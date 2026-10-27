@@ -9,6 +9,8 @@ import { boot, clickTab, textoDe } from '../lib/boot.mjs';
 import { capturarDescarga } from '../lib/capture-utils.mjs';
 import { correrSpec } from '../lib/spec.mjs';
 import { fixtureSinCompras, compraBase, celdaItem, abrirModalSep, cerrarModalSep, abrirModalFuente } from '../lib/compras.mjs';
+import { abrirModalConcepto as ccAbrir, cerrarModalConcepto as ccCerrar, llenarFormConcepto as ccLlenar, compraCBase as ccBase, clp as ccClp, entidadDe as ccEntidad } from '../lib/compras_conceptos.mjs';
+import { docsDe as ccDocs } from '../lib/corte.mjs';
 
 const ITEM = 'BIBLIOTECAS, LIBROS Y REVISTAS'; // 410606
 const MODAL_SEP = '#modalBody';
@@ -224,5 +226,21 @@ await correrSpec('compras_avisos_fecha', async (t) => {
     t.eq(await page.evaluate(() => /Datos a revisar/.test(document.getElementById('tab-of-general').innerText)), false, 'General: las fuentes no tienen "Datos a revisar" (no se inventa uno)');
     t.noErrores(h);
     await h.close();
+  }
+
+  // ---------------------------------------------------------------- Fuentes por CONCEPTO: avisos de fecha y «concepto vacío» (equivalente a «cuenta no reconocida»)
+  {
+    const hc = await boot({ fixture: 'compras_conceptos' });
+    await ccAbrir(hc, 'faep', '1121');
+    const marcas = await hc.page.evaluate(() => Object.fromEntries(Array.from(document.querySelectorAll('#otrasFuentesModalBody table.compras-table tbody tr[data-compra-id]')).map(tr => [tr.dataset.compraId, Array.from(tr.querySelectorAll('.compra-aviso-fecha')).map(x => x.textContent.trim())])));
+    t.eq(marcas.fa1121_2025, ['⚠ fecha fuera de 2026'], 'concepto: fecha de 2025 marcada');
+    t.eq(marcas.fa1121_invalida, ['⚠ fecha no válida: no se contabiliza'], 'concepto: fecha no válida (no se contabiliza)');
+    t.eq(marcas.fa1121_sinconcepto, ['⚠ concepto vacío: no se contabiliza'], 'concepto: «concepto vacío» en lugar de «cuenta no reconocida»');
+    t.eq(marcas.fa1121_1, [], 'concepto: una compra sana no lleva marcas');
+    const e = ccEntidad(ccDocs('compras_conceptos'), '1121', 'faep');
+    t.eq([e.doc.nExcluidas, e.doc.sinContabilizar], [2, 130000], 'cálculo independiente: 2 compras sin contabilizar por $130.000 (los totales no cambian con los avisos)');
+    t.eq(await hc.page.evaluate(() => /Datos a revisar/.test(document.getElementById('tab-of-faep').innerText)), false, 'concepto: las fuentes no tienen «Datos a revisar»');
+    t.noErrores(hc);
+    await hc.close();
   }
 });

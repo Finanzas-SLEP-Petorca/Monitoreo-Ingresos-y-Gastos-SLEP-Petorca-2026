@@ -279,6 +279,43 @@ await correrSpec('persistencia', async (t) => {
   t.eq(w[0] && w[0].payload.otras_fuentes, { faep: { bys_items: { 'Concepto de prueba': DEL } } }, 'FAEP ítem B&S: quitar usa deleteField()');
   await page.keyboard.press('Escape'); await h.waitIdle();
 
+  // ---------------------------------------------------------------- Fuente por concepto (FAEP): registro de compras con CONCEPTO (alta / edición / borrado = un write de SOLO esa compra)
+  await h.clearWrites();
+  await clickTab(page, 'FAEP');
+  await page.click('#otrasFuentesTbody-faep td[data-abrir-otra-fuente="1121"]');
+  await h.waitIdle();
+  const campoC = (f) => `#otrasFuentesModalBody .compra-form-grid .of-compra-input[data-field="${f}"]`;
+  await page.fill(campoC('concepto'), 'Concepto documentado');
+  await page.selectOption(campoC('tipoDocumento'), 'Factura');
+  await page.fill(campoC('nroDocumento'), 'C-1');
+  await page.fill(campoC('fechaDocumento'), '2026-04-10');
+  await page.fill(campoC('montoGasto'), '123000');
+  await page.click('#otrasFuentesModalBody .of-add-compra-btn');
+  await h.flushWrites();
+  w = writesDe(await h.writes(), '1121');
+  const cid = Object.keys((w[0] && w[0].payload.otras_fuentes.faep.compras) || {})[0];
+  t.ok(w.length === 1 && esMergeSet(w[0]) && cid && w[0].payload.otras_fuentes.faep.compras[cid].concepto === 'Concepto documentado' && Object.keys(w[0].payload.otras_fuentes.faep).join() === 'compras', 'FAEP compra por concepto: alta = un setDoc merge:true que toca solo otras_fuentes.faep.compras.<id>', w);
+  await h.clearWrites();
+  await page.click(`#otrasFuentesModalBody button.of-compra-edit-btn[data-compra-id="${cid}"]`);
+  await page.fill(campoC('montoGasto'), '150000');
+  await page.click('#otrasFuentesModalBody .of-add-compra-btn');
+  await h.flushWrites();
+  w = writesDe(await h.writes(), '1121');
+  t.ok(w.length === 1 && Object.keys(w[0].payload.otras_fuentes.faep.compras).join() === cid && w[0].payload.otras_fuentes.faep.compras[cid].montoGasto === 150000, 'FAEP compra por concepto: editar reescribe SOLO esa compra', w);
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForFunction(() => document.getElementById('sync-indicator').classList.contains('green'));
+  await h.waitIdle();
+  await clickTab(page, 'FAEP');
+  await page.click('#otrasFuentesTbody-faep td[data-abrir-otra-fuente="1121"]');
+  await h.waitIdle();
+  t.eq(await page.locator(`#otrasFuentesModalBody tr[data-compra-id="${cid}"]`).count(), 1, 'FAEP compra por concepto: tras recargar la página sigue en el registro');
+  await h.clearWrites();
+  await page.click(`#otrasFuentesModalBody button.of-compra-del-btn[data-compra-id="${cid}"]`);
+  await h.flushWrites();
+  w = writesDe(await h.writes(), '1121');
+  t.eq(w[0] && w[0].payload.otras_fuentes, { faep: { compras: { [cid]: DEL } } }, 'FAEP compra por concepto: borrar usa deleteField() de esa compra');
+  await page.keyboard.press('Escape'); await h.waitIdle();
+
   // ---------------------------------------------------------------- JUNJI (GESPARVU, 3 ingresos)
   await h.clearWrites();
   await clickTab(page, 'JUNJI');

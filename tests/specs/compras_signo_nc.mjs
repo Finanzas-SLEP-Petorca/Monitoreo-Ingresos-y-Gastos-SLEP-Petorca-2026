@@ -12,6 +12,8 @@ import {
   fixtureSinCompras, compraBase, libroXlsx, importarLibro, filaCompra, ENC_COMPRAS_SEP, ENC_COMPRAS_FUENTE,
   celdaItem, montosFilaCompra, abrirModalSep, cerrarModalSep, abrirModalFuente,
 } from '../lib/compras.mjs';
+import { abrirModalConcepto as ccAbrir, cerrarModalConcepto as ccCerrar, llenarFormConcepto as ccLlenar, compraCBase as ccBase, clp as ccClp, entidadDe as ccEntidad } from '../lib/compras_conceptos.mjs';
+import { docsDe as ccDocs } from '../lib/corte.mjs';
 
 const ITEM = 'BIBLIOTECAS, LIBROS Y REVISTAS'; // código 410606 (Subt. 22)
 const MODAL_SEP = '#modalBody';
@@ -334,6 +336,30 @@ await correrSpec('compras_signo_nc', async (t) => {
     const mal = await recorrer(docsBase());
     const bien = await recorrer(corregidos);
     for (const vista of Object.keys(mal)) t.eq(mal[vista], bien[vista], `equivalencia: la vista "${vista}" es idéntica con la NC/ND guardada con el signo equivocado o con el correcto`);
+  }
+
+  // ---------------------------------------------------------------- Fuentes por CONCEPTO (registro de compras con Concepto): mismo signo de NC/ND
+  {
+    const hc = await boot({ fixture: 'compras_conceptos' });
+    await ccAbrir(hc, 'figa', '1121');
+    const filaNc = await hc.page.evaluate(() => Array.from(document.querySelectorAll('#otrasFuentesModalBody tr[data-compra-id="fg1121_nc"] td.num')).map(td => td.textContent.trim()));
+    t.eq(filaNc, ['-$30.000', '-$35.700'], 'FIGA (concepto): una NC guardada en negativo se ve negativa');
+    await ccLlenar(hc.page, ccBase({ concepto: 'Material didáctico', tipoDocumento: 'Nota de crédito', montoGasto: 70000, montoDocumento: 83300, documentoOriginal: '530-FAC' }));
+    await hc.page.click('#otrasFuentesModalBody .of-add-compra-btn');
+    await hc.flushWrites(); await hc.waitIdle();
+    const w = (await hc.writes()).filter(x => x.path === 'sep_carga_rbd/1121');
+    const c = Object.values(w[0].payload.otras_fuentes.figa.compras)[0];
+    t.eq([c.montoGasto, c.montoDocumento], [-70000, -83300], 'FIGA (concepto): al agregar, la NC se guarda SIEMPRE en negativo');
+    await ccLlenar(hc.page, ccBase({ concepto: 'Material didáctico', tipoDocumento: 'Nota de débito', montoGasto: -5000, montoDocumento: -5950 }));
+    await hc.page.click('#otrasFuentesModalBody .of-add-compra-btn');
+    await hc.flushWrites(); await hc.waitIdle();
+    const w2 = (await hc.writes()).filter(x => x.path === 'sep_carga_rbd/1121').pop();
+    const d = Object.values(w2.payload.otras_fuentes.figa.compras)[0];
+    t.eq([d.montoGasto, d.montoDocumento], [5000, 5950], 'FIGA (concepto): la nota de débito se guarda SIEMPRE en positivo');
+    const e = ccEntidad(ccDocs('compras_conceptos'), '1121', 'figa');
+    t.eq(e.doc.total, 250000 - 30000, 'cálculo independiente: la NC resta del documentado');
+    t.noErrores(hc);
+    await hc.close();
   }
 });
 

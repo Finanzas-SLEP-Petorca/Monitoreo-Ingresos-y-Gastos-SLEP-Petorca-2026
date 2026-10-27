@@ -19,7 +19,7 @@ await correrSpec('compras_conceptos_ui', async (t) => {
   await abrirModalConcepto(h, 'faep', '1121');
 
   // ============================== 1. FORMULARIO ==============================
-  const campos = await page.evaluate(() => Array.from(document.querySelectorAll('#otrasFuentesModalBody .compra-form-grid label.compra-field')).map(l => ({
+  const campos = await page.evaluate(() => Array.from(document.querySelectorAll('#otrasFuentesModalBody .compra-form-grid[data-fuente] label.compra-field')).map(l => ({
     rotulo: l.querySelector('.compra-field-label').textContent.trim(), campo: l.querySelector('.compra-input').dataset.field, tag: l.querySelector('.compra-input').tagName.toLowerCase(), tipo: l.querySelector('.compra-input').type })));
   t.eq(campos.map(c => c.rotulo), ['Concepto', 'Tipo de documento', 'N° documento', 'Fecha documento', 'Fecha pago', 'Descripción', 'RUT proveedor', 'Nombre proveedor', 'Monto gasto', 'Monto documento', 'N° DC', 'Doc. original (NC/ND)'],
     'el formulario lleva los mismos campos de las compras de las demás fuentes con «Concepto» en lugar de «Código de cuenta»');

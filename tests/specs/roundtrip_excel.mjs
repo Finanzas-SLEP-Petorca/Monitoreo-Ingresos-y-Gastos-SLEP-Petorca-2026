@@ -182,4 +182,25 @@ await correrSpec('roundtrip_excel', async (t) => {
     t.noErrores(hj);
     await hj.close();
   }
+
+  // ================================================================ Fuentes por CONCEPTO con registro de compras (hoja COMPRAS con «Concepto»). Fixture `compras_conceptos` sin las compras que el panel normaliza al reimportar.
+  {
+    const docs = JSON.parse(JSON.stringify(cargarFixture('compras_conceptos').docs));
+    Object.assign(docs['1121'].otras_fuentes.faep.compras.fa1121_nc, { montoGasto: -50000, montoDocumento: -59500 });
+    ['fa1121_sinconcepto', 'fa1121_invalida'].forEach(id => { delete docs['1121'].otras_fuentes.faep.compras[id]; });
+    const hc = await boot({ fixture: docs });
+    for (const key of ['faep', 'figa', 'junji', 'aporte_educ', 'aporte_junji']) {
+      await clickTab(hc.page, 'of-' + key);
+      const sAntes = documentos(await hc.store());
+      const e1 = await exportar(hc, () => hc.page.click(`#downloadExcelOFBtn-${key}`));
+      t.eq(e1.libro.hojas.COMPRAS[0][3], 'Concepto', `${key} (concepto): COMPRAS trae la columna Concepto`);
+      const m = await importar(hc, `#importExcelOFInput-${key}`, e1);
+      t.ok(/COMPRAS: \d+ filas/.test(m[0] || '') && !/NO se import/.test(m[0] || ''), `${key} (concepto): la importación lista COMPRAS sin rechazos`, m);
+      const e2 = await exportar(hc, () => hc.page.click(`#downloadExcelOFBtn-${key}`));
+      t.eq(igualLibros(e1.libro, e2.libro), null, `${key} (concepto): exportar → importar → exportar da las mismas hojas`);
+      t.eq(primeraDiferencia(sAntes, documentos(await hc.store())), null, `${key} (concepto): los documentos quedan iguales`);
+    }
+    t.noErrores(hc);
+    await hc.close();
+  }
 });

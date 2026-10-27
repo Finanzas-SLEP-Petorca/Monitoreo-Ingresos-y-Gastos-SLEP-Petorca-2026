@@ -5,6 +5,8 @@
 // También: ids/atributos construidos a partir de texto con comillas siguen funcionando (editar, guardar, quitar).
 import { boot, clickTab, cargarFixture } from '../lib/boot.mjs';
 import { correrSpec } from '../lib/spec.mjs';
+import { abrirModalConcepto as ccAbrir, cerrarModalConcepto as ccCerrar, llenarFormConcepto as ccLlenar, compraCBase as ccBase, clp as ccClp, entidadDe as ccEntidad } from '../lib/compras_conceptos.mjs';
+import { docsDe as ccDocs } from '../lib/corte.mjs';
 
 const RUTA = (id) => `sep_carga_rbd/${id}`;
 const P = {
@@ -322,4 +324,28 @@ await correrSpec('seguridad_xss', async (t) => {
   t.ok(await page.evaluate(() => document.querySelectorAll('#tableBody tr.rbd-row').length) === 55, 'la tabla SEP sigue completa (55 filas)');
   t.noErrores(h);
   await h.close();
+
+  // ---------------------------------------------------------------- Fuentes por CONCEPTO: concepto, descripción, proveedor, N° DC y id con marcado
+  {
+    const hc = await boot({ fixture: 'compras_conceptos' });
+    await hc.remoto('1121', `d.otras_fuentes.faep.compras['x"><img src=x onerror=window.__xss=1>'] = { concepto: '<img src=x onerror="window.__xss=1">', tipoDocumento: 'Factura', nroDocumento: '"><svg onload=window.__xss=1>', fechaDocumento: '2026-05-05', fechaPago: '', descripcion: '<script>window.__xss=1</script>', rutProveedor: '', nombreProveedor: '<b onmouseover=window.__xss=1>x</b>', montoGasto: 1000, montoDocumento: 1000, documentoOriginal: '', documentoContable: '<i>dc</i>' };`);
+    await hc.waitIdle();
+    await ccAbrir(hc, 'faep', '1121');
+    const r = await hc.page.evaluate(() => ({
+      xss: window.__xss || null,
+      imgs: document.querySelectorAll('#otrasFuentesModalBody img, #otrasFuentesModalBody svg, #otrasFuentesModalBody script').length,
+      litera: document.getElementById('otrasFuentesModalBody').textContent.includes('<img src=x onerror="window.__xss=1">'),
+      opcion: Array.from(document.querySelectorAll('#ofconceptos-1121-faep option')).some(o => o.value === '<img src=x onerror="window.__xss=1">'),
+      bs: document.querySelectorAll('#otrasFuentesModalBody table.compras-table b, #otrasFuentesModalBody table.compras-table i').length,
+    }));
+    t.eq(r, { xss: null, imgs: 0, litera: true, opcion: true, bs: 0 }, 'concepto: el texto con marcado se ve literal en el registro y las sugerencias y no ejecuta nada');
+    const filaSel = await hc.page.evaluate(() => Array.from(document.querySelectorAll('#otrasFuentesModalBody tr[data-compra-id]')).filter(tr => tr.dataset.compraId.startsWith('x"')).length);
+    t.eq(filaSel, 1, 'concepto: un id de compra con comillas sigue funcionando (fila presente)');
+    await hc.page.click('#otrasFuentesModalBody tr[data-compra-id] button.of-compra-edit-btn[aria-label^="Editar compra"]');
+    await ccCerrar(hc);
+    await hc.page.click('#otrasFuentesTbody-faep button.row-action-btn[data-action="pdf"][data-rbd="1121"]');
+    t.eq(await hc.page.evaluate(() => window.__xss || null), null, 'concepto: el PDF por fila tampoco ejecuta nada');
+    t.noErrores(hc);
+    await hc.close();
+  }
 });

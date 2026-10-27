@@ -7,6 +7,8 @@
 import { boot, clickTab, textoDe } from '../lib/boot.mjs';
 import { correrSpec } from '../lib/spec.mjs';
 import { fixtureSinCompras, compraBase, libroXlsx, importarLibro, filaCompra, ENC_COMPRAS_SEP, ENC_COMPRAS_FUENTE } from '../lib/compras.mjs';
+import { abrirModalConcepto as ccAbrir, cerrarModalConcepto as ccCerrar, llenarFormConcepto as ccLlenar, compraCBase as ccBase, clp as ccClp, entidadDe as ccEntidad } from '../lib/compras_conceptos.mjs';
+import { docsDe as ccDocs } from '../lib/corte.mjs';
 
 const NOMBRE = 'LICEO PULMAHUE DE LA LIGUA';
 const ORIGENES = [
@@ -142,5 +144,24 @@ await correrSpec('compras_id_cero', async (t) => {
       t.eq(sinImp(ids), ['c-real-9'], `${E}: un ID real se respeta tal cual y los otros 3 reciben clave "imp-…"`);
       await h.close();
     }
+  }
+
+  // ---------------------------------------------------------------- Fuentes por CONCEPTO: ID "0" / vacío → clave determinista imp-…
+  {
+    const hc = await boot({ fixture: 'compras_conceptos' });
+    await hc.clickTab('of-aporte_educ');
+    const ENC = ['ID', 'RBD', 'Nombre', 'Concepto', 'TipoDocumento', 'NroDocumento', 'FechaDocumento', 'FechaPago', 'Descripcion', 'RutProveedor', 'NombreProveedor', 'MontoGasto', 'MontoDocumento', 'DocumentoOriginal', 'N° DC'];
+    const f = (id, n, desc) => [id, 1121, NOMBRE, 'Servicios básicos', 'Factura', String(n), '2026-05-05', '', desc, '', '', 1000 * n, 1000 * n, '', ''];
+    const libro = await libroXlsx(hc.page, { COMPRAS: [ENC, f('', 1, 'a'), f(0, 2, 'b'), f('0', 3, 'c'), f('real-1', 4, 'd')] });
+    const claves = async () => Object.keys((await hc.store())['sep_carga_rbd/1121'].otras_fuentes.aporte_educ.compras).sort();
+    const antes = await claves();
+    await importarLibro(hc, '#importExcelOFInput-aporte_educ', libro);
+    const tras = await claves();
+    t.eq(tras.length, antes.length + 4, 'concepto: 4 compras distintas (nada colapsa en la clave "0")');
+    t.ok(!tras.includes('0') && tras.filter(k => /^imp-/.test(k)).length === 3 && tras.includes('real-1'), 'concepto: 3 claves imp-… y el ID real se respeta');
+    await importarLibro(hc, '#importExcelOFInput-aporte_educ', libro);
+    t.eq(await claves(), tras, 'concepto: reimportar el mismo archivo no duplica y deja las mismas claves');
+    t.noErrores(hc);
+    await hc.close();
   }
 });

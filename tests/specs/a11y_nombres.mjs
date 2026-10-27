@@ -8,7 +8,7 @@
 // Cobertura: las vistas y modales de tests/lib/a11y-vistas.mjs (3 vistas del Panel principal, SEP en 4 estados, las 9 fuentes (+ Real/Proy.), % Ejecución en todas sus
 // fuentes, Reportes en sus 2 vistas, 5 modales SEP, 10 modales de fuentes y "Cómo usar"), más la pantalla de acceso en sus 4 estados y el formulario de compra en modo edición.
 import { boot } from '../lib/boot.mjs';
-import { recorrerVistas, recorrerLogin, recorrerHonorarios, recorrerJardines } from '../lib/a11y-vistas.mjs';
+import { recorrerVistas, recorrerLogin, recorrerHonorarios, recorrerJardines, recorrerConceptos } from '../lib/a11y-vistas.mjs';
 import { nombresAccesibles, controlesSinNombre } from '../lib/a11y.mjs';
 import { correrSpec } from '../lib/spec.mjs';
 
@@ -149,6 +149,32 @@ await correrSpec('a11y_nombres', async (t) => {
     t.eq(await nomDe('#otrasFuentesTbody-faep button.row-action-btn[data-action="csv"][data-rbd="1121"]'), 'Descargar detalle mensual (CSV) de RBD 1121', 'J5) y el de un RBD sigue diciendo «RBD 1121»');
     t.noErrores(hj);
     await hj.close();
+  });
+
+  // ======================================================================== K) Registro de compras por CONCEPTO (fuentes por concepto)
+  await escenario(t, 'K', async () => {
+    const hk = await boot({ fixture: 'compras_conceptos', viewport: { width: 1500, height: 1000 } });
+    const sinNom = [], dup = [];
+    let nVistas = 0, nRegistro = 0;
+    await recorrerConceptos(hk, async ({ nombre, scope, tipo }) => {
+      const lista = await nombresAccesibles(hk.page, { scope });
+      nVistas++;
+      controlesSinNombre(lista).forEach((c) => sinNom.push(`${nombre}: ${resumen(c)}`));
+      const cel = lista.filter((c) => /^input\.celda-input/.test(c.sel));
+      const vistos = new Map(); cel.forEach((c) => vistos.set(c.nombre, (vistos.get(c.nombre) || 0) + 1));
+      vistos.forEach((n, nom) => { if (n > 1) dup.push(`${nombre}: celda ${nom} ×${n}`); });
+      if (tipo === 'modal') {
+        const reg = lista.filter((c) => /compra-input|of-add-compra-btn|of-cancelar-edicion-btn|of-compra-(edit|dup|del)-btn/.test(c.sel));
+        nRegistro += reg.length;
+        const cuenta = new Map(); reg.forEach((c) => cuenta.set(c.nombre, (cuenta.get(c.nombre) || 0) + 1));
+        cuenta.forEach((n, nom) => { if (n > 1) dup.push(`${nombre}: control «${nom}» ×${n}`); });
+      }
+    });
+    t.ok(nVistas >= 5 && nRegistro > 40, `K0) se midieron ${nVistas} vistas/estados con el registro por concepto y ${nRegistro} controles del registro`, { nVistas, nRegistro });
+    t.eq(sinNom, [], 'K1) ningún control del registro de compras por concepto (formulario, tabla, edición) queda sin nombre accesible');
+    t.eq(dup, [], 'K2) nombres únicos en el formulario y la tabla del registro, y celdas «sin documento» únicas');
+    t.noErrores(hk);
+    await hk.close();
   });
 
   // ---- controles concretos de la lista de la auditoría

@@ -581,9 +581,9 @@ Fiscales agregaron combinaciones nuevas):
   (`tipoEntidadDeRbd`: `rbd` / `ac` / `gesparvu`, con `universoIncluyeTipo`), no por la fuente; por la misma razón el rótulo
   («RBD 1121», «Administración Central», «GESPARVU 5402002») sale del tipo de entidad en todas las vistas.
 - `bysMode`: `'compras'` (Bienes y Servicios como "Registro de compras" con código de cuenta
-  SUPEREDUC + documento/proveedor — General/PIE/Mantención/Pro-Retención) o `'concepto'` (ítems
-  por concepto libre, sin código ni documento — JUNJI/FAEP/FIGA/Aportes Fiscales, ninguna es parte
-  del sistema de rendición de cuentas de SUPEREDUC).
+  SUPEREDUC + documento/proveedor — General/PIE/Mantención/Pro-Retención) o `'concepto'` (Bienes y
+  Servicios por **concepto** libre, sin código de cuenta — JUNJI/FAEP/FIGA/Aportes Fiscales, ninguna es parte
+  del sistema de rendición de cuentas de SUPEREDUC; ver «Registro de compras por concepto» más abajo).
 
 | Fuente | `incomeShape` | `bysMode` | `universo` | CSV SUPEREDUC |
 |---|---|---|---|---|
@@ -592,6 +592,24 @@ Fiscales agregaron combinaciones nuevas):
 | Aporte Fiscal Extraord. Educación | `single` | `concepto` | `rbd_ac` | No |
 | JUNJI | `junji3` | `concepto` | `gesparvu` | No |
 | Aporte Fiscal Extraord. JUNJI | `single` | `concepto` | `gesparvu` | No |
+
+**Registro de compras por concepto (JUNJI, FAEP, FIGA y los dos Aportes Fiscales).** Estas 5 fuentes (`bysMode:'concepto'`, todas sus entidades: RBD/AC/GESPARVU según su
+`universo`) tienen, además de los montos mensuales por concepto, un **registro de compras por documento** (identificar a qué corresponde el gasto: tipo y N° de documento,
+fechas de documento y de pago, proveedor, montos, pago). Es el mismo mapa `compras` de las fuentes con código de cuenta pero con **`concepto`** (texto libre, con lista de
+sugerencias de los conceptos de esa entidad y fuente; un concepto nuevo pasa a existir como concepto de la entidad sin escribir nada más que la compra) en lugar de `codigo`:
+`otras_fuentes.{fuente}.compras = { id: { concepto, tipoDocumento, nroDocumento, fechaDocumento, fechaPago, descripcion, rutProveedor, nombreProveedor, montoGasto, montoDocumento, documentoOriginal, documentoContable } }`.
+Mismas reglas de las demás compras: mes del gasto = Fecha de Documento, nota de crédito en negativo (`conSignoDeNota`), Documento Original solo para NC/ND, N° DC interno (nunca en CSV), avisos
+de fecha (el equivalente de «cuenta no reconocida» es «**concepto vacío**»: no se contabiliza), lectura tolerante a datos dañados (`sanitizaCompraConcepto`), escape XSS, ID de compra
+(`generarCompraId`; el importador usa la clave determinista `imp-…` para IDs vacíos o «0») y guardado con `merge` por compra (un write que toca solo `otras_fuentes.<fuente>.compras.<id>`), con ✏️ editar,
+⧉ duplicar y 🗑 borrar (esas tres solo en el registro por concepto; las fuentes con código de cuenta siguen igual).
+**Documentado vs. sin documento:** los montos mensuales por concepto ya cargados (`bys_items`) se **mantienen** como «sin documento» (Real hasta el corte «Real hasta», Proyectado después) y lo documentado
+(`bys_doc_items`, derivado de las compras, **siempre Real**) se suma **aparte**: B&S = sin documento + documentado en todas las vistas (tabla, tarjetas, Panel principal, % Ejecución, Visualizador, Reporte personalizado,
+Estado y saldo de Operación de JUNJI), mostrados por separado como «Documentado $X · Sin documento $Y» (resumen y subtítulo del modal, nota de las tarjetas KPI, desglose «Doc. · S/doc.» bajo el B&S de la fila cuando
+hay algo documentado, PDF por fila). En el Visualizador hay un grupo «documentado (compras por concepto)» y en el Reporte personalizado los conceptos `bys_doc`, `bys_sindoc` y `bys_doc_item|<concepto>`.
+Exportaciones: el Excel trae la hoja `COMPRAS` con la columna `Concepto` en vez de `Codigo` (antes de `BYS_ITEMS`, que sigue siendo lo «sin documento»; un archivo antiguo sin la hoja no borra nada, y una hoja con
+`Codigo` se rechaza entera); el XLS y el PDF por fila llevan el registro; el CSV por fila sigue siendo el de detalle mensual (con líneas `B&S documentado - <concepto>`); **no hay CSV de SUPEREDUC** para estas fuentes.
+⚠ Riesgo de uso: si se registra un documento por un gasto que ya estaba como «sin documento» sin restar ese monto, el gasto se cuenta dos veces (el panel lo advierte en el modal). El diseño usa un contexto
+(`ctxComprasOtraFuente`) para que Honorarios (PR-3) reutilice el formulario y la tabla en estas fuentes.
 
 **JUNJI** (`incomeShape:'junji3'`, `bysMode:'concepto'`): Operación financia Remuneraciones y
 Bienes y Servicios; Homologación, Carrera Docente y Bono Desempeño Laboral (BDL) financian solo Remuneraciones — el modal
@@ -665,7 +683,7 @@ criterio que la pestaña SEP pero leyendo/escribiendo `otras_fuentes` en vez de 
   oficial de cada una en la columna "Subvencion" (`GENERAL`, `PIE`, `MANTENIMIENTO`, `PRORETENCION`).
 - **⬇ Excel / ⬆ Importar Excel** — carga completa de la fuente en hojas (Ingreso, Remuneraciones,
   Compras + `BYS_PROY_ITEMS` para las `bysMode:'compras'`; hojas de Ingreso + Remuneraciones +
-  `BYS_ITEMS` por concepto para las `bysMode:'concepto'`) y una hoja `META` con el corte "Real hasta
+  `COMPRAS` (con `Concepto`) + `BYS_ITEMS` —lo «sin documento»— para las `bysMode:'concepto'`) y una hoja `META` con el corte "Real hasta
   el mes" de cada entidad, reimportable tal cual se exporta (el corte y la proyección de B&S
   sobreviven al round-trip; si una hoja falta en el archivo, el import no toca esos datos).
 - **🖨 Exportar PDF** — mismo mecanismo de impresión del navegador que ya usa la pestaña SEP;
@@ -865,7 +883,7 @@ en una colección propia y separada (`sep_carga_rbd`) que no comparte datos con 
 - **Modelo de datos**: un documento por entidad en `sep_carga_rbd/{id}` —cada RBD de `DATA.registros` (55), `AC` (Administración Central) y cada GESPARVU
   (13)— con los campos `rbd`, `nombre`, `ingreso_items` (Preferente / Prioritario / Carrera Docente, cada uno `{item, meses, total}`),
   `ingreso_real_hasta_mes` (corte propio de ingresos, opcional), `rem` (`meses`, `total`, `real_hasta_mes`), `bys_proyeccion.items.{código}`
-  (proyección de B&S por cuenta), `compras.{id}` (Subt. 22/29 de SEP), `otras_fuentes.{fuente}` (las 9 fuentes: ingreso/s, `gasto_rem`, `compras` o `bys_items`,
+  (proyección de B&S por cuenta), `compras.{id}` (Subt. 22/29 de SEP), `otras_fuentes.{fuente}` (las 9 fuentes: ingreso/s, `gasto_rem`, `compras` (con `codigo`, o con `concepto` en las 5 fuentes por concepto, donde conviven con `bys_items`),
   `bys_proy_items`, `real_hasta_mes`), `lastModifiedBy` y `lastModifiedAt`. El antiguo `agregado.items` ya no se guarda (el B&S por ítem y mes se deriva de
   las compras); los totales nunca se leen de Firestore, siempre se recalculan. Más un documento `sep_carga_rbd/_meta`
   con la lista compartida de conceptos de gasto (`items_22`, `items_29`, que el panel ignora) y el **mes de cierre global**

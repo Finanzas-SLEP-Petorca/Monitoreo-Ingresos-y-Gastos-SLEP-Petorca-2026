@@ -217,3 +217,30 @@ export async function recorrerJardines(h, visitante) {
   await page.selectOption('#ejecRbdSelect', '5402002');
   await vista('jardines.ejec.faep.5402002');
 }
+
+/**
+ * Registro de compras por CONCEPTO, con el fixture `compras_conceptos` ya arrancado en `h`: las pestañas FAEP y JUNJI con el desglose «Doc. · S/doc.», el detalle de FAEP 1121 (formulario, tabla con avisos,
+ * documentado por concepto y «sin documento»), el formulario en modo edición con avisos en vivo y el detalle de JUNJI 5403002.
+ * `visitante({nombre, scope, tipo})` como en recorrerVistas.
+ */
+export async function recorrerConceptos(h, visitante) {
+  const { page } = h;
+  const vista = async (nombre) => { await h.waitIdle(); await visitante({ nombre, scope: '#app', tipo: 'vista' }); };
+  const modal = async (nombre) => { await h.waitIdle(); await visitante({ nombre, scope: '#otrasFuentesModal .modal-panel', tipo: 'modal' }); };
+  for (const k of ['faep', 'junji']) { await h.clickTab('of-' + k); await vista(`conceptos.of.${k}.total`); }
+  for (const [fuente, id] of [['faep', '1121'], ['junji', '5403002']]) {
+    await h.clickTab('of-' + fuente);
+    await page.click(`#otrasFuentesTbody-${fuente} td[data-abrir-otra-fuente="${id}"]`);
+    await h.waitIdle();
+    await modal(`conceptos.modal.of.${fuente}.${id}`);
+    if (fuente === 'faep') {
+      await page.click('#otrasFuentesModalBody tr[data-compra-id="fa1121_1"] .of-compra-edit-btn');
+      await page.fill('#otrasFuentesModalBody .compra-form-grid [data-field="fechaDocumento"]', '2025-12-30');
+      await page.fill('#otrasFuentesModalBody .compra-form-grid [data-field="fechaPago"]', '2025-12-01');
+      await modal('conceptos.modal.of.faep.1121.edicion-con-avisos');
+      await page.click('#otrasFuentesModalBody .of-cancelar-edicion-btn');
+    }
+    await page.keyboard.press('Escape');
+    await h.waitIdle();
+  }
+}

@@ -11,6 +11,8 @@
 import { boot, clickTab, cargarFixture } from '../lib/boot.mjs';
 import { correrSpec } from '../lib/spec.mjs';
 import { capturarDescarga, leerXlsx, parseCsvPuntoYComa } from '../lib/capture-utils.mjs';
+import { abrirModalConcepto as ccAbrir, cerrarModalConcepto as ccCerrar, llenarFormConcepto as ccLlenar, compraCBase as ccBase, clp as ccClp, entidadDe as ccEntidad } from '../lib/compras_conceptos.mjs';
+import { docsDe as ccDocs } from '../lib/corte.mjs';
 
 const RUTA = (id) => `sep_carga_rbd/${id}`;
 const DEL = { __sentinel: 'deleteField' };
@@ -754,4 +756,27 @@ await correrSpec('n_dc', async (t) => {
     t.noErrores(h);
     await h.close();
   });
+
+  // ---------------------------------------------------------------- Fuentes por CONCEPTO: N° DC en formulario, tabla, Excel y PDF; nunca en el CSV
+  {
+    const hc = await boot({ fixture: 'compras_conceptos' });
+    await ccAbrir(hc, 'faep', '1121');
+    t.eq(await hc.page.evaluate(() => document.querySelector('#otrasFuentesModalBody .compra-input[data-field="documentoContable"]').maxLength), 100, 'concepto: campo N° DC de hasta 100 caracteres');
+    t.eq(await hc.page.evaluate(() => document.querySelector('#otrasFuentesModalBody tr[data-compra-id="fa1121_1"] td.col-dc').textContent.trim()), 'DC_701', 'concepto: columna N° DC en la tabla');
+    await ccLlenar(hc.page, ccBase({ concepto: 'Con DC', documentoContable: 'DC_999' }));
+    await hc.page.click('#otrasFuentesModalBody .of-add-compra-btn');
+    await hc.flushWrites(); await hc.waitIdle();
+    const w = (await hc.writes()).filter(x => x.path === 'sep_carga_rbd/1121').pop();
+    t.eq(Object.values(w.payload.otras_fuentes.faep.compras)[0].documentoContable, 'DC_999', 'concepto: el write lleva documentoContable');
+    await ccCerrar(hc);
+    const csv = await capturarDescargaNdc(hc);
+    t.ok(!csv.includes('DC_701') && !csv.includes('DC_999'), 'concepto: el CSV por fila NUNCA lleva el N° DC');
+    t.noErrores(hc);
+    await hc.close();
+  }
 });
+
+async function capturarDescargaNdc(h) {
+  const [d] = await Promise.all([h.page.waitForEvent('download', { timeout: 20000 }), h.page.click('#otrasFuentesTbody-faep button.row-action-btn[data-action="csv"][data-rbd="1121"]')]);
+  return (await import('node:fs')).readFileSync(await d.path(), 'utf8');
+}
