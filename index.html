@@ -6813,6 +6813,11 @@ function importOtraFuenteSimpleSheet(ws, fuenteKey, campo) {
 function importOtraFuenteComprasSheet(ws, fuenteKey) {
   const porConcepto = comprasPorConcepto(fuenteKey); // fuentes por concepto: la columna 4 es «Concepto» (texto libre) y no un código de cuenta
   const rows = rowsFromSheet(ws);
+  // La hoja COMPRAS de una fuente con código de cuenta (Subv. General, PIE…) trae «Codigo» en esa columna: importarla aquí crearía conceptos con el número de cuenta. Se rechaza entera, con aviso.
+  if (porConcepto && /^c[oó]digo/i.test(String((rows[0] || [])[3] == null ? '' : (rows[0] || [])[3]).trim())) {
+    rechazarFilaImportacion('COMPRAS', 1, `la columna 4 se llama «${String(rows[0][3]).trim()}» (código de cuenta SUPEREDUC) y ${FUENTES_OTRAS_BY_KEY[fuenteKey].label} lleva «Concepto»: la hoja COMPRAS no se importó`);
+    return { n: 0, noHabilitadas: 0 };
+  }
   const idxDc = indiceColumnaDc(rows[0]); // N° DC: -1 en un Excel antiguo (sin la columna) → no se toca el N° DC que ya tenga la compra
   const porRbd = {};
   const indicesPorRbd = {}; // entidad → índice firma→ID de sus compras (ver idCompraParaImportar)
