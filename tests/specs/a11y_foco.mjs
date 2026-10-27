@@ -8,7 +8,7 @@
 // Se mide el contorno calculado (outline / box-shadow), su grosor, su contraste y que ningún ancestro con overflow lo recorte, en una muestra de cada TIPO de control de
 // cada vista y modal (hasta 2 por firma: etiqueta + tipo + clases), además de un recorrido real con la tecla Tab.
 import { boot } from '../lib/boot.mjs';
-import { recorrerVistas, recorrerHonorarios } from '../lib/a11y-vistas.mjs';
+import { recorrerVistas, recorrerHonorarios, recorrerConceptos } from '../lib/a11y-vistas.mjs';
 import { medirFoco, medirFocoActivo, motivoFocoInvisible } from '../lib/a11y.mjs';
 import { correrSpec } from '../lib/spec.mjs';
 
@@ -40,6 +40,15 @@ await correrSpec('a11y_foco', async (t) => {
       lista.forEach((c) => { firmas.add(c.firma); if (!c.ok) malos.push({ vista: 'honorarios.' + nombre, ...c }); });
     });
     await hh.close();
+  });
+  await escenario(t, 'VK', async () => {
+    const hk = await boot({ fixture: 'compras_conceptos', viewport: { width: 1500, height: 1000 } });
+    await recorrerConceptos(hk, async ({ nombre, scope }) => {
+      const lista = await medirFoco(hk.page, { scope, porGrupo: 3 });
+      vistas++; muestreados += lista.length;
+      lista.forEach((c) => { firmas.add(c.firma); if (!c.ok) malos.push({ vista: 'conceptos.' + nombre, ...c }); });
+    });
+    await hk.close();
   });
   t.ok(vistas >= 50 && muestreados > 500, `V0) se midieron ${muestreados} controles en ${vistas} vistas/modales (${firmas.size} firmas distintas de control)`, { vistas, muestreados });
   const unicos = new Map();

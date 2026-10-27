@@ -26,8 +26,8 @@ const FIRMA = (sel) => {
 const primeraDiferencia = (a, b) => { for (let i = 0; i < Math.max(a.length, b.length); i++) if (a[i] !== b[i]) return `línea ${i}: «${a[i]}» ≠ «${b[i]}»`; return null; };
 
 await correrSpec('modal_equivalencia', async (t) => {
-  const h = await boot({ fixture: 'default' });
-  const { page } = h;
+  let h = await boot({ fixture: 'default' });
+  let { page } = h;
   const rnd = prng(20260821);
   const pick = (arr) => arr[Math.floor(rnd() * arr.length)];
   const meses0 = (v = 0) => `{ ${MESES.map(m => `${m}: ${v}`).join(', ')} }`;
@@ -87,7 +87,10 @@ await correrSpec('modal_equivalencia', async (t) => {
   await page.keyboard.press('Escape'); await h.waitIdle();
 
   // ============================================================ Fuentes: General (compras + proyección por concepto) y FAEP (conceptos)
-  for (const [fuente, ops] of [['general', ['addCompra', 'delCompra', 'editCompra', 'addConc', 'delConc', 'ingreso', 'rem', 'corte']], ['faep', ['addConc', 'delConc', 'editConc', 'ingreso', 'rem', 'corte']]]) {
+  await h.close();
+  h = await boot({ fixture: 'compras_conceptos' }); // FAEP con registro de compras por concepto (documentado + sin documento)
+  page = h.page;
+  for (const [fuente, ops] of [['general', ['addCompra', 'delCompra', 'editCompra', 'addConc', 'delConc', 'ingreso', 'rem', 'corte']], ['faep', ['addConc', 'delConc', 'editConc', 'addCompra', 'delCompra', 'editCompra', 'ingreso', 'rem', 'corte']]]) {
     await clickTab(page, 'of-' + fuente);
     const abrir = async () => { await page.click(`#otrasFuentesTbody-${fuente} td[data-abrir-otra-fuente="1121"]`); await h.waitIdle(); };
     const reabrir = async () => { await page.keyboard.press('Escape'); await h.waitIdle(); await abrir(); };
@@ -100,7 +103,7 @@ await correrSpec('modal_equivalencia', async (t) => {
       const conc = pick(['Alimentación', 'Agua/Luz', 'A&B <x>', 'Con "comillas"', 'Traslado ñandú']);
       const mes = pick(MESES);
       const cuerpo = {
-        addCompra: `const c = d.otras_fuentes.${fuente}.compras = d.otras_fuentes.${fuente}.compras || {}; c['cA${n}'] = ${compra(n)};`,
+        addCompra: `const c = d.otras_fuentes.${fuente}.compras = d.otras_fuentes.${fuente}.compras || {}; c['cA${n}'] = ${fuente === 'faep' ? compra(n).replace("codigo: '410605'", "concepto: 'Alimentación'") : compra(n)};`,
         delCompra: `const c = d.otras_fuentes.${fuente}.compras || {}; const ids = Object.keys(c); if (ids.length > 1) delete c[ids[${n} % ids.length]];`,
         editCompra: `const c = d.otras_fuentes.${fuente}.compras || {}; const ids = Object.keys(c); if (ids.length) c[ids[${n} % ids.length]].descripcion = 'Editada ${n} & <i>';`,
         addConc: `const l = d.otras_fuentes.${fuente}.${lista} = d.otras_fuentes.${fuente}.${lista} || {}; l[${JSON.stringify(conc)}] = { concepto: ${JSON.stringify(conc)}, meses: ${meses0(n)}, total: 0 };`,

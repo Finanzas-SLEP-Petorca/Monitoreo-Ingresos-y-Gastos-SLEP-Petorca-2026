@@ -667,6 +667,81 @@ async function seccionJardines(h, R) {
   await R.imprimir('jardines.print.dashboard', () => page.click('#dashPdfBtn'));
 }
 
+// Con el fixture "compras_conceptos" (registro de compras por documento con CONCEPTO en JUNJI, FAEP, FIGA y los dos Aportes Fiscales, junto a lo «sin documento» — ver generate.mjs): el Panel principal,
+// las pestañas de las 5 fuentes (tarjetas con «Documentado · Sin documento» y desglose por fila), los detalles de entidades con documentos (formulario, avisos, documentado por concepto), % Ejecución,
+// el Visualizador (grupo «documentado») y el Reporte personalizado con los conceptos nuevos, y las exportaciones (Excel con la hoja COMPRAS, JSON, XLS / CSV de detalle / PDF por fila).
+async function seccionComprasConceptos(h, R) {
+  const { page } = h;
+  const fila = (key, rbd, accion) => `#otrasFuentesTbody-${key} button.row-action-btn[data-action="${accion}"][data-rbd="${rbd}"]`;
+  await abrirDetails(page, '#tab-dashboard');
+  for (const v of ['total', 'real', 'proy']) {
+    await page.click(`.dash-chips button[data-dash-vista="${v}"]`);
+    await R.vista(`compras_conceptos.dashboard.${v}`, '#tab-dashboard');
+  }
+  await page.click('.dash-chips button[data-dash-vista="total"]');
+  for (const key of ['junji', 'faep', 'figa', 'aporte_educ', 'aporte_junji']) {
+    await h.clickTab('of-' + key);
+    await R.vista(`compras_conceptos.of.${key}.total`, `#tab-of-${key}`);
+    if (key === 'faep') {
+      for (const v of ['real', 'proy']) {
+        await page.click(`#tab-of-${key} .of-chip[data-of-vista="${v}"]`);
+        await R.vista(`compras_conceptos.of.${key}.${v}`, `#tab-of-${key}`);
+      }
+      await page.click(`#tab-of-${key} .of-chip[data-of-vista="total"]`);
+      await h.waitIdle();
+    }
+  }
+  for (const [fuente, id] of [['faep', '1121'], ['faep', 'AC'], ['faep', '5402002'], ['figa', '5404001'], ['figa', '1121'], ['junji', '5403002'], ['junji', '5402002'], ['aporte_educ', '1121'], ['aporte_junji', '5402002']]) {
+    await abrirModalOtraFuente(h, R, fuente, id, `compras_conceptos.modal.of.${fuente}.${id}`);
+  }
+  await h.clickTab('of-faep');
+  await page.click('#otrasFuentesTbody-faep td[data-abrir-otra-fuente="1121"]');
+  await h.waitIdle();
+  await page.click('#otrasFuentesModalBody tr[data-compra-id="fa1121_1"] .of-compra-edit-btn');
+  await R.vista('compras_conceptos.modal.of.faep.1121.formulario-edicion', '#otrasFuentesModalBody .compra-form-grid');
+  await page.keyboard.press('Escape');
+  await h.waitIdle();
+  await h.clickTab('% Ejecución');
+  for (const [key, ent] of [['faep', ''], ['faep', '1121'], ['junji', ''], ['consolidado', '']]) {
+    await page.click(`#ejecFuenteChips .of-chip[data-ejec-fuente="${key}"]`);
+    if (key !== 'consolidado') await setSelect(page, '#ejecRbdSelect', ent);
+    await R.vista(`compras_conceptos.ejec.${key}.${ent || 'agregado'}`, '#tab-ejecucion');
+  }
+  await h.clickTab('Reportes');
+  await page.click('#vzFuentesNinguna');
+  for (const k of ['faep', 'junji']) await page.click(`#vzFuenteChips [data-vz-fuente="${k}"]`);
+  await page.click('#vzExpIng'); await page.click('#vzExpGas');
+  await R.vista('compras_conceptos.rep.vz.fuentes', SEL_VZ);
+  await R.descarga('compras_conceptos.exp.vz.fuentes.csv', () => page.click('#vzCsvBtn'));
+  await page.click('#vzAgruparChips [data-vz-agrupar="codigo"]');
+  await R.vista('compras_conceptos.rep.vz.por-codigo', SEL_VZ);
+  await page.click('#vzLimpiarBtn');
+  await page.click('#reporteVistaChips [data-reporte-vista="personalizado"]');
+  await h.waitIdle();
+  const f = await configurarPersonalizado(h, R, {
+    entidades: ['1121', '5402002', '5403002'],
+    conceptos: ['of|faep|bys_total', 'of|faep|bys_doc', 'of|faep|bys_sindoc', 'of|faep|bys_doc_item|Alimentación', 'of|junji|bys_total', 'of|junji|bys_doc'],
+    meses: ['ENERO', 'MARZO', 'SEPTIEMBRE', 'DICIEMBRE'],
+  });
+  R.dato('compras_conceptos.rep.pers.faltantes', f);
+  await R.vista('compras_conceptos.rep.pers', SEL_PERS);
+  await R.descarga('compras_conceptos.exp.pers.csv', () => page.click('#reporteCsvBtn'));
+  for (const key of ['junji', 'faep', 'figa', 'aporte_educ', 'aporte_junji']) {
+    await h.clickTab('of-' + key);
+    await R.descarga(`compras_conceptos.exp.of.${key}.excel`, () => page.click(`#downloadExcelOFBtn-${key}`));
+  }
+  await h.clickTab('of-faep');
+  await R.descarga('compras_conceptos.exp.of.faep.json-carga', () => page.click('#downloadCargaOFBtn-faep'));
+  await R.descarga('compras_conceptos.exp.of.faep.fila.1121.xls', () => page.click(fila('faep', '1121', 'excel')));
+  await R.descarga('compras_conceptos.exp.of.faep.fila.1121.csv-detalle', () => page.click(fila('faep', '1121', 'csv')));
+  await R.imprimir('compras_conceptos.print.of.faep.fila.1121', () => page.click(fila('faep', '1121', 'pdf')));
+  await h.clickTab('of-junji');
+  await R.descarga('compras_conceptos.exp.of.junji.fila.5403002.csv-detalle', () => page.click(fila('junji', '5403002', 'csv')));
+  await R.imprimir('compras_conceptos.print.of.junji.fila.5403002', () => page.click(fila('junji', '5403002', 'pdf')));
+  await h.clickTab('Panel principal');
+  await R.imprimir('compras_conceptos.print.dashboard', () => page.click('#dashPdfBtn'));
+}
+
 export const SECCIONES = [
   { nombre: 'dashboard', fn: seccionEncabezadoYDashboard },
   { nombre: 'sep', fn: seccionSep },
@@ -680,6 +755,7 @@ export const SECCIONES = [
   { nombre: 'estado', fixture: 'estado', fn: seccionEstado },
   { nombre: 'honorarios', fixture: 'honorarios', fn: seccionHonorarios },
   { nombre: 'jardines', fixture: 'jardines', fn: seccionJardines },
+  { nombre: 'compras_conceptos', fixture: 'compras_conceptos', fn: seccionComprasConceptos },
 ];
 
 export async function capturar({ log = () => {}, solo = null, html = undefined } = {}) {

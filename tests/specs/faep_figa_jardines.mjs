@@ -311,7 +311,7 @@ await correrSpec('faep_figa_jardines', async (t) => {
   // ---------------------------------------------------------------- 9) Excel: exportar, archivo nuevo, archivo antiguo (sin jardines) y fila de un jardín sin FAEP previo
   await clickTab(p2, 'faep');
   const x1 = await exportar(p2, () => p2.click('#downloadExcelOFBtn-faep'));
-  t.eq(x1.libro.orden, ['INGRESO', 'REMUNERACIONES', 'BYS_ITEMS', 'META'], 'Excel FAEP: las hojas de siempre');
+  t.eq(x1.libro.orden, ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'META'], 'Excel FAEP: las hojas de siempre');
   const colA = (hoja) => x1.libro.hojas[hoja].slice(1).map(r => String(r[0]));
   t.eq(colA('INGRESO'), idsDeUniverso('rbd_ac_gesparvu'), 'Excel FAEP · INGRESO: 69 filas, RBD, AC y luego los 13 jardines');
   t.eq(colA('META'), idsDeUniverso('rbd_ac_gesparvu'), 'Excel FAEP · META: las 69 entidades (con su «Real hasta»)');

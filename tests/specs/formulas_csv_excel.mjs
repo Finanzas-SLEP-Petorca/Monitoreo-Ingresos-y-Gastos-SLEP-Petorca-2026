@@ -5,6 +5,8 @@
 import { boot, clickTab, cargarFixture } from '../lib/boot.mjs';
 import { correrSpec } from '../lib/spec.mjs';
 import { capturarDescarga, leerXlsx, parseCsvPuntoYComa } from '../lib/capture-utils.mjs';
+import { abrirModalConcepto as ccAbrir, cerrarModalConcepto as ccCerrar, llenarFormConcepto as ccLlenar, compraCBase as ccBase, clp as ccClp, entidadDe as ccEntidad } from '../lib/compras_conceptos.mjs';
+import { docsDe as ccDocs } from '../lib/corte.mjs';
 
 const RUTA = (id) => `sep_carga_rbd/${id}`;
 const F1 = '=HYPERLINK("http://x","y")';
@@ -156,4 +158,17 @@ await correrSpec('formulas_csv_excel', async (t) => {
   t.eq((await leerXlsx(page, xl3.buffer)).hojas.BYS_ITEMS, libroFaep.hojas.BYS_ITEMS, 'FAEP: exportar → reimportar → exportar deja BYS_ITEMS idéntica');
   t.noErrores(h);
   await h.close();
+
+  // ---------------------------------------------------------------- Fuentes por CONCEPTO: hoja COMPRAS con «Concepto»
+  {
+    const hc = await boot({ fixture: 'compras_conceptos' });
+    await hc.remoto('1121', `Object.assign(d.otras_fuentes.faep.compras.fa1121_1, { concepto: '=CMD()', descripcion: '+X', nombreProveedor: '@Y', nroDocumento: '-77' });`);
+    await hc.waitIdle();
+    await hc.clickTab('of-faep');
+    const x = await capturarDescarga(hc.page, () => hc.page.click('#downloadExcelOFBtn-faep'));
+    const fila = (await leerXlsx(hc.page, x.buffer)).hojas.COMPRAS.find(r => r[0] === 'fa1121_1');
+    t.eq([fila[3], fila[8], fila[10], fila[5]], ["'=CMD()", "'+X", "'@Y", '-77'], 'concepto: apóstrofo solo en concepto, descripción y proveedor; nunca en el N° de documento');
+    t.noErrores(hc);
+    await hc.close();
+  }
 });
