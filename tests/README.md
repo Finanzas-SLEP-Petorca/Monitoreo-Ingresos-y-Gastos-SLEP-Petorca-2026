@@ -21,7 +21,7 @@ node tests/specs/persistencia.mjs        # un spec directamente (sin la tabla)
 ```
 
 Código de salida: `0` si todo es PASS o KNOWN_BUG; `1` si algo FALLA.
-Duración: ≈ 16 min la suite completa (49 pruebas: fixture + 47 specs + golden; golden ≈ 100 s; los specs más largos son `n_dc`, `escritura_modal_tecleo`, `a11y_contraste`, `corte_ingresos`, `modal_equivalencia`, `sync_estado`, `seguridad_xss` y `mes_cierre_global`). `-v` muestra la salida completa de cada prueba; `--jobs N` corre specs en paralelo.
+Duración: ≈ 16 min la suite completa (53 pruebas: fixture + 51 specs + golden; golden ≈ 100 s; los specs más largos son `n_dc`, `escritura_modal_tecleo`, `a11y_contraste`, `corte_ingresos`, `modal_equivalencia`, `sync_estado`, `seguridad_xss` y `mes_cierre_global`). `-v` muestra la salida completa de cada prueba; `--jobs N` corre specs en paralelo.
 
 ### Qué HTML se prueba (`APP_HTML`)
 
@@ -408,7 +408,7 @@ El mock de arriba es rápido y determinista, pero lo escribimos nosotros: no dem
 `setup.sh`; las dependencias, unos 280 MB, se instalan fuera del repositorio en `E2E_HOME`, por defecto `/home/user/.e2e-real`).
 
 ```bash
-bash tests/e2e-real/setup.sh && node tests/e2e-real/run.mjs        # los 12 specs contra el árbol (el 11 es Honorarios por boleta; el 12, jardines en FAEP/FIGA y BDL de JUNJI), ≈ 8 min
+bash tests/e2e-real/setup.sh && node tests/e2e-real/run.mjs        # los 13 specs contra el árbol (el 11 es Honorarios por boleta; el 12, jardines en FAEP/FIGA y BDL de JUNJI; el 13, registro de compras por concepto), ≈ 9 min
 node tests/e2e-real/run.mjs --matriz                                # además contra @069f9dd y @baseline, ≈ 15 min
 ```
 

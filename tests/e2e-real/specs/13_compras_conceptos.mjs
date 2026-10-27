@@ -47,7 +47,7 @@ await correrSpec('13_compras_conceptos', async (t) => {
       t.eq([Object.keys(w[0].payload.otras_fuentes), Object.keys(w[0].payload.otras_fuentes.faep), Object.keys(w[0].payload.otras_fuentes.faep.compras).length], [['faep'], ['compras'], 1], 'K1) el payload toca solo otras_fuentes.faep.compras.<id>');
       let s = await emu.leer('1122');
       t.eq([s.data.otras_fuentes.faep.compras[id].concepto, s.data.otras_fuentes.faep.compras[id].montoGasto], ['Concepto de prueba real', 321000], 'K1) servidor: la compra con su concepto y monto');
-      const sinCompras = clon(s.data.otras_fuentes); delete sinCompras.faep.compras;
+      const sinCompras = clon(s.data.otras_fuentes); delete sinCompras.faep.compras; if (!Object.keys(sinCompras.faep).length) delete sinCompras.faep; // 1122 no tenía FAEP: el mapa se crea solo con la compra
       const ref = clon(of0); if (ref.faep) delete ref.faep.compras;
       t.eq(canon(sinCompras), canon(ref), 'K1) servidor: el resto de otras_fuentes (ingreso, rem, «sin documento», otras fuentes) queda EXACTAMENTE igual');
       // edición
@@ -66,7 +66,6 @@ await correrSpec('13_compras_conceptos', async (t) => {
       t.eq(Object.keys(s.data.otras_fuentes.faep.compras).sort(), ['ajena', id].sort(), 'K1) servidor: ambas compras conviven');
       // borrado
       await h.clearLog();
-      page.once('dialog', d => d.accept());
       await page.click(`#otrasFuentesModalBody button.of-compra-del-btn[data-compra-id="${id}"]`);
       await h.flush();
       s = await emu.leer('1122');
