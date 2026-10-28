@@ -1508,6 +1508,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   <div id="tab-of-fondos_fijos" class="tab-content hidden" role="tabpanel" aria-labelledby="tabbtn-of-fondos_fijos">
     <section><h2>Fondos Fijos — control operativo</h2><div class="panel">
       <div class="detalle-empty"><strong>No es una fuente de financiamiento ni genera ingreso.</strong> Controla anticipos, rendiciones y compensación. El gasto aceptado se registra una sola vez en Subvención General; aquí solo se concilia su rendición, registro y compensación SIGFE. Incluye todos los RBD y GESPARVU.</div>
+      <div class="table-controls" style="margin-top:12px;"><button id="importFondosFijosBtn" type="button" style="background:#6b46c1; border-color:#6b46c1;">⬆ Importar Control Fondos Fijos</button><input type="file" id="importFondosFijosInput" accept=".xlsx" style="display:none;"><span class="detalle-sub">Lee la hoja “FONDOS FIJOS P02”. Importa cupo, saldo inicial, rendido, observado y folio; reposición, registro en General y compensación SIGFE quedan sin cargar para conciliarlos.</span></div>
       <div id="fondosFijosKpis" class="kpi-row" style="margin-top:12px;"></div>
       <div class="table-scroll" style="margin-top:12px;"><table class="data-table" id="fondosFijosTable"><thead><tr><th>RBD / GESPARVU</th><th>Nombre</th><th class="num">Cupo vigente</th><th class="num">Gasto aceptado</th><th class="num">Registrado en General</th><th class="num">Pendiente General</th><th class="num">Compensado SIGFE</th><th class="num">Pendiente SIGFE</th><th>Estado</th><th class="col-acciones">Acciones</th></tr></thead><tbody id="fondosFijosTbody"></tbody></table></div>
     </div></section>
@@ -2626,6 +2627,57 @@ function guardarCampoFondoFijo(input) {
   scheduleRbdSave(rbd, { nombre: r ? r.nombre : rbd, fondos_fijos: payload });
   renderFondosFijos(); renderDashFondosFijos();
   if (fondosFijosRbdAbierto === rbd) abrirFondosFijosModal(rbd);
+}
+// Importador del libro operativo vigente. Solo toma datos que están explícitos en P02: cupo,
+// saldo inicial, rendido, observado y folio. Nunca infiere una reposición, registro en General ni
+// compensación SIGFE a partir de la fórmula de saldo, pues son hitos distintos de conciliación.
+const MAPA_COLUMNAS_FONDOS_FIJOS = [
+  ['MARZO', 7, 13], ['ABRIL', 15, 21], ['MAYO', 23, 29], ['JUNIO', 31, 37], ['JULIO', 39, 45],
+  ['AGOSTO', 47, 53], ['SEPTIEMBRE', 55, 61], ['OCTUBRE', 63, null], ['NOVIEMBRE', 69, null], ['DICIEMBRE', 75, null],
+];
+function montoImportadoFondoFijo(v) { return Math.max(0, Number(v) || 0); }
+async function importarControlFondosFijos(file) {
+  if (!currentUser) { alert('Inicia sesión antes de importar.'); return; }
+  if (typeof XLSX === 'undefined') { alert('No se pudo cargar la librería de Excel. Intenta de nuevo con conexión a internet.'); return; }
+  if (!confirm('Se cargarán cupos, saldos iniciales, rendido, observado y folios desde “FONDOS FIJOS P02”. No se modificarán los ingresos, gastos ni consolidado. Los campos Registrado en General, Compensado SIGFE y Reposición se conservarán si ya existen y, si no, quedarán pendientes. ¿Continuar?')) return;
+  try {
+    const wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
+    const nombreHoja = wb.SheetNames.find(n => String(n).trim().toUpperCase() === 'FONDOS FIJOS P02');
+    if (!nombreHoja) { alert('No se encontró la hoja “FONDOS FIJOS P02”. No se importó nada.'); return; }
+    const rows = rowsFromSheet(wb.Sheets[nombreHoja]);
+    const permitidos = new Set(filasFondosFijos().map(r => r.rbd));
+    const cambios = [];
+    let omitidos = 0;
+    for (let i = 2; i < rows.length; i++) {
+      const row = rows[i] || [];
+      if (row[0] === undefined || row[0] === null || String(row[0]).trim() === '') continue;
+      const rbd = String(Math.trunc(Number(row[0])));
+      if (!permitidos.has(rbd)) { omitidos++; continue; }
+      const ff = ensureFondoFijo(rbd);
+      ff.cupo = montoImportadoFondoFijo(row[6]);
+      const meses = {};
+      MAPA_COLUMNAS_FONDOS_FIJOS.forEach(([mes, inicio, colFolio]) => {
+        const actual = ff.meses[mes];
+        actual.saldo_inicial = montoImportadoFondoFijo(row[inicio]);
+        actual.rendido = montoImportadoFondoFijo(row[inicio + 2]);
+        actual.observado = montoImportadoFondoFijo(row[inicio + 3]);
+        if (colFolio !== null) actual.folio = textoSeguro(row[colFolio]);
+        meses[mes] = { saldo_inicial: actual.saldo_inicial, rendido: actual.rendido, observado: actual.observado, ...(colFolio !== null ? { folio: actual.folio } : {}) };
+      });
+      const entidad = filasFondosFijos().find(x => x.rbd === rbd);
+      cambios.push({ rbd, nombre: entidad ? entidad.nombre : rbd, datos: { cupo: ff.cupo, meses } });
+    }
+    if (!cambios.length) { alert('No se encontraron RBD o GESPARVU coincidentes para importar.'); return; }
+    for (const cambio of cambios) {
+      scheduleRbdSave(cambio.rbd, { nombre: cambio.nombre, fondos_fijos: cambio.datos });
+      await flushRbdSave(cambio.rbd);
+    }
+    renderFondosFijos(); renderDashFondosFijos();
+    alert(`Importación terminada: ${cambios.length} entidades cargadas${omitidos ? `; ${omitidos} filas omitidas por no pertenecer al universo RBD/GESPARVU.` : ''}.\n\nQuedan pendientes de conciliación los campos Reposición entregada, Registrado en General y Compensado SIGFE, porque la planilla fuente no los identifica por separado.`);
+  } catch (err) {
+    console.error('Error importando Fondos Fijos', err);
+    alert('No se pudo importar el archivo: ' + err.message);
+  }
 }
 let otrasFuentesSel = FUENTES_OTRAS[0].key;
 let otrasFuentesRbdAbierto = null; // rbd (o "AC") cuyo detalle está abierto en el modal de Otras Fuentes
@@ -6050,6 +6102,12 @@ document.getElementById('fondosFijosTable').addEventListener('click', (e) => {
 document.getElementById('fondosFijosModalCloseBtn').addEventListener('click', cerrarFondosFijosModal);
 document.getElementById('fondosFijosModal').addEventListener('click', (e) => { if (e.target.id === 'fondosFijosModal') cerrarFondosFijosModal(); });
 document.getElementById('fondosFijosModalBody').addEventListener('change', (e) => { if (e.target.classList.contains('ff-input')) guardarCampoFondoFijo(e.target); });
+document.getElementById('importFondosFijosBtn').addEventListener('click', () => document.getElementById('importFondosFijosInput').click());
+document.getElementById('importFondosFijosInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (file) await importarControlFondosFijos(file);
+  e.target.value = '';
+});
 
 // Al abrir, el foco entra al modal (botón de cerrar) para que Tab recorra su contenido en vez de la página que queda detrás (U-05 / U-09); al cerrar vuelve a
 // la fila (o a lo que tuviera el foco) de la que se abrió. Las filas se reconstruyen con cada snapshot: el "alterno" las busca por RBD en la tabla de la fuente.
