@@ -860,6 +860,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <button class="tab-btn" data-tab="of-faep" type="button" role="tab" id="tabbtn-of-faep" aria-controls="tab-of-faep" aria-selected="false" tabindex="-1"><span aria-hidden="true">🏗️</span> FAEP</button>
       <button class="tab-btn" data-tab="of-subt31_proyectos" type="button" title="Subtítulo 31 (Proyectos)" role="tab" id="tabbtn-of-subt31_proyectos" aria-controls="tab-of-subt31_proyectos" aria-selected="false" tabindex="-1"><span aria-hidden="true">🧱</span> Subt. 31</button>
       <button class="tab-btn" data-tab="of-recuperacion_llmm" type="button" title="Recuperación Licencias Médicas" role="tab" id="tabbtn-of-recuperacion_llmm" aria-controls="tab-of-recuperacion_llmm" aria-selected="false" tabindex="-1"><span aria-hidden="true">🩺</span> Recup. LLMM</button>
+      <button class="tab-btn" data-tab="of-asignacion_familiar" type="button" title="Asignación Familiar" role="tab" id="tabbtn-of-asignacion_familiar" aria-controls="tab-of-asignacion_familiar" aria-selected="false" tabindex="-1"><span aria-hidden="true">👨‍👩‍👧</span> Asig. Familiar</button>
       <button class="tab-btn" data-tab="of-figa" type="button" role="tab" id="tabbtn-of-figa" aria-controls="tab-of-figa" aria-selected="false" tabindex="-1"><span aria-hidden="true">🌐</span> FIGA</button>
       <button class="tab-btn" data-tab="of-aporte_educ" type="button" title="Aporte Fiscal Extraordinario Educación" role="tab" id="tabbtn-of-aporte_educ" aria-controls="tab-of-aporte_educ" aria-selected="false" tabindex="-1"><span aria-hidden="true">🏛️</span> Aporte Educ.</button>
       <button class="tab-btn" data-tab="of-aporte_junji" type="button" title="Aporte Fiscal Extraordinario JUNJI" role="tab" id="tabbtn-of-aporte_junji" aria-controls="tab-of-aporte_junji" aria-selected="false" tabindex="-1"><span aria-hidden="true">🍼</span> Aporte JUNJI</button>
@@ -1491,6 +1492,14 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <div class="detalle-empty">Fuente exclusivamente de ingresos: Recuperación LLMM Isapres, Recuperación LLMM FONASA y Recuperación LLMM SIL. No registra gastos asociados.</div>
       <div class="table-controls"><button id="downloadExcelOFBtn-recuperacion_llmm" type="button" style="background:#1b8247; border-color:#1b8247;">⬇ Excel</button><button id="importExcelOFBtn-recuperacion_llmm" type="button" style="background:#6b46c1; border-color:#6b46c1;">⬆ Importar Excel</button><input type="file" id="importExcelOFInput-recuperacion_llmm" accept=".xlsx" style="display:none;"><button id="exportPdfOFBtn-recuperacion_llmm" type="button" style="background:#374151; border-color:#374151;">🖨 Exportar PDF</button><button id="downloadCargaOFBtn-recuperacion_llmm" type="button" style="background:var(--series-2-btn); border-color:var(--series-2-btn);">⬇ Descargar carga (JSON)</button></div>
       <div class="table-scroll" style="margin-top:12px;"><table class="data-table" id="otrasFuentesTable-recuperacion_llmm"><thead><tr><th>RBD / GESPARVU</th><th>Nombre</th><th>Real hasta</th><th class="num">Ingreso</th><th class="num">Saldo</th><th>Estado (Total)</th><th class="col-acciones">Acciones</th></tr></thead><tbody id="otrasFuentesTbody-recuperacion_llmm"></tbody></table></div>
+    </div></section>
+  </div>
+
+  <div id="tab-of-asignacion_familiar" class="tab-content hidden" role="tabpanel" aria-labelledby="tabbtn-of-asignacion_familiar">
+    <section><h2>Asignación Familiar</h2><div class="panel">
+      <div class="detalle-empty">Seguimiento de Ingresos Percibidos y Gastos de Asignación Familiar, exclusivamente en Remuneraciones. Incluye todos los RBD y GESPARVU; no registra Bienes y Servicios.</div>
+      <div class="table-controls"><button id="downloadExcelOFBtn-asignacion_familiar" type="button" style="background:#1b8247; border-color:#1b8247;">⬇ Excel</button><button id="importExcelOFBtn-asignacion_familiar" type="button" style="background:#6b46c1; border-color:#6b46c1;">⬆ Importar Excel</button><input type="file" id="importExcelOFInput-asignacion_familiar" accept=".xlsx" style="display:none;"><button id="exportPdfOFBtn-asignacion_familiar" type="button" style="background:#374151; border-color:#374151;">🖨 Exportar PDF</button><button id="downloadCargaOFBtn-asignacion_familiar" type="button" style="background:var(--series-2-btn); border-color:var(--series-2-btn);">⬇ Descargar carga (JSON)</button></div>
+      <div class="table-scroll" style="margin-top:12px;"><table class="data-table" id="otrasFuentesTable-asignacion_familiar"><thead><tr><th>RBD / GESPARVU</th><th>Nombre</th><th>Real hasta</th><th class="num">Ingreso Percibido</th><th class="num">Gasto Remuneraciones</th><th class="num">Gasto Total</th><th class="num">Saldo</th><th>Estado (Total)</th><th class="col-acciones">Acciones</th></tr></thead><tbody id="otrasFuentesTbody-asignacion_familiar"></tbody></table></div>
     </div></section>
   </div>
 
@@ -2416,6 +2425,7 @@ const FUENTES_OTRAS = [
   { key: 'faep', label: 'FAEP', incomeShape: 'single', bysMode: 'concepto', universo: 'rbd_ac_gesparvu', codigoSupereduc: null },
   { key: 'subt31_proyectos', label: 'Subtítulo 31 (Proyectos)', incomeShape: 'single', bysMode: 'concepto', universo: 'rbd_ac_gesparvu', codigoSupereduc: null },
   { key: 'recuperacion_llmm', label: 'Recuperación Licencias Médicas', incomeShape: 'llmm3', bysMode: 'none', universo: 'rbd_ac_gesparvu', codigoSupereduc: null, sinGasto: true },
+  { key: 'asignacion_familiar', label: 'Asignación Familiar', incomeShape: 'single', bysMode: 'none', universo: 'rbd_gesparvu', codigoSupereduc: null, soloRem: true },
   { key: 'figa', label: 'FIGA', incomeShape: 'single', bysMode: 'concepto', universo: 'rbd_ac_gesparvu', codigoSupereduc: null },
   { key: 'aporte_educ', label: 'Aporte Fiscal Extraord. Educación', incomeShape: 'single', bysMode: 'concepto', universo: 'rbd_ac', codigoSupereduc: null },
   { key: 'aporte_junji', label: 'Aporte Fiscal Extraord. JUNJI', incomeShape: 'single', bysMode: 'concepto', universo: 'gesparvu', codigoSupereduc: null },
@@ -2483,6 +2493,7 @@ const GESPARVU_REGISTROS = [
 // Tipos de entidad que componen cada universo: 'rbd' (establecimiento de DATA.registros), 'ac' (la fila fija AC) y 'gesparvu' (jardín infantil / sala cuna).
 const UNIVERSO_TIPOS = {
   rbd_ac: ['rbd', 'ac'],
+  rbd_gesparvu: ['rbd', 'gesparvu'],
   gesparvu: ['gesparvu'],
   rbd_ac_gesparvu: ['rbd', 'ac', 'gesparvu'],
 };
@@ -2500,6 +2511,7 @@ function universoIncluyeTipo(universo, tipo) {
 function filasDeUniverso(universo) {
   if (universo === 'gesparvu') return GESPARVU_REGISTROS;
   const rbdAc = [...DATA.registros, AC_PSEUDO_RBD];
+  if (universo === 'rbd_gesparvu') return [...DATA.registros, ...GESPARVU_REGISTROS];
   return universo === 'rbd_ac_gesparvu' ? [...rbdAc, ...GESPARVU_REGISTROS] : rbdAc;
 }
 function filasOtrasFuentes(fuenteKey) {
@@ -5752,6 +5764,12 @@ function kpiCardsOtraFuente(fuenteKey, tipo, b, t) {
     { label: `Sin gastos asociados (${suf})`, value: fmtCLP(0), full: 'Fuente exclusivamente de ingresos', tone: 'green' },
     { label: `Saldo (${suf})`, value: fmtCLP(b.saldo), full: 'Corresponde al ingreso recuperado', tone: 'green' },
   ];
+  if (fuente.soloRem) return [
+    { label: `Ingreso Percibido (${suf})`, value: fmtCLP(b.ingreso), full: corteTxt, tone: 'blue' },
+    { label: `Gasto Remuneraciones (${suf})`, value: fmtCLP(b.rem), full: corteTxt, tone: 'amber' },
+    { label: `Gasto Total (${suf})`, value: fmtCLP(b.gasto), full: 'Solo Remuneraciones', tone: 'amber' },
+    { label: `Saldo (${suf})`, value: fmtCLP(b.saldo), full: saldoTxt, critical: b.saldo < 0, tone: b.saldo < 0 ? 'red' : 'green' },
+  ];
   return [
     { label: `Ingreso (${suf})`, value: fmtCLP(b.ingreso), full: corteTxt, tone: 'blue' },
     { label: `Gasto Remuneraciones (${suf})`, value: fmtCLP(b.rem), full: corteTxt, tone: 'amber' },
@@ -5823,7 +5841,7 @@ function renderOtrasFuentesTable(fuenteKey) {
       <td class="rbd-clickable" data-abrir-otra-fuente="${escHtml(r.rbd)}"><span class="nombre-txt" title="${escHtml(r.nombre)}">${escHtml(r.nombre)}</span></td>
       <td class="of-real-hasta">${corteTxt}</td>
       <td class="num">${fmtCLP(b.ingreso)}</td>
-      ${fuente.sinGasto ? '' : `<td class="num">${fmtCLP(b.rem)}</td><td class="num">${fmtCLP(b.bys)}${bysSplitCeldaHTML(b)}</td><td class="num">${fmtCLP(b.gasto)}</td>`}
+      ${fuente.sinGasto ? '' : fuente.soloRem ? `<td class="num">${fmtCLP(b.rem)}</td><td class="num">${fmtCLP(b.gasto)}</td>` : `<td class="num">${fmtCLP(b.rem)}</td><td class="num">${fmtCLP(b.bys)}${bysSplitCeldaHTML(b)}</td><td class="num">${fmtCLP(b.gasto)}</td>`}
       <td class="num" style="color:${b.saldo < 0 ? 'var(--status-critical)' : 'var(--text-primary)'}">${fmtCLP(b.saldo)}</td>
       <td>${otrasFuentesEstadoTagHTML(of, key)}${otrasFuentesEstadoCausaHTML(of, key)}</td>
       <td class="col-acciones">${otrasFuentesAccionesHTML(key, r.rbd)}</td>
@@ -6271,7 +6289,7 @@ function buildOtrasFuentesDetalleHTML(rbd, fuenteKey) {
   const corte = realHastaMesOtraFuente(of);
   const compras = fuente.bysMode === 'compras';
   const corteSelectHTML = `<div class="of-modal-corte"><label class="of-ctl-label">Real hasta el mes: <select class="of-modal-corte-select" data-rbd="${rbd}" data-fuente="${fuenteKey}">${MESES_CARGA_TITLE.map((m, i) => `<option value="${i + 1}"${i + 1 === corte ? ' selected' : ''}>${m}</option>`).join('')}</select></label>
-    <span class="detalle-sub">Los meses hasta el corte son <strong>Real</strong> y los siguientes <strong>Proyectado</strong>${compras ? ' (las compras siempre son Real; la proyección de Bienes y Servicios se carga aparte, más abajo).' : ' (Bienes y Servicios «sin documento» sigue el corte; lo documentado con compras siempre es Real).'}</span></div>`;
+    <span class="detalle-sub">Los meses hasta el corte son <strong>Real</strong> y los siguientes <strong>Proyectado</strong>${fuente.bysMode === 'none' ? ' (esta fuente no registra Bienes y Servicios).' : compras ? ' (las compras siempre son Real; la proyección de Bienes y Servicios se carga aparte, más abajo).' : ' (Bienes y Servicios «sin documento» sigue el corte; lo documentado con compras siempre es Real).'}</span></div>`;
 
   let headerHTML, tablasMesesHTML;
   if (fuente.incomeShape === 'junji3') {
@@ -6289,17 +6307,20 @@ function buildOtrasFuentesDetalleHTML(rbd, fuenteKey) {
     ${otrasFuentesTablaMes('Recuperación LLMM FONASA', rbd, fuenteKey, 'of_ingreso_llmm_fonasa', of.ingreso_llmm_fonasa, `oftotal-${rbd}-${fuenteKey}-of_ingreso_llmm_fonasa`)}
     ${otrasFuentesTablaMes('Recuperación LLMM SIL', rbd, fuenteKey, 'of_ingreso_llmm_sil', of.ingreso_llmm_sil, `oftotal-${rbd}-${fuenteKey}-of_ingreso_llmm_sil`)}`;
   } else {
-    const bysSubtitle = compras
+    const etiquetaIngreso = fuente.soloRem ? 'Ingresos Percibidos' : `Ingreso (${fuenteLabel})`;
+    const bysSubtitle = fuente.bysMode === 'none'
+      ? 'Esta fuente solo permite gastos en Remuneraciones; no registra Bienes y Servicios.'
+      : compras
       ? 'Bienes y Servicios se carga como "Registro de compras" más abajo; su total mensual se calcula solo.'
       : 'Bienes y Servicios se carga como "Registro de compras" por documento (con concepto) o, sin documento, como montos mensuales por concepto, más abajo; los totales se calculan solos.';
     headerHTML = `<strong>Detalle por mes — Ingreso y Remuneraciones (${fuenteLabel})</strong> — <span class="detalle-sub">${bysSubtitle}</span>`;
     tablasMesesHTML = `
-    ${otrasFuentesTablaMes(`Ingreso (${fuenteLabel})`, rbd, fuenteKey, 'of_ingreso', of.ingreso, `oftotal-${rbd}-${fuenteKey}-of_ingreso`)}
+    ${otrasFuentesTablaMes(etiquetaIngreso, rbd, fuenteKey, 'of_ingreso', of.ingreso, `oftotal-${rbd}-${fuenteKey}-of_ingreso`)}
     ${fuente.incomeShape === 'carrera2' ? otrasFuentesTablaMes(`Ingreso Carrera Docente ${fuenteKey === 'general' ? 'General' : 'PIE'}`, rbd, fuenteKey, 'of_ingreso_carrera_docente', of.ingreso_carrera_docente || { meses: mesesEnCero(), total: 0 }, `oftotal-${rbd}-${fuenteKey}-of_ingreso_carrera_docente`) : ''}
     ${otrasFuentesTablaMes(`Gasto Remuneraciones (${fuenteLabel})`, rbd, fuenteKey, 'of_gasto_rem', of.gasto_rem, `oftotal-${rbd}-${fuenteKey}-of_gasto_rem`)}`;
   }
 
-  const bysHTML = fuente.sinGasto ? '' : (compras
+  const bysHTML = (fuente.sinGasto || fuente.bysMode === 'none') ? '' : (compras
     ? comprasSectionOtraFuenteHTML(rbd, fuenteKey, of, fuenteLabel) + bysConceptoSectionHTML(rbd, fuenteKey, of, false, {
         lista: 'bys_proy_items', modo: 'of_bys_proy_item', forzarProy: true,
         titulo: 'Proyección Bienes y Servicios (por concepto)',
@@ -6822,7 +6843,7 @@ function buildOtraFuenteCargaWorkbook(fuenteKey, onlyRbd) {
     if (fuente.incomeShape === 'carrera2') XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso_carrera_docente', onlyRbd)), 'ING_CARRERA_DOCENTE');
   }
   if (!fuente.sinGasto) XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'gasto_rem', onlyRbd)), 'REMUNERACIONES');
-  if (fuente.sinGasto) {
+  if (fuente.sinGasto || fuente.bysMode === 'none') {
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetMetaAOA(fuenteKey, onlyRbd)), 'META');
     return wb;
   }
@@ -7009,7 +7030,7 @@ function importOtraFuenteWorkbook(wbIn, fuenteKey) {
     if (fuente.incomeShape === 'carrera2' && wbIn.Sheets['ING_CARRERA_DOCENTE']) resumen.push('ING_CARRERA_DOCENTE: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_CARRERA_DOCENTE'], fuenteKey, 'ingreso_carrera_docente') + ' filas');
   }
   if (!fuente.sinGasto && wbIn.Sheets['REMUNERACIONES']) resumen.push('REMUNERACIONES: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['REMUNERACIONES'], fuenteKey, 'gasto_rem') + ' filas');
-  if (fuente.sinGasto) { renderOtrasFuentesTable(fuenteKey); return resumen.concat(resumenRechazosImportacion()); }
+  if (fuente.sinGasto || fuente.bysMode === 'none') { renderOtrasFuentesTable(fuenteKey); return resumen.concat(resumenRechazosImportacion()); }
   if (fuente.bysMode === 'compras') {
     if (wbIn.Sheets['COMPRAS']) {
       const rc = importOtraFuenteComprasSheet(wbIn.Sheets['COMPRAS'], fuenteKey);
@@ -7145,7 +7166,9 @@ function buildOtraFuenteEntidadPrintHTML(rbd, fuenteKey) {
       ? [['Recuperación LLMM Isapres', of.ingreso_llmm_isapres], ['Recuperación LLMM FONASA', of.ingreso_llmm_fonasa], ['Recuperación LLMM SIL', of.ingreso_llmm_sil]]
       : [['Ingreso', of.ingreso]];
   let bysHTML;
-  if (fuente.bysMode === 'compras') {
+  if (fuente.bysMode === 'none') {
+    bysHTML = '';
+  } else if (fuente.bysMode === 'compras') {
     const compras = Object.values(of.compras || {}).sort((a, b) => (a.fechaDocumento || '').localeCompare(b.fechaDocumento || ''));
     const filasCompras = compras.map(c => {
       const cat = CUENTAS_COMPRAS_BY_CODIGO[c.codigo];
@@ -7263,6 +7286,7 @@ const DASH_META = {
   faep: { corto: 'FAEP', icono: '🏗️' },
   subt31_proyectos: { corto: 'Subt. 31', icono: '🧱' },
   recuperacion_llmm: { corto: 'Recup. LLMM', icono: '🩺' },
+  asignacion_familiar: { corto: 'Asig. Familiar', icono: '👨‍👩‍👧' },
   figa: { corto: 'FIGA', icono: '🌐' },
   aporte_educ: { corto: 'Aporte Fiscal Educ.', icono: '🏛️' },
   aporte_junji: { corto: 'Aporte Fiscal JUNJI', icono: '🍼' },
@@ -8398,6 +8422,7 @@ function reporteConceptosFuente(f) {
     add('ingreso_llmm_sil', 'Recuperación LLMM SIL');
   } else add('ingreso', 'Ingreso');
   add('rem', 'Remuneraciones');
+  if (f.bysMode === 'none') return out;
   add('bys_total', 'Bienes y Servicios — total (Real+Proy)');
   if (f.bysMode === 'compras') add('bys_proy', 'Bienes y Servicios Proyección — total');
   const din = reporteConceptosDinamicos(f);
