@@ -2535,7 +2535,12 @@ function filasDeUniverso(universo) {
   return universo === 'rbd_ac_gesparvu' ? [...rbdAc, ...GESPARVU_REGISTROS] : rbdAc;
 }
 function filasOtrasFuentes(fuenteKey) {
-  return filasDeUniverso(FUENTES_OTRAS_BY_KEY[fuenteKey].universo);
+  const fuente = FUENTES_OTRAS_BY_KEY[fuenteKey];
+  const filas = filasDeUniverso(fuente.universo);
+  // General normalmente muestra RBD + AC. Un GESPARVU se incorpora solo cuando tiene Fondo Fijo
+  // registrado en General: así el gasto queda visible sin llenar la pestaña de filas vacías.
+  if (fuenteKey !== 'general') return filas;
+  return filas.concat(GESPARVU_REGISTROS.filter(g => resumenFondoFijo(g.rbd).registrado > 0));
 }
 
 // Fondos Fijos es deliberadamente un control operativo separado: no se incorpora a FUENTES_OTRAS,
@@ -2554,6 +2559,11 @@ function ensureFondoFijo(rbd) {
   if (!ff.meses) ff.meses = mesesFondosFijosVacios();
   MESES_CARGA.forEach(m => { ff.meses[m] = Object.assign({ saldo_inicial: 0, rendido: 0, observado: 0, registrado_general: 0, compensado_sigfe: 0, reposicion: 0, folio: '' }, ff.meses[m] || {}); });
   return ff;
+}
+function mesesFondosFijosRegistradosEnGeneral(rbd) {
+  const ff = ensureFondoFijo(rbd), meses = mesesEnCero();
+  MESES_CARGA.forEach(m => { meses[m] = num(ff.meses[m].registrado_general); });
+  return meses;
 }
 function resumenFondoFijo(rbd) {
   const ff = ensureFondoFijo(rbd);
@@ -2653,7 +2663,11 @@ function guardarCampoFondoFijo(input) {
   const r = filasFondosFijos().find(x => x.rbd === rbd);
   const payload = mes ? { meses: { [mes]: { [campo]: valor } } } : { [campo]: valor };
   scheduleRbdSave(rbd, { nombre: r ? r.nombre : rbd, fondos_fijos: payload });
+  recomputeOtraFuente(rbd, 'general');
   renderFondosFijos(); renderDashFondosFijos();
+  renderOtrasFuentesTable('general');
+  renderDashboard();
+  if (otrasFuentesRbdAbierto === rbd && otrasFuentesSel === 'general') renderOtrasFuentesModalContenido();
   if (fondosFijosRbdAbierto === rbd) abrirFondosFijosModal(rbd);
 }
 // Importador del libro operativo vigente. Solo toma datos que están explícitos en P02: cupo,
@@ -3778,7 +3792,7 @@ function bloqueRealProy(ingreso, rem, bys, hon) {
   const gasto = rem + (hon || 0) + bys;
   return hon === undefined ? { ingreso, rem, bys, gasto, saldo: ingreso - gasto } : { ingreso, rem, hon, bys, gasto, saldo: ingreso - gasto };
 }
-function computeRealProyOtraFuente(of, fuenteKey) {
+function computeRealProyOtraFuente(of, fuenteKey, rbd) {
   const fuente = FUENTES_OTRAS_BY_KEY[fuenteKey] || {};
   const corte = realHastaMesOtraFuente(of);
   const lineasIngreso = lineasIngresoOtraFuente(fuente, of);
@@ -3795,6 +3809,12 @@ function computeRealProyOtraFuente(of, fuenteKey) {
     (of.bys_items || []).forEach(it => { const s = splitRealProyMeses(it.meses, corte); bysReal += s.real; bysProy += s.proy; });
     // «Documentado»: las compras por documento (con concepto), SIEMPRE Real (como las compras de las demás fuentes), sin importar el corte.
     bysDoc = (of.bys_doc_items || []).reduce((s, it) => s + (it.total || 0), 0);
+  }
+  // El Fondo Fijo no crea una segunda fuente: su monto ya registrado se suma SOLO a B&S Real de
+  // Subvención General, desde el mismo RBD/GESPARVU y mes. Compensación SIGFE no interviene aquí.
+  if (fuenteKey === 'general' && rbd) {
+    const mesesFondos = mesesFondosFijosRegistradosEnGeneral(rbd);
+    bysReal += MESES_CARGA.reduce((s, m) => s + mesesFondos[m], 0);
   }
   // B&S de una fuente por concepto = sin documento + documentado (cada parte redondeada a pesos, así `bys = bysSin + bysDoc` cuadra siempre; sin documentos queda igual que antes).
   const real = bloqueRealProy(Math.round(ingReal), Math.round(rem.real), Math.round(bysReal) + (porConcepto ? Math.round(bysDoc) : 0));
@@ -3815,7 +3835,7 @@ function computeRealProyOtraFuente(of, fuenteKey) {
 function recomputeOtraFuente(rbd, fuenteKey) {
   const of = ensureOtraFuente(rbd, fuenteKey);
   const fuente = FUENTES_OTRAS_BY_KEY[fuenteKey] || {};
-  const rp = computeRealProyOtraFuente(of, fuenteKey);
+  const rp = computeRealProyOtraFuente(of, fuenteKey, rbd);
   of.ingreso_total = rp.total.ingreso;
   of.gasto_bys_total = rp.total.bys;
   of.gasto_total = rp.total.gasto;
@@ -6487,6 +6507,16 @@ function bysConceptoSectionHTML(rbd, fuenteKey, of, mostrarSaldoOperacion, opts)
     </div>`;
 }
 
+// Línea de solo lectura que explica qué parte de B&S General viene de una rendición consolidada
+// de Fondo Fijo. Se deriva del control operativo, de modo que editarlo allí ajusta General sin
+// crear una compra ficticia ni duplicar un gasto.
+function fondosFijosEnGeneralHTML(rbd) {
+  const meses = mesesFondosFijosRegistradosEnGeneral(rbd);
+  const total = MESES_CARGA.reduce((s, m) => s + meses[m], 0);
+  if (!total) return '';
+  return `<div class="compras-section" style="margin-top:14px;"><div class="detalle-header"><strong>Fondos Fijos rendidos — B&S General</strong> — <span class="detalle-sub">Solo lectura. Montos registrados desde Fondos Fijos para esta entidad; cada columna corresponde al mes de la rendición. Edita el campo “Registrado en General” en Fondos Fijos.</span></div><div class="detalle-scroll"><table class="detalle-table">${DETALLE_COLGROUP}<thead><tr><th>Origen</th>${MESES_CARGA.map((m, i) => `<th class="num">${escHtml(MESES_CARGA_ABREV[i])}</th>`).join('')}<th class="num">Total</th></tr></thead><tbody><tr class="ff-calculada"><td class="item-label">Rendición Fondo Fijo</td>${MESES_CARGA.map(m => `<td class="num">${meses[m] ? fmtCLP(meses[m]) : '—'}</td>`).join('')}<td class="num item-total"><strong>${fmtCLP(total)}</strong></td></tr></tbody></table></div></div>`;
+}
+
 function buildOtrasFuentesDetalleHTML(rbd, fuenteKey) {
   const of = recomputeOtraFuente(rbd, fuenteKey);
   const fuente = FUENTES_OTRAS_BY_KEY[fuenteKey];
@@ -6543,7 +6573,7 @@ function buildOtrasFuentesDetalleHTML(rbd, fuenteKey) {
           nota: 'Montos mensuales por concepto, sin documento (lo que ya estaba cargado antes del registro de compras). Se suman APARTE de lo documentado: cada ítem se identifica por un concepto libre y sigue el corte "Real hasta".',
           listaConceptosId: ctx.listaConceptosId,
         });
-    })());
+    })()) + (fuenteKey === 'general' ? fondosFijosEnGeneralHTML(rbd) : '');
 
   return `
   <div class="detalle-wrap">
@@ -7312,6 +7342,10 @@ function csvDetalleMensualOtraFuenteLines(fuenteKey, rbd) {
     (of.bys_items || []).forEach(it => push(fila(`B&S - ${it.concepto}`, tipoPorCorte, it)));
     (of.bys_doc_items || []).forEach(it => push(fila(`B&S documentado - ${it.concepto}`, 'Real', it))); // compras por documento (siempre Real); N° DC y demás datos del documento nunca van en este CSV
   }
+  if (fuenteKey === 'general') {
+    const mesesFondos = mesesFondosFijosRegistradosEnGeneral(rbd);
+    if (MESES_CARGA.some(m => mesesFondos[m])) push(fila('B&S Fondos Fijos rendidos', 'Real', { meses: mesesFondos }));
+  }
   const vacios = MESES_CARGA.map(() => '');
   [['real', 'Real'], ['proy', 'Proyectado'], ['total', 'Total (Real+Proyectado)']].forEach(([k, etiqueta]) => {
     const b = of.rp[k];
@@ -7750,6 +7784,7 @@ function partesMensualesOtraFuente(fuenteKey, out, entidadFiltro) {
       (of.bys_items || []).forEach(it => sumar(it.meses, 'bys'));                // sin documento: Real hasta el corte, Proyectado después
       (of.bys_doc_items || []).forEach(it => sumar(it.meses, 'bys', 'real'));    // documentado (compras con concepto): siempre Real
     }
+    if (fuenteKey === 'general') sumar(mesesFondosFijosRegistradosEnGeneral(r.rbd), 'bys', 'real');
   });
   return cortes;
 }
@@ -8065,6 +8100,7 @@ function reporteLineasOtraFuente(fuenteKey, sel) {
       (of.bys_items || []).forEach(it => vzSumar(mapa, { fuenteKey, tipo: 'gasto', grupo: 'bys_concepto', concepto: it.concepto }, it.meses, corte));
       (of.bys_doc_items || []).forEach(it => vzSumar(mapa, { fuenteKey, tipo: 'gasto', grupo: 'bys_doc', concepto: it.concepto }, it.meses, 'real')); // documentado: siempre Real
     }
+    if (fuenteKey === 'general') vzSumar(mapa, { fuenteKey, tipo: 'gasto', grupo: 'fondos_fijos', concepto: 'Fondos Fijos rendidos' }, mesesFondosFijosRegistradosEnGeneral(r.rbd), 'real');
   });
   return Array.from(mapa.values());
 }
