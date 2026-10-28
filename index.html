@@ -2650,7 +2650,8 @@ async function importarControlFondosFijos(file) {
     let omitidos = 0;
     for (let i = 2; i < rows.length; i++) {
       const row = rows[i] || [];
-      if (row[0] === undefined || row[0] === null || String(row[0]).trim() === '') continue;
+      // rowsFromSheet usa defval:0; una fila separadora vacía llega como 0 y no es una entidad omitida.
+      if (row[0] === undefined || row[0] === null || String(row[0]).trim() === '' || Number(row[0]) === 0) continue;
       const rbd = String(Math.trunc(Number(row[0])));
       if (!permitidos.has(rbd)) { omitidos++; continue; }
       const ff = ensureFondoFijo(rbd);
