@@ -861,6 +861,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <button class="tab-btn" data-tab="of-subt31_proyectos" type="button" title="Subtítulo 31 (Proyectos)" role="tab" id="tabbtn-of-subt31_proyectos" aria-controls="tab-of-subt31_proyectos" aria-selected="false" tabindex="-1"><span aria-hidden="true">🧱</span> Subt. 31</button>
       <button class="tab-btn" data-tab="of-recuperacion_llmm" type="button" title="Recuperación Licencias Médicas" role="tab" id="tabbtn-of-recuperacion_llmm" aria-controls="tab-of-recuperacion_llmm" aria-selected="false" tabindex="-1"><span aria-hidden="true">🩺</span> Recup. LLMM</button>
       <button class="tab-btn" data-tab="of-asignacion_familiar" type="button" title="Asignación Familiar" role="tab" id="tabbtn-of-asignacion_familiar" aria-controls="tab-of-asignacion_familiar" aria-selected="false" tabindex="-1"><span aria-hidden="true">👨‍👩‍👧</span> Asig. Familiar</button>
+      <button class="tab-btn" data-tab="of-fondos_fijos" type="button" title="Control operativo de Fondos Fijos" role="tab" id="tabbtn-of-fondos_fijos" aria-controls="tab-of-fondos_fijos" aria-selected="false" tabindex="-1"><span aria-hidden="true">💼</span> Fondos Fijos</button>
       <button class="tab-btn" data-tab="of-figa" type="button" role="tab" id="tabbtn-of-figa" aria-controls="tab-of-figa" aria-selected="false" tabindex="-1"><span aria-hidden="true">🌐</span> FIGA</button>
       <button class="tab-btn" data-tab="of-aporte_educ" type="button" title="Aporte Fiscal Extraordinario Educación" role="tab" id="tabbtn-of-aporte_educ" aria-controls="tab-of-aporte_educ" aria-selected="false" tabindex="-1"><span aria-hidden="true">🏛️</span> Aporte Educ.</button>
       <button class="tab-btn" data-tab="of-aporte_junji" type="button" title="Aporte Fiscal Extraordinario JUNJI" role="tab" id="tabbtn-of-aporte_junji" aria-controls="tab-of-aporte_junji" aria-selected="false" tabindex="-1"><span aria-hidden="true">🍼</span> Aporte JUNJI</button>
@@ -893,6 +894,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <div class="dash-strip" id="dashStrip"></div>
       <h3 class="dash-h3">Por fuente de financiamiento <span style="font-weight:400; color:var(--text-muted); font-size:12px;">— haz clic en una tarjeta para ir a su pestaña</span></h3>
       <div class="dash-cards" id="dashCards"></div>
+      <div id="dashFondosFijos" style="margin-top:12px;"></div>
       <div class="dash-grid2">
         <div class="dash-panel">
           <div class="dash-panel-head">
@@ -1501,6 +1503,21 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <div class="table-controls"><button id="downloadExcelOFBtn-asignacion_familiar" type="button" style="background:#1b8247; border-color:#1b8247;">⬇ Excel</button><button id="importExcelOFBtn-asignacion_familiar" type="button" style="background:#6b46c1; border-color:#6b46c1;">⬆ Importar Excel</button><input type="file" id="importExcelOFInput-asignacion_familiar" accept=".xlsx" style="display:none;"><button id="exportPdfOFBtn-asignacion_familiar" type="button" style="background:#374151; border-color:#374151;">🖨 Exportar PDF</button><button id="downloadCargaOFBtn-asignacion_familiar" type="button" style="background:var(--series-2-btn); border-color:var(--series-2-btn);">⬇ Descargar carga (JSON)</button></div>
       <div class="table-scroll" style="margin-top:12px;"><table class="data-table" id="otrasFuentesTable-asignacion_familiar"><thead><tr><th>RBD / GESPARVU</th><th>Nombre</th><th>Real hasta</th><th class="num">Ingreso Percibido</th><th class="num">Gasto Remuneraciones</th><th class="num">Gasto Total</th><th class="num">Saldo</th><th>Estado (Total)</th><th class="col-acciones">Acciones</th></tr></thead><tbody id="otrasFuentesTbody-asignacion_familiar"></tbody></table></div>
     </div></section>
+  </div>
+
+  <div id="tab-of-fondos_fijos" class="tab-content hidden" role="tabpanel" aria-labelledby="tabbtn-of-fondos_fijos">
+    <section><h2>Fondos Fijos — control operativo</h2><div class="panel">
+      <div class="detalle-empty"><strong>No es una fuente de financiamiento ni genera ingreso.</strong> Controla anticipos, rendiciones y compensación. El gasto aceptado se registra una sola vez en Subvención General; aquí solo se concilia su rendición, registro y compensación SIGFE. Incluye todos los RBD y GESPARVU.</div>
+      <div id="fondosFijosKpis" class="kpi-row" style="margin-top:12px;"></div>
+      <div class="table-scroll" style="margin-top:12px;"><table class="data-table" id="fondosFijosTable"><thead><tr><th>RBD / GESPARVU</th><th>Nombre</th><th class="num">Cupo vigente</th><th class="num">Gasto aceptado</th><th class="num">Registrado en General</th><th class="num">Pendiente General</th><th class="num">Compensado SIGFE</th><th class="num">Pendiente SIGFE</th><th>Estado</th><th class="col-acciones">Acciones</th></tr></thead><tbody id="fondosFijosTbody"></tbody></table></div>
+    </div></section>
+  </div>
+
+  <div id="fondosFijosModal" class="modal-overlay hidden">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="fondosFijosModalTitle" tabindex="-1">
+      <div class="modal-header"><div><h3 id="fondosFijosModalTitle"></h3><div class="modal-subtitle" id="fondosFijosModalSubtitle"></div></div><button id="fondosFijosModalCloseBtn" type="button" class="modal-close" aria-label="Cerrar">✕</button></div>
+      <div class="modal-body" id="fondosFijosModalBody"></div>
+    </div>
   </div>
 
   <div id="tab-of-figa" class="tab-content hidden" role="tabpanel" aria-labelledby="tabbtn-of-figa">
@@ -2516,6 +2533,99 @@ function filasDeUniverso(universo) {
 }
 function filasOtrasFuentes(fuenteKey) {
   return filasDeUniverso(FUENTES_OTRAS_BY_KEY[fuenteKey].universo);
+}
+
+// Fondos Fijos es deliberadamente un control operativo separado: no se incorpora a FUENTES_OTRAS,
+// al saldo consolidado, al déficit ni a los CSV. El gasto aceptado se debe contabilizar una sola vez
+// bajo Subvención General; aquí se conserva la conciliación de la rendición con General y SIGFE.
+function filasFondosFijos() { return filasDeUniverso('rbd_gesparvu'); }
+function mesesFondosFijosVacios() {
+  const meses = {};
+  MESES_CARGA.forEach(m => { meses[m] = { saldo_inicial: 0, rendido: 0, observado: 0, registrado_general: 0, compensado_sigfe: 0, reposicion: 0, folio: '' }; });
+  return meses;
+}
+function ensureFondoFijo(rbd) {
+  if (!CARGA_MANUAL.fondos_fijos_por_rbd) CARGA_MANUAL.fondos_fijos_por_rbd = {};
+  if (!CARGA_MANUAL.fondos_fijos_por_rbd[rbd]) CARGA_MANUAL.fondos_fijos_por_rbd[rbd] = { cupo: 0, meses: mesesFondosFijosVacios() };
+  const ff = CARGA_MANUAL.fondos_fijos_por_rbd[rbd];
+  if (!ff.meses) ff.meses = mesesFondosFijosVacios();
+  MESES_CARGA.forEach(m => { ff.meses[m] = Object.assign({ saldo_inicial: 0, rendido: 0, observado: 0, registrado_general: 0, compensado_sigfe: 0, reposicion: 0, folio: '' }, ff.meses[m] || {}); });
+  return ff;
+}
+function resumenFondoFijo(rbd) {
+  const ff = ensureFondoFijo(rbd);
+  const total = { cupo: num(ff.cupo), rendido: 0, observado: 0, aceptado: 0, registrado: 0, compensado: 0, reposicion: 0, saldoCaja: 0 };
+  MESES_CARGA.forEach(m => {
+    const x = ff.meses[m];
+    const aceptado = Math.max(0, num(x.rendido) - num(x.observado));
+    total.rendido += num(x.rendido); total.observado += num(x.observado); total.aceptado += aceptado;
+    total.registrado += num(x.registrado_general); total.compensado += num(x.compensado_sigfe); total.reposicion += num(x.reposicion);
+    total.saldoCaja = num(x.saldo_inicial) - aceptado + num(x.reposicion);
+  });
+  total.pendienteGeneral = Math.max(0, total.aceptado - total.registrado);
+  total.pendienteSigfe = Math.max(0, total.aceptado - total.compensado);
+  return total;
+}
+function estadoFondoFijo(t) {
+  if (!t.cupo && !t.rendido && !t.aceptado) return { label: 'Sin datos', cls: 'nd' };
+  if (t.observado > 0) return { label: 'Con observaciones', cls: 'mal' };
+  if (t.pendienteGeneral > 0) return { label: 'Pendiente General', cls: 'mal' };
+  if (t.pendienteSigfe > 0) return { label: 'Pendiente SIGFE', cls: 'mal' };
+  return { label: 'Conciliado', cls: 'ok' };
+}
+function tagFondoFijo(t) { const e = estadoFondoFijo(t); return `<span class="c-estado ${e.cls}">${e.label}</span>`; }
+function totalFondosFijos() {
+  const t = { cupo: 0, rendido: 0, observado: 0, aceptado: 0, registrado: 0, compensado: 0, reposicion: 0, saldoCaja: 0, pendienteGeneral: 0, pendienteSigfe: 0 };
+  filasFondosFijos().forEach(r => { const x = resumenFondoFijo(r.rbd); Object.keys(t).forEach(k => t[k] += x[k] || 0); });
+  return t;
+}
+function kpiFondoFijo(label, value, detail, tone) { return `<div class="kpi-card tone-${tone}"><div class="label">${label}</div><div class="value">${fmtCLP(value)}</div><div class="delta">${detail}</div></div>`; }
+function renderFondosFijos() {
+  const tbody = document.getElementById('fondosFijosTbody');
+  if (!tbody) return;
+  const total = totalFondosFijos();
+  document.getElementById('fondosFijosKpis').innerHTML = [
+    kpiFondoFijo('Cupo vigente', total.cupo, 'Referencial; no es ingreso', 'blue'),
+    kpiFondoFijo('Gasto aceptado', total.aceptado, 'Rendido menos observado', 'amber'),
+    kpiFondoFijo('Pendiente en General', total.pendienteGeneral, 'Por registrar una vez en Subv. General', total.pendienteGeneral ? 'red' : 'green'),
+    kpiFondoFijo('Pendiente SIGFE', total.pendienteSigfe, 'Aceptado menos compensado', total.pendienteSigfe ? 'red' : 'green'),
+    kpiFondoFijo('Observado', total.observado, 'No se rinde hasta su regularización', total.observado ? 'red' : 'gray'),
+  ].join('');
+  tbody.innerHTML = filasFondosFijos().map(r => {
+    const t = resumenFondoFijo(r.rbd);
+    return `<tr class="otras-fuentes-row" data-ff-rbd="${escHtml(r.rbd)}"><td>${escHtml(r.rbd)}</td><td><span class="nombre-txt" title="${escHtml(r.nombre)}">${escHtml(r.nombre)}</span></td><td class="num">${fmtCLP(t.cupo)}</td><td class="num">${fmtCLP(t.aceptado)}</td><td class="num">${fmtCLP(t.registrado)}</td><td class="num" style="color:${t.pendienteGeneral ? 'var(--status-critical)' : 'inherit'}">${fmtCLP(t.pendienteGeneral)}</td><td class="num">${fmtCLP(t.compensado)}</td><td class="num" style="color:${t.pendienteSigfe ? 'var(--status-critical)' : 'inherit'}">${fmtCLP(t.pendienteSigfe)}</td><td>${tagFondoFijo(t)}</td><td class="col-acciones"><button type="button" class="row-action-btn" data-ff-abrir="${escHtml(r.rbd)}">Ver / editar</button></td></tr>`;
+  }).join('');
+}
+function renderDashFondosFijos() {
+  const host = document.getElementById('dashFondosFijos'); if (!host) return;
+  const t = totalFondosFijos();
+  host.innerHTML = `<div class="dash-panel"><div class="dash-panel-head"><h3>💼 Fondos Fijos — control operativo</h3><button type="button" class="link-btn" onclick="irAPestana('of-fondos_fijos')">Abrir control</button></div><p class="dash-nota-chart">No participa en el ingreso, gasto, saldo ni déficit consolidados. Gasto aceptado: <strong>${fmtCLP(t.aceptado)}</strong> · Pendiente General: <strong style="color:${t.pendienteGeneral ? 'var(--status-critical)' : 'inherit'}">${fmtCLP(t.pendienteGeneral)}</strong> · Pendiente SIGFE: <strong style="color:${t.pendienteSigfe ? 'var(--status-critical)' : 'inherit'}">${fmtCLP(t.pendienteSigfe)}</strong>.</p></div>`;
+}
+let fondosFijosRbdAbierto = null;
+function filaMesFondoFijo(rbd, mes, ff) {
+  const x = ff.meses[mes], aceptado = Math.max(0, num(x.rendido) - num(x.observado), 0), pendienteGeneral = Math.max(0, aceptado - num(x.registrado_general)), pendienteSigfe = Math.max(0, aceptado - num(x.compensado_sigfe)), saldoFinal = num(x.saldo_inicial) - aceptado + num(x.reposicion);
+  const campo = (key, label, tipo = 'number') => `<label class="compra-field"><span class="compra-field-label">${label}</span><input type="${tipo}" ${tipo === 'number' ? 'min="0" step="1"' : ''} class="ff-input" data-ff-rbd="${rbd}" data-ff-mes="${mes}" data-ff-campo="${key}" value="${escHtml(String(x[key] || ''))}"></label>`;
+  return `<div class="compras-section" style="margin-top:14px;"><div class="detalle-header"><strong>${mes[0] + mes.slice(1).toLowerCase()}</strong> — <span class="detalle-sub">Gasto aceptado <strong>${fmtCLP(aceptado)}</strong> · Pendiente General <strong>${fmtCLP(pendienteGeneral)}</strong> · Pendiente SIGFE <strong>${fmtCLP(pendienteSigfe)}</strong> · Saldo de caja <strong>${fmtCLP(saldoFinal)}</strong></span></div><div class="compra-form-grid">${campo('saldo_inicial', 'Saldo inicial')}${campo('rendido', 'Rendido por director(a)')}${campo('observado', 'Monto observado')}${campo('registrado_general', 'Registrado en General')}${campo('compensado_sigfe', 'Compensado SIGFE')}${campo('reposicion', 'Reposición entregada')}${campo('folio', 'Folio rendición', 'text')}</div></div>`;
+}
+function abrirFondosFijosModal(rbd) {
+  const r = filasFondosFijos().find(x => x.rbd === rbd); if (!r) return;
+  fondosFijosRbdAbierto = rbd;
+  const ff = ensureFondoFijo(rbd), t = resumenFondoFijo(rbd);
+  document.getElementById('fondosFijosModalTitle').textContent = `${otrasFuentesTituloEntidad(r)} — ${r.nombre} · Fondos Fijos`;
+  document.getElementById('fondosFijosModalSubtitle').innerHTML = `Gasto aceptado: <strong>${fmtCLP(t.aceptado)}</strong> · Pendiente General: <strong>${fmtCLP(t.pendienteGeneral)}</strong> · Pendiente SIGFE: <strong>${fmtCLP(t.pendienteSigfe)}</strong>`;
+  document.getElementById('fondosFijosModalBody').innerHTML = `<div class="detalle-empty">Registra montos consolidados de la rendición, sin repetir sus comprobantes menores. El <strong>gasto aceptado</strong> es Rendición menos Observado y se debe cargar una sola vez en Subvención General.</div><div class="compra-form-grid" style="margin-top:12px;"><label class="compra-field"><span class="compra-field-label">Cupo vigente (referencial)</span><input type="number" min="0" step="1" class="ff-input" data-ff-rbd="${rbd}" data-ff-campo="cupo" value="${ff.cupo || ''}"></label></div>${MESES_CARGA.map(m => filaMesFondoFijo(rbd, m, ff)).join('')}`;
+  document.getElementById('fondosFijosModal').classList.remove('hidden'); document.body.style.overflow = 'hidden';
+}
+function cerrarFondosFijosModal() { fondosFijosRbdAbierto = null; document.getElementById('fondosFijosModal').classList.add('hidden'); document.body.style.overflow = ''; }
+function guardarCampoFondoFijo(input) {
+  const rbd = input.dataset.ffRbd, campo = input.dataset.ffCampo, mes = input.dataset.ffMes, ff = ensureFondoFijo(rbd);
+  const valor = campo === 'folio' ? input.value.trim() : Math.max(0, Number(input.value) || 0);
+  if (mes) ff.meses[mes][campo] = valor; else ff[campo] = valor;
+  const r = filasFondosFijos().find(x => x.rbd === rbd);
+  const payload = mes ? { meses: { [mes]: { [campo]: valor } } } : { [campo]: valor };
+  scheduleRbdSave(rbd, { nombre: r ? r.nombre : rbd, fondos_fijos: payload });
+  renderFondosFijos(); renderDashFondosFijos();
+  if (fondosFijosRbdAbierto === rbd) abrirFondosFijosModal(rbd);
 }
 let otrasFuentesSel = FUENTES_OTRAS[0].key;
 let otrasFuentesRbdAbierto = null; // rbd (o "AC") cuyo detalle está abierto en el modal de Otras Fuentes
@@ -5933,6 +6043,14 @@ FUENTES_OTRAS.forEach(f => {
   });
 });
 
+document.getElementById('fondosFijosTable').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-ff-abrir]');
+  if (b) abrirFondosFijosModal(b.dataset.ffAbrir);
+});
+document.getElementById('fondosFijosModalCloseBtn').addEventListener('click', cerrarFondosFijosModal);
+document.getElementById('fondosFijosModal').addEventListener('click', (e) => { if (e.target.id === 'fondosFijosModal') cerrarFondosFijosModal(); });
+document.getElementById('fondosFijosModalBody').addEventListener('change', (e) => { if (e.target.classList.contains('ff-input')) guardarCampoFondoFijo(e.target); });
+
 // Al abrir, el foco entra al modal (botón de cerrar) para que Tab recorra su contenido en vez de la página que queda detrás (U-05 / U-09); al cerrar vuelve a
 // la fila (o a lo que tuviera el foco) de la que se abrió. Las filas se reconstruyen con cada snapshot: el "alterno" las busca por RBD en la tabla de la fuente.
 function abrirOtrasFuentesModal(rbd, origen) {
@@ -7733,6 +7851,7 @@ function renderDashboard() {
   renderDashCierre();
   document.querySelectorAll('.dash-chips button').forEach(b => b.classList.toggle('active', b.dataset.dashVista === dashVista));
   renderDashCards(fuentes);
+  renderDashFondosFijos();
   renderDashComparativo(fuentes);
   renderDashComposicion(fuentes);
   renderDashMensual();
@@ -8310,6 +8429,8 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
       const div = document.getElementById('tab-of-' + f.key);
       if (div) div.classList.toggle('hidden', tab !== 'of-' + f.key);
     });
+    const fondosFijosTab = document.getElementById('tab-of-fondos_fijos');
+    if (fondosFijosTab) fondosFijosTab.classList.toggle('hidden', tab !== 'of-fondos_fijos');
     if (tab === 'ejecucion') renderEjecucion();
     if (tab === 'dashboard') renderDashboard();
     if (tab === 'reportes') {
@@ -8326,6 +8447,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
       otrasFuentesSel = fuenteDelTab.key;
       renderOtrasFuentesTable(fuenteDelTab.key);
     }
+    if (tab === 'of-fondos_fijos') renderFondosFijos();
   });
 });
 
@@ -10316,6 +10438,7 @@ function aplicarSnapshot(snapshot) {
   const nuevoAgregado = {}, nuevoIngreso = {}, nuevoRem = {}, nuevoCompras = {}, nuevoBysProyeccion = {};
   const nuevoHonorarios = {}, nuevoHonAgregado = {}, nuevoHonProyeccion = {};
   const nuevoOtrasFuentes = {};
+  const nuevoFondosFijos = {};
   const presentIds = new Set();
   const docsInvalidos = [];
   let latestAt = null, latestEmail = null;
@@ -10468,6 +10591,16 @@ function aplicarSnapshot(snapshot) {
       });
       nuevoOtrasFuentes[rbd] = of;
 
+      // Fondos Fijos se lee aparte de otras_fuentes porque no participa del consolidado financiero.
+      const ffRaw = objetoPlano(data.fondos_fijos);
+      const ffMeses = mesesFondosFijosVacios();
+      Object.keys(ffMeses).forEach(m => {
+        const x = objetoPlano(objetoPlano(ffRaw.meses)[m]);
+        ['saldo_inicial', 'rendido', 'observado', 'registrado_general', 'compensado_sigfe', 'reposicion'].forEach(c => { ffMeses[m][c] = Math.max(0, num(x[c])); });
+        ffMeses[m].folio = textoSeguro(x.folio);
+      });
+      nuevoFondosFijos[rbd] = { cupo: Math.max(0, num(ffRaw.cupo)), meses: ffMeses };
+
       if (data.lastModifiedAt) {
         const t = data.lastModifiedAt.toDate ? data.lastModifiedAt.toDate() : new Date(data.lastModifiedAt);
         if (!isNaN(t.getTime())) {
@@ -10479,7 +10612,7 @@ function aplicarSnapshot(snapshot) {
       console.error('Documento con datos inválidos en Firestore, se omite:', rbd, err);
       docsInvalidos.push(rbd);
       // Descarta lo que alcanzó a armarse de este documento (nada a medias).
-      [nuevoAgregado, nuevoIngreso, nuevoRem, nuevoCompras, nuevoBysProyeccion, nuevoHonorarios, nuevoHonAgregado, nuevoHonProyeccion, nuevoOtrasFuentes].forEach(o => { delete o[rbd]; });
+      [nuevoAgregado, nuevoIngreso, nuevoRem, nuevoCompras, nuevoBysProyeccion, nuevoHonorarios, nuevoHonAgregado, nuevoHonProyeccion, nuevoOtrasFuentes, nuevoFondosFijos].forEach(o => { delete o[rbd]; });
     }
   });
 
@@ -10492,6 +10625,7 @@ function aplicarSnapshot(snapshot) {
   CARGA_MANUAL.hon_agregado_por_rbd = nuevoHonAgregado;
   CARGA_MANUAL.hon_proyeccion_por_rbd = nuevoHonProyeccion;
   CARGA_MANUAL.otras_fuentes_por_rbd = nuevoOtrasFuentes;
+  CARGA_MANUAL.fondos_fijos_por_rbd = nuevoFondosFijos;
   aplicarMetaCierre(superponerEdicionesSinConfirmar(META_DOC_ID, metaData)); // antes de recalcular: el mes de cierre mueve el default de los ingresos
 
   DATA.registros.forEach(recomputeRegistro);
@@ -10503,6 +10637,7 @@ function aplicarSnapshot(snapshot) {
   renderReportFilters();
   renderTable();
   renderOtrasFuentesTable();
+  renderFondosFijos();
   if (otrasFuentesRbdAbierto) renderOtrasFuentesModalContenido(); // el modal de una fuente refleja cambios y borrados remotos (SEP: renderTable → renderModalContenido)
   renderDashboard();
   if (!document.getElementById('tab-reportes').classList.contains('hidden')) renderVisualizador();
