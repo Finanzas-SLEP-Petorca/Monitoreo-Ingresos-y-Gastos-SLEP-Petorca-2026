@@ -2390,8 +2390,8 @@ const ITEMS_29 = CUENTAS_SEP_29.map(c => c.nombre);
 // revisado) y los dos Aportes Fiscales Extraordinarios (ingresos aparte, no rendibles por el libro
 // de compras SUPEREDUC; se llevan separados por Educación y por JUNJI).
 const FUENTES_OTRAS = [
-  { key: 'general', label: 'Subvención General', incomeShape: 'single', bysMode: 'compras', universo: 'rbd_ac', codigoSupereduc: 'GENERAL', colPlan: 'general', colPlanAC: 'adm_central_general' },
-  { key: 'pie', label: 'PIE', incomeShape: 'single', bysMode: 'compras', universo: 'rbd_ac', codigoSupereduc: 'PIE', colPlan: 'pie' },
+  { key: 'general', label: 'Subvención General', incomeShape: 'carrera2', bysMode: 'compras', universo: 'rbd_ac', codigoSupereduc: 'GENERAL', colPlan: 'general', colPlanAC: 'adm_central_general' },
+  { key: 'pie', label: 'PIE', incomeShape: 'carrera2', bysMode: 'compras', universo: 'rbd_ac', codigoSupereduc: 'PIE', colPlan: 'pie' },
   { key: 'mantenimiento', label: 'Subv. Mantención', incomeShape: 'single', bysMode: 'compras', universo: 'rbd_ac', codigoSupereduc: 'MANTENIMIENTO', colPlan: 'mantenimiento' },
   { key: 'prorretencion', label: 'Subv. Pro-Retención', incomeShape: 'single', bysMode: 'compras', universo: 'rbd_ac', codigoSupereduc: 'PRORETENCION', colPlan: 'proretencion' },
   { key: 'junji', label: 'JUNJI', incomeShape: 'junji3', bysMode: 'concepto', universo: 'gesparvu', codigoSupereduc: null },
@@ -2402,6 +2402,10 @@ const FUENTES_OTRAS = [
 ];
 const FUENTES_OTRAS_BY_KEY = {};
 FUENTES_OTRAS.forEach(f => { FUENTES_OTRAS_BY_KEY[f.key] = f; });
+function lineasIngresoOtraFuente(fuente, of) {
+  if (fuente && fuente.incomeShape === 'junji3') return [of.ingreso_operacion, of.ingreso_homologacion, of.ingreso_carrera_docente, of.ingreso_bdl];
+  return fuente && fuente.incomeShape === 'carrera2' ? [of.ingreso, of.ingreso_carrera_docente] : [of.ingreso];
+}
 // ¿El registro de compras de la fuente lleva CONCEPTO (texto libre) en vez de Código de cuenta? Son las fuentes bysMode:'concepto' (JUNJI, FAEP, FIGA y los dos
 // Aportes Fiscales). Su mapa `compras` tiene la misma forma que el de las demás (tipo, N°, fechas, proveedor, montos, N° DC, Doc. original) con `concepto` en lugar de `codigo`.
 function comprasPorConcepto(fuenteKey) {
@@ -3476,6 +3480,7 @@ function ensureOtraFuente(rbd, fuenteKey) {
       entry.saldo_operacion_bys = 0;
     } else {
       entry.ingreso = { meses: mesesEnCero(), total: 0 };
+      if (fuente.incomeShape === 'carrera2') entry.ingreso_carrera_docente = { meses: mesesEnCero(), total: 0 };
     }
     // bysMode:'compras': las compras son siempre Real; la proyección de B&S vive aparte en
     // bys_proy_items (por concepto libre, siempre Proyectada).
@@ -3486,7 +3491,10 @@ function ensureOtraFuente(rbd, fuenteKey) {
     computeRealProyOtraFuente(entry, fuenteKey);
     CARGA_MANUAL.otras_fuentes_por_rbd[rbd][fuenteKey] = entry;
   }
-  return CARGA_MANUAL.otras_fuentes_por_rbd[rbd][fuenteKey];
+  const resultado = CARGA_MANUAL.otras_fuentes_por_rbd[rbd][fuenteKey];
+  const fuente = FUENTES_OTRAS_BY_KEY[fuenteKey] || {};
+  if (fuente.incomeShape === 'carrera2' && !resultado.ingreso_carrera_docente) resultado.ingreso_carrera_docente = { meses: mesesEnCero(), total: 0 };
+  return resultado;
 }
 // Bienes y Servicios de las fuentes bysMode:'compras' (Real) = la suma de las compras cargadas
 // (mismo criterio de itemsFromCompras, agrupando por código de cuenta y mes de Fecha Documento).
@@ -3540,9 +3548,7 @@ function bloqueRealProy(ingreso, rem, bys, hon) {
 function computeRealProyOtraFuente(of, fuenteKey) {
   const fuente = FUENTES_OTRAS_BY_KEY[fuenteKey] || {};
   const corte = realHastaMesOtraFuente(of);
-  const lineasIngreso = fuente.incomeShape === 'junji3'
-    ? [of.ingreso_operacion, of.ingreso_homologacion, of.ingreso_carrera_docente, of.ingreso_bdl]
-    : [of.ingreso];
+  const lineasIngreso = lineasIngresoOtraFuente(fuente, of);
   let ingReal = 0, ingProy = 0;
   lineasIngreso.forEach(l => { const s = splitRealProyMeses(l && l.meses, corte); ingReal += s.real; ingProy += s.proy; });
   const rem = splitRealProyMeses(of.gasto_rem && of.gasto_rem.meses, corte);
@@ -4364,7 +4370,8 @@ function buildDetalleHTML(rbd, printMode) {
         const v = it ? (it.meses[m] || 0) : 0;
         return celdaInputHTML(rbd, 'ingreso_item', m, v, `data-item="${escHtml(itemName)}"`, printMode, itemName);
       }).join('');
-      return `<tr><td class="item-label">${itemName}</td>${cells}<td class="num item-total" id="ingresoitemtotal-${rbd}-${idx}">${fmtCLP(total)}</td></tr>`;
+      const etiqueta = itemName === 'Carrera Docente' ? 'Ingreso Carrera Docente SEP' : itemName;
+      return `<tr><td class="item-label">${etiqueta}</td>${cells}<td class="num item-total" id="ingresoitemtotal-${rbd}-${idx}">${fmtCLP(total)}</td></tr>`;
     }).join('');
     // Corte propio de ingresos de ESTE RBD (misma apariencia y lugar que "Remuneraciones reales hasta"). Si el RBD no tiene corte propio el
     // selector muestra el efectivo (mes de cierre global o DATA.n_meses) y una nota lo dice. En el PDF (printMode) va como texto simple.
@@ -6248,6 +6255,7 @@ function buildOtrasFuentesDetalleHTML(rbd, fuenteKey) {
     headerHTML = `<strong>Detalle por mes — Ingreso y Remuneraciones (${fuenteLabel})</strong> — <span class="detalle-sub">${bysSubtitle}</span>`;
     tablasMesesHTML = `
     ${otrasFuentesTablaMes(`Ingreso (${fuenteLabel})`, rbd, fuenteKey, 'of_ingreso', of.ingreso, `oftotal-${rbd}-${fuenteKey}-of_ingreso`)}
+    ${fuente.incomeShape === 'carrera2' ? otrasFuentesTablaMes(`Ingreso Carrera Docente ${fuenteKey === 'general' ? 'General' : 'PIE'}`, rbd, fuenteKey, 'of_ingreso_carrera_docente', of.ingreso_carrera_docente || { meses: mesesEnCero(), total: 0 }, `oftotal-${rbd}-${fuenteKey}-of_ingreso_carrera_docente`) : ''}
     ${otrasFuentesTablaMes(`Gasto Remuneraciones (${fuenteLabel})`, rbd, fuenteKey, 'of_gasto_rem', of.gasto_rem, `oftotal-${rbd}-${fuenteKey}-of_gasto_rem`)}`;
   }
 
@@ -6764,6 +6772,7 @@ function buildOtraFuenteCargaWorkbook(fuenteKey, onlyRbd) {
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso_bdl', onlyRbd)), 'ING_BDL');
   } else {
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso', onlyRbd)), 'INGRESO');
+    if (fuente.incomeShape === 'carrera2') XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso_carrera_docente', onlyRbd)), 'ING_CARRERA_DOCENTE');
   }
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'gasto_rem', onlyRbd)), 'REMUNERACIONES');
   if (fuente.bysMode === 'compras') {
@@ -6942,6 +6951,7 @@ function importOtraFuenteWorkbook(wbIn, fuenteKey) {
     if (wbIn.Sheets['ING_BDL']) resumen.push('ING_BDL: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_BDL'], fuenteKey, 'ingreso_bdl') + ' filas'); // un Excel anterior al BDL no trae la hoja: se importa igual y no toca el BDL guardado
   } else {
     if (wbIn.Sheets['INGRESO']) resumen.push('INGRESO: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['INGRESO'], fuenteKey, 'ingreso') + ' filas');
+    if (fuente.incomeShape === 'carrera2' && wbIn.Sheets['ING_CARRERA_DOCENTE']) resumen.push('ING_CARRERA_DOCENTE: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_CARRERA_DOCENTE'], fuenteKey, 'ingreso_carrera_docente') + ' filas');
   }
   if (wbIn.Sheets['REMUNERACIONES']) resumen.push('REMUNERACIONES: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['REMUNERACIONES'], fuenteKey, 'gasto_rem') + ' filas');
   if (fuente.bysMode === 'compras') {
@@ -7437,7 +7447,7 @@ function partesMensualesOtraFuente(fuenteKey, out, entidadFiltro) {
       const k = siempre || (i + 1 <= corte ? 'real' : 'proy');
       out[k][tipo][i] += v;
     });
-    const lineasIng = fuente.incomeShape === 'junji3' ? [of.ingreso_operacion, of.ingreso_homologacion, of.ingreso_carrera_docente, of.ingreso_bdl] : [of.ingreso];
+    const lineasIng = lineasIngresoOtraFuente(fuente, of);
     lineasIng.forEach(l => sumar(l && l.meses, 'ing'));
     sumar(of.gasto_rem && of.gasto_rem.meses, 'rem');
     if (fuente.bysMode === 'compras') {
@@ -10325,6 +10335,10 @@ function aplicarSnapshot(snapshot) {
         } else {
           const mIngreso = mesesDesde(raw, 'ingreso');
           entry.ingreso = { meses: mIngreso, total: totalDeMeses(mIngreso) };
+          if (f.incomeShape === 'carrera2') {
+            const mCarreraDocente = mesesDesde(raw, 'ingreso_carrera_docente');
+            entry.ingreso_carrera_docente = { meses: mCarreraDocente, total: totalDeMeses(mCarreraDocente) };
+          }
         }
         const mRem = mesesDesde(raw, 'gasto_rem');
         entry.gasto_rem = { meses: mRem, total: totalDeMeses(mRem) };
