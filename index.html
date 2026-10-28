@@ -858,6 +858,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <button class="tab-btn" data-tab="of-prorretencion" type="button" role="tab" id="tabbtn-of-prorretencion" aria-controls="tab-of-prorretencion" aria-selected="false" tabindex="-1"><span aria-hidden="true">📌</span> Pro-Retención</button>
       <button class="tab-btn" data-tab="of-junji" type="button" role="tab" id="tabbtn-of-junji" aria-controls="tab-of-junji" aria-selected="false" tabindex="-1"><span aria-hidden="true">🧸</span> JUNJI</button>
       <button class="tab-btn" data-tab="of-faep" type="button" role="tab" id="tabbtn-of-faep" aria-controls="tab-of-faep" aria-selected="false" tabindex="-1"><span aria-hidden="true">🏗️</span> FAEP</button>
+      <button class="tab-btn" data-tab="of-subt31_proyectos" type="button" title="Subtítulo 31 (Proyectos)" role="tab" id="tabbtn-of-subt31_proyectos" aria-controls="tab-of-subt31_proyectos" aria-selected="false" tabindex="-1"><span aria-hidden="true">🧱</span> Subt. 31</button>
+      <button class="tab-btn" data-tab="of-recuperacion_llmm" type="button" title="Recuperación Licencias Médicas" role="tab" id="tabbtn-of-recuperacion_llmm" aria-controls="tab-of-recuperacion_llmm" aria-selected="false" tabindex="-1"><span aria-hidden="true">🩺</span> Recup. LLMM</button>
       <button class="tab-btn" data-tab="of-figa" type="button" role="tab" id="tabbtn-of-figa" aria-controls="tab-of-figa" aria-selected="false" tabindex="-1"><span aria-hidden="true">🌐</span> FIGA</button>
       <button class="tab-btn" data-tab="of-aporte_educ" type="button" title="Aporte Fiscal Extraordinario Educación" role="tab" id="tabbtn-of-aporte_educ" aria-controls="tab-of-aporte_educ" aria-selected="false" tabindex="-1"><span aria-hidden="true">🏛️</span> Aporte Educ.</button>
       <button class="tab-btn" data-tab="of-aporte_junji" type="button" title="Aporte Fiscal Extraordinario JUNJI" role="tab" id="tabbtn-of-aporte_junji" aria-controls="tab-of-aporte_junji" aria-selected="false" tabindex="-1"><span aria-hidden="true">🍼</span> Aporte JUNJI</button>
@@ -1475,6 +1477,22 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     </section>
   </div>
   <!-- /#tab-of-faep -->
+
+  <div id="tab-of-subt31_proyectos" class="tab-content hidden" role="tabpanel" aria-labelledby="tabbtn-of-subt31_proyectos">
+    <section><h2>Subtítulo 31 (Proyectos)</h2><div class="panel">
+      <div class="detalle-empty">Seguimiento de proyectos por Ingreso vs. Gasto, sin meta 70/30. Incluye establecimientos, Administración Central (AC) y los GESPARVU de jardines infantiles, igual que FAEP.</div>
+      <div class="table-controls"><button id="downloadExcelOFBtn-subt31_proyectos" type="button" style="background:#1b8247; border-color:#1b8247;">⬇ Excel</button><button id="importExcelOFBtn-subt31_proyectos" type="button" style="background:#6b46c1; border-color:#6b46c1;">⬆ Importar Excel</button><input type="file" id="importExcelOFInput-subt31_proyectos" accept=".xlsx" style="display:none;"><button id="exportPdfOFBtn-subt31_proyectos" type="button" style="background:#374151; border-color:#374151;">🖨 Exportar PDF</button><button id="downloadCargaOFBtn-subt31_proyectos" type="button" style="background:var(--series-2-btn); border-color:var(--series-2-btn);">⬇ Descargar carga (JSON)</button></div>
+      <div class="table-scroll" style="margin-top:12px;"><table class="data-table" id="otrasFuentesTable-subt31_proyectos"><thead><tr><th>RBD / GESPARVU</th><th>Nombre</th><th>Real hasta</th><th class="num">Ingreso</th><th class="num">Gasto Remuneraciones</th><th class="num">Gasto Bienes y Servicios</th><th class="num">Gasto Total</th><th class="num">Saldo</th><th>Estado (Total)</th><th class="col-acciones">Acciones</th></tr></thead><tbody id="otrasFuentesTbody-subt31_proyectos"></tbody></table></div>
+    </div></section>
+  </div>
+
+  <div id="tab-of-recuperacion_llmm" class="tab-content hidden" role="tabpanel" aria-labelledby="tabbtn-of-recuperacion_llmm">
+    <section><h2>Recuperación Licencias Médicas</h2><div class="panel">
+      <div class="detalle-empty">Fuente exclusivamente de ingresos: Recuperación LLMM Isapres, Recuperación LLMM FONASA y Recuperación LLMM SIL. No registra gastos asociados.</div>
+      <div class="table-controls"><button id="downloadExcelOFBtn-recuperacion_llmm" type="button" style="background:#1b8247; border-color:#1b8247;">⬇ Excel</button><button id="importExcelOFBtn-recuperacion_llmm" type="button" style="background:#6b46c1; border-color:#6b46c1;">⬆ Importar Excel</button><input type="file" id="importExcelOFInput-recuperacion_llmm" accept=".xlsx" style="display:none;"><button id="exportPdfOFBtn-recuperacion_llmm" type="button" style="background:#374151; border-color:#374151;">🖨 Exportar PDF</button><button id="downloadCargaOFBtn-recuperacion_llmm" type="button" style="background:var(--series-2-btn); border-color:var(--series-2-btn);">⬇ Descargar carga (JSON)</button></div>
+      <div class="table-scroll" style="margin-top:12px;"><table class="data-table" id="otrasFuentesTable-recuperacion_llmm"><thead><tr><th>RBD / GESPARVU</th><th>Nombre</th><th>Real hasta</th><th class="num">Ingreso</th><th class="num">Saldo</th><th>Estado (Total)</th><th class="col-acciones">Acciones</th></tr></thead><tbody id="otrasFuentesTbody-recuperacion_llmm"></tbody></table></div>
+    </div></section>
+  </div>
 
   <div id="tab-of-figa" class="tab-content hidden" role="tabpanel" aria-labelledby="tabbtn-of-figa">
     <section>
@@ -2396,6 +2414,8 @@ const FUENTES_OTRAS = [
   { key: 'prorretencion', label: 'Subv. Pro-Retención', incomeShape: 'single', bysMode: 'compras', universo: 'rbd_ac', codigoSupereduc: 'PRORETENCION', colPlan: 'proretencion' },
   { key: 'junji', label: 'JUNJI', incomeShape: 'junji3', bysMode: 'concepto', universo: 'gesparvu', codigoSupereduc: null },
   { key: 'faep', label: 'FAEP', incomeShape: 'single', bysMode: 'concepto', universo: 'rbd_ac_gesparvu', codigoSupereduc: null },
+  { key: 'subt31_proyectos', label: 'Subtítulo 31 (Proyectos)', incomeShape: 'single', bysMode: 'concepto', universo: 'rbd_ac_gesparvu', codigoSupereduc: null },
+  { key: 'recuperacion_llmm', label: 'Recuperación Licencias Médicas', incomeShape: 'llmm3', bysMode: 'none', universo: 'rbd_ac_gesparvu', codigoSupereduc: null, sinGasto: true },
   { key: 'figa', label: 'FIGA', incomeShape: 'single', bysMode: 'concepto', universo: 'rbd_ac_gesparvu', codigoSupereduc: null },
   { key: 'aporte_educ', label: 'Aporte Fiscal Extraord. Educación', incomeShape: 'single', bysMode: 'concepto', universo: 'rbd_ac', codigoSupereduc: null },
   { key: 'aporte_junji', label: 'Aporte Fiscal Extraord. JUNJI', incomeShape: 'single', bysMode: 'concepto', universo: 'gesparvu', codigoSupereduc: null },
@@ -2404,6 +2424,7 @@ const FUENTES_OTRAS_BY_KEY = {};
 FUENTES_OTRAS.forEach(f => { FUENTES_OTRAS_BY_KEY[f.key] = f; });
 function lineasIngresoOtraFuente(fuente, of) {
   if (fuente && fuente.incomeShape === 'junji3') return [of.ingreso_operacion, of.ingreso_homologacion, of.ingreso_carrera_docente, of.ingreso_bdl];
+  if (fuente && fuente.incomeShape === 'llmm3') return [of.ingreso_llmm_isapres, of.ingreso_llmm_fonasa, of.ingreso_llmm_sil];
   return fuente && fuente.incomeShape === 'carrera2' ? [of.ingreso, of.ingreso_carrera_docente] : [of.ingreso];
 }
 // ¿El registro de compras de la fuente lleva CONCEPTO (texto libre) en vez de Código de cuenta? Son las fuentes bysMode:'concepto' (JUNJI, FAEP, FIGA y los dos
@@ -3478,6 +3499,10 @@ function ensureOtraFuente(rbd, fuenteKey) {
       entry.ingreso_carrera_docente = { meses: mesesEnCero(), total: 0 };
       entry.ingreso_bdl = { meses: mesesEnCero(), total: 0 };
       entry.saldo_operacion_bys = 0;
+    } else if (fuente.incomeShape === 'llmm3') {
+      entry.ingreso_llmm_isapres = { meses: mesesEnCero(), total: 0 };
+      entry.ingreso_llmm_fonasa = { meses: mesesEnCero(), total: 0 };
+      entry.ingreso_llmm_sil = { meses: mesesEnCero(), total: 0 };
     } else {
       entry.ingreso = { meses: mesesEnCero(), total: 0 };
       if (fuente.incomeShape === 'carrera2') entry.ingreso_carrera_docente = { meses: mesesEnCero(), total: 0 };
@@ -3494,6 +3519,11 @@ function ensureOtraFuente(rbd, fuenteKey) {
   const resultado = CARGA_MANUAL.otras_fuentes_por_rbd[rbd][fuenteKey];
   const fuente = FUENTES_OTRAS_BY_KEY[fuenteKey] || {};
   if (fuente.incomeShape === 'carrera2' && !resultado.ingreso_carrera_docente) resultado.ingreso_carrera_docente = { meses: mesesEnCero(), total: 0 };
+  if (fuente.incomeShape === 'llmm3') {
+    ['ingreso_llmm_isapres', 'ingreso_llmm_fonasa', 'ingreso_llmm_sil'].forEach(campo => {
+      if (!resultado[campo]) resultado[campo] = { meses: mesesEnCero(), total: 0 };
+    });
+  }
   return resultado;
 }
 // Bienes y Servicios de las fuentes bysMode:'compras' (Real) = la suma de las compras cargadas
@@ -5717,6 +5747,11 @@ function kpiCardsOtraFuente(fuenteKey, tipo, b, t) {
   const saldoTxt = tipo === 'total'
     ? `Ingreso − Gasto · ${t.nDeficit} de ${t.nEntidades} entidades en déficit`
     : `Ingreso ${suf} − Gasto ${suf}`;
+  if (fuente.sinGasto) return [
+    { label: `Ingreso (${suf})`, value: fmtCLP(b.ingreso), full: corteTxt, tone: 'blue' },
+    { label: `Sin gastos asociados (${suf})`, value: fmtCLP(0), full: 'Fuente exclusivamente de ingresos', tone: 'green' },
+    { label: `Saldo (${suf})`, value: fmtCLP(b.saldo), full: 'Corresponde al ingreso recuperado', tone: 'green' },
+  ];
   return [
     { label: `Ingreso (${suf})`, value: fmtCLP(b.ingreso), full: corteTxt, tone: 'blue' },
     { label: `Gasto Remuneraciones (${suf})`, value: fmtCLP(b.rem), full: corteTxt, tone: 'amber' },
@@ -5775,6 +5810,7 @@ function bysSplitCeldaHTML(b) {
 // pinta la tabla de la fuente pedida, no las 9 de una vez, para no recalcular lo que no se ve.
 function renderOtrasFuentesTable(fuenteKey) {
   const key = fuenteKey || otrasFuentesSel;
+  const fuente = FUENTES_OTRAS_BY_KEY[key];
   const tbody = document.getElementById('otrasFuentesTbody-' + key);
   if (!tbody) return;
   const vista = otrasFuentesVista;
@@ -5787,9 +5823,7 @@ function renderOtrasFuentesTable(fuenteKey) {
       <td class="rbd-clickable" data-abrir-otra-fuente="${escHtml(r.rbd)}"><span class="nombre-txt" title="${escHtml(r.nombre)}">${escHtml(r.nombre)}</span></td>
       <td class="of-real-hasta">${corteTxt}</td>
       <td class="num">${fmtCLP(b.ingreso)}</td>
-      <td class="num">${fmtCLP(b.rem)}</td>
-      <td class="num">${fmtCLP(b.bys)}${bysSplitCeldaHTML(b)}</td>
-      <td class="num">${fmtCLP(b.gasto)}</td>
+      ${fuente.sinGasto ? '' : `<td class="num">${fmtCLP(b.rem)}</td><td class="num">${fmtCLP(b.bys)}${bysSplitCeldaHTML(b)}</td><td class="num">${fmtCLP(b.gasto)}</td>`}
       <td class="num" style="color:${b.saldo < 0 ? 'var(--status-critical)' : 'var(--text-primary)'}">${fmtCLP(b.saldo)}</td>
       <td>${otrasFuentesEstadoTagHTML(of, key)}${otrasFuentesEstadoCausaHTML(of, key)}</td>
       <td class="col-acciones">${otrasFuentesAccionesHTML(key, r.rbd)}</td>
@@ -6248,6 +6282,12 @@ function buildOtrasFuentesDetalleHTML(rbd, fuenteKey) {
     ${otrasFuentesTablaMes('Ingreso Carrera Docente', rbd, fuenteKey, 'of_ingreso_carrera_docente', of.ingreso_carrera_docente, `oftotal-${rbd}-${fuenteKey}-of_ingreso_carrera_docente`)}
     ${otrasFuentesTablaMes('Ingreso Bono Desempeño Laboral (BDL)', rbd, fuenteKey, 'of_ingreso_bdl', of.ingreso_bdl, `oftotal-${rbd}-${fuenteKey}-of_ingreso_bdl`)}
     ${otrasFuentesTablaMes('Gasto Remuneraciones', rbd, fuenteKey, 'of_gasto_rem', of.gasto_rem, `oftotal-${rbd}-${fuenteKey}-of_gasto_rem`)}`;
+  } else if (fuente.incomeShape === 'llmm3') {
+    headerHTML = `<strong>Detalle por mes — Recuperación de Licencias Médicas</strong> — <span class="detalle-sub">Esta fuente registra exclusivamente ingresos; no tiene gastos asociados.</span>`;
+    tablasMesesHTML = `
+    ${otrasFuentesTablaMes('Recuperación LLMM Isapres', rbd, fuenteKey, 'of_ingreso_llmm_isapres', of.ingreso_llmm_isapres, `oftotal-${rbd}-${fuenteKey}-of_ingreso_llmm_isapres`)}
+    ${otrasFuentesTablaMes('Recuperación LLMM FONASA', rbd, fuenteKey, 'of_ingreso_llmm_fonasa', of.ingreso_llmm_fonasa, `oftotal-${rbd}-${fuenteKey}-of_ingreso_llmm_fonasa`)}
+    ${otrasFuentesTablaMes('Recuperación LLMM SIL', rbd, fuenteKey, 'of_ingreso_llmm_sil', of.ingreso_llmm_sil, `oftotal-${rbd}-${fuenteKey}-of_ingreso_llmm_sil`)}`;
   } else {
     const bysSubtitle = compras
       ? 'Bienes y Servicios se carga como "Registro de compras" más abajo; su total mensual se calcula solo.'
@@ -6259,7 +6299,7 @@ function buildOtrasFuentesDetalleHTML(rbd, fuenteKey) {
     ${otrasFuentesTablaMes(`Gasto Remuneraciones (${fuenteLabel})`, rbd, fuenteKey, 'of_gasto_rem', of.gasto_rem, `oftotal-${rbd}-${fuenteKey}-of_gasto_rem`)}`;
   }
 
-  const bysHTML = compras
+  const bysHTML = fuente.sinGasto ? '' : (compras
     ? comprasSectionOtraFuenteHTML(rbd, fuenteKey, of, fuenteLabel) + bysConceptoSectionHTML(rbd, fuenteKey, of, false, {
         lista: 'bys_proy_items', modo: 'of_bys_proy_item', forzarProy: true,
         titulo: 'Proyección Bienes y Servicios (por concepto)',
@@ -6277,7 +6317,7 @@ function buildOtrasFuentesDetalleHTML(rbd, fuenteKey) {
           nota: 'Montos mensuales por concepto, sin documento (lo que ya estaba cargado antes del registro de compras). Se suman APARTE de lo documentado: cada ítem se identifica por un concepto libre y sigue el corte "Real hasta".',
           listaConceptosId: ctx.listaConceptosId,
         });
-    })();
+    })());
 
   return `
   <div class="detalle-wrap">
@@ -6351,6 +6391,9 @@ const OTRA_FUENTE_MODO_CAMPO = {
   of_ingreso_homologacion: 'ingreso_homologacion',
   of_ingreso_carrera_docente: 'ingreso_carrera_docente',
   of_ingreso_bdl: 'ingreso_bdl',
+  of_ingreso_llmm_isapres: 'ingreso_llmm_isapres',
+  of_ingreso_llmm_fonasa: 'ingreso_llmm_fonasa',
+  of_ingreso_llmm_sil: 'ingreso_llmm_sil',
 };
 function onOtraFuenteCeldaInput(input) {
   const rbd = input.dataset.rbd, fuenteKey = input.dataset.fuente, mes = input.dataset.mes, modo = input.dataset.modo;
@@ -6770,11 +6813,19 @@ function buildOtraFuenteCargaWorkbook(fuenteKey, onlyRbd) {
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso_homologacion', onlyRbd)), 'ING_HOMOLOGACION');
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso_carrera_docente', onlyRbd)), 'ING_CARRERA_DOCENTE');
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso_bdl', onlyRbd)), 'ING_BDL');
+  } else if (fuente.incomeShape === 'llmm3') {
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso_llmm_isapres', onlyRbd)), 'ING_LLMM_ISAPRES');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso_llmm_fonasa', onlyRbd)), 'ING_LLMM_FONASA');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso_llmm_sil', onlyRbd)), 'ING_LLMM_SIL');
   } else {
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso', onlyRbd)), 'INGRESO');
     if (fuente.incomeShape === 'carrera2') XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso_carrera_docente', onlyRbd)), 'ING_CARRERA_DOCENTE');
   }
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'gasto_rem', onlyRbd)), 'REMUNERACIONES');
+  if (!fuente.sinGasto) XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'gasto_rem', onlyRbd)), 'REMUNERACIONES');
+  if (fuente.sinGasto) {
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetMetaAOA(fuenteKey, onlyRbd)), 'META');
+    return wb;
+  }
   if (fuente.bysMode === 'compras') {
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteComprasAOA(fuenteKey, onlyRbd)), 'COMPRAS');
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetBysItemsAOA(fuenteKey, 'bys_proy_items', onlyRbd)), 'BYS_PROY_ITEMS');
@@ -6949,11 +7000,16 @@ function importOtraFuenteWorkbook(wbIn, fuenteKey) {
     if (wbIn.Sheets['ING_HOMOLOGACION']) resumen.push('ING_HOMOLOGACION: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_HOMOLOGACION'], fuenteKey, 'ingreso_homologacion') + ' filas');
     if (wbIn.Sheets['ING_CARRERA_DOCENTE']) resumen.push('ING_CARRERA_DOCENTE: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_CARRERA_DOCENTE'], fuenteKey, 'ingreso_carrera_docente') + ' filas');
     if (wbIn.Sheets['ING_BDL']) resumen.push('ING_BDL: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_BDL'], fuenteKey, 'ingreso_bdl') + ' filas'); // un Excel anterior al BDL no trae la hoja: se importa igual y no toca el BDL guardado
+  } else if (fuente.incomeShape === 'llmm3') {
+    if (wbIn.Sheets['ING_LLMM_ISAPRES']) resumen.push('ING_LLMM_ISAPRES: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_LLMM_ISAPRES'], fuenteKey, 'ingreso_llmm_isapres') + ' filas');
+    if (wbIn.Sheets['ING_LLMM_FONASA']) resumen.push('ING_LLMM_FONASA: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_LLMM_FONASA'], fuenteKey, 'ingreso_llmm_fonasa') + ' filas');
+    if (wbIn.Sheets['ING_LLMM_SIL']) resumen.push('ING_LLMM_SIL: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_LLMM_SIL'], fuenteKey, 'ingreso_llmm_sil') + ' filas');
   } else {
     if (wbIn.Sheets['INGRESO']) resumen.push('INGRESO: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['INGRESO'], fuenteKey, 'ingreso') + ' filas');
     if (fuente.incomeShape === 'carrera2' && wbIn.Sheets['ING_CARRERA_DOCENTE']) resumen.push('ING_CARRERA_DOCENTE: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_CARRERA_DOCENTE'], fuenteKey, 'ingreso_carrera_docente') + ' filas');
   }
-  if (wbIn.Sheets['REMUNERACIONES']) resumen.push('REMUNERACIONES: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['REMUNERACIONES'], fuenteKey, 'gasto_rem') + ' filas');
+  if (!fuente.sinGasto && wbIn.Sheets['REMUNERACIONES']) resumen.push('REMUNERACIONES: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['REMUNERACIONES'], fuenteKey, 'gasto_rem') + ' filas');
+  if (fuente.sinGasto) { renderOtrasFuentesTable(fuenteKey); return resumen.concat(resumenRechazosImportacion()); }
   if (fuente.bysMode === 'compras') {
     if (wbIn.Sheets['COMPRAS']) {
       const rc = importOtraFuenteComprasSheet(wbIn.Sheets['COMPRAS'], fuenteKey);
@@ -7015,10 +7071,14 @@ function csvDetalleMensualOtraFuenteLines(fuenteKey, rbd) {
     push(fila('Ingreso Homologación', tipoPorCorte, of.ingreso_homologacion));
     push(fila('Ingreso Carrera Docente', tipoPorCorte, of.ingreso_carrera_docente));
     push(fila('Ingreso Bono Desempeño Laboral (BDL)', tipoPorCorte, of.ingreso_bdl));
+  } else if (fuente.incomeShape === 'llmm3') {
+    push(fila('Recuperación LLMM Isapres', tipoPorCorte, of.ingreso_llmm_isapres));
+    push(fila('Recuperación LLMM FONASA', tipoPorCorte, of.ingreso_llmm_fonasa));
+    push(fila('Recuperación LLMM SIL', tipoPorCorte, of.ingreso_llmm_sil));
   } else {
     push(fila('Ingreso', tipoPorCorte, of.ingreso));
   }
-  push(fila('Gasto Remuneraciones', tipoPorCorte, of.gasto_rem));
+  if (!fuente.sinGasto) push(fila('Gasto Remuneraciones', tipoPorCorte, of.gasto_rem));
   if (fuente.bysMode === 'compras') {
     (of.bys_items || []).forEach(it => push(fila(`B&S compras - ${it.codigo} ${it.item}`, 'Real', it)));
     (of.bys_proy_items || []).forEach(it => push(fila(`B&S proyeccion - ${it.concepto}`, 'Proyectado', it)));
@@ -7081,7 +7141,9 @@ function buildOtraFuenteEntidadPrintHTML(rbd, fuenteKey) {
   };
   const tablasIngreso = fuente.incomeShape === 'junji3'
     ? [['Ingreso Operación', of.ingreso_operacion], ['Ingreso Homologación', of.ingreso_homologacion], ['Ingreso Carrera Docente', of.ingreso_carrera_docente], ['Ingreso Bono Desempeño Laboral (BDL)', of.ingreso_bdl]]
-    : [['Ingreso', of.ingreso]];
+    : fuente.incomeShape === 'llmm3'
+      ? [['Recuperación LLMM Isapres', of.ingreso_llmm_isapres], ['Recuperación LLMM FONASA', of.ingreso_llmm_fonasa], ['Recuperación LLMM SIL', of.ingreso_llmm_sil]]
+      : [['Ingreso', of.ingreso]];
   let bysHTML;
   if (fuente.bysMode === 'compras') {
     const compras = Object.values(of.compras || {}).sort((a, b) => (a.fechaDocumento || '').localeCompare(b.fechaDocumento || ''));
@@ -7119,7 +7181,7 @@ function buildOtraFuenteEntidadPrintHTML(rbd, fuenteKey) {
     <div class="kpi-section-label">Total (Real + Proyectado)</div>
     <div class="kpi-row" style="margin-bottom:10px;">${kpis('total')}</div>
     ${tablasIngreso.map(([titulo, obj]) => tablaMesesEstaticaHTML(titulo, [{ label: titulo, obj }], corte, false)).join('')}
-    ${tablaMesesEstaticaHTML('Gasto Remuneraciones', [{ label: 'Gasto Remuneraciones', obj: of.gasto_rem }], corte, false)}
+    ${fuente.sinGasto ? '' : tablaMesesEstaticaHTML('Gasto Remuneraciones', [{ label: 'Gasto Remuneraciones', obj: of.gasto_rem }], corte, false)}
     ${bysHTML}`;
 }
 function exportOtraFuenteEntidadPdf(fuenteKey, rbd) {
@@ -7199,6 +7261,8 @@ const DASH_META = {
   prorretencion: { corto: 'Pro-Retención', icono: '📌' },
   junji: { corto: 'JUNJI', icono: '🧸' },
   faep: { corto: 'FAEP', icono: '🏗️' },
+  subt31_proyectos: { corto: 'Subt. 31', icono: '🧱' },
+  recuperacion_llmm: { corto: 'Recup. LLMM', icono: '🩺' },
   figa: { corto: 'FIGA', icono: '🌐' },
   aporte_educ: { corto: 'Aporte Fiscal Educ.', icono: '🏛️' },
   aporte_junji: { corto: 'Aporte Fiscal JUNJI', icono: '🍼' },
@@ -7759,7 +7823,9 @@ function reporteLineasOtraFuente(fuenteKey, sel) {
     const corte = realHastaMesOtraFuente(of);
     const lineasIng = f.incomeShape === 'junji3'
       ? [['Ingreso Operación', of.ingreso_operacion], ['Ingreso Homologación', of.ingreso_homologacion], ['Ingreso Carrera Docente', of.ingreso_carrera_docente], ['Ingreso Bono Desempeño Laboral (BDL)', of.ingreso_bdl]]
-      : [['Ingreso', of.ingreso]];
+      : f.incomeShape === 'llmm3'
+        ? [['Recuperación LLMM Isapres', of.ingreso_llmm_isapres], ['Recuperación LLMM FONASA', of.ingreso_llmm_fonasa], ['Recuperación LLMM SIL', of.ingreso_llmm_sil]]
+        : [['Ingreso', of.ingreso]];
     lineasIng.forEach(([nombre, l]) => vzSumar(mapa, { fuenteKey, tipo: 'ingreso', grupo: 'ingreso', concepto: nombre }, l && l.meses, corte));
     vzSumar(mapa, { fuenteKey, tipo: 'gasto', grupo: 'rem', concepto: 'Remuneraciones' }, of.gasto_rem && of.gasto_rem.meses, corte);
     if (f.bysMode === 'compras') {
@@ -8326,6 +8392,10 @@ function reporteConceptosFuente(f) {
     add('ingreso_homologacion', 'Ingreso Homologación');
     add('ingreso_carrera_docente', 'Ingreso Carrera Docente');
     add('ingreso_bdl', 'Ingreso Bono Desempeño Laboral (BDL)');
+  } else if (f.incomeShape === 'llmm3') {
+    add('ingreso_llmm_isapres', 'Recuperación LLMM Isapres');
+    add('ingreso_llmm_fonasa', 'Recuperación LLMM FONASA');
+    add('ingreso_llmm_sil', 'Recuperación LLMM SIL');
   } else add('ingreso', 'Ingreso');
   add('rem', 'Remuneraciones');
   add('bys_total', 'Bienes y Servicios — total (Real+Proy)');
@@ -8366,6 +8436,9 @@ function serieConceptoOF(rbd, key) {
     case 'ingreso_homologacion': return of.ingreso_homologacion ? of.ingreso_homologacion.meses : {};
     case 'ingreso_carrera_docente': return of.ingreso_carrera_docente ? of.ingreso_carrera_docente.meses : {};
     case 'ingreso_bdl': return of.ingreso_bdl ? of.ingreso_bdl.meses : {};
+    case 'ingreso_llmm_isapres': return of.ingreso_llmm_isapres ? of.ingreso_llmm_isapres.meses : {};
+    case 'ingreso_llmm_fonasa': return of.ingreso_llmm_fonasa ? of.ingreso_llmm_fonasa.meses : {};
+    case 'ingreso_llmm_sil': return of.ingreso_llmm_sil ? of.ingreso_llmm_sil.meses : {};
     case 'rem': return of.gasto_rem ? of.gasto_rem.meses : {};
     case 'bys_total': return sumaItemsMeses([...items, ...docs, ...proy]); // sin documento + documentado (+ proyección en las fuentes con compras)
     case 'bys_proy': return sumaItemsMeses(proy);
@@ -10332,6 +10405,13 @@ function aplicarSnapshot(snapshot) {
           entry.ingreso_carrera_docente = { meses: mCarreraDocente, total: totalDeMeses(mCarreraDocente) };
           entry.ingreso_bdl = { meses: mBdl, total: totalDeMeses(mBdl) };
           entry.saldo_operacion_bys = 0;
+        } else if (f.incomeShape === 'llmm3') {
+          const mIsapres = mesesDesde(raw, 'ingreso_llmm_isapres');
+          const mFonasa = mesesDesde(raw, 'ingreso_llmm_fonasa');
+          const mSil = mesesDesde(raw, 'ingreso_llmm_sil');
+          entry.ingreso_llmm_isapres = { meses: mIsapres, total: totalDeMeses(mIsapres) };
+          entry.ingreso_llmm_fonasa = { meses: mFonasa, total: totalDeMeses(mFonasa) };
+          entry.ingreso_llmm_sil = { meses: mSil, total: totalDeMeses(mSil) };
         } else {
           const mIngreso = mesesDesde(raw, 'ingreso');
           entry.ingreso = { meses: mIngreso, total: totalDeMeses(mIngreso) };
