@@ -120,6 +120,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .kpi-card.tone-red   .value, .kpi-card.tone-red.critical .value { color:var(--tone-red-fg); }
   .kpi-card.tone-gray  { background:var(--tone-gray-bg);  border-color:var(--tone-gray-border); }
   .kpi-card.tone-gray  .value { color:var(--tone-gray-fg); }
+  .detalle-table tr.ff-calculada td { background:rgba(42,120,214,0.055); font-weight:600; }
+  .detalle-table tr.ff-calculada td.item-label { color:var(--text-primary); }
   .kpi-row-real .kpi-card { border-left:3px solid #0ca35c; }
   .kpi-row-proy .kpi-card { border-left:3px solid #e08a00; }
 
@@ -2603,10 +2605,36 @@ function renderDashFondosFijos() {
   host.innerHTML = `<div class="dash-panel"><div class="dash-panel-head"><h3>💼 Fondos Fijos — control operativo</h3><button type="button" class="link-btn" onclick="irAPestana('of-fondos_fijos')">Abrir control</button></div><p class="dash-nota-chart">No participa en el ingreso, gasto, saldo ni déficit consolidados. Gasto aceptado: <strong>${fmtCLP(t.aceptado)}</strong> · Pendiente General: <strong style="color:${t.pendienteGeneral ? 'var(--status-critical)' : 'inherit'}">${fmtCLP(t.pendienteGeneral)}</strong> · Pendiente SIGFE: <strong style="color:${t.pendienteSigfe ? 'var(--status-critical)' : 'inherit'}">${fmtCLP(t.pendienteSigfe)}</strong>.</p></div>`;
 }
 let fondosFijosRbdAbierto = null;
-function filaMesFondoFijo(rbd, mes, ff) {
-  const x = ff.meses[mes], aceptado = Math.max(0, num(x.rendido) - num(x.observado), 0), pendienteGeneral = Math.max(0, aceptado - num(x.registrado_general)), pendienteSigfe = Math.max(0, aceptado - num(x.compensado_sigfe)), saldoFinal = num(x.saldo_inicial) - aceptado + num(x.reposicion);
-  const campo = (key, label, tipo = 'number') => `<label class="compra-field"><span class="compra-field-label">${label}</span><input type="${tipo}" ${tipo === 'number' ? 'min="0" step="1"' : ''} class="ff-input" data-ff-rbd="${rbd}" data-ff-mes="${mes}" data-ff-campo="${key}" value="${escHtml(String(x[key] || ''))}"></label>`;
-  return `<div class="compras-section" style="margin-top:14px;"><div class="detalle-header"><strong>${mes[0] + mes.slice(1).toLowerCase()}</strong> — <span class="detalle-sub">Gasto aceptado <strong>${fmtCLP(aceptado)}</strong> · Pendiente General <strong>${fmtCLP(pendienteGeneral)}</strong> · Pendiente SIGFE <strong>${fmtCLP(pendienteSigfe)}</strong> · Saldo de caja <strong>${fmtCLP(saldoFinal)}</strong></span></div><div class="compra-form-grid">${campo('saldo_inicial', 'Saldo inicial')}${campo('rendido', 'Rendido por director(a)')}${campo('observado', 'Monto observado')}${campo('registrado_general', 'Registrado en General')}${campo('compensado_sigfe', 'Compensado SIGFE')}${campo('reposicion', 'Reposición entregada')}${campo('folio', 'Folio rendición', 'text')}</div></div>`;
+function tablaFondosFijosDetalleHTML(rbd, ff, total) {
+  const campos = [
+    ['saldo_inicial', 'Saldo inicial', 'input'],
+    ['rendido', 'Rendido por director(a)', 'input'],
+    ['observado', 'Monto observado', 'input'],
+    ['aceptado', 'Gasto aceptado', 'calc'],
+    ['registrado_general', 'Registrado en General', 'input'],
+    ['pendiente_general', 'Pendiente General', 'calc'],
+    ['compensado_sigfe', 'Compensado SIGFE', 'input'],
+    ['pendiente_sigfe', 'Pendiente SIGFE', 'calc'],
+    ['reposicion', 'Reposición entregada', 'input'],
+    ['saldo_final', 'Saldo final de caja', 'calc'],
+    ['folio', 'Folio rendición', 'folio'],
+  ];
+  const valorMes = (x, campo) => {
+    const aceptado = Math.max(0, num(x.rendido) - num(x.observado));
+    if (campo === 'aceptado') return aceptado;
+    if (campo === 'pendiente_general') return Math.max(0, aceptado - num(x.registrado_general));
+    if (campo === 'pendiente_sigfe') return Math.max(0, aceptado - num(x.compensado_sigfe));
+    if (campo === 'saldo_final') return num(x.saldo_inicial) - aceptado + num(x.reposicion);
+    return x[campo];
+  };
+  const totalCampo = (campo) => {
+    if (campo === 'saldo_inicial' || campo === 'saldo_final' || campo === 'folio') return '—';
+    if (campo === 'aceptado') return fmtCLP(total.aceptado);
+    if (campo === 'pendiente_general') return fmtCLP(total.pendienteGeneral);
+    if (campo === 'pendiente_sigfe') return fmtCLP(total.pendienteSigfe);
+    return fmtCLP(MESES_CARGA.reduce((s, m) => s + num(ff.meses[m][campo]), 0));
+  };
+  return `<div class="compras-section" style="margin-top:14px;"><div class="detalle-header"><strong>Detalle mensual del Fondo Fijo</strong> — <span class="detalle-sub">Escribe solo las filas editables. Gasto aceptado, pendientes y saldo de caja se calculan automáticamente.</span></div><div class="detalle-scroll"><table class="detalle-table">${DETALLE_COLGROUP}<thead><tr><th>Control</th>${MESES_CARGA.map(m => `<th class="num">${escHtml(MESES_CARGA_ABREV[MESES_CARGA.indexOf(m)])}</th>`).join('')}<th class="num">Total</th></tr></thead><tbody>${campos.map(([campo, etiqueta, tipo]) => `<tr class="${tipo === 'calc' ? 'ff-calculada' : ''}"><td class="item-label">${etiqueta}</td>${MESES_CARGA.map(m => { const x = ff.meses[m], valor = valorMes(x, campo); if (tipo === 'calc') return `<td class="num">${fmtCLP(valor)}</td>`; const inputType = tipo === 'folio' ? 'text' : 'number'; const attrs = tipo === 'folio' ? '' : ' min="0" step="1"'; return `<td class="num"><input type="${inputType}"${attrs} class="celda-input ff-input" data-ff-rbd="${rbd}" data-ff-mes="${m}" data-ff-campo="${campo}" value="${escHtml(String(valor || ''))}" aria-label="${escHtml(etiqueta + ' ' + m)}"></td>`; }).join('')}<td class="num item-total"><strong>${totalCampo(campo)}</strong></td></tr>`).join('')}</tbody></table></div></div>`;
 }
 function abrirFondosFijosModal(rbd) {
   const r = filasFondosFijos().find(x => x.rbd === rbd); if (!r) return;
@@ -2614,7 +2642,7 @@ function abrirFondosFijosModal(rbd) {
   const ff = ensureFondoFijo(rbd), t = resumenFondoFijo(rbd);
   document.getElementById('fondosFijosModalTitle').textContent = `${otrasFuentesTituloEntidad(r)} — ${r.nombre} · Fondos Fijos`;
   document.getElementById('fondosFijosModalSubtitle').innerHTML = `Gasto aceptado: <strong>${fmtCLP(t.aceptado)}</strong> · Pendiente General: <strong>${fmtCLP(t.pendienteGeneral)}</strong> · Pendiente SIGFE: <strong>${fmtCLP(t.pendienteSigfe)}</strong>`;
-  document.getElementById('fondosFijosModalBody').innerHTML = `<div class="detalle-empty">Registra montos consolidados de la rendición, sin repetir sus comprobantes menores. El <strong>gasto aceptado</strong> es Rendición menos Observado y se debe cargar una sola vez en Subvención General.</div><div class="compra-form-grid" style="margin-top:12px;"><label class="compra-field"><span class="compra-field-label">Cupo vigente (referencial)</span><input type="number" min="0" step="1" class="ff-input" data-ff-rbd="${rbd}" data-ff-campo="cupo" value="${ff.cupo || ''}"></label></div>${MESES_CARGA.map(m => filaMesFondoFijo(rbd, m, ff)).join('')}`;
+  document.getElementById('fondosFijosModalBody').innerHTML = `<div class="detalle-empty">Registra montos consolidados de la rendición, sin repetir sus comprobantes menores. El <strong>gasto aceptado</strong> es Rendición menos Observado y se debe cargar una sola vez en Subvención General.</div><div class="compra-form-grid" style="margin-top:12px;"><label class="compra-field"><span class="compra-field-label">Cupo vigente (referencial)</span><input type="number" min="0" step="1" class="ff-input" data-ff-rbd="${rbd}" data-ff-campo="cupo" value="${ff.cupo || ''}"></label></div>${tablaFondosFijosDetalleHTML(rbd, ff, t)}`;
   document.getElementById('fondosFijosModal').classList.remove('hidden'); document.body.style.overflow = 'hidden';
 }
 function cerrarFondosFijosModal() { fondosFijosRbdAbierto = null; document.getElementById('fondosFijosModal').classList.add('hidden'); document.body.style.overflow = ''; }
