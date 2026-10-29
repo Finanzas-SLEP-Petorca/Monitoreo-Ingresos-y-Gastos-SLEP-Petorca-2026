@@ -51,6 +51,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     --series-2: #eb6834;
     --series-2-btn: #c94b17;   /* fondo de los botones naranjas con texto blanco: #eb6834 daba 3,2:1; este da 4,7:1 (U-12) */
     --series-3: #475569;
+    --series-hon: #0e7490;     /* tercera serie «Honorarios» (Subt. 21) de % Ejecución de las fuentes; el mismo color que --chart-hon del Panel principal */
     --status-good: #127235;
     --status-warning: #b45309;
     --status-serious: #ec835a;
@@ -90,11 +91,11 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
      concepto cae siempre en la misma columna de arriba a abajo, y las 3 tarjetas propias de Total
      (sin Real/Proyectado) simplemente pasan a una segunda línea de esa misma grilla. */
   .kpi-row { display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:8px; margin-bottom:14px; }
-  .kpi-row.kpi-row-real, .kpi-row.kpi-row-proy { grid-template-columns:repeat(6, minmax(0,1fr)); } /* Real y Proyectado llevan 6 tarjetas desde que existe «Gasto Honorarios» */
-  /* % Ejecución de las fuentes distintas de SEP: 6 tarjetas (Rem/B&S/Total × Real y a diciembre) en 3 columnas. */
-  .kpi-row.kpi-row-3 { grid-template-columns:repeat(3, minmax(0,1fr)); }
+  .kpi-row.kpi-row-real, .kpi-row.kpi-row-proy, .kpi-row.of-kpi-row { grid-template-columns:repeat(6, minmax(0,1fr)); } /* Real y Proyectado llevan 6 tarjetas desde que existe «Gasto Honorarios»; las 3 filas de cada fuente también (PR-3) */
+  /* % Ejecución de las fuentes distintas de SEP: 8 tarjetas (Rem/Hon/B&S/Total × Real y a diciembre) en 4 columnas. */
+  .kpi-row.kpi-row-4 { grid-template-columns:repeat(4, minmax(0,1fr)); }
   @media (max-width:900px) {
-    .kpi-row, .kpi-row.kpi-row-3 { grid-template-columns:repeat(2, minmax(0,1fr)); }
+    .kpi-row, .kpi-row.kpi-row-4 { grid-template-columns:repeat(2, minmax(0,1fr)); }
   }
   .kpi-row.kpi-row-collapsed { display:none; }
   .kpi-section-label { display:flex; align-items:center; gap:5px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--text-secondary); margin:0 0 6px 2px; background:none; border:none; padding:2px; cursor:pointer; font-family:inherit; }
@@ -385,10 +386,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     /* La tabla SEP (13 columnas) y la fila del PDF individual medían 1.436 / 1.166 px sobre una hoja horizontal de ~975 px útiles: el navegador la encogía
        o, según el tamaño de papel y la escala, la columna Estado (la última) quedaba cortada. Compacta para que quepa entera: fuente 9 px, encabezados
        en varias líneas, barras de % más cortas; los montos siguen sin partirse (nowrap). */
-    #tab-panel table.data-table, #printSingleWrap table.data-table { width:100% !important; font-size:9px !important; }
-    #tab-panel table.data-table th, #tab-panel table.data-table td, #printSingleWrap table.data-table th, #printSingleWrap table.data-table td { padding:3px 3px !important; }
-    #tab-panel table.data-table th, #printSingleWrap table.data-table th { white-space:normal !important; line-height:1.15; vertical-align:bottom; }
-    #tab-panel table.data-table td.num, #printSingleWrap table.data-table td.num { white-space:nowrap; }
+    #tab-panel table.data-table, .tab-content[id^="tab-of-"] table.data-table, #printSingleWrap table.data-table { width:100% !important; font-size:9px !important; }
+    #tab-panel table.data-table th, #tab-panel table.data-table td, .tab-content[id^="tab-of-"] table.data-table th, .tab-content[id^="tab-of-"] table.data-table td, #printSingleWrap table.data-table th, #printSingleWrap table.data-table td { padding:3px 3px !important; }
+    #tab-panel table.data-table th, .tab-content[id^="tab-of-"] table.data-table th, #printSingleWrap table.data-table th { white-space:normal !important; line-height:1.15; vertical-align:bottom; }
+    #tab-panel table.data-table td.num, .tab-content[id^="tab-of-"] table.data-table td.num, #printSingleWrap table.data-table td.num { white-space:nowrap; }
     #tab-panel .pct-bar-track, #printSingleWrap .pct-bar-track { width:22px !important; margin-right:3px !important; }
     #tab-panel .pct-bar-text, #printSingleWrap .pct-bar-text { width:auto !important; }
     #tab-panel .tag, #printSingleWrap .tag { font-size:8px !important; padding:1px 5px !important; }
@@ -409,6 +410,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
        las 4 tablas quedan con exactamente el mismo ancho total y ninguna se corta. */
     table.detalle-table td:first-child, table.detalle-table th:first-child { width:120px !important; max-width:120px !important; overflow:hidden !important; text-overflow:ellipsis !important; white-space:nowrap !important; }
     table.detalle-table td.item-total:last-child, table.detalle-table th:last-child { width:70px !important; max-width:70px !important; }
+    /* Registros por documento (compras y honorarios) del PDF por entidad: 11-13 columnas de texto libre que en pantalla viajan en un scroll horizontal. En la hoja se parten en varias líneas
+       (los montos no) y la primera columna (cuenta / concepto) muestra su texto completo, así ningún registro se sale de la hoja aunque la descripción o el prestador sean largos. */
+    table.compras-table, table.hon-table { width:100% !important; }
+    table.compras-table th, table.compras-table td, table.hon-table th, table.hon-table td { white-space:normal !important; overflow-wrap:anywhere; }
+    table.compras-table td.num, table.compras-table th.num, table.hon-table td.num, table.hon-table th.num { white-space:nowrap !important; }
+    table.compras-table td:first-child, table.compras-table th:first-child, table.hon-table td:first-child, table.hon-table th:first-child { width:auto !important; max-width:none !important; overflow:visible !important; text-overflow:clip !important; }
     table.detalle-table th.mes-real, table.detalle-table th.mes-proy { white-space:nowrap !important; }
     .mes-tag { font-size:7px !important; }
     /* Reemplaza el <input> editable por texto plano alineado a la derecha: en pantalla el
@@ -537,7 +544,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   @media (max-width:1000px) { .dash-cards { grid-template-columns:repeat(3, minmax(0, 1fr)); } }
   @media (max-width:720px) { .dash-cards { grid-template-columns:repeat(2, minmax(0, 1fr)); } }
   @media (max-width:480px) { .dash-cards { grid-template-columns:1fr; } }
-  .dash-card { background:var(--surface-1); border:1px solid var(--border); border-radius:12px; padding:14px; cursor:pointer; box-shadow:0 1px 3px rgba(17,24,39,0.05); transition:border-color .12s, box-shadow .12s, transform .12s; min-width:0; }
+  .dash-card { scroll-margin:6px; /* al enfocarla con Tab el navegador la deja a 6 px del borde: el anillo de foco no queda recortado por el contenedor con scroll */ background:var(--surface-1); border:1px solid var(--border); border-radius:12px; padding:14px; cursor:pointer; box-shadow:0 1px 3px rgba(17,24,39,0.05); transition:border-color .12s, box-shadow .12s, transform .12s; min-width:0; }
   .dash-card:hover, .dash-card:focus-visible { border-color:var(--series-1); box-shadow:0 6px 16px rgba(37,99,235,0.13); transform:translateY(-1px); }
   .dash-card .c-head { display:flex; align-items:center; justify-content:space-between; gap:8px; }
   .dash-card .c-name { font-weight:700; font-size:14px; display:flex; align-items:center; gap:6px; min-width:0; }
@@ -1209,7 +1216,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           <div class="ejec-toggle-group">
             <label class="ejec-toggle"><input type="checkbox" id="ejecShowRem" checked><span class="ejec-legend-dot" style="background:var(--series-1)"></span><span id="ejecLblRem">Remuneraciones (Subt. 21)</span></label>
             <label class="ejec-toggle"><input type="checkbox" id="ejecShowBys" checked><span class="ejec-legend-dot" style="background:var(--series-2)"></span><span id="ejecLblBys">Bienes y Servicios (22+29)</span></label>
-            <label class="ejec-toggle" id="ejecToggleTotalWrap" hidden><input type="checkbox" id="ejecShowTotal" checked><span class="ejec-legend-dot" style="background:var(--series-3)"></span>Total (Rem. + B&amp;S)</label>
+            <label class="ejec-toggle" id="ejecToggleHonWrap" hidden><input type="checkbox" id="ejecShowHon" checked><span class="ejec-legend-dot" style="background:var(--series-hon)"></span>Honorarios (Subt. 21)</label>
+            <label class="ejec-toggle" id="ejecToggleTotalWrap" hidden><input type="checkbox" id="ejecShowTotal" checked><span class="ejec-legend-dot" style="background:var(--series-3)"></span>Total (Rem. + Hon. + B&amp;S)</label>
           </div>
           <button id="ejecPdfBtn" type="button" style="background:#374151; border-color:#374151;" title="PDF con el filtro, las tarjetas % y el gráfico actuales">🖨 Exportar PDF</button>
         </div>
@@ -1272,6 +1280,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                 <th title="Corte Real/Proyectado de la entidad: los meses hasta ese mes son Real">Real hasta</th>
                 <th class="num">Ingreso</th>
                 <th class="num">Gasto Remuneraciones</th>
+                <th class="num" title="Honorarios (Subt. 21): boletas + proyección, en su propia línea (sin 70/30)">Gasto Honorarios (Subt. 21)</th>
                 <th class="num">Gasto Bienes y Servicios</th>
                 <th class="num">Gasto Total</th>
                 <th class="num">Saldo</th>
@@ -1311,6 +1320,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                 <th title="Corte Real/Proyectado de la entidad: los meses hasta ese mes son Real">Real hasta</th>
                 <th class="num">Ingreso</th>
                 <th class="num">Gasto Remuneraciones</th>
+                <th class="num" title="Honorarios (Subt. 21): boletas + proyección, en su propia línea (sin 70/30)">Gasto Honorarios (Subt. 21)</th>
                 <th class="num">Gasto Bienes y Servicios</th>
                 <th class="num">Gasto Total</th>
                 <th class="num">Saldo</th>
@@ -1350,6 +1360,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                 <th title="Corte Real/Proyectado de la entidad: los meses hasta ese mes son Real">Real hasta</th>
                 <th class="num">Ingreso</th>
                 <th class="num">Gasto Remuneraciones</th>
+                <th class="num" title="Honorarios (Subt. 21): boletas + proyección, en su propia línea (sin 70/30)">Gasto Honorarios (Subt. 21)</th>
                 <th class="num">Gasto Bienes y Servicios</th>
                 <th class="num">Gasto Total</th>
                 <th class="num">Saldo</th>
@@ -1389,6 +1400,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                 <th title="Corte Real/Proyectado de la entidad: los meses hasta ese mes son Real">Real hasta</th>
                 <th class="num">Ingreso</th>
                 <th class="num">Gasto Remuneraciones</th>
+                <th class="num" title="Honorarios (Subt. 21): boletas + proyección, en su propia línea (sin 70/30)">Gasto Honorarios (Subt. 21)</th>
                 <th class="num">Gasto Bienes y Servicios</th>
                 <th class="num">Gasto Total</th>
                 <th class="num">Saldo</th>
@@ -1428,6 +1440,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                 <th title="Corte Real/Proyectado de la entidad: los meses hasta ese mes son Real">Real hasta</th>
                 <th class="num">Ingreso</th>
                 <th class="num">Gasto Remuneraciones</th>
+                <th class="num" title="Honorarios (Subt. 21): boletas + proyección, en su propia línea (sin 70/30)">Gasto Honorarios (Subt. 21)</th>
                 <th class="num">Gasto Bienes y Servicios</th>
                 <th class="num">Gasto Total</th>
                 <th class="num">Saldo</th>
@@ -1468,6 +1481,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                 <th title="Corte Real/Proyectado de la entidad: los meses hasta ese mes son Real">Real hasta</th>
                 <th class="num">Ingreso</th>
                 <th class="num">Gasto Remuneraciones</th>
+                <th class="num" title="Honorarios (Subt. 21): boletas + proyección, en su propia línea (sin 70/30)">Gasto Honorarios (Subt. 21)</th>
                 <th class="num">Gasto Bienes y Servicios</th>
                 <th class="num">Gasto Total</th>
                 <th class="num">Saldo</th>
@@ -1487,7 +1501,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     <section><h2>Subtítulo 31 (Proyectos)</h2><div class="panel">
       <div class="detalle-empty">Seguimiento de proyectos por Ingreso vs. Gasto, sin meta 70/30. Incluye establecimientos, Administración Central (AC) y los GESPARVU de jardines infantiles, igual que FAEP.</div>
       <div class="table-controls"><button id="downloadExcelOFBtn-subt31_proyectos" type="button" style="background:#1b8247; border-color:#1b8247;">⬇ Excel</button><button id="importExcelOFBtn-subt31_proyectos" type="button" style="background:#6b46c1; border-color:#6b46c1;">⬆ Importar Excel</button><input type="file" id="importExcelOFInput-subt31_proyectos" accept=".xlsx" style="display:none;"><button id="exportPdfOFBtn-subt31_proyectos" type="button" style="background:#374151; border-color:#374151;">🖨 Exportar PDF</button><button id="downloadCargaOFBtn-subt31_proyectos" type="button" style="background:var(--series-2-btn); border-color:var(--series-2-btn);">⬇ Descargar carga (JSON)</button></div>
-      <div class="table-scroll" style="margin-top:12px;"><table class="data-table" id="otrasFuentesTable-subt31_proyectos"><thead><tr><th>RBD / GESPARVU</th><th>Nombre</th><th>Real hasta</th><th class="num">Ingreso</th><th class="num">Gasto Remuneraciones</th><th class="num">Gasto Bienes y Servicios</th><th class="num">Gasto Total</th><th class="num">Saldo</th><th>Estado (Total)</th><th class="col-acciones">Acciones</th></tr></thead><tbody id="otrasFuentesTbody-subt31_proyectos"></tbody></table></div>
+      <div class="table-scroll" style="margin-top:12px;"><table class="data-table" id="otrasFuentesTable-subt31_proyectos"><thead><tr><th>RBD / GESPARVU</th><th>Nombre</th><th>Real hasta</th><th class="num">Ingreso</th><th class="num">Gasto Remuneraciones</th><th class="num" title="Honorarios (Subt. 21): boletas + proyección, en su propia línea (sin 70/30)">Gasto Honorarios (Subt. 21)</th><th class="num">Gasto Bienes y Servicios</th><th class="num">Gasto Total</th><th class="num">Saldo</th><th>Estado (Total)</th><th class="col-acciones">Acciones</th></tr></thead><tbody id="otrasFuentesTbody-subt31_proyectos"></tbody></table></div>
     </div></section>
   </div>
 
@@ -1503,7 +1517,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     <section><h2>Asignación Familiar</h2><div class="panel">
       <div class="detalle-empty">Seguimiento de Ingresos Percibidos y Gastos de Asignación Familiar, exclusivamente en Remuneraciones. Incluye todos los RBD y GESPARVU; no registra Bienes y Servicios.</div>
       <div class="table-controls"><button id="downloadExcelOFBtn-asignacion_familiar" type="button" style="background:#1b8247; border-color:#1b8247;">⬇ Excel</button><button id="importExcelOFBtn-asignacion_familiar" type="button" style="background:#6b46c1; border-color:#6b46c1;">⬆ Importar Excel</button><input type="file" id="importExcelOFInput-asignacion_familiar" accept=".xlsx" style="display:none;"><button id="exportPdfOFBtn-asignacion_familiar" type="button" style="background:#374151; border-color:#374151;">🖨 Exportar PDF</button><button id="downloadCargaOFBtn-asignacion_familiar" type="button" style="background:var(--series-2-btn); border-color:var(--series-2-btn);">⬇ Descargar carga (JSON)</button></div>
-      <div class="table-scroll" style="margin-top:12px;"><table class="data-table" id="otrasFuentesTable-asignacion_familiar"><thead><tr><th>RBD / GESPARVU</th><th>Nombre</th><th>Real hasta</th><th class="num">Ingreso Percibido</th><th class="num">Gasto Remuneraciones</th><th class="num">Gasto Total</th><th class="num">Saldo</th><th>Estado (Total)</th><th class="col-acciones">Acciones</th></tr></thead><tbody id="otrasFuentesTbody-asignacion_familiar"></tbody></table></div>
+      <div class="table-scroll" style="margin-top:12px;"><table class="data-table" id="otrasFuentesTable-asignacion_familiar"><thead><tr><th>RBD / GESPARVU</th><th>Nombre</th><th>Real hasta</th><th class="num">Ingreso Percibido</th><th class="num">Gasto Remuneraciones</th><th class="num" title="Honorarios (Subt. 21): boletas + proyección, en su propia línea (sin 70/30)">Gasto Honorarios (Subt. 21)</th><th class="num">Gasto Total</th><th class="num">Saldo</th><th>Estado (Total)</th><th class="col-acciones">Acciones</th></tr></thead><tbody id="otrasFuentesTbody-asignacion_familiar"></tbody></table></div>
     </div></section>
   </div>
 
@@ -1548,6 +1562,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                 <th title="Corte Real/Proyectado de la entidad: los meses hasta ese mes son Real">Real hasta</th>
                 <th class="num">Ingreso</th>
                 <th class="num">Gasto Remuneraciones</th>
+                <th class="num" title="Honorarios (Subt. 21): boletas + proyección, en su propia línea (sin 70/30)">Gasto Honorarios (Subt. 21)</th>
                 <th class="num">Gasto Bienes y Servicios</th>
                 <th class="num">Gasto Total</th>
                 <th class="num">Saldo</th>
@@ -1587,6 +1602,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                 <th title="Corte Real/Proyectado de la entidad: los meses hasta ese mes son Real">Real hasta</th>
                 <th class="num">Ingreso</th>
                 <th class="num">Gasto Remuneraciones</th>
+                <th class="num" title="Honorarios (Subt. 21): boletas + proyección, en su propia línea (sin 70/30)">Gasto Honorarios (Subt. 21)</th>
                 <th class="num">Gasto Bienes y Servicios</th>
                 <th class="num">Gasto Total</th>
                 <th class="num">Saldo</th>
@@ -1626,6 +1642,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                 <th title="Corte Real/Proyectado de la entidad: los meses hasta ese mes son Real">Real hasta</th>
                 <th class="num">Ingreso</th>
                 <th class="num">Gasto Remuneraciones</th>
+                <th class="num" title="Honorarios (Subt. 21): boletas + proyección, en su propia línea (sin 70/30)">Gasto Honorarios (Subt. 21)</th>
                 <th class="num">Gasto Bienes y Servicios</th>
                 <th class="num">Gasto Total</th>
                 <th class="num">Saldo</th>
@@ -1722,6 +1739,15 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         cargados se mantienen como <strong>«sin documento»</strong> (siguen el corte "Real hasta"); lo documentado se suma <strong>aparte</strong> y el panel
         muestra los dos por separado: «Documentado $X · Sin documento $Y». Si registras un documento por un gasto que ya estaba como «sin documento», réstalo de ese monto
         para no contarlo dos veces. El Excel de cada fuente trae la hoja COMPRAS (con la columna Concepto) y los PDF por fila incluyen el registro.</p>
+        <p><strong>Honorarios (Subt. 21) en todas las fuentes.</strong> Debajo de Remuneraciones, el detalle de cada entidad de cada fuente (incluida la fila AC y los jardines) trae el bloque
+        <strong>«Honorarios (Subt. 21)»</strong>: una fila mensual de solo lectura con las boletas (siempre <span class="help-tag real">Real</span>, en el mes de su Fecha Documento), la
+        <strong>proyección</strong> mensual por cuenta o por concepto (siempre <span class="help-tag proy">Proyectado</span>; se SUMA a las boletas) y el <strong>registro por boleta</strong> (solo monto bruto, con N° DC).
+        En Subv. General, PIE, Mantención y Pro-Retención cada boleta lleva una <strong>cuenta</strong> del catálogo de honorarios habilitada para esa subvención; en JUNJI, FAEP, Subtítulo 31, Asignación Familiar, FIGA y los dos Aportes Fiscales
+        (que no tienen código de cuenta) lleva un <strong>concepto</strong>, igual que su registro de compras. <strong>Recuperación Licencias Médicas</strong> es una fuente solo de ingresos: no lleva honorarios. En estas fuentes <strong>no hay 70/30</strong>: los honorarios son gasto de la fuente en su propia línea
+        «Honorarios (Subt. 21)», aparte de Remuneraciones y de Bienes y Servicios, y entran en el gasto total, el saldo y el Estado (gasto total = remuneraciones + honorarios + B&S). En JUNJI son gasto de
+        <em>personal</em>: se financian como las Remuneraciones (con cualquiera de sus ingresos) y <strong>no</strong> cuentan en el saldo de Operación para Bienes y Servicios. Las compras antiguas con un tipo de documento de
+        honorarios (BOLH, BHE, BOLHE, BPST, BPSTE) siguen sumando en Bienes y Servicios y se marcan <strong>«⚠ muévelo a Honorarios»</strong>: muévelas a mano al registro de honorarios. El Excel de cada fuente trae las hojas
+        HONORARIOS y HON_PROYECCION (uno anterior, sin ellas, se importa igual y no toca ninguna boleta).</p>
 
         <h4>5. Cómo cargar los datos de un establecimiento de SEP</h4>
         <ul>
@@ -2462,6 +2488,12 @@ function lineasIngresoOtraFuente(fuente, of) {
 function comprasPorConcepto(fuenteKey) {
   const f = FUENTES_OTRAS_BY_KEY[fuenteKey];
   return !!f && f.bysMode === 'concepto';
+}
+// Honorarios: ¿la fuente los registra por CONCEPTO (texto libre) en vez de por cuenta del catálogo? Las fuentes con Plan de Cuentas (General, PIE, Mantención,
+// Pro-Retención) usan cuenta; todas las demás (JUNJI, FAEP, Subt. 31, Recuperación LLMM, Asignación Familiar, FIGA, Aportes) usan concepto.
+function honPorConcepto(fuenteKey) {
+  const f = FUENTES_OTRAS_BY_KEY[fuenteKey];
+  return !!f && !f.colPlan;
 }
 // Columna del Plan de Cuentas que rige a una entidad en una fuente con compras. La fila AC usa la
 // columna «Adm. Central» cuando el manual la tiene (solo Subv. General); si no, la de la fuente.
@@ -3415,15 +3447,83 @@ function registrarCompraEnIndice(idx, id, campos) { idx.set(firmaContenidoCompra
 // Un "contexto" (ctxHonSep…) dice dónde viven las boletas de UNA entidad y qué columna del Plan de Cuentas la rige: las funciones de abajo y de la interfaz
 // (honFormHTML, honTablaHTML…) trabajan con el contexto y no con SEP en particular, para reusarlas en las demás fuentes (PR-3).
 // ============================================================================
+// PR-3: el mismo contexto sirve a las 9 fuentes (ctxHonOtraFuente). Lo que cambia entre ellos vive aquí y no en el código común: `porConcepto` (las fuentes sin código de cuenta
+// SUPEREDUC —JUNJI, FAEP, FIGA y los dos Aportes— llevan CONCEPTO en vez de cuenta, igual que su registro de compras), `colPlan` (columna del Plan de Cuentas que habilita las cuentas;
+// null si no hay cuenta), cómo se guarda (`payloadBoleta` / `payloadProy`), cómo se pintan los meses y qué se recalcula tras un cambio (`tras`).
 function ctxHonSep(rbd) {
+  rbd = String(rbd);
+  const reg = () => DATA.registros.find(x => x.rbd === rbd);
   return {
-    clave: 'sep', rbd: String(rbd), subvencion: 'SEP', colPlan: 'sep', etiqueta: 'RBD ' + rbd,
+    clave: 'sep', rbd, subvencion: 'SEP', colPlan: 'sep', etiqueta: 'RBD ' + rbd, porConcepto: false, campoClave: 'codigo', sufijoId: '',
     attrs: `data-rbd="${escHtml(rbd)}"`,        // atributos que llevan los botones para decir de qué entidad son
     modalSel: '#modalBody',                    // contenedor del modal donde viven el formulario y la tabla
     boletas: () => (CARGA_MANUAL.honorarios_por_rbd || {})[rbd] || {},
     proyeccion: () => (CARGA_MANUAL.hon_proyeccion_por_rbd || {})[rbd] || null,
     agregado: () => (CARGA_MANUAL.hon_agregado_por_rbd || {})[rbd] || null,
+    nombre: () => { const r = reg(); return r ? r.nombre : rbd; },
+    asegurarBoletas: () => {
+      if (!CARGA_MANUAL.honorarios_por_rbd) CARGA_MANUAL.honorarios_por_rbd = {};
+      if (!CARGA_MANUAL.honorarios_por_rbd[rbd]) CARGA_MANUAL.honorarios_por_rbd[rbd] = {};
+      return CARGA_MANUAL.honorarios_por_rbd[rbd];
+    },
+    asegurarProyeccion: () => ensureHonProyeccion(rbd),
+    payloadBoleta: (id, v) => ({ honorarios: { [id]: v } }),
+    payloadProy: (clave, v) => ({ hon_proyeccion: { items: { [clave]: v } } }),
+    nombreItemProy: (clave) => nombreItemHonProyeccion(clave),
+    valorProy: (it) => ({ meses: it.meses, total: it.total }),
+    cabeceraMeses: (tipo) => mesHeaderCellsHTML(tipo, rbd),
+    celdasProy: (it, printMode) => MESES_CARGA.map(m => celdaInputHTML(rbd, 'hon_proy', m, it.meses[m] || 0, `data-codigo="${escHtml(it.codigo)}"`, printMode, 'Proyección honorarios ' + nombreItemHonProyeccion(it.codigo))).join(''),
+    tras: () => honTrasCambio(rbd),
   };
+}
+// Contexto de Honorarios de UNA entidad en UNA de las fuentes (General, PIE, Mantención, Pro-Retención: con cuenta del catálogo; JUNJI, FAEP, Subt. 31, Asignación Familiar, FIGA y los Aportes: con concepto; Recuperación LLMM es solo de ingresos y no lleva honorarios). Las boletas
+// viven en `otras_fuentes.<fuente>.honorarios` y la proyección en `otras_fuentes.<fuente>.hon_proyeccion_items` (clave = cuenta o concepto); en memoria `of.honorarios`, `of.hon_agregado`
+// (derivado de las boletas) y `of.hon_proy` (los ítems de la proyección y su suma).
+function ctxHonOtraFuente(fuenteKey, rbd) {
+  rbd = String(rbd);
+  const f = FUENTES_OTRAS_BY_KEY[fuenteKey];
+  const porConcepto = honPorConcepto(fuenteKey);
+  const campoClave = porConcepto ? 'concepto' : 'codigo';
+  const of = () => ensureOtraFuente(rbd, fuenteKey);
+  const etiqueta = otrasFuentesTituloEntidad({ rbd }, fuenteKey);
+  return {
+    clave: fuenteKey, rbd, fuente: f, subvencion: f.label, colPlan: colPlanOtraFuente(fuenteKey, rbd), etiqueta, porConcepto, campoClave, sufijoId: '-' + fuenteKey,
+    attrs: `data-rbd="${escHtml(rbd)}" data-fuente="${fuenteKey}"`,
+    modalSel: '#otrasFuentesModalBody',
+    listaConceptosId: `ofhonconceptos-${idSeguro(rbd)}-${fuenteKey}`,   // <datalist> con los conceptos de honorarios que ya tiene la entidad en la fuente
+    boletas: () => { const o = ((CARGA_MANUAL.otras_fuentes_por_rbd || {})[rbd] || {})[fuenteKey]; return (o && o.honorarios) || {}; },
+    proyeccion: () => { const o = ((CARGA_MANUAL.otras_fuentes_por_rbd || {})[rbd] || {})[fuenteKey]; return (o && o.hon_proy) || null; },
+    agregado: () => { const o = ((CARGA_MANUAL.otras_fuentes_por_rbd || {})[rbd] || {})[fuenteKey]; return (o && o.hon_agregado) || null; },
+    nombre: () => { const r = filasOtrasFuentes(fuenteKey).find(x => x.rbd === rbd); return r ? r.nombre : rbd; },
+    asegurarBoletas: () => { const o = of(); if (!o.honorarios) o.honorarios = {}; return o.honorarios; },
+    asegurarProyeccion: () => { const o = of(); if (!o.hon_proy) o.hon_proy = { items: [], meses: mesesEnCero(), total: 0 }; return o.hon_proy; },
+    payloadBoleta: (id, v) => ({ otras_fuentes: { [fuenteKey]: { honorarios: { [id]: v } } } }),
+    payloadProy: (clave, v) => ({ otras_fuentes: { [fuenteKey]: { hon_proyeccion_items: { [clave]: v } } } }),
+    nombreItemProy: (clave) => porConcepto ? clave : nombreItemHonProyeccion(clave),
+    valorProy: (it) => ({ [campoClave]: it[campoClave], meses: it.meses, total: it.total }),
+    cabeceraMeses: (tipo) => (tipo === 'hon_proy' ? mesHeaderCellsCorteHTML(realHastaMesOtraFuente(of()), true) : mesHeaderCellsCorteHTML(12, false)),   // boletas: los 12 meses «Real» (siempre reales, sin importar el corte); proyección: siempre «Proy.»
+    celdasProy: (it, printMode) => {
+      const clave = it[campoClave];
+      const nombre = 'Proyección honorarios ' + (porConcepto ? clave : nombreItemHonProyeccion(clave));
+      return MESES_CARGA.map(m => printMode
+        ? `<td class="num mes-proy">${it.meses[m] ? fmtCLP(it.meses[m]) : '—'}</td>`
+        : `<td class="num mes-proy"><input type="text" inputmode="numeric" autocomplete="off" class="celda-input" value="${formatoMontoCelda(it.meses[m])}" placeholder="0"
+            aria-label="${escHtml(nombreCeldaMonto(nombre, m, etiqueta))}" data-rbd="${escHtml(rbd)}" data-fuente="${fuenteKey}" data-modo="of_hon_proy_item" data-${campoClave}="${escHtml(clave)}" data-mes="${m}" oninput="onOtraFuenteCeldaInput(this)"></td>`).join('');
+    },
+    tras: () => {
+      const o = of();
+      recomputeHonOtraFuente(o, fuenteKey);
+      recomputeOtraFuente(rbd, fuenteKey);
+      renderOtrasFuentesTable(fuenteKey);
+      if (otrasFuentesRbdAbierto === rbd) renderOtrasFuentesModalContenido();
+    },
+  };
+}
+// El contexto de un botón o campo del modal: los de las fuentes llevan data-fuente (los de SEP no).
+function ctxHonDeElemento(el) {
+  const fuente = el.getAttribute('data-fuente');
+  const rbd = el.getAttribute('data-rbd');
+  return (fuente && FUENTES_OTRAS_BY_KEY[fuente]) ? ctxHonOtraFuente(fuente, rbd) : ctxHonSep(rbd);
 }
 // Cuentas del catálogo habilitadas para la subvención del contexto (columna del Plan de Cuentas), en el orden del manual.
 function honCuentasHabilitadas(ctx) { return HON_CUENTAS.filter(c => planNivelCuenta(c.codigo, ctx.colPlan) > 0); }
@@ -3441,7 +3541,7 @@ function honTipoPermitido(codigoCuenta, codigoTipo) {
 function honNombreTipo(codigoTipo) { return HON_NOMBRE_TIPO[codigoTipo] || codigoTipo; }
 // Boleta leída de Firestore (que no valida tipos) con los tipos que el panel espera: textos como texto y montos como número finito. El tipo siempre queda como
 // CÓDIGO (un nombre del panel se traduce; un valor raro se conserva para que se vea y se avise). No lleva `documentoOriginal` (es de notas de crédito/débito).
-function sanitizaHonorario(h) {
+function sanitizaHonorario(h, porConcepto) {
   const tipoRaw = textoSeguro(h.tipoDocumento).trim();
   const limpia = {
     ...h,
@@ -3457,28 +3557,37 @@ function sanitizaHonorario(h) {
     montoDocumento: num(h.montoDocumento),
   };
   delete limpia.documentoOriginal;
+  if (porConcepto) { delete limpia.codigo; limpia.concepto = textoSeguro(h.concepto); } // fuentes por CONCEPTO: el concepto (texto) va en lugar de la cuenta
   if (h.documentoContable !== undefined) limpia.documentoContable = textoSeguro(h.documentoContable);
   return limpia;
 }
 // QUÉ boletas entran en los totales (única regla; itemsFromHonorarios y los avisos la comparten): su cuenta está en el catálogo de honorarios y su Fecha
 // Documento empieza con aaaa-mm-dd con un mes que existe (cualquier año: solo se mira el mes, igual que las compras). La Fecha de Pago nunca se usa.
-function itemsFromHonorarios(mapa) {
+// Fuentes por CONCEPTO (`porConcepto`): en lugar de la cuenta del catálogo, la boleta se agrupa por su CONCEPTO (texto); una sin concepto no entra (igual que una compra sin concepto).
+function itemsFromHonorarios(mapa, porConcepto) {
   const buckets = {};
   Object.values(mapa || {}).forEach(h => {
     if (!h || typeof h !== 'object') return;
-    const cat = HON_CUENTAS_BY_CODIGO[h.codigo];
     const mes = mesFromFechaISO(h.fechaDocumento);
+    if (porConcepto) {
+      const concepto = conceptoCompra(h);
+      if (!concepto || !mes) return;
+      if (!buckets[concepto]) buckets[concepto] = { concepto, item: concepto, meses: mesesEnCero(), total: 0 };
+      buckets[concepto].meses[mes] += num(h.montoGasto);
+      return;
+    }
+    const cat = HON_CUENTAS_BY_CODIGO[h.codigo];
     if (!cat || !mes) return;
     if (!buckets[h.codigo]) buckets[h.codigo] = { codigo: h.codigo, item: cat.nombre, meses: mesesEnCero(), total: 0 };
     buckets[h.codigo].meses[mes] += num(h.montoGasto);
   });
-  const items = Object.values(buckets).sort((a, b) => a.codigo.localeCompare(b.codigo));
+  const items = Object.values(buckets).sort(porConcepto ? (a, b) => a.concepto.localeCompare(b.concepto, 'es') : (a, b) => a.codigo.localeCompare(b.codigo));
   items.forEach(it => { it.total = MESES_CARGA.reduce((s, m) => s + it.meses[m], 0); });
   return items;
 }
 // Agregado mensual (derivado, nunca se edita) de las boletas de una entidad: { rbd, nombre, items por cuenta, meses, total }.
-function honAgregadoDesdeBoletas(rbd, nombre, mapa) {
-  const items = itemsFromHonorarios(mapa);
+function honAgregadoDesdeBoletas(rbd, nombre, mapa, porConcepto) {
+  const items = itemsFromHonorarios(mapa, porConcepto);
   const meses = mesesEnCero();
   items.forEach(it => MESES_CARGA.forEach(m => { meses[m] += it.meses[m]; }));
   return { rbd, nombre, items, meses, total: MESES_CARGA.reduce((s, m) => s + meses[m], 0) };
@@ -3487,6 +3596,22 @@ function recomputeHonDesdeBoletas(rbd) {
   if (!CARGA_MANUAL.hon_agregado_por_rbd) CARGA_MANUAL.hon_agregado_por_rbd = {};
   const reg = DATA.registros.find(r => r.rbd === rbd);
   CARGA_MANUAL.hon_agregado_por_rbd[rbd] = honAgregadoDesdeBoletas(rbd, reg ? reg.nombre : rbd, (CARGA_MANUAL.honorarios_por_rbd || {})[rbd]);
+}
+// Fuentes (PR-3): deriva de las boletas de la entidad su agregado por cuenta/concepto y mes (`of.hon_agregado`) y la suma de su proyección (`of.hon_proy`). Nunca se guarda: se recalcula siempre.
+function recomputeHonOtraFuente(of, fuenteKey) {
+  const porConcepto = honPorConcepto(fuenteKey);
+  of.honorarios = objetoPlano(of.honorarios);
+  const ag = honAgregadoDesdeBoletas('', '', of.honorarios, porConcepto);
+  of.hon_agregado = { items: ag.items, meses: ag.meses, total: ag.total };
+  if (!of.hon_proy || !Array.isArray(of.hon_proy.items)) of.hon_proy = { items: [], meses: mesesEnCero(), total: 0 };
+  recomputeBysProyeccionAgregado(of.hon_proy);
+  return of;
+}
+// Ítem de la proyección de honorarios de una fuente (por cuenta o por concepto, según `campo`): se crea en $0.
+function ensureHonProyItemOtraFuente(hp, campo, clave) {
+  let it = hp.items.find(x => x[campo] === clave);
+  if (!it) { it = { [campo]: clave, meses: mesesEnCero(), total: 0 }; hp.items.push(it); }
+  return it;
 }
 // Proyección de honorarios por cuenta: misma forma y mismo recálculo que la de B&S (los ítems son { codigo, meses, total }).
 function ensureHonProyeccion(rbd) {
@@ -3506,8 +3631,9 @@ function nombreItemHonProyeccion(codigo) {
 function avisosHonorario(h, ctx) {
   const out = [];
   if (!h || typeof h !== 'object') return out;
-  avisosCompra(h, HON_CUENTAS_BY_CODIGO).forEach(a => out.push({ ...a, titulo: a.titulo.replace(/La compra/g, 'La boleta').replace(/la compra/g, 'la boleta') }));
-  const cuenta = HON_CUENTAS_BY_CODIGO[h.codigo];
+  // Fuentes por concepto: la regla equivalente a «cuenta no reconocida» es «concepto vacío» (la boleta sin concepto no entra en ningún total) y no hay cuenta que habilitar ni tipo que restringir.
+  avisosCompra(h, ctx && ctx.porConcepto ? CATALOGO_POR_CONCEPTO : HON_CUENTAS_BY_CODIGO).forEach(a => out.push({ ...a, titulo: a.titulo.replace(/La compra/g, 'La boleta').replace(/la compra/g, 'la boleta') }));
+  const cuenta = (ctx && ctx.porConcepto) ? null : HON_CUENTAS_BY_CODIGO[h.codigo];
   if (cuenta && honNivelCuenta(ctx, h.codigo) === 0) {
     out.push({ clave: 'cuentaNoHabilitada', celda: 'cuenta', excluye: false, texto: `⚠ cuenta no habilitada para ${ctx.subvencion}`,
       titulo: `La cuenta ${h.codigo} no está habilitada para ${ctx.subvencion} en el Plan de Cuentas 2026: SUPEREDUC rechazaría la boleta. Se cuenta en los totales; reclasifícala.` });
@@ -3730,6 +3856,10 @@ function ensureOtraFuente(rbd, fuenteKey) {
     // bysMode:'concepto': además de los montos «sin documento» (bys_items), el registro de compras por CONCEPTO (`compras`, siempre Real) y sus totales
     // derivados por concepto y mes (`bys_doc_items`, «documentado»).
     else { entry.compras = {}; entry.bys_doc_items = []; }
+    // Honorarios (Subt. 21, PR-3): boletas por id, su agregado derivado y la proyección por cuenta/concepto (siempre Proyectada). Las boletas son siempre Real.
+    entry.honorarios = {};
+    entry.hon_agregado = { items: [], meses: mesesEnCero(), total: 0 };
+    entry.hon_proy = { items: [], meses: mesesEnCero(), total: 0 };
     computeRealProyOtraFuente(entry, fuenteKey);
     CARGA_MANUAL.otras_fuentes_por_rbd[rbd][fuenteKey] = entry;
   }
@@ -3787,7 +3917,8 @@ function splitRealProyMeses(meses, corte) {
   });
   return { real, proy };
 }
-// `hon` (honorarios, Subt. 21) solo lo trae SEP por ahora (PR-1): si no se pasa, el bloque queda EXACTAMENTE igual que antes (sin la clave `hon`; las demás fuentes lo guardan en su respaldo JSON).
+// `hon` (honorarios, Subt. 21): SEP y las 9 fuentes lo traen (PR-1 y PR-3). En las fuentes NO hay 70/30: es gasto de la fuente en su propia línea, aparte de Remuneraciones y de B&S
+// (gasto = rem + hon + bys). Si no se pasa, el bloque queda sin la clave `hon`.
 function bloqueRealProy(ingreso, rem, bys, hon) {
   const gasto = rem + (hon || 0) + bys;
   return hon === undefined ? { ingreso, rem, bys, gasto, saldo: ingreso - gasto } : { ingreso, rem, hon, bys, gasto, saldo: ingreso - gasto };
@@ -3810,6 +3941,9 @@ function computeRealProyOtraFuente(of, fuenteKey, rbd) {
     // «Documentado»: las compras por documento (con concepto), SIEMPRE Real (como las compras de las demás fuentes), sin importar el corte.
     bysDoc = (of.bys_doc_items || []).reduce((s, it) => s + (it.total || 0), 0);
   }
+  // Honorarios (Subt. 21): las boletas (por mes de su Fecha Documento) son SIEMPRE Real, sin importar el corte; la proyección, siempre Proyectada. Ambas se suman al gasto de la fuente.
+  const honReal = fuente.sinGasto ? 0 : Math.round((of.hon_agregado && of.hon_agregado.total) || 0); // sinGasto (Recuperación LLMM): fuente solo de ingresos, sin honorarios
+  const honProy = fuente.sinGasto ? 0 : Math.round((of.hon_proy && of.hon_proy.total) || 0);
   // El Fondo Fijo no crea una segunda fuente: su monto ya registrado se suma SOLO a B&S Real de
   // Subvención General, desde el mismo RBD/GESPARVU y mes. Compensación SIGFE no interviene aquí.
   if (fuenteKey === 'general' && rbd) {
@@ -3817,9 +3951,9 @@ function computeRealProyOtraFuente(of, fuenteKey, rbd) {
     bysReal += MESES_CARGA.reduce((s, m) => s + mesesFondos[m], 0);
   }
   // B&S de una fuente por concepto = sin documento + documentado (cada parte redondeada a pesos, así `bys = bysSin + bysDoc` cuadra siempre; sin documentos queda igual que antes).
-  const real = bloqueRealProy(Math.round(ingReal), Math.round(rem.real), Math.round(bysReal) + (porConcepto ? Math.round(bysDoc) : 0));
-  const proy = bloqueRealProy(Math.round(ingProy), Math.round(rem.proy), Math.round(bysProy));
-  const total = bloqueRealProy(real.ingreso + proy.ingreso, real.rem + proy.rem, real.bys + proy.bys);
+  const real = bloqueRealProy(Math.round(ingReal), Math.round(rem.real), Math.round(bysReal) + (porConcepto ? Math.round(bysDoc) : 0), honReal);
+  const proy = bloqueRealProy(Math.round(ingProy), Math.round(rem.proy), Math.round(bysProy), honProy);
+  const total = bloqueRealProy(real.ingreso + proy.ingreso, real.rem + proy.rem, real.bys + proy.bys, real.hon + proy.hon);
   if (porConcepto) {
     real.bysDoc = Math.round(bysDoc); real.bysSin = Math.round(bysReal);
     proy.bysDoc = 0; proy.bysSin = Math.round(bysProy);
@@ -3878,7 +4012,7 @@ function causaEstadoOtraFuente(of, fuenteKey) {
 // nEntidades / nDeficit / nSuperavit (según el saldo Total).
 function computeTotalesOtraFuente(fuenteKey) {
   // Fuentes por concepto: además `bysDoc` (documentado) y `bysSin` (sin documento), que suman `bys`.
-  const vacio = () => ({ ingreso: 0, rem: 0, bys: 0, gasto: 0, saldo: 0, ...(comprasPorConcepto(fuenteKey) ? { bysDoc: 0, bysSin: 0 } : {}) });
+  const vacio = () => ({ ingreso: 0, rem: 0, hon: 0, bys: 0, gasto: 0, saldo: 0, ...(comprasPorConcepto(fuenteKey) ? { bysDoc: 0, bysSin: 0 } : {}) });
   const acc = { real: vacio(), proy: vacio(), total: vacio(), nEntidades: 0, nDeficit: 0, nSuperavit: 0 };
   filasOtrasFuentes(fuenteKey).forEach(r => {
     const of = recomputeOtraFuente(r.rbd, fuenteKey);
@@ -4309,7 +4443,7 @@ function onCeldaInput(input) {
     totalCell = document.getElementById(`honproyitemtotal-${rbd}-${idSeguro(codigo)}`);
     if (totalCell) totalCell.textContent = fmtCLP(it.total);
     const totalGeneralCell = document.getElementById(`honproytotal-${rbd}`);
-    if (totalGeneralCell) totalGeneralCell.textContent = fmtCLP(hp.total);
+    if (totalGeneralCell) (totalGeneralCell.querySelector('strong') || totalGeneralCell).textContent = fmtCLP(hp.total);
     scheduleRbdSave(rbd, { nombre: hp.nombre, hon_proyeccion: { items: { [codigo]: { meses: { [mes]: val }, total: it.total } } } });
   } else {
     const simple = ensureSimple(rbd, 'rem_por_rbd');
@@ -4407,17 +4541,22 @@ function honOptionsTipo(codigoCuenta, seleccionado) {
 }
 function honNombreBoleta(h, id) {
   const cod = honCodigoTipo(h.tipoDocumento);
-  return [cod || h.tipoDocumento, h.nroDocumento ? 'N° ' + h.nroDocumento : '', h.fechaDocumento].filter(Boolean).join(' ') || ('cuenta ' + (h.codigo || id));
+  return [cod || h.tipoDocumento, h.nroDocumento ? 'N° ' + h.nroDocumento : '', h.fechaDocumento].filter(Boolean).join(' ')
+    || (h.concepto !== undefined ? 'concepto ' + (h.concepto || id) : 'cuenta ' + (h.codigo || id));
 }
 function honFilaHTML(ctx, id, h, printMode) {
-  const cat = HON_CUENTAS_BY_CODIGO[h.codigo];
+  const cat = ctx.porConcepto ? null : HON_CUENTAS_BY_CODIGO[h.codigo];
   const avisos = printMode ? [] : avisosHonorario(h, ctx); // marcas ⚠ (solo en pantalla: el PDF no las lleva)
   const idAttr = escHtml(id);
   const cod = honCodigoTipo(h.tipoDocumento);
   const tipoTxt = cod ? honNombreTipo(cod) : (h.tipoDocumento || '');
   const nombreBoleta = escHtml(honNombreBoleta(h, id));
+  // Fuentes por concepto: el concepto (texto) en lugar de la cuenta del catálogo.
+  const celdaCuenta = ctx.porConcepto
+    ? `${escHtml(conceptoCompra(h))}${insigniasAvisoHTML(avisos, 'cuenta')}`
+    : `${escHtml(h.codigo)}${cat ? ` · ${escHtml(cat.nombre)}` : ''}${insigniasAvisoHTML(avisos, 'cuenta')}`;
   return `<tr data-hon-id="${idAttr}">
-      <td>${escHtml(h.codigo)}${cat ? ` · ${escHtml(cat.nombre)}` : ''}${insigniasAvisoHTML(avisos, 'cuenta')}</td>
+      <td>${celdaCuenta}</td>
       <td${cod ? ` title="${escHtml(cod)}"` : ''}>${escHtml(tipoTxt)}${insigniasAvisoHTML(avisos, 'tipo')}</td>
       <td>${escHtml(h.nroDocumento || '')}</td>
       <td>${escHtml(h.fechaDocumento || '')}${insigniasAvisoHTML(avisos, 'doc')}</td>
@@ -4435,10 +4574,24 @@ function honFilaHTML(ctx, id, h, printMode) {
       </td>`}
     </tr>`;
 }
+// Conceptos de honorarios que ya tiene la entidad en una fuente por concepto (los de sus boletas y los de su proyección), sin repetir y ordenados: sugerencias del formulario.
+function conceptosHonDeEntidad(ctx) {
+  const set = new Set();
+  Object.values(ctx.boletas()).forEach(h => { const t = conceptoCompra(h); if (t) set.add(t); });
+  const hp = ctx.proyeccion();
+  (hp ? hp.items : []).forEach(it => { const t = textoSeguro(it.concepto).trim(); if (t) set.add(t); });
+  return Array.from(set).sort((a, b) => a.localeCompare(b, 'es'));
+}
+function honDatalistHTML(ctx) {
+  return ctx.porConcepto ? `<datalist id="${ctx.listaConceptosId}">${conceptosHonDeEntidad(ctx).map(t => `<option value="${escHtml(t)}"></option>`).join('')}</datalist>` : '';
+}
 function honFormHTML(ctx) {
+  const campoCuenta = ctx.porConcepto
+    ? `<label class="compra-field compra-field-concepto"><span class="compra-field-label">Concepto de honorarios</span><input type="text" class="hon-input" data-field="concepto" list="${ctx.listaConceptosId}" autocomplete="off" placeholder="Elige uno o escribe uno nuevo" title="Concepto de la boleta (p. ej. «Taller de arte»): elige uno de la lista (los de esta entidad en esta fuente) o escribe uno nuevo"></label>`
+    : `<label class="compra-field"><span class="compra-field-label">Cuenta de honorarios</span><select class="hon-input" data-field="codigo">${honOptionsCuentas(ctx)}</select></label>`;
   return `
     <div class="hon-form-grid" ${ctx.attrs}>
-      <label class="compra-field"><span class="compra-field-label">Cuenta de honorarios</span><select class="hon-input" data-field="codigo">${honOptionsCuentas(ctx)}</select></label>
+      ${campoCuenta}
       <label class="compra-field"><span class="compra-field-label">Tipo de documento (honorarios)</span><select class="hon-input" data-field="tipoDocumento">${honOptionsTipo('', '')}</select></label>
       <label class="compra-field"><span class="compra-field-label">N° boleta</span><input type="text" class="hon-input" data-field="nroDocumento" autocomplete="off" placeholder="N° boleta"></label>
       <label class="compra-field"><span class="compra-field-label">Fecha boleta</span><input type="date" class="hon-input" data-field="fechaDocumento" title="Fecha de emisión de la boleta: determina el mes del gasto"></label>
@@ -4446,7 +4599,7 @@ function honFormHTML(ctx) {
       <label class="compra-field"><span class="compra-field-label">Descripción de la boleta</span><input type="text" class="hon-input" data-field="descripcion" autocomplete="off" placeholder="Descripción del gasto"></label>
       <label class="compra-field"><span class="compra-field-label">RUT del prestador</span><input type="text" class="hon-input" data-field="rutProveedor" autocomplete="off" placeholder="11111111-1"></label>
       <label class="compra-field"><span class="compra-field-label">Nombre del prestador</span><input type="text" class="hon-input" data-field="nombreProveedor" autocomplete="off" placeholder="Nombre del prestador"></label>
-      <label class="compra-field"><span class="compra-field-label">Monto gasto de la boleta</span><input type="text" inputmode="numeric" class="hon-input" data-field="montoGasto" autocomplete="off" placeholder="Monto bruto" title="Monto bruto de la boleta que se imputa a este RBD (menor si la boleta se reparte)"></label>
+      <label class="compra-field"><span class="compra-field-label">Monto gasto de la boleta</span><input type="text" inputmode="numeric" class="hon-input" data-field="montoGasto" autocomplete="off" placeholder="Monto bruto" title="Monto bruto de la boleta que se imputa a ${escHtml(ctx.clave === 'sep' ? 'este RBD' : 'esta entidad')} (menor si la boleta se reparte)"></label>
       <label class="compra-field"><span class="compra-field-label">Monto documento de la boleta</span><input type="text" inputmode="numeric" class="hon-input" data-field="montoDocumento" autocomplete="off" placeholder="= Monto gasto si se deja vacío" title="Valor total de la boleta (bruto). Vacío = igual al Monto gasto"></label>
       <label class="compra-field compra-field-dc" title="${escHtml(AYUDA_DC)}"><span class="compra-field-label">N° DC de la boleta</span><input type="text" class="hon-input" data-field="documentoContable" maxlength="100" autocomplete="off" placeholder="p. ej. DC_344" title="${escHtml(AYUDA_DC)}"></label>
       <span class="compra-form-actions">
@@ -4463,7 +4616,7 @@ function honTablaHTML(ctx, printMode) {
     .map(([id, h]) => honFilaHTML(ctx, id, h, printMode)).join('');
   return `<div class="compras-scroll">
         <table class="detalle-table hon-table">
-          <thead><tr><th>Cuenta</th><th>Tipo doc.</th><th>N° doc.</th><th>Fecha doc.</th><th>Fecha pago</th><th>Descripción</th><th>RUT prestador</th><th>Nombre prestador</th><th class="num">Monto gasto</th><th class="num">Monto doc.</th><th title="${escHtml(AYUDA_DC)}">N° DC</th>${printMode ? '' : '<th aria-label="Acciones de honorarios"></th>'}</tr></thead>
+          <thead><tr><th>${ctx.porConcepto ? 'Concepto' : 'Cuenta'}</th><th>Tipo doc.</th><th>N° doc.</th><th>Fecha doc.</th><th>Fecha pago</th><th>Descripción</th><th>RUT prestador</th><th>Nombre prestador</th><th class="num">Monto gasto</th><th class="num">Monto doc.</th><th title="${escHtml(AYUDA_DC)}">N° DC</th>${printMode ? '' : '<th aria-label="Acciones de honorarios"></th>'}</tr></thead>
           <tbody>${filas || `<tr><td colspan="${printMode ? 11 : 12}" class="detalle-sin-compras">Sin boletas de honorarios registradas todavía.</td></tr>`}</tbody>
         </table>
       </div>`;
@@ -4473,59 +4626,74 @@ function honFilaRealHTML(ctx) {
   const ag = ctx.agregado();
   const cells = MESES_CARGA.map(m => { const v = ag ? ag.meses[m] : 0; return `<td class="num mes-real">${v ? fmtCLP(v) : '—'}</td>`; }).join('');
   return `<table class="detalle-table">${DETALLE_COLGROUP}
-      <thead><tr><th>Honorarios (Subt. 21) — boletas</th>${mesHeaderCellsHTML('hon', ctx.rbd)}<th class="num">Total</th></tr></thead>
-      <tbody><tr><td class="item-label">Honorarios (Subt. 21)</td>${cells}<td class="num item-total" id="hontotal-${ctx.rbd}">${fmtCLP(ag ? ag.total : 0)}</td></tr></tbody>
+      <thead><tr><th>Honorarios (Subt. 21) — boletas</th>${ctx.cabeceraMeses('hon')}<th class="num">Total</th></tr></thead>
+      <tbody><tr><td class="item-label">Honorarios (Subt. 21)</td>${cells}<td class="num item-total" id="hontotal-${ctx.rbd}${ctx.sufijoId}">${fmtCLP(ag ? ag.total : 0)}</td></tr></tbody>
     </table>`;
 }
-// Proyección de honorarios por cuenta (siempre «proyectada»; se SUMA a las boletas): mismo patrón que «Bienes y Servicios (Proyección)».
+// Proyección de honorarios por cuenta (o por concepto en las fuentes sin cuenta; siempre «proyectada»; se SUMA a las boletas): mismo patrón que «Bienes y Servicios (Proyección)».
 function honProyeccionHTML(ctx, printMode) {
-  const rbd = ctx.rbd;
+  const rbd = ctx.rbd, sf = ctx.sufijoId, campo = ctx.campoClave;
   const hp = ctx.proyeccion();
   const itemsList = hp ? hp.items : [];
   const total = hp ? hp.total : 0;
+  const rotuloClave = ctx.porConcepto ? 'concepto' : 'cuenta';
   const filas = itemsList.map(it => {
-    const cells = MESES_CARGA.map(m => celdaInputHTML(rbd, 'hon_proy', m, it.meses[m] || 0, `data-codigo="${escHtml(it.codigo)}"`, printMode, 'Proyección honorarios ' + nombreItemHonProyeccion(it.codigo))).join('');
-    const delCell = printMode ? '' : `<td class="compra-acciones-cell" style="width:32px;"><button type="button" class="honproy-del-btn" ${ctx.attrs} data-codigo="${escHtml(it.codigo)}" title="Quitar cuenta de la proyección de honorarios" aria-label="Quitar cuenta de la proyección de honorarios: ${escHtml(nombreItemHonProyeccion(it.codigo))}">🗑</button></td>`;
-    return `<tr><td class="item-label">${escHtml(nombreItemHonProyeccion(it.codigo))}</td>${cells}<td class="num item-total" id="honproyitemtotal-${rbd}-${idSeguro(it.codigo)}">${fmtCLP(it.total)}</td>${delCell}</tr>`;
+    const clave = it[campo];
+    const nombre = ctx.nombreItemProy(clave);
+    const delCell = printMode ? '' : `<td class="compra-acciones-cell" style="width:32px;"><button type="button" class="honproy-del-btn" ${ctx.attrs} data-${campo}="${escHtml(clave)}" title="Quitar ${rotuloClave} de la proyección de honorarios" aria-label="Quitar ${rotuloClave} de la proyección de honorarios: ${escHtml(nombre)}">🗑</button></td>`;
+    return `<tr><td class="item-label">${escHtml(nombre)}</td>${ctx.celdasProy(it, printMode)}<td class="num item-total" id="honproyitemtotal-${rbd}${sf}-${idSeguro(clave)}">${fmtCLP(it.total)}</td>${delCell}</tr>`;
   }).join('');
-  const filasHTML = filas || `<tr><td colspan="${printMode ? 14 : 15}" class="detalle-sin-compras">Sin cuentas de proyección de honorarios todavía${printMode ? '' : ' — elige una de la lista de abajo y agrégala'}.</td></tr>`;
+  const filasHTML = filas || `<tr><td colspan="${printMode ? 14 : 15}" class="detalle-sin-compras">Sin ${ctx.porConcepto ? 'conceptos' : 'cuentas'} de proyección de honorarios todavía${printMode ? '' : ` — ${ctx.porConcepto ? 'escribe uno abajo' : 'elige una de la lista de abajo'} y agrégal${ctx.porConcepto ? 'o' : 'a'}`}.</td></tr>`;
   const totalRow = itemsList.length
-    ? `<tr><td class="item-label"><strong>Total Honorarios (Proyección)</strong></td>${MESES_CARGA.map(() => '<td></td>').join('')}<td class="num item-total" id="honproytotal-${rbd}"><strong>${fmtCLP(total)}</strong></td>${printMode ? '' : '<td></td>'}</tr>`
+    ? `<tr><td class="item-label"><strong>Total Honorarios (Proyección)</strong></td>${MESES_CARGA.map(() => '<td></td>').join('')}<td class="num item-total" id="honproytotal-${rbd}${sf}"><strong>${fmtCLP(total)}</strong></td>${printMode ? '' : '<td></td>'}</tr>`
     : '';
-  const yaAgregados = new Set(itemsList.map(it => it.codigo));
-  const addRowHTML = printMode ? '' : `
+  const yaAgregados = new Set(itemsList.map(it => it[campo]));
+  const addRowHTML = printMode ? '' : (ctx.porConcepto ? `
       <div class="honproy-add-row">
-        <select class="hon-input honproy-add-select" id="honproyAddSelect-${rbd}" aria-label="Cuenta de proyección de honorarios para agregar, ${escHtml(ctx.etiqueta)}">
+        <input type="text" class="hon-input honproy-add-input" id="honproyAddInput-${rbd}${sf}" list="${ctx.listaConceptosId}" autocomplete="off" placeholder="Concepto de la proyección de honorarios" aria-label="Concepto de proyección de honorarios para agregar, ${escHtml(ctx.etiqueta)}">
+        <button type="button" class="add-honproy-btn" ${ctx.attrs}>+ Agregar concepto</button>
+      </div>` : `
+      <div class="honproy-add-row">
+        <select class="hon-input honproy-add-select" id="honproyAddSelect-${rbd}${sf}" aria-label="Cuenta de proyección de honorarios para agregar, ${escHtml(ctx.etiqueta)}">
           <option value="">+ Elegir cuenta de proyección de honorarios…</option>
           ${honCuentasHabilitadas(ctx).filter(c => !yaAgregados.has(c.codigo)).map(c => `<option value="${c.codigo}">${c.codigo} · ${escHtml(c.nombre)}</option>`).join('')}
         </select>
         <button type="button" class="add-honproy-btn" ${ctx.attrs}>+ Agregar cuenta</button>
-      </div>`;
+      </div>`);
   const dobles = mesesHonConBoletasYProyeccion(ctx.agregado() && ctx.agregado().meses, hp && hp.meses);
   const avisoDoble = dobles.length
     ? `<div class="hon-aviso-doble plan-nota plan-nota-aviso">⚠ ${dobles.map(m => MESES_CARGA_TITLE[MESES_CARGA.indexOf(m)]).join(', ')}: hay boletas y también proyección de honorarios. Ambas se SUMAN; si la proyección ya se cumplió con una boleta, réstala de la proyección para no contarla dos veces.</div>`
     : '';
   return `<table class="detalle-table">${DETALLE_COLGROUP}
-      <thead><tr><th>Honorarios (Proyección) — por cuenta</th>${mesHeaderCellsHTML('hon_proy', rbd)}<th class="num">Total</th>${printMode ? '' : '<th aria-label="Acciones de la proyección de honorarios"></th>'}</tr></thead>
+      <thead><tr><th>Honorarios (Proyección) — por ${rotuloClave}</th>${ctx.cabeceraMeses('hon_proy')}<th class="num">Total</th>${printMode ? '' : '<th aria-label="Acciones de la proyección de honorarios"></th>'}</tr></thead>
       <tbody>${filasHTML}${totalRow}</tbody>
     </table>${addRowHTML}${avisoDoble}`;
 }
-// Nota con las cuentas que aceptan honorarios en la subvención del contexto (según el Plan de Cuentas 2026).
+// Nota con las cuentas que aceptan honorarios en la subvención del contexto (según el Plan de Cuentas 2026) o, sin cuenta, cómo se identifica cada boleta.
 function honNotaPlanHTML(ctx) {
+  if (ctx.porConcepto) return `<div class="plan-nota">${escHtml(ctx.subvencion)} no tiene código de cuenta SUPEREDUC: cada boleta se identifica por un <strong>concepto</strong> libre (igual que su registro de compras) y su tipo de documento es uno de los 5 de honorarios (BOLH, BHE, BOLHE, BPST, BPSTE).</div>`;
   const hab = honCuentasHabilitadas(ctx);
   const conPert = hab.filter(c => honNivelCuenta(ctx, c.codigo) === 2).length;
-  return `<div class="plan-nota">Plan de Cuentas SUPEREDUC 2026 · <strong>${escHtml(ctx.subvencion)}</strong>: ${hab.length} cuentas aceptan documentos de honorarios de ${HON_CUENTAS.length}${conPert ? ` (${conPert} sujetas a exigencias de pertinencia: PME, alumnos prioritarios y preferentes…)` : ''}. El tipo de documento depende de la cuenta (BOLH, BHE, BOLHE, BPST, BPSTE).</div>`;
+  const quien = ctx.rbd === 'AC' && ctx.fuente && ctx.colPlan !== ctx.fuente.colPlan ? `${ctx.subvencion} — Administración Central` : ctx.subvencion;
+  return `<div class="plan-nota">Plan de Cuentas SUPEREDUC 2026 · <strong>${escHtml(quien)}</strong>: ${hab.length} cuentas aceptan documentos de honorarios de ${HON_CUENTAS.length}${conPert ? ` (${conPert} sujetas a exigencias de pertinencia: PME, alumnos prioritarios y preferentes…)` : ''}. El tipo de documento depende de la cuenta (BOLH, BHE, BOLHE, BPST, BPSTE).</div>`;
+}
+// Cómo suman los honorarios en los totales de la entidad: SEP los cuenta del lado del personal (70 %); las demás fuentes no tienen 70/30 y los llevan en su propia línea de gasto.
+function honTextoTotales(ctx) {
+  if (ctx.clave === 'sep') return 'Los honorarios cuentan del lado del <strong>personal</strong> (el 70 %) junto con las remuneraciones, en su propia línea.';
+  return 'Esta fuente no tiene 70/30: los honorarios son gasto de la fuente en su propia línea «Honorarios (Subt. 21)», aparte de Remuneraciones y de Bienes y Servicios; las boletas son siempre Real y la proyección, siempre Proyectada.'
+    + (ctx.fuente && ctx.fuente.incomeShape === 'junji3' ? ' En JUNJI son gasto de personal: se financian como las Remuneraciones (con cualquiera de sus ingresos) y NO cuentan en el saldo de Operación para Bienes y Servicios.' : '');
 }
 // Bloque completo del detalle: fila de boletas, proyección y registro (formulario + tabla). Se inserta justo debajo de «Remuneraciones (Subt. 21)».
 function honSectionHTML(ctx, printMode) {
   const resumen = printMode ? '' : resumenAvisosHonorariosHTML(resumenAvisosHonorarios(ctx.boletas(), ctx));
   return `
     <div class="hon-block" style="margin-top:14px;">
+      ${printMode ? '' : honDatalistHTML(ctx)}
       ${honFilaRealHTML(ctx)}
       <div style="margin-top:8px;">${honProyeccionHTML(ctx, printMode)}</div>
       <div class="hon-section">
         <div class="detalle-header">
-          <strong>Registro de honorarios ${escHtml(ctx.subvencion)} (Subt. 21)</strong> — <span class="detalle-sub">una fila por boleta, con las columnas del Libro de Honorarios de SUPEREDUC (A–L); cada boleta se suma sola al mes de su Fecha Documento. Solo monto bruto. Los honorarios cuentan del lado del <strong>personal</strong> (el 70 %) junto con las remuneraciones, en su propia línea. <strong>N° DC</strong> es interno y no va en ningún CSV.</span>
+          <strong>Registro de honorarios ${escHtml(ctx.subvencion)} (Subt. 21)</strong> — <span class="detalle-sub">una fila por boleta, con las columnas del Libro de Honorarios de SUPEREDUC (A–L); cada boleta se suma sola al mes de su Fecha Documento. Solo monto bruto. ${honTextoTotales(ctx)} <strong>N° DC</strong> es interno y no va en ningún CSV.</span>
         </div>
         ${printMode ? '' : honFormHTML(ctx)}
         ${printMode ? '' : honNotaPlanHTML(ctx)}
@@ -4534,7 +4702,6 @@ function honSectionHTML(ctx, printMode) {
       </div>
     </div>`;
 }
-
 function buildDetalleHTML(rbd, printMode) {
   const registro = DATA.registros.find(x => x.rbd === rbd);
   const ag = CARGA_MANUAL.agregado_por_rbd[rbd];
@@ -5021,11 +5188,19 @@ function leerCamposHon(ctx) {
   return campos;
 }
 // Valida y arma la boleta a guardar: { campos } o { error }. Los montos se leen con parseMontoCL (1500000, 1.500.000…); las boletas son gasto POSITIVO; un Monto documento vacío vale lo mismo que el Monto gasto.
-function armarBoletaHon(crudo) {
-  if (!crudo.codigo) return { error: 'Elige una cuenta de honorarios.' };
+// Con cuenta (SEP y las 4 fuentes con código SUPEREDUC): la cuenta debe estar en el catálogo y aceptar el tipo. Fuentes por concepto: un concepto (clave de mapa válida) en lugar de la cuenta.
+function armarBoletaHon(crudo, ctx) {
+  const porConcepto = !!(ctx && ctx.porConcepto);
+  let concepto = '';
+  if (porConcepto) {
+    concepto = String(crudo.concepto || '').trim();
+    if (!concepto) return { error: 'Escribe o elige un concepto de honorarios.' };
+    const errClave = validarClaveMapa(concepto, 'El concepto');
+    if (errClave) return { error: errClave + '\nNo se guardó la boleta.' };
+  } else if (!crudo.codigo) return { error: 'Elige una cuenta de honorarios.' };
   const tipo = honCodigoTipo(crudo.tipoDocumento);
   if (!tipo) return { error: 'Elige el tipo de documento de honorarios (BOLH, BHE, BOLHE, BPST o BPSTE).' };
-  if (!honTipoPermitido(crudo.codigo, tipo)) {
+  if (!porConcepto && !honTipoPermitido(crudo.codigo, tipo)) {
     const c = HON_CUENTAS_BY_CODIGO[crudo.codigo];
     return { error: `La cuenta ${crudo.codigo} no acepta el tipo ${tipo}` + (c ? ` (acepta: ${c.docs.join(', ')}).` : ' porque no está en el catálogo de honorarios.') };
   }
@@ -5037,7 +5212,8 @@ function armarBoletaHon(crudo) {
   if (!md.ok) return { error: MONTO_AYUDA_INVALIDO };
   if (md.valor < 0) return { error: 'El monto del documento no puede ser negativo.' };
   return { campos: {
-    codigo: crudo.codigo, tipoDocumento: tipo, nroDocumento: crudo.nroDocumento, fechaDocumento: crudo.fechaDocumento, fechaPago: crudo.fechaPago,
+    ...(porConcepto ? { concepto } : { codigo: crudo.codigo }),
+    tipoDocumento: tipo, nroDocumento: crudo.nroDocumento, fechaDocumento: crudo.fechaDocumento, fechaPago: crudo.fechaPago,
     descripcion: crudo.descripcion, rutProveedor: crudo.rutProveedor, nombreProveedor: crudo.nombreProveedor,
     montoGasto: mg.valor, montoDocumento: md.valor > 0 ? md.valor : mg.valor, documentoContable: crudo.documentoContable,
   } };
@@ -5092,10 +5268,10 @@ function llenarFormularioHon(ctx, campos) {
   const wrap = honGrid(ctx);
   if (!wrap) return;
   const get = (f) => (campos[f] !== undefined && campos[f] !== null) ? campos[f] : '';
-  const selCuenta = wrap.querySelector('select[data-field="codigo"]');
-  fijarValorSelect(selCuenta, String(get('codigo')), String(get('codigo')));
+  const selCuenta = wrap.querySelector('select[data-field="codigo"]'); // las fuentes por concepto no tienen selector de cuenta: llevan un campo de concepto
   const selTipo = wrap.querySelector('select[data-field="tipoDocumento"]');
-  selTipo.innerHTML = honOptionsTipo(selCuenta.value, '');
+  if (selCuenta) fijarValorSelect(selCuenta, String(get('codigo')), String(get('codigo')));
+  selTipo.innerHTML = honOptionsTipo(selCuenta ? selCuenta.value : '', '');
   fijarValorSelect(selTipo, honCodigoTipo(get('tipoDocumento')) || String(get('tipoDocumento')), String(get('tipoDocumento')));
   wrap.querySelectorAll('.hon-input').forEach(el => {
     const f = el.dataset.field;
@@ -5112,8 +5288,7 @@ function resetFormularioHonUI(ctx) {
   const cancelBtn = document.querySelector(`${ctx.modalSel} .cancelar-edicion-hon-btn`);
   if (cancelBtn) cancelBtn.classList.add('hidden');
 }
-function iniciarEdicionHon(rbd, id) {
-  const ctx = ctxHonSep(rbd);
+function iniciarEdicionHon(ctx, id) {
   const campos = ctx.boletas()[id];
   if (!campos) return;
   llenarFormularioHon(ctx, campos);
@@ -5127,8 +5302,7 @@ function iniciarEdicionHon(rbd, id) {
   if (cancelBtn) cancelBtn.classList.remove('hidden');
   wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
-function duplicarHon(rbd, id) {
-  const ctx = ctxHonSep(rbd);
+function duplicarHon(ctx, id) {
   const campos = ctx.boletas()[id];
   if (!campos) return;
   resetFormularioHonUI(ctx);
@@ -5146,48 +5320,42 @@ function cancelarEdicionHon(ctx) {
   }
 }
 // Si la boleta que se estaba editando desapareció (otra persona la borró), el formulario conserva lo escrito pero pasa a "boleta nueva".
-function revisarModoEdicionHon(rbd) {
-  const ctx = ctxHonSep(rbd);
+function revisarModoEdicionHon(ctx) {
   const wrap = honGrid(ctx);
   if (!wrap || !wrap.dataset.editingId) return;
   if (!ctx.boletas()[wrap.dataset.editingId]) resetFormularioHonUI(ctx);
 }
-// Recalcula lo que depende de las boletas / la proyección de UNA entidad y repinta lo que se ve de inmediato (fila de la tabla SEP, tarjetas y detalle abierto).
+// Recalcula lo que depende de las boletas / la proyección de UNA entidad y repinta lo que se ve de inmediato (SEP: fila de la tabla, tarjetas y detalle abierto; fuentes: ver ctx.tras).
 function honTrasCambio(rbd) {
   recomputeHonDesdeBoletas(rbd);
   const r = DATA.registros.find(x => x.rbd === rbd);
   if (r) { recomputeRegistro(r); updateRowDOM(rbd); }
   if (modalRbdAbierto === rbd) renderModalContenido();
 }
-function agregarHonorario(rbd) {
-  const ctx = ctxHonSep(rbd);
+function agregarHonorario(ctx) {
   const crudo = leerCamposHon(ctx);
   if (!crudo) return;
-  const { campos, error } = armarBoletaHon(crudo);
+  const { campos, error } = armarBoletaHon(crudo, ctx);
   if (error) { alert(error); return; }
   const wrap = honGrid(ctx);
   const id = (wrap && wrap.dataset.editingId) || generarCompraId();
-  if (!CARGA_MANUAL.honorarios_por_rbd) CARGA_MANUAL.honorarios_por_rbd = {};
-  if (!CARGA_MANUAL.honorarios_por_rbd[rbd]) CARGA_MANUAL.honorarios_por_rbd[rbd] = {};
-  CARGA_MANUAL.honorarios_por_rbd[rbd][id] = campos;
-  honTrasCambio(rbd);
+  ctx.asegurarBoletas()[id] = campos;
+  ctx.tras();
   cancelarEdicionHon(ctx); // formulario limpio y fuera del modo edición (el modal ya no se reconstruye, así que se limpia a mano)
-  const reg = DATA.registros.find(x => x.rbd === rbd);
-  scheduleRbdSave(rbd, { nombre: reg ? reg.nombre : rbd, honorarios: { [id]: campos } });
-  flushRbdSaveNow(rbd);
+  scheduleRbdSave(ctx.rbd, { nombre: ctx.nombre(), ...ctx.payloadBoleta(id, campos) });
+  flushRbdSaveNow(ctx.rbd);
 }
-async function eliminarHonorario(rbd, id) {
+async function eliminarHonorario(ctx, id) {
   if (!confirm('¿Eliminar esta boleta de honorarios? No se puede deshacer.')) return;
-  flushRbdSaveNow(rbd);
-  const ctx = ctxHonSep(rbd);
+  flushRbdSaveNow(ctx.rbd);
   const wrap = honGrid(ctx);
   if (wrap && wrap.dataset.editingId === id) cancelarEdicionHon(ctx); // se borra la boleta que se estaba editando
-  if (CARGA_MANUAL.honorarios_por_rbd && CARGA_MANUAL.honorarios_por_rbd[rbd]) delete CARGA_MANUAL.honorarios_por_rbd[rbd][id];
-  honTrasCambio(rbd);
+  delete ctx.asegurarBoletas()[id];
+  ctx.tras();
   if (!currentUser) return;
   try {
-    await setDoc(doc(db, CARGA_COLLECTION, rbd), {
-      honorarios: { [id]: deleteField() },
+    await setDoc(doc(db, CARGA_COLLECTION, ctx.rbd), {
+      ...ctx.payloadBoleta(id, deleteField()),
       lastModifiedBy: currentUser.email,
       lastModifiedAt: serverTimestamp(),
     }, { merge: true });
@@ -5195,34 +5363,46 @@ async function eliminarHonorario(rbd, id) {
     alert('No se pudo eliminar la boleta para el resto del equipo: ' + err.message);
   }
 }
-// Proyección de honorarios por cuenta: igual que la de B&S, un ítem se puede agregar en $0 y completarse después mes a mes (se guarda al instante).
-function agregarHonProyeccionItem(rbd) {
-  const select = document.getElementById(`honproyAddSelect-${rbd}`);
-  if (!select || !select.value) { alert('Elige una cuenta de la lista antes de agregar.'); return; }
-  const codigo = select.value;
-  const hp = ensureHonProyeccion(rbd);
-  const it = ensureBysProyeccionItem(hp, codigo);
+// Proyección de honorarios por cuenta (o por concepto): igual que la de B&S, un ítem se puede agregar en $0 y completarse después mes a mes (se guarda al instante).
+function agregarHonProyeccionItem(ctx) {
+  let clave, input = null;
+  if (ctx.porConcepto) {
+    input = document.getElementById(`honproyAddInput-${ctx.rbd}${ctx.sufijoId}`);
+    clave = (input && input.value || '').trim();
+    if (!clave) { alert('Escribe un concepto antes de agregar.'); return; }
+    const errClave = validarClaveMapa(clave, 'El concepto');
+    if (errClave) { alert(errClave + '\nNo se agregó el concepto.'); return; }
+    const actual = ctx.proyeccion();
+    if (actual && actual.items.some(x => x.concepto === clave)) { alert('Ya existe ese concepto en la proyección de honorarios.'); return; }
+  } else {
+    const select = document.getElementById(`honproyAddSelect-${ctx.rbd}${ctx.sufijoId}`);
+    if (!select || !select.value) { alert('Elige una cuenta de la lista antes de agregar.'); return; }
+    clave = select.value;
+  }
+  const hp = ctx.asegurarProyeccion();
+  const it = ensureHonProyItemOtraFuente(hp, ctx.campoClave, clave);
   recomputeBysProyeccionAgregado(hp);
-  honTrasCambio(rbd);
-  scheduleRbdSave(rbd, { nombre: hp.nombre, hon_proyeccion: { items: { [codigo]: { meses: it.meses, total: it.total } } } });
-  flushRbdSaveNow(rbd);
+  ctx.tras();
+  if (input) input.value = ''; // el modal ya no se reconstruye en lo que se está escribiendo: el campo se limpia a mano
+  scheduleRbdSave(ctx.rbd, { nombre: ctx.nombre(), ...ctx.payloadProy(clave, ctx.valorProy(it)) });
+  flushRbdSaveNow(ctx.rbd);
 }
-async function eliminarHonProyeccionItem(rbd, codigo) {
-  if (!confirm('¿Quitar esta cuenta de la proyección de honorarios? No se puede deshacer.')) return;
-  flushRbdSaveNow(rbd);
-  const hp = ensureHonProyeccion(rbd);
-  hp.items = hp.items.filter(x => x.codigo !== codigo);
+async function eliminarHonProyeccionItem(ctx, clave) {
+  if (!confirm(`¿Quitar ${ctx.porConcepto ? 'este concepto' : 'esta cuenta'} de la proyección de honorarios? No se puede deshacer.`)) return;
+  flushRbdSaveNow(ctx.rbd);
+  const hp = ctx.asegurarProyeccion();
+  hp.items = hp.items.filter(x => x[ctx.campoClave] !== clave);
   recomputeBysProyeccionAgregado(hp);
-  honTrasCambio(rbd);
+  ctx.tras();
   if (!currentUser) return;
   try {
-    await setDoc(doc(db, CARGA_COLLECTION, rbd), {
-      hon_proyeccion: { items: { [codigo]: deleteField() } },
+    await setDoc(doc(db, CARGA_COLLECTION, ctx.rbd), {
+      ...ctx.payloadProy(clave, deleteField()),
       lastModifiedBy: currentUser.email,
       lastModifiedAt: serverTimestamp(),
     }, { merge: true });
   } catch (err) {
-    alert('No se pudo quitar la cuenta para el resto del equipo: ' + err.message);
+    alert(`No se pudo quitar ${ctx.porConcepto ? 'el concepto' : 'la cuenta'} para el resto del equipo: ` + err.message);
   }
 }
 
@@ -5788,7 +5968,7 @@ function renderModalContenido(opts) {
     try { morphContenedor(modalBodyEl, buildDetalleHTML(rbd), opts); } // modal ya abierto: se reconcilia, no se reemplaza
     finally { modalMorphEnCurso = false; }
     revisarModoEdicionCompra(rbd);
-    revisarModoEdicionHon(rbd);
+    revisarModoEdicionHon(ctxHonSep(rbd));
     return;
   }
   const activeEl = document.activeElement;
@@ -5876,6 +6056,26 @@ document.addEventListener('keydown', (e) => {
   else if (!document.getElementById('helpModal').classList.contains('hidden')) cerrarHelpModal();
 });
 
+// Honorarios (Subt. 21): registro por boleta y proyección por cuenta/concepto. Un solo manejador de clics para el modal de SEP y el de las fuentes: cada botón dice de qué entidad
+// (y, en las fuentes, de qué fuente) es con data-rbd / data-fuente, y de ahí sale su contexto (ctxHonDeElemento).
+function manejarClicHonorarios(e) {
+  const clave = (b) => (b.hasAttribute('data-codigo') ? b.getAttribute('data-codigo') : b.getAttribute('data-concepto'));
+  const addHonBtn = e.target.closest('.add-hon-btn');
+  if (addHonBtn) { agregarHonorario(ctxHonDeElemento(addHonBtn)); return true; }
+  const cancelHonBtn = e.target.closest('.cancelar-edicion-hon-btn');
+  if (cancelHonBtn) { cancelarEdicionHon(ctxHonDeElemento(cancelHonBtn)); return true; }
+  const editHonBtn = e.target.closest('.hon-edit-btn');
+  if (editHonBtn) { iniciarEdicionHon(ctxHonDeElemento(editHonBtn), editHonBtn.getAttribute('data-hon-id')); return true; }
+  const dupHonBtn = e.target.closest('.hon-dup-btn');
+  if (dupHonBtn) { duplicarHon(ctxHonDeElemento(dupHonBtn), dupHonBtn.getAttribute('data-hon-id')); return true; }
+  const delHonBtn = e.target.closest('.hon-del-btn');
+  if (delHonBtn) { eliminarHonorario(ctxHonDeElemento(delHonBtn), delHonBtn.getAttribute('data-hon-id')); return true; }
+  const addHonProyBtn = e.target.closest('.add-honproy-btn');
+  if (addHonProyBtn) { agregarHonProyeccionItem(ctxHonDeElemento(addHonProyBtn)); return true; }
+  const delHonProyBtn = e.target.closest('.honproy-del-btn');
+  if (delHonProyBtn) { eliminarHonProyeccionItem(ctxHonDeElemento(delHonProyBtn), clave(delHonProyBtn)); return true; }
+  return false;
+}
 const modalBodyEl = document.getElementById('modalBody');
 modalBodyEl.addEventListener('click', (e) => {
   const addBtn = e.target.closest('.add-compra-btn');
@@ -5892,21 +6092,7 @@ modalBodyEl.addEventListener('click', (e) => {
   if (addBysProyBtn) { agregarBysProyeccionItem(addBysProyBtn.getAttribute('data-rbd')); return; }
   const delBysProyBtn = e.target.closest('.bysproy-del-btn');
   if (delBysProyBtn) { eliminarBysProyeccionItem(delBysProyBtn.getAttribute('data-rbd'), delBysProyBtn.getAttribute('data-codigo')); return; }
-  // Honorarios (Subt. 21): registro por boleta y proyección por cuenta.
-  const addHonBtn = e.target.closest('.add-hon-btn');
-  if (addHonBtn) { agregarHonorario(addHonBtn.getAttribute('data-rbd')); return; }
-  const cancelHonBtn = e.target.closest('.cancelar-edicion-hon-btn');
-  if (cancelHonBtn) { cancelarEdicionHon(ctxHonSep(cancelHonBtn.getAttribute('data-rbd'))); return; }
-  const editHonBtn = e.target.closest('.hon-edit-btn');
-  if (editHonBtn) { iniciarEdicionHon(editHonBtn.getAttribute('data-rbd'), editHonBtn.getAttribute('data-hon-id')); return; }
-  const dupHonBtn = e.target.closest('.hon-dup-btn');
-  if (dupHonBtn) { duplicarHon(dupHonBtn.getAttribute('data-rbd'), dupHonBtn.getAttribute('data-hon-id')); return; }
-  const delHonBtn = e.target.closest('.hon-del-btn');
-  if (delHonBtn) { eliminarHonorario(delHonBtn.getAttribute('data-rbd'), delHonBtn.getAttribute('data-hon-id')); return; }
-  const addHonProyBtn = e.target.closest('.add-honproy-btn');
-  if (addHonProyBtn) { agregarHonProyeccionItem(addHonProyBtn.getAttribute('data-rbd')); return; }
-  const delHonProyBtn = e.target.closest('.honproy-del-btn');
-  if (delHonProyBtn) { eliminarHonProyeccionItem(delHonProyBtn.getAttribute('data-rbd'), delHonProyBtn.getAttribute('data-codigo')); return; }
+  manejarClicHonorarios(e);
 });
 modalBodyEl.addEventListener('beforeinput', bloquearTecleoNoNumerico);
 modalBodyEl.addEventListener('input', alCambiarFormularioCompra);
@@ -5978,14 +6164,16 @@ function kpiCardsOtraFuente(fuenteKey, tipo, b, t) {
   if (fuente.soloRem) return [
     { label: `Ingreso Percibido (${suf})`, value: fmtCLP(b.ingreso), full: corteTxt, tone: 'blue' },
     { label: `Gasto Remuneraciones (${suf})`, value: fmtCLP(b.rem), full: corteTxt, tone: 'amber' },
-    { label: `Gasto Total (${suf})`, value: fmtCLP(b.gasto), full: 'Solo Remuneraciones', tone: 'amber' },
+    { label: `Gasto Honorarios (${suf})`, value: fmtCLP(b.hon), full: 'Boletas + proyección de honorarios (Subt. 21)', tone: 'amber' },
+    { label: `Gasto Total (${suf})`, value: fmtCLP(b.gasto), full: 'Remuneraciones + Honorarios', tone: 'amber' },
     { label: `Saldo (${suf})`, value: fmtCLP(b.saldo), full: saldoTxt, critical: b.saldo < 0, tone: b.saldo < 0 ? 'red' : 'green' },
   ];
   return [
     { label: `Ingreso (${suf})`, value: fmtCLP(b.ingreso), full: corteTxt, tone: 'blue' },
     { label: `Gasto Remuneraciones (${suf})`, value: fmtCLP(b.rem), full: corteTxt, tone: 'amber' },
+    { label: `Gasto Honorarios (${suf})`, value: fmtCLP(b.hon), full: tipo === 'real' ? 'Boletas de honorarios registradas (Subt. 21): siempre Real' : tipo === 'proy' ? 'Proyección de honorarios (Subt. 21): siempre Proyectada' : 'Boletas + proyección (Subt. 21), en su propia línea (sin 70/30)', tone: 'amber' },
     { label: `Gasto Bienes y Servicios (${suf})`, value: fmtCLP(b.bys), full: bysTxt, tone: 'amber' },
-    { label: `Gasto Total (${suf})`, value: fmtCLP(b.gasto), full: 'Remuneraciones + Bienes y Servicios', tone: 'amber' },
+    { label: `Gasto Total (${suf})`, value: fmtCLP(b.gasto), full: 'Remuneraciones + Honorarios + Bienes y Servicios', tone: 'amber' },
     { label: `Saldo (${suf})`, value: fmtCLP(b.saldo), full: saldoTxt, critical: b.saldo < 0, tone: b.saldo < 0 ? 'red' : 'green' },
   ];
 }
@@ -6052,7 +6240,7 @@ function renderOtrasFuentesTable(fuenteKey) {
       <td class="rbd-clickable" data-abrir-otra-fuente="${escHtml(r.rbd)}"><span class="nombre-txt" title="${escHtml(r.nombre)}">${escHtml(r.nombre)}</span></td>
       <td class="of-real-hasta">${corteTxt}</td>
       <td class="num">${fmtCLP(b.ingreso)}</td>
-      ${fuente.sinGasto ? '' : fuente.soloRem ? `<td class="num">${fmtCLP(b.rem)}</td><td class="num">${fmtCLP(b.gasto)}</td>` : `<td class="num">${fmtCLP(b.rem)}</td><td class="num">${fmtCLP(b.bys)}${bysSplitCeldaHTML(b)}</td><td class="num">${fmtCLP(b.gasto)}</td>`}
+      ${fuente.sinGasto ? '' : fuente.soloRem ? `<td class="num">${fmtCLP(b.rem)}</td><td class="num">${fmtCLP(b.hon)}</td><td class="num">${fmtCLP(b.gasto)}</td>` : `<td class="num">${fmtCLP(b.rem)}</td><td class="num">${fmtCLP(b.hon)}</td><td class="num">${fmtCLP(b.bys)}${bysSplitCeldaHTML(b)}</td><td class="num">${fmtCLP(b.gasto)}</td>`}
       <td class="num" style="color:${b.saldo < 0 ? 'var(--status-critical)' : 'var(--text-primary)'}">${fmtCLP(b.saldo)}</td>
       <td>${otrasFuentesEstadoTagHTML(of, key)}${otrasFuentesEstadoCausaHTML(of, key)}</td>
       <td class="col-acciones">${otrasFuentesAccionesHTML(key, r.rbd)}</td>
@@ -6370,7 +6558,7 @@ function comprasConceptoFilaHTML(ctx, id, c) {
   const nombreCompra = escHtml([c.tipoDocumento, c.nroDocumento ? 'N° ' + c.nroDocumento : ''].filter(Boolean).join(' ') || ('concepto ' + (concepto || id)));
   return `<tr data-compra-id="${idAttr}">
     <td>${escHtml(concepto)}${insigniasAvisoHTML(avisos, 'cuenta')}</td>
-    <td>${escHtml(c.tipoDocumento || '')}</td>
+    <td>${escHtml(c.tipoDocumento || '')}${marcaTipoHonorariosHTML(c)}</td>
     <td>${escHtml(c.nroDocumento || '')}</td>
     <td>${escHtml(c.fechaDocumento || '')}${insigniasAvisoHTML(avisos, 'doc')}</td>
     <td>${escHtml(c.fechaPago || '')}${insigniasAvisoHTML(avisos, 'pago')}</td>
@@ -6423,6 +6611,7 @@ function comprasConceptoSectionHTML(ctx, of) {
       ${datalistConceptosHTML(ctx, of)}
       ${comprasConceptoFormHTML(ctx)}
       ${resumenAvisosComprasHTML(resumenAvisosCompras(compras, CATALOGO_POR_CONCEPTO))}
+      ${resumenTipoHonorariosEnComprasHTML(compras)}
       <div class="compras-scroll">
         <table class="detalle-table compras-table">
           <thead><tr><th>Concepto</th><th>Tipo doc.</th><th>N° doc.</th><th>Fecha doc.</th><th>Fecha pago</th><th>Descripción</th><th>RUT prov.</th><th>Nombre prov.</th><th class="num">Monto gasto</th><th class="num">Monto doc.</th><th title="${escHtml(AYUDA_DC)}">N° DC</th><th title="${escHtml(AYUDA_DOC_ORIGINAL)}">Doc. original</th><th aria-label="Acciones"></th></tr></thead>
@@ -6524,11 +6713,11 @@ function buildOtrasFuentesDetalleHTML(rbd, fuenteKey) {
   const corte = realHastaMesOtraFuente(of);
   const compras = fuente.bysMode === 'compras';
   const corteSelectHTML = `<div class="of-modal-corte"><label class="of-ctl-label">Real hasta el mes: <select class="of-modal-corte-select" data-rbd="${rbd}" data-fuente="${fuenteKey}">${MESES_CARGA_TITLE.map((m, i) => `<option value="${i + 1}"${i + 1 === corte ? ' selected' : ''}>${m}</option>`).join('')}</select></label>
-    <span class="detalle-sub">Los meses hasta el corte son <strong>Real</strong> y los siguientes <strong>Proyectado</strong>${fuente.bysMode === 'none' ? ' (esta fuente no registra Bienes y Servicios).' : compras ? ' (las compras siempre son Real; la proyección de Bienes y Servicios se carga aparte, más abajo).' : ' (Bienes y Servicios «sin documento» sigue el corte; lo documentado con compras siempre es Real).'}</span></div>`;
+    <span class="detalle-sub">Los meses hasta el corte son <strong>Real</strong> y los siguientes <strong>Proyectado</strong>${fuente.bysMode === 'none' ? ' (esta fuente no registra Bienes y Servicios).' : compras ? ' (las compras siempre son Real; la proyección de Bienes y Servicios se carga aparte, más abajo).' : ' (Bienes y Servicios «sin documento» sigue el corte; lo documentado con compras siempre es Real).'} Las boletas de honorarios siempre son Real y su proyección, Proyectada.</span></div>`;
 
   let headerHTML, tablasMesesHTML;
   if (fuente.incomeShape === 'junji3') {
-    headerHTML = `<strong>Ingresos ${fuenteLabel}</strong> — <span class="detalle-sub">Operación financia Remuneraciones y Bienes y Servicios; Homologación, Carrera Docente y BDL financian solo Remuneraciones.</span>`;
+    headerHTML = `<strong>Ingresos ${fuenteLabel}</strong> — <span class="detalle-sub">Operación financia Remuneraciones y Bienes y Servicios; Homologación, Carrera Docente y BDL financian solo Remuneraciones. Los honorarios (Subt. 21) son gasto de personal: se financian como las Remuneraciones y no entran en el saldo de Operación para B&S.</span>`;
     tablasMesesHTML = `
     ${otrasFuentesTablaMes('Ingreso Operación', rbd, fuenteKey, 'of_ingreso_operacion', of.ingreso_operacion, `oftotal-${rbd}-${fuenteKey}-of_ingreso_operacion`)}
     ${otrasFuentesTablaMes('Ingreso Homologación', rbd, fuenteKey, 'of_ingreso_homologacion', of.ingreso_homologacion, `oftotal-${rbd}-${fuenteKey}-of_ingreso_homologacion`)}
@@ -6548,7 +6737,7 @@ function buildOtrasFuentesDetalleHTML(rbd, fuenteKey) {
       : compras
       ? 'Bienes y Servicios se carga como "Registro de compras" más abajo; su total mensual se calcula solo.'
       : 'Bienes y Servicios se carga como "Registro de compras" por documento (con concepto) o, sin documento, como montos mensuales por concepto, más abajo; los totales se calculan solos.';
-    headerHTML = `<strong>Detalle por mes — Ingreso y Remuneraciones (${fuenteLabel})</strong> — <span class="detalle-sub">${bysSubtitle}</span>`;
+    headerHTML = `<strong>Detalle por mes — Ingreso, Remuneraciones y Honorarios (${fuenteLabel})</strong> — <span class="detalle-sub">${bysSubtitle}</span>`;
     tablasMesesHTML = `
     ${otrasFuentesTablaMes(etiquetaIngreso, rbd, fuenteKey, 'of_ingreso', of.ingreso, `oftotal-${rbd}-${fuenteKey}-of_ingreso`)}
     ${fuente.incomeShape === 'carrera2' ? otrasFuentesTablaMes(`Ingreso Carrera Docente ${fuenteKey === 'general' ? 'General' : 'PIE'}`, rbd, fuenteKey, 'of_ingreso_carrera_docente', of.ingreso_carrera_docente || { meses: mesesEnCero(), total: 0 }, `oftotal-${rbd}-${fuenteKey}-of_ingreso_carrera_docente`) : ''}
@@ -6583,6 +6772,7 @@ function buildOtrasFuentesDetalleHTML(rbd, fuenteKey) {
     </div>
     <div class="detalle-scroll">
     ${tablasMesesHTML}
+    ${fuente.sinGasto ? '' : honSectionHTML(ctxHonOtraFuente(fuenteKey, rbd), false)}
     ${bysHTML}
     </div>
   </div>`;
@@ -6629,6 +6819,7 @@ function renderOtrasFuentesModalContenido(opts) {
     otrasFuentesMorphEnCurso = true;
     try { morphContenedor(cuerpo, html, opts); } finally { otrasFuentesMorphEnCurso = false; }
     if (comprasPorConcepto(fuenteKey)) revisarModoEdicionCompraOF(rbd, fuenteKey);
+    revisarModoEdicionHon(ctxHonOtraFuente(fuenteKey, rbd));
     return;
   }
   cuerpo.innerHTML = html;
@@ -6658,7 +6849,23 @@ function onOtraFuenteCeldaInput(input) {
   const of = ensureOtraFuente(rbd, fuenteKey);
   const reg = filasOtrasFuentes(fuenteKey).find(x => x.rbd === rbd);
 
-  if (modo === 'of_bys_item' || modo === 'of_bys_proy_item') {
+  if (modo === 'of_hon_proy_item') {
+    // Proyección de honorarios por cuenta (fuentes con cuenta) o por concepto (JUNJI, FAEP, FIGA, Aportes): siempre Proyectada; se guarda SOLO ese mes de ese ítem.
+    const ctx = ctxHonOtraFuente(fuenteKey, rbd);
+    const campo = ctx.campoClave;
+    const clave = input.dataset[campo];
+    const hp = ctx.asegurarProyeccion();
+    const it = ensureHonProyItemOtraFuente(hp, campo, clave);
+    it.meses[mes] = val;
+    it.total = MESES_CARGA.reduce((s, m) => s + (it.meses[m] || 0), 0);
+    recomputeBysProyeccionAgregado(hp);
+    const itemTotalCell = document.getElementById(`honproyitemtotal-${rbd}${ctx.sufijoId}-${idSeguro(clave)}`);
+    if (itemTotalCell) itemTotalCell.textContent = fmtCLP(it.total);
+    const totalGeneralCell = document.getElementById(`honproytotal-${rbd}${ctx.sufijoId}`);
+    if (totalGeneralCell) (totalGeneralCell.querySelector('strong') || totalGeneralCell).textContent = fmtCLP(hp.total); // la cifra va en negrita: se actualiza el <strong> y no se reemplaza
+    recomputeOtraFuente(rbd, fuenteKey);
+    scheduleRbdSave(rbd, { nombre: reg ? reg.nombre : rbd, ...ctx.payloadProy(clave, { [campo]: clave, meses: { [mes]: val }, total: it.total }) });
+  } else if (modo === 'of_bys_item' || modo === 'of_bys_proy_item') {
     // Ítem de B&S por concepto: `bys_items` (fuentes de concepto) o `bys_proy_items` (proyección
     // de las fuentes con compras).
     const lista = modo === 'of_bys_proy_item' ? 'bys_proy_items' : 'bys_items';
@@ -6900,6 +7107,7 @@ async function eliminarCompraOtraFuente(rbd, fuenteKey, compraId) {
 
 const otrasFuentesModalBodyEl = document.getElementById('otrasFuentesModalBody');
 otrasFuentesModalBodyEl.addEventListener('click', (e) => {
+  if (manejarClicHonorarios(e)) return; // boletas y proyección de honorarios (Subt. 21)
   const addBtn = e.target.closest('.of-add-compra-btn');
   if (addBtn) { agregarCompraOtraFuente(addBtn.getAttribute('data-rbd'), addBtn.getAttribute('data-fuente')); return; }
   const delBtn = e.target.closest('.of-compra-del-btn');
@@ -6923,6 +7131,7 @@ otrasFuentesModalBodyEl.addEventListener('input', alCambiarFormularioCompra);
 otrasFuentesModalBodyEl.addEventListener('change', alCambiarFormularioCompra);
 otrasFuentesModalBodyEl.addEventListener('keyup', alCambiarFormularioCompra);
 otrasFuentesModalBodyEl.addEventListener('focusout', alCambiarFormularioCompra);
+['input', 'change', 'keyup', 'focusout'].forEach(ev => otrasFuentesModalBodyEl.addEventListener(ev, alCambiarFormularioHon)); // ídem para el formulario de honorarios
 otrasFuentesModalBodyEl.addEventListener('focusout', (e) => {
   if (e.target.classList && e.target.classList.contains('celda-input')) {
     flushRbdSaveNow(e.target.dataset.rbd);
@@ -7039,6 +7248,33 @@ function sheetOtraFuenteComprasAOA(fuenteKey, onlyRbd) {
   });
   return rows;
 }
+// HONORARIOS de una fuente (PR-3): una fila por boleta, con su ID (mismas columnas que la hoja HONORARIOS de SEP: Libro de Honorarios A–L + N° DC), con «Concepto» en lugar de «Codigo» en las
+// fuentes por concepto (JUNJI, FAEP, FIGA, Aportes). Texto libre neutralizado contra fórmulas; el tipo va como CÓDIGO (BOLHE).
+function sheetOtraFuenteHonorariosAOA(fuenteKey, onlyRbd) {
+  const porConcepto = honPorConcepto(fuenteKey);
+  const headers = ['ID', 'RBD', 'Nombre', porConcepto ? 'Concepto' : 'Codigo', 'TipoDocumento', 'NroDocumento', 'FechaDocumento', 'FechaPago', 'Descripcion', 'RutProveedor', 'NombreProveedor', 'MontoGasto', 'MontoDocumento', 'N° DC'];
+  const rows = [headers];
+  filasOtraFuenteExport(fuenteKey, onlyRbd).forEach(r => {
+    const of = (CARGA_MANUAL.otras_fuentes_por_rbd || {})[r.rbd]?.[fuenteKey];
+    Object.entries((of && of.honorarios) || {}).forEach(([id, h]) => {
+      rows.push([id, rbdCellValue(r.rbd), r.nombre, porConcepto ? neutralizaFormula(conceptoCompra(h)) : (h.codigo || ''), honCodigoTipo(h.tipoDocumento) || h.tipoDocumento || '', h.nroDocumento || '', h.fechaDocumento || '', h.fechaPago || '', neutralizaFormula(h.descripcion || ''), h.rutProveedor || '', neutralizaFormula(h.nombreProveedor || ''), Math.round(num(h.montoGasto)), Math.round(num(h.montoDocumento)), neutralizaFormula(textoSeguro(h.documentoContable))]);
+    });
+  });
+  return rows;
+}
+// HON_PROYECCION de una fuente: por cuenta (Codigo + Item + 12 meses, como la de SEP) o por concepto (Concepto + 12 meses, como BYS_ITEMS).
+function sheetOtraFuenteHonProyeccionAOA(fuenteKey, onlyRbd) {
+  const porConcepto = honPorConcepto(fuenteKey);
+  const rows = [['RBD', 'Nombre', ...(porConcepto ? ['Concepto'] : ['Codigo', 'Item']), ...MESES_CARGA_TITLE, 'Total Año']];
+  filasOtraFuenteExport(fuenteKey, onlyRbd).forEach(r => {
+    const of = (CARGA_MANUAL.otras_fuentes_por_rbd || {})[r.rbd]?.[fuenteKey];
+    ((of && of.hon_proy && of.hon_proy.items) || []).forEach(it => {
+      const vals = MESES_CARGA.map(m => Math.round(it.meses[m] || 0));
+      rows.push([rbdCellValue(r.rbd), r.nombre, ...(porConcepto ? [neutralizaFormula(it.concepto)] : [it.codigo, nombreItemHonProyeccion(it.codigo)]), ...vals, Math.round(it.total)]);
+    });
+  });
+  return rows;
+}
 function sheetBysItemsAOA(fuenteKey, lista = 'bys_items', onlyRbd) {
   const headers = ['RBD', 'Nombre', 'Concepto', ...MESES_CARGA_TITLE, 'Total Año'];
   const rows = [headers];
@@ -7079,6 +7315,11 @@ function buildOtraFuenteCargaWorkbook(fuenteKey, onlyRbd) {
   }
   if (!fuente.sinGasto) XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'gasto_rem', onlyRbd)), 'REMUNERACIONES');
   if (fuente.sinGasto || fuente.bysMode === 'none') {
+    // Sin B&S: solo las hojas de honorarios (la fuente sin gasto no las lleva).
+    if (!fuente.sinGasto) {
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteHonorariosAOA(fuenteKey, onlyRbd)), 'HONORARIOS');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteHonProyeccionAOA(fuenteKey, onlyRbd)), 'HON_PROYECCION');
+    }
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetMetaAOA(fuenteKey, onlyRbd)), 'META');
     return wb;
   }
@@ -7090,6 +7331,9 @@ function buildOtraFuenteCargaWorkbook(fuenteKey, onlyRbd) {
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteComprasAOA(fuenteKey, onlyRbd)), 'COMPRAS');
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetBysItemsAOA(fuenteKey, 'bys_items', onlyRbd)), 'BYS_ITEMS');
   }
+  // Honorarios (Subt. 21): boletas y proyección (hojas nuevas; un Excel anterior no las trae y al importarlo no se toca ninguna boleta).
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteHonorariosAOA(fuenteKey, onlyRbd)), 'HONORARIOS');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteHonProyeccionAOA(fuenteKey, onlyRbd)), 'HON_PROYECCION');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetMetaAOA(fuenteKey, onlyRbd)), 'META');
   return wb;
 }
@@ -7194,6 +7438,134 @@ function importOtraFuenteComprasSheet(ws, fuenteKey) {
   if (otrasFuentesRbdAbierto && porRbd[otrasFuentesRbdAbierto]) renderOtrasFuentesModalContenido();
   return { n, noHabilitadas };
 }
+// Importar la hoja HONORARIOS de una fuente (PR-3). Mismo contrato que la de SEP: cada fila que no se puede importar se informa con su motivo y no se pierde en silencio; una boleta ya cargada que no viene
+// en el archivo no se toca; el N° DC solo se escribe si el archivo trae la columna. La hoja de una fuente con cuenta trae «Codigo» y la de una fuente por concepto «Concepto»: la que no corresponde se rechaza entera.
+// Devuelve { n, noHabilitadas } (cuenta del catálogo pero no habilitada para esa subvención: se importa igual y queda marcada ⚠).
+function importOtraFuenteHonorariosSheet(ws, fuenteKey) {
+  const porConcepto = honPorConcepto(fuenteKey);
+  const label = FUENTES_OTRAS_BY_KEY[fuenteKey].label;
+  const rows = rowsFromSheet(ws);
+  const encabezado = String((rows[0] || [])[3] == null ? '' : (rows[0] || [])[3]).trim();
+  if (porConcepto && /^c[oó]digo/i.test(encabezado)) { rechazarFilaImportacion('HONORARIOS', 1, `la columna 4 se llama «${encabezado}» (cuenta de honorarios) y ${label} lleva «Concepto»: la hoja HONORARIOS no se importó`); return { n: 0, noHabilitadas: 0 }; }
+  if (!porConcepto && /^concepto/i.test(encabezado)) { rechazarFilaImportacion('HONORARIOS', 1, `la columna 4 se llama «${encabezado}» y ${label} lleva «Codigo» (cuenta de honorarios): la hoja HONORARIOS no se importó`); return { n: 0, noHabilitadas: 0 }; }
+  const idxDc = indiceColumnaDc(rows[0]);
+  const universo = new Set(filasOtrasFuentes(fuenteKey).map(r => r.rbd));
+  const indicesPorRbd = {};
+  const porRbd = {};
+  let n = 0, noHabilitadas = 0;
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    if (row[1] === undefined || row[1] === null || String(row[1]).trim() === '') continue;
+    const fila = i + 1;
+    const rbd = String(row[1]).trim();
+    const errRbd = validarIdDocumento(rbd, 'El RBD');
+    if (errRbd) { rechazarFilaImportacion('HONORARIOS', fila, errRbd); continue; }
+    if (!universo.has(rbd)) { rechazarFilaImportacion('HONORARIOS', fila, `la entidad "${rbd}" no es parte de ${label}`); continue; }
+    const codigoRaw = row[3];
+    let concepto = '', codigo = '';
+    if (porConcepto) {
+      concepto = String(codigoRaw === 0 ? '' : (codigoRaw ?? '')).trim(); // una celda vacía llega como el número 0 (rowsFromSheet usa defval:0)
+      if (!concepto) { rechazarFilaImportacion('HONORARIOS', fila, 'falta el concepto'); continue; }
+      const errConcepto = validarClaveMapa(concepto, 'El concepto');
+      if (errConcepto) { rechazarFilaImportacion('HONORARIOS', fila, errConcepto); continue; }
+    } else {
+      codigo = (typeof codigoRaw === 'number') ? String(Math.trunc(codigoRaw)) : String(codigoRaw || '').trim();
+      if (!HON_CUENTAS_BY_CODIGO[codigo]) { rechazarFilaImportacion('HONORARIOS', fila, `la cuenta "${codigo}" no acepta honorarios (no está en el catálogo de honorarios del Plan de Cuentas 2026)`); continue; }
+    }
+    const tipoRaw = String(row[4] || '').trim();
+    const tipo = honCodigoTipo(tipoRaw);
+    if (!tipo) { rechazarFilaImportacion('HONORARIOS', fila, `el tipo de documento "${tipoRaw}" no es de honorarios (BOLH, BHE, BOLHE, BPST, BPSTE)`); continue; }
+    if (!porConcepto && !honTipoPermitido(codigo, tipo)) { rechazarFilaImportacion('HONORARIOS', fila, `la cuenta ${codigo} no acepta el tipo ${tipo}`); continue; }
+    const campos = {
+      ...(porConcepto ? { concepto } : { codigo }),
+      tipoDocumento: tipo,
+      nroDocumento: String(row[5] || '').trim(),
+      fechaDocumento: excelDateToISO(row[6]),
+      fechaPago: excelDateToISO(row[7]),
+      descripcion: String(row[8] || '').trim(),
+      rutProveedor: String(row[9] || '').trim(),
+      nombreProveedor: String(row[10] || '').trim(),
+      montoGasto: Number(row[11]) || 0,
+      montoDocumento: Number(row[12]) || 0,
+    };
+    if (!campos.fechaDocumento) { rechazarFilaImportacion('HONORARIOS', fila, 'falta la fecha del documento'); continue; }
+    if (!(campos.montoGasto > 0)) { rechazarFilaImportacion('HONORARIOS', fila, 'el monto gasto debe ser mayor que 0 (las boletas son gasto positivo)'); continue; }
+    if (!(campos.montoDocumento > 0)) campos.montoDocumento = campos.montoGasto;
+    const idExplicito = idCompraImportadoUsable(row[0]);
+    const errId = idExplicito ? validarClaveMapa(idExplicito, 'El ID de la boleta') : null;
+    if (errId) { rechazarFilaImportacion('HONORARIOS', fila, errId); continue; }
+    const of = ensureOtraFuente(rbd, fuenteKey);
+    if (!of.honorarios) of.honorarios = {};
+    const indice = indicesPorRbd[rbd] || (indicesPorRbd[rbd] = indiceComprasPorFirma(of.honorarios));
+    const id = idCompraParaImportar(row[0], campos, of.honorarios, indice);
+    const previa = of.honorarios[id];
+    aplicarDcImportado(campos, row, idxDc, previa);
+    of.honorarios[id] = (idxDc < 0 && previa && previa.documentoContable) ? { ...campos, documentoContable: previa.documentoContable } : campos;
+    registrarCompraEnIndice(indice, id, campos);
+    if (!porRbd[rbd]) porRbd[rbd] = {};
+    porRbd[rbd][id] = campos;
+    n++;
+    if (!porConcepto && honNivelCuenta(ctxHonOtraFuente(fuenteKey, rbd), codigo) === 0) noHabilitadas++;
+  }
+  Object.keys(porRbd).forEach(rbd => {
+    recomputeHonOtraFuente(ensureOtraFuente(rbd, fuenteKey), fuenteKey);
+    recomputeOtraFuente(rbd, fuenteKey);
+    const reg = filasOtrasFuentes(fuenteKey).find(x => x.rbd === rbd);
+    scheduleRbdSave(rbd, { nombre: reg ? reg.nombre : rbd, otras_fuentes: { [fuenteKey]: { honorarios: porRbd[rbd] } } });
+  });
+  if (otrasFuentesRbdAbierto && porRbd[otrasFuentesRbdAbierto]) renderOtrasFuentesModalContenido();
+  return { n, noHabilitadas };
+}
+// Importar la hoja HON_PROYECCION de una fuente: por cuenta (Codigo, Item, 12 meses) o por concepto (Concepto, 12 meses). Una cuenta fuera del catálogo de honorarios, un concepto vacío o inválido
+// o una entidad que no es de la fuente se informan y se omiten.
+function importOtraFuenteHonProyeccionSheet(ws, fuenteKey) {
+  const porConcepto = honPorConcepto(fuenteKey);
+  const label = FUENTES_OTRAS_BY_KEY[fuenteKey].label;
+  const rows = rowsFromSheet(ws);
+  const encabezado = String((rows[0] || [])[2] == null ? '' : (rows[0] || [])[2]).trim();
+  if (porConcepto && /^c[oó]digo/i.test(encabezado)) { rechazarFilaImportacion('HON_PROYECCION', 1, `la columna 3 se llama «${encabezado}» (cuenta de honorarios) y ${label} lleva «Concepto»: la hoja HON_PROYECCION no se importó`); return 0; }
+  if (!porConcepto && /^concepto/i.test(encabezado)) { rechazarFilaImportacion('HON_PROYECCION', 1, `la columna 3 se llama «${encabezado}» y ${label} lleva «Codigo» (cuenta de honorarios): la hoja HON_PROYECCION no se importó`); return 0; }
+  const campo = porConcepto ? 'concepto' : 'codigo';
+  const universo = new Set(filasOtrasFuentes(fuenteKey).map(r => r.rbd));
+  const porRbd = new Set();
+  let n = 0;
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    if (row[0] === undefined || row[0] === null || String(row[0]).trim() === '') continue;
+    const fila = i + 1;
+    const rbd = String(row[0]).trim();
+    const errRbd = validarIdDocumento(rbd, 'El RBD');
+    if (errRbd) { rechazarFilaImportacion('HON_PROYECCION', fila, errRbd); continue; }
+    if (!universo.has(rbd)) { rechazarFilaImportacion('HON_PROYECCION', fila, `la entidad "${rbd}" no es parte de ${label}`); continue; }
+    const claveRaw = row[2];
+    let clave;
+    if (porConcepto) {
+      clave = String(claveRaw === 0 ? '' : (claveRaw ?? '')).trim();
+      if (!clave) continue;
+      const errConcepto = validarClaveMapa(clave, 'El concepto');
+      if (errConcepto) { rechazarFilaImportacion('HON_PROYECCION', fila, errConcepto); continue; }
+    } else {
+      clave = (typeof claveRaw === 'number') ? String(Math.trunc(claveRaw)) : String(claveRaw || '').trim();
+      if (!HON_CUENTAS_BY_CODIGO[clave]) { rechazarFilaImportacion('HON_PROYECCION', fila, `la cuenta "${clave}" no acepta honorarios (no está en el catálogo de honorarios del Plan de Cuentas 2026)`); continue; }
+    }
+    const desde = porConcepto ? 3 : 4;
+    const meses = {};
+    let total = 0;
+    MESES_CARGA.forEach((m, mi) => { const v = Number(row[desde + mi]) || 0; meses[m] = v; total += v; });
+    const ctx = ctxHonOtraFuente(fuenteKey, rbd);
+    const hp = ctx.asegurarProyeccion();
+    const it = ensureHonProyItemOtraFuente(hp, campo, clave);
+    it.meses = meses;
+    it.total = Math.round(total);
+    recomputeBysProyeccionAgregado(hp);
+    recomputeOtraFuente(rbd, fuenteKey);
+    scheduleRbdSave(rbd, { nombre: ctx.nombre(), ...ctx.payloadProy(clave, { [campo]: clave, meses, total: it.total }) });
+    porRbd.add(rbd);
+    n++;
+  }
+  if (otrasFuentesRbdAbierto && porRbd.has(otrasFuentesRbdAbierto)) renderOtrasFuentesModalContenido();
+  return n;
+}
 function importBysItemsSheet(ws, fuenteKey, lista = 'bys_items') {
   const rows = rowsFromSheet(ws);
   const porRbd = new Set();
@@ -7265,7 +7637,17 @@ function importOtraFuenteWorkbook(wbIn, fuenteKey) {
     if (fuente.incomeShape === 'carrera2' && wbIn.Sheets['ING_CARRERA_DOCENTE']) resumen.push('ING_CARRERA_DOCENTE: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_CARRERA_DOCENTE'], fuenteKey, 'ingreso_carrera_docente') + ' filas');
   }
   if (!fuente.sinGasto && wbIn.Sheets['REMUNERACIONES']) resumen.push('REMUNERACIONES: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['REMUNERACIONES'], fuenteKey, 'gasto_rem') + ' filas');
-  if (fuente.sinGasto || fuente.bysMode === 'none') { renderOtrasFuentesTable(fuenteKey); return resumen.concat(resumenRechazosImportacion()); }
+  if (fuente.sinGasto || fuente.bysMode === 'none') {
+    // Sin B&S: solo se leen las hojas de honorarios (la fuente sin gasto no las lleva).
+    if (!fuente.sinGasto) {
+      if (wbIn.Sheets['HONORARIOS']) {
+        const rh = importOtraFuenteHonorariosSheet(wbIn.Sheets['HONORARIOS'], fuenteKey);
+        resumen.push('HONORARIOS: ' + rh.n + ' filas');
+      }
+      if (wbIn.Sheets['HON_PROYECCION']) resumen.push('HON_PROYECCION: ' + importOtraFuenteHonProyeccionSheet(wbIn.Sheets['HON_PROYECCION'], fuenteKey) + ' filas');
+    }
+    renderOtrasFuentesTable(fuenteKey); return resumen.concat(resumenRechazosImportacion());
+  }
   if (fuente.bysMode === 'compras') {
     if (wbIn.Sheets['COMPRAS']) {
       const rc = importOtraFuenteComprasSheet(wbIn.Sheets['COMPRAS'], fuenteKey);
@@ -7277,6 +7659,12 @@ function importOtraFuenteWorkbook(wbIn, fuenteKey) {
     if (wbIn.Sheets['COMPRAS']) resumen.push('COMPRAS: ' + importOtraFuenteComprasSheet(wbIn.Sheets['COMPRAS'], fuenteKey).n + ' filas');
     if (wbIn.Sheets['BYS_ITEMS']) resumen.push('BYS_ITEMS: ' + importBysItemsSheet(wbIn.Sheets['BYS_ITEMS'], fuenteKey) + ' filas');
   }
+  // Honorarios (hojas nuevas): un archivo anterior que no las trae simplemente no las toca (no borra ninguna boleta ni proyección).
+  if (wbIn.Sheets['HONORARIOS']) {
+    const rh = importOtraFuenteHonorariosSheet(wbIn.Sheets['HONORARIOS'], fuenteKey);
+    resumen.push('HONORARIOS: ' + rh.n + ' filas' + (rh.noHabilitadas ? ` (⚠ ${rh.noHabilitadas} con cuenta no habilitada para ${fuente.label} en el Plan de Cuentas 2026: quedan marcadas en el registro)` : ''));
+  }
+  if (wbIn.Sheets['HON_PROYECCION']) resumen.push('HON_PROYECCION: ' + importOtraFuenteHonProyeccionSheet(wbIn.Sheets['HON_PROYECCION'], fuenteKey) + ' filas');
   renderOtrasFuentesTable(fuenteKey);
   return resumen.concat(resumenRechazosImportacion());
 }
@@ -7335,6 +7723,9 @@ function csvDetalleMensualOtraFuenteLines(fuenteKey, rbd) {
     push(fila('Ingreso', tipoPorCorte, of.ingreso));
   }
   if (!fuente.sinGasto) push(fila('Gasto Remuneraciones', tipoPorCorte, of.gasto_rem));
+  // Honorarios (Subt. 21): boletas por cuenta/concepto (siempre Real) y proyección (siempre Proyectado); N° DC, RUT y nombre del prestador nunca van en este CSV.
+  ((of.hon_agregado && of.hon_agregado.items) || []).forEach(it => push(fila(`Honorarios boletas - ${!honPorConcepto(fuente.key) ? `${it.codigo} ${it.item}` : it.concepto}`, 'Real', it)));
+  ((of.hon_proy && of.hon_proy.items) || []).forEach(it => push(fila(`Honorarios proyeccion - ${!honPorConcepto(fuente.key) ? (HON_CUENTAS_BY_CODIGO[it.codigo] ? `${it.codigo} ${HON_CUENTAS_BY_CODIGO[it.codigo].nombre}` : it.codigo) : it.concepto}`, 'Proyectado', it)));
   if (fuente.bysMode === 'compras') {
     (of.bys_items || []).forEach(it => push(fila(`B&S compras - ${it.codigo} ${it.item}`, 'Real', it)));
     (of.bys_proy_items || []).forEach(it => push(fila(`B&S proyeccion - ${it.concepto}`, 'Proyectado', it)));
@@ -7441,9 +7832,10 @@ function buildOtraFuenteEntidadPrintHTML(rbd, fuenteKey) {
     <div class="kpi-section-label">Proyectado</div>
     <div class="kpi-row kpi-row-proy" style="margin-bottom:10px;">${kpis('proy')}</div>
     <div class="kpi-section-label">Total (Real + Proyectado)</div>
-    <div class="kpi-row" style="margin-bottom:10px;">${kpis('total')}</div>
+    <div class="kpi-row of-kpi-row" style="margin-bottom:10px;">${kpis('total')}</div>
     ${tablasIngreso.map(([titulo, obj]) => tablaMesesEstaticaHTML(titulo, [{ label: titulo, obj }], corte, false)).join('')}
     ${fuente.sinGasto ? '' : tablaMesesEstaticaHTML('Gasto Remuneraciones', [{ label: 'Gasto Remuneraciones', obj: of.gasto_rem }], corte, false)}
+    ${fuente.sinGasto ? '' : honSectionHTML(ctxHonOtraFuente(fuenteKey, rbd), true)}
     ${bysHTML}`;
 }
 function exportOtraFuenteEntidadPdf(fuenteKey, rbd) {
@@ -7603,7 +7995,7 @@ function renderDashStrip(fuentes) {
   document.getElementById('dashStrip').innerHTML = [
     dashTile('Ingreso', fmtCLP(acc.ingreso), `SEP + 9 fuentes · ${vistaTxt}`, 'blue'),
     dashTile('Gasto Remuneraciones', fmtCLP(acc.rem), vistaTxt, 'amber'),
-    dashTile('Gasto Honorarios (Subt. 21)', fmtCLP(acc.hon), `por ahora solo SEP · ${vistaTxt}`, 'amber'),
+    dashTile('Gasto Honorarios (Subt. 21)', fmtCLP(acc.hon), `SEP + 9 fuentes · ${vistaTxt}`, 'amber'),
     dashTile('Gasto Bienes y Servicios', fmtCLP(acc.bys), vistaTxt, 'amber'),
     dashTile('Gasto Total', fmtCLP(acc.gasto), vistaTxt, 'amber'),
     dashTile('Saldo consolidado', fmtCLP(acc.saldo), acc.saldo < 0 ? '▼ Déficit' : '▲ Superávit', acc.saldo < 0 ? 'red' : 'green'),
@@ -7784,6 +8176,9 @@ function partesMensualesOtraFuente(fuenteKey, out, entidadFiltro) {
       (of.bys_items || []).forEach(it => sumar(it.meses, 'bys'));                // sin documento: Real hasta el corte, Proyectado después
       (of.bys_doc_items || []).forEach(it => sumar(it.meses, 'bys', 'real'));    // documentado (compras con concepto): siempre Real
     }
+    // Honorarios (Subt. 21): boletas siempre reales (por mes de Fecha Documento) y proyección siempre proyectada, como en SEP.
+    ((of.hon_agregado && of.hon_agregado.items) || []).forEach(it => sumar(it.meses, 'hon', 'real'));
+    ((of.hon_proy && of.hon_proy.items) || []).forEach(it => sumar(it.meses, 'hon', 'proy'));
     if (fuenteKey === 'general') sumar(mesesFondosFijosRegistradosEnGeneral(r.rbd), 'bys', 'real');
   });
   return cortes;
@@ -8093,6 +8488,9 @@ function reporteLineasOtraFuente(fuenteKey, sel) {
         : [['Ingreso', of.ingreso]];
     lineasIng.forEach(([nombre, l]) => vzSumar(mapa, { fuenteKey, tipo: 'ingreso', grupo: 'ingreso', concepto: nombre }, l && l.meses, corte));
     vzSumar(mapa, { fuenteKey, tipo: 'gasto', grupo: 'rem', concepto: 'Remuneraciones' }, of.gasto_rem && of.gasto_rem.meses, corte);
+    // Honorarios (Subt. 21): tercera serie del gasto. Boletas por cuenta (o por concepto; siempre reales) y proyección (siempre proyectada).
+    ((of.hon_agregado && of.hon_agregado.items) || []).forEach(it => vzSumar(mapa, { fuenteKey, tipo: 'gasto', grupo: 'hon', subt: '21', codigo: it.codigo || '', concepto: it.item }, it.meses, 'real'));
+    ((of.hon_proy && of.hon_proy.items) || []).forEach(it => vzSumar(mapa, { fuenteKey, tipo: 'gasto', grupo: 'hon_proy', subt: '21', codigo: it.codigo || '', concepto: it.concepto !== undefined ? it.concepto : (HON_CUENTAS_BY_CODIGO[it.codigo] || { nombre: it.codigo }).nombre }, it.meses, 'proy'));
     if (f.bysMode === 'compras') {
       (of.bys_items || []).forEach(it => vzSumar(mapa, { fuenteKey, tipo: 'gasto', grupo: 'bys', subt: it.subtitulo, codigo: it.codigo, concepto: it.item }, it.meses, 'real'));
       (of.bys_proy_items || []).forEach(it => vzSumar(mapa, { fuenteKey, tipo: 'gasto', grupo: 'bys_proy', concepto: it.concepto }, it.meses, 'proy'));
@@ -8204,8 +8602,8 @@ function vzArbolPorCodigo(tipo, lineas) {
     const hijos = agrupar(grupo, claveFn, vzEtiquetaLinea, `gasto|s:${clave}`);
     roots.push(vzPadre(vzNodo(`gasto|s:${clave}`, etiqueta), hijos));
   };
-  subcat('hon', 'Honorarios (Subt. 21)', l => l.grupo === 'hon', l => l.codigo);
-  subcat('honproy', 'Honorarios — Proyección', l => l.grupo === 'hon_proy', l => l.codigo);
+  subcat('hon', 'Honorarios (Subt. 21)', l => l.grupo === 'hon', l => l.codigo || 'c:' + l.concepto.trim().toLowerCase());
+  subcat('honproy', 'Honorarios — Proyección', l => l.grupo === 'hon_proy', l => l.codigo || 'c:' + l.concepto.trim().toLowerCase());
   subcat('bys22', 'Bienes y Servicios — Subt. 22', l => l.grupo === 'bys' && l.subt === '22', l => l.codigo);
   subcat('bys29', 'Bienes y Servicios — Subt. 29', l => l.grupo === 'bys' && l.subt === '29', l => l.codigo);
   subcat('byscon', 'Bienes y Servicios — por concepto (sin código)', l => l.grupo === 'bys_concepto', l => l.concepto.trim().toLowerCase());
@@ -8632,7 +9030,7 @@ function buildConceptoCatalog() {
 // B&S por concepto libre y proyección de B&S por concepto. Key: `of|{fuente}|{tipo}[|{arg}]`
 // (el arg —código o concepto libre— puede traer "|", por eso se parsea con parseConceptoOF).
 function reporteConceptosDinamicos(f) {
-  const codigos = new Map(), conceptos = new Set(), proy = new Set(), docs = new Set();
+  const codigos = new Map(), conceptos = new Set(), proy = new Set(), docs = new Set(), hon = new Map(), honProy = new Map();
   const conDatos = it => Object.values(it.meses || {}).some(v => Number(v));
   filasOtrasFuentes(f.key).forEach(r => {
     const of = ((CARGA_MANUAL.otras_fuentes_por_rbd || {})[r.rbd] || {})[f.key];
@@ -8644,8 +9042,15 @@ function reporteConceptosDinamicos(f) {
     });
     (of.bys_proy_items || []).forEach(it => { if (it.concepto && conDatos(it)) proy.add(it.concepto); });
     (of.bys_doc_items || []).forEach(it => { if (it.concepto && conDatos(it)) docs.add(it.concepto); });
+    // Honorarios (Subt. 21): una línea por cuenta (o por concepto) de las boletas y de la proyección que tengan datos.
+    const claveHon = it => (honPorConcepto(f.key) ? it.concepto : it.codigo);
+    ((of.hon_agregado && of.hon_agregado.items) || []).forEach(it => { const k = claveHon(it); if (k && conDatos(it)) hon.set(k, honPorConcepto(f.key) ? k : `${k} · ${(HON_CUENTAS_BY_CODIGO[k] || { nombre: it.item }).nombre}`); });
+    ((of.hon_proy && of.hon_proy.items) || []).forEach(it => { const k = claveHon(it); if (k && conDatos(it)) honProy.set(k, honPorConcepto(f.key) ? k : `${k} · ${nombreItemHonProyeccion(k).replace(/^\d+ · /, '')}`); });
   });
+  const ordenar = m => Array.from(m, ([clave, etiqueta]) => ({ clave, etiqueta })).sort((a, b) => String(a.clave).localeCompare(String(b.clave), 'es', { numeric: true }));
   return {
+    hon: ordenar(hon),
+    honProy: ordenar(honProy),
     codigos: Array.from(codigos.values()).sort((a, b) => String(a.codigo).localeCompare(String(b.codigo), 'es', { numeric: true })),
     conceptos: Array.from(conceptos).sort((a, b) => a.localeCompare(b, 'es')),
     proy: Array.from(proy).sort((a, b) => a.localeCompare(b, 'es')),
@@ -8667,7 +9072,15 @@ function reporteConceptosFuente(f) {
     add('ingreso_llmm_sil', 'Recuperación LLMM SIL');
   } else add('ingreso', 'Ingreso');
   add('rem', 'Remuneraciones');
-  if (f.bysMode === 'none') return out;
+  if (f.sinGasto) return out; // fuente solo de ingresos: sin honorarios
+  add('hon', 'Honorarios (Subt. 21) — boletas');
+  add('hon_proy', 'Honorarios (Proyección) — total');
+  if (f.bysMode === 'none') {
+    const dn = reporteConceptosDinamicos(f);
+    dn.hon.forEach(h => add(`hon_item|${h.clave}`, `Honorarios — ${h.etiqueta}`));
+    dn.honProy.forEach(h => add(`hon_proy_item|${h.clave}`, `Honorarios Proyección — ${h.etiqueta}`));
+    return out;
+  }
   add('bys_total', 'Bienes y Servicios — total (Real+Proy)');
   if (f.bysMode === 'compras') add('bys_proy', 'Bienes y Servicios Proyección — total');
   const din = reporteConceptosDinamicos(f);
@@ -8676,6 +9089,8 @@ function reporteConceptosFuente(f) {
     add('bys_doc', 'Bienes y Servicios — documentado (compras)');
     add('bys_sindoc', 'Bienes y Servicios — sin documento (montos mensuales)');
   }
+  din.hon.forEach(h => add(`hon_item|${h.clave}`, `Honorarios — ${h.etiqueta}`));
+  din.honProy.forEach(h => add(`hon_proy_item|${h.clave}`, `Honorarios Proyección — ${h.etiqueta}`));
   din.codigos.forEach(c => add(`bys_codigo|${c.codigo}`, `${c.codigo} · ${c.nombre} (Subt.${c.subt})`));
   din.conceptos.forEach(n => add(`bys_concepto|${n}`, `B&S — ${n}`));
   din.proy.forEach(n => add(`bys_proy_item|${n}`, `B&S Proyección — ${n}`));
@@ -8700,6 +9115,8 @@ function serieConceptoOF(rbd, key) {
   const of = ofDeEntidad(rbd, fuenteKey);
   if (!of) return {};
   const items = of.bys_items || [], proy = of.bys_proy_items || [], docs = of.bys_doc_items || [];
+  const honItems = (of.hon_agregado && of.hon_agregado.items) || [], honProyItems = (of.hon_proy && of.hon_proy.items) || [];
+  const claveHon = (it) => (it.concepto !== undefined ? it.concepto : it.codigo);
   switch (tipo) {
     case 'ingreso': return of.ingreso ? of.ingreso.meses : {};
     case 'ingreso_operacion': return of.ingreso_operacion ? of.ingreso_operacion.meses : {};
@@ -8710,6 +9127,10 @@ function serieConceptoOF(rbd, key) {
     case 'ingreso_llmm_fonasa': return of.ingreso_llmm_fonasa ? of.ingreso_llmm_fonasa.meses : {};
     case 'ingreso_llmm_sil': return of.ingreso_llmm_sil ? of.ingreso_llmm_sil.meses : {};
     case 'rem': return of.gasto_rem ? of.gasto_rem.meses : {};
+    case 'hon': return sumaItemsMeses(honItems);                          // boletas de honorarios (siempre reales)
+    case 'hon_proy': return sumaItemsMeses(honProyItems);                 // proyección de honorarios (siempre proyectada)
+    case 'hon_item': { const it = honItems.find(x => claveHon(x) === arg); return it ? it.meses : {}; }
+    case 'hon_proy_item': { const it = honProyItems.find(x => claveHon(x) === arg); return it ? it.meses : {}; }
     case 'bys_total': return sumaItemsMeses([...items, ...docs, ...proy]); // sin documento + documentado (+ proyección en las fuentes con compras)
     case 'bys_proy': return sumaItemsMeses(proy);
     case 'bys_doc': return sumaItemsMeses(docs);
@@ -8735,7 +9156,8 @@ function esRealParaConcepto(rbd, key, idx1based) {
   const of = ofDeEntidad(rbd, fuenteKey);
   const corte = realHastaMesOtraFuente(of);
   if (tipo === 'bys_codigo' || tipo === 'bys_doc' || tipo === 'bys_doc_item') return true; // compras (con código o con concepto): siempre reales
-  if (tipo === 'bys_proy' || tipo === 'bys_proy_item') return false;
+  if (tipo === 'hon' || tipo === 'hon_item') return true;                                  // boletas de honorarios: siempre reales
+  if (tipo === 'bys_proy' || tipo === 'bys_proy_item' || tipo === 'hon_proy' || tipo === 'hon_proy_item') return false;
   if (tipo === 'bys_total' && of) {
     const mes = MESES_CARGA[idx1based - 1];
     let real = 0, proy = 0;
@@ -9109,6 +9531,8 @@ const EJEC_FUENTES = [
   { key: 'prorretencion', label: 'Pro-Retención' },
   { key: 'junji', label: 'JUNJI' },
   { key: 'faep', label: 'FAEP' },
+  { key: 'subt31_proyectos', label: 'Subt. 31' },
+  { key: 'asignacion_familiar', label: 'Asig. Familiar' },
   { key: 'figa', label: 'FIGA' },
   { key: 'aporte_educ', label: 'Aporte Educ.' },
   { key: 'aporte_junji', label: 'Aporte JUNJI' },
@@ -9126,6 +9550,7 @@ const EJEC_THEAD_FUENTE = `<tr>
   <th>Mes</th><th>Tipo</th>
   <th class="num">Ingreso (mes)</th>
   <th class="num">Gasto Rem. (mes)</th><th class="num">Δ vs mes ant.</th><th class="num">% Ejec. Rem. acum.</th>
+  <th class="num">Gasto Hon. (mes)</th><th class="num">Δ vs mes ant.</th><th class="num">% Ejec. Hon. acum.</th>
   <th class="num">Gasto B&amp;S (mes)</th><th class="num">Δ vs mes ant.</th><th class="num">% Ejec. B&amp;S acum.</th>
   <th class="num">% Ejec. Total acum.</th>
 </tr>`;
@@ -9144,8 +9569,8 @@ function computeEjecucionSerieFuente(fuenteKey, entidadFiltro) {
   const corteMax = cortes.length ? Math.max(...cortes) : DATA.n_meses;
   const ingresoAnual = sum(p.real.ing) + sum(p.proy.ing);
   const pct = v => (ingresoAnual > 0 ? (v / ingresoAnual) * 100 : null);
-  // Honorarios (Subt. 21): por ahora solo SEP los tiene (PR-1), así que solo cuentan en el Consolidado: van DENTRO del Total (para que cuadre con SEP y el Panel principal)
-  // pero sin columna ni serie propia (llegan con las demás fuentes, PR-3).
+  // Honorarios (Subt. 21, PR-3): serie propia (columna, tarjetas y línea) en cada fuente y en el Consolidado, y DENTRO del Total (así cuadra con SEP, las pestañas y el Panel principal).
+  // En las fuentes no hay 70/30: son gasto de la fuente aparte de Remuneraciones y de B&S. (SEP sigue midiendo «Personal» = Rem. + Hon. contra su meta del 70 %.)
   let cumRem = 0, cumHon = 0, cumBys = 0;
   const serie = MESES_CARGA.map((mes, i) => {
     const idx = i + 1;
@@ -9157,15 +9582,15 @@ function computeEjecucionSerieFuente(fuenteKey, entidadFiltro) {
     const tipo = tipoMesPorCortes(idx, corteMin, corteMax);
     return {
       mes, idx, tipo, esReal: tipo === 'real', ingresoMes, gastoRemMes, gastoHonMes, gastoBysMes,
-      pctRemAcum: pct(cumRem), pctBysAcum: pct(cumBys), pctTotalAcum: pct(cumRem + cumHon + cumBys),
+      pctRemAcum: pct(cumRem), pctHonAcum: pct(cumHon), pctBysAcum: pct(cumBys), pctTotalAcum: pct(cumRem + cumHon + cumBys),
     };
   });
   const realRem = sum(p.real.rem), realHon = sum(p.real.hon), realBys = sum(p.real.bys);
   const totRem = realRem + sum(p.proy.rem), totHon = realHon + sum(p.proy.hon), totBys = realBys + sum(p.proy.bys);
   return {
     serie, ingresoAnual, corteMin, corteMax, nEntidades: cortes.length,
-    real: { rem: realRem, hon: realHon, bys: realBys, total: realRem + realHon + realBys, pctRem: pct(realRem), pctBys: pct(realBys), pctTotal: pct(realRem + realHon + realBys) },
-    anual: { rem: totRem, hon: totHon, bys: totBys, total: totRem + totHon + totBys, pctRem: pct(totRem), pctBys: pct(totBys), pctTotal: pct(totRem + totHon + totBys) },
+    real: { rem: realRem, hon: realHon, bys: realBys, total: realRem + realHon + realBys, pctRem: pct(realRem), pctHon: pct(realHon), pctBys: pct(realBys), pctTotal: pct(realRem + realHon + realBys) },
+    anual: { rem: totRem, hon: totHon, bys: totBys, total: totRem + totHon + totBys, pctRem: pct(totRem), pctHon: pct(totHon), pctBys: pct(totBys), pctTotal: pct(totRem + totHon + totBys) },
   };
 }
 
@@ -9179,8 +9604,9 @@ function ejecSyncControles() {
   });
   document.getElementById('ejecLblRem').textContent = esSep ? 'Personal (Remuneraciones + Honorarios)' : 'Remuneraciones';
   document.getElementById('ejecLblBys').textContent = esSep ? 'Bienes y Servicios (22+29)' : 'Bienes y Servicios';
+  document.getElementById('ejecToggleHonWrap').hidden = esSep;
   document.getElementById('ejecToggleTotalWrap').hidden = esSep;
-  document.getElementById('ejecKpiRow').classList.toggle('kpi-row-3', !esSep);
+  document.getElementById('ejecKpiRow').classList.toggle('kpi-row-4', !esSep);
   const thead = document.querySelector('#ejecTable thead');
   const modo = esSep ? 'sep' : 'fuente';
   if (thead.dataset.modo !== modo) { thead.innerHTML = esSep ? EJEC_THEAD_SEP : EJEC_THEAD_FUENTE; thead.dataset.modo = modo; }
@@ -9234,7 +9660,7 @@ function ejecucionChartSVG(serie, showRem, showBys, opts) {
   const n = serie.length;
 
   const values = [];
-  serie.forEach(m => { if (showRem) values.push(m.pctRemAcum); if (showBys) values.push(m.pctBysAcum); if (opts.showTotal) values.push(m.pctTotalAcum); });
+  serie.forEach(m => { if (showRem) values.push(m.pctRemAcum); if (opts.showHon) values.push(m.pctHonAcum); if (showBys) values.push(m.pctBysAcum); if (opts.showTotal) values.push(m.pctTotalAcum); });
   const maxVal = values.length ? Math.max(...values, 0) : 0;
   const yMax = Math.min(1000, Math.max(100, Math.ceil((maxVal + 5) / 25) * 25));   // tope: un monto absurdo no puede volver interminable el bucle de marcas
 
@@ -9278,6 +9704,7 @@ function ejecucionChartSVG(serie, showRem, showBys, opts) {
 
   const remPath = showRem ? seriePath('pctRemAcum', 'var(--series-1)') : '';
   const bysPath = showBys ? seriePath('pctBysAcum', 'var(--series-2)') : '';
+  const honPath = opts.showHon ? seriePath('pctHonAcum', 'var(--series-hon)') : '';
   const totPath = opts.showTotal ? seriePath('pctTotalAcum', 'var(--series-3)') : '';
 
   const colW = n > 1 ? plotW / (n - 1) : plotW;
@@ -9287,7 +9714,7 @@ function ejecucionChartSVG(serie, showRem, showBys, opts) {
   }).join('');
 
   const svg = `<svg viewBox="0 0 ${W} ${H}">
-    ${gridlines}${metaLine}${corteLine}${remPath}${bysPath}${totPath}${monthLabels}
+    ${gridlines}${metaLine}${corteLine}${remPath}${honPath}${bysPath}${totPath}${monthLabels}
     <line class="ejec-crosshair" id="ejecCrosshair" x1="0" x2="0" y1="${margin.top}" y2="${margin.top + plotH}"></line>
     ${hitCols}
   </svg>`;
@@ -9319,12 +9746,6 @@ function ejecWireTooltip(wrap, chart, serie, htmlFor) {
 }
 
 function ejecPctTxt(v) { return v === null || v === undefined ? '—' : fmtPct(v); }
-// Consolidado con honorarios de SEP: el Total los incluye (cuadra con SEP y con el Panel principal) aunque esta vista aún no tiene columna ni serie de Honorarios.
-function conHonNota(r) {
-  return (r.real.hon !== 0 || r.anual.hon !== 0)
-    ? ` El Total incluye los honorarios (Subt. 21) de SEP — ${fmtCLP(r.real.hon)} reales y ${fmtCLP(r.anual.hon)} a diciembre —, que todavía no tienen columna ni serie propia en esta vista (llegarán con las demás fuentes).`
-    : '';
-}
 const EJEC_TIPO_TXT = { real: 'Real', proy: 'Proy.', mixto: 'Mixto' };
 
 function renderEjecucionFuente() {
@@ -9332,6 +9753,7 @@ function renderEjecucionFuente() {
   const entidad = key === 'consolidado' ? null : (document.getElementById('ejecRbdSelect').value || null);
   const showRem = document.getElementById('ejecShowRem').checked;
   const showBys = document.getElementById('ejecShowBys').checked;
+  const showHon = document.getElementById('ejecShowHon').checked;
   const showTotal = document.getElementById('ejecShowTotal').checked;
   const r = computeEjecucionSerieFuente(key, entidad);
   const { serie } = r;
@@ -9342,20 +9764,21 @@ function renderEjecucionFuente() {
   const baseTxt = key === 'consolidado'
     ? `Consolidado: suma SEP y las 9 fuentes (en SEP el ingreso es real ${fraseCorteIngresoSep()} y las remuneraciones hasta el corte de cada RBD). `
     : '';
-  const notaHon = conHonNota(r);
+  const notaHon = (r.real.hon !== 0 || r.anual.hon !== 0) ? ' Honorarios (Subt. 21): boletas siempre reales y proyección siempre proyectada; en las fuentes son una línea propia de gasto (sin 70/30).' : '';
   document.getElementById('ejecCorteNota').textContent = sinIngreso
     ? `${baseTxt}Sin ingreso cargado para esta selección: el % de ejecución se calcula contra el Ingreso anual Total (Real+Proy) y no se puede calcular todavía.`
     : `${baseTxt}Sin meta: el % se calcula contra el Ingreso anual Total (Real+Proy) de la selección (${fmtCLP(r.ingresoAnual)}). Corte real/proyectado: "Real hasta" de cada entidad — ${corteTxt}.${notaHon}`;
 
   const mk = (label, v, full) => ({ label, value: ejecPctTxt(v), full, critical: v !== null && v >= 100 });
   const base = sinIngreso ? 'Sin ingreso cargado' : null;
-  const conHon = r.real.hon !== 0 || r.anual.hon !== 0;           // solo el Consolidado, con los honorarios de SEP
-  const sumandos = conHon ? 'Rem. + Hon. + B&S' : 'Rem. + B&S';
+  const sumandos = 'Rem. + Hon. + B&S';
   document.getElementById('ejecKpiRow').innerHTML = [
     mk('% Ejec. Remuneraciones — Real', r.real.pctRem, base || `Solo lo ejecutado (${fmtCLP(r.real.rem)}) sobre el Ingreso anual Total`),
+    mk('% Ejec. Honorarios — Real', r.real.pctHon, base || `Solo lo ejecutado (${fmtCLP(r.real.hon)}) sobre el Ingreso anual Total`),
     mk('% Ejec. B&S — Real', r.real.pctBys, base || `Solo lo ejecutado (${fmtCLP(r.real.bys)}) sobre el Ingreso anual Total`),
     mk('% Ejec. Total — Real', r.real.pctTotal, base || `${sumandos} ejecutados (${fmtCLP(r.real.total)}) sobre el Ingreso anual Total`),
     mk('% Ejec. Remuneraciones — Real+Proy a diciembre', r.anual.pctRem, base || `Acumulado a diciembre incluyendo lo proyectado (${fmtCLP(r.anual.rem)})`),
+    mk('% Ejec. Honorarios — Real+Proy a diciembre', r.anual.pctHon, base || `Acumulado a diciembre incluyendo lo proyectado (${fmtCLP(r.anual.hon)})`),
     mk('% Ejec. B&S — Real+Proy a diciembre', r.anual.pctBys, base || `Acumulado a diciembre incluyendo lo proyectado (${fmtCLP(r.anual.bys)})`),
     mk('% Ejec. Total — Real+Proy a diciembre', r.anual.pctTotal, base || `${sumandos} a diciembre (${fmtCLP(r.anual.total)}) sobre el Ingreso anual Total`),
   ].map(k => `<div class="kpi-card${k.critical ? ' critical' : ''}"><div class="label">${k.label}</div><div class="value">${k.value}</div><div class="delta">${k.full}</div></div>`).join('');
@@ -9364,12 +9787,13 @@ function renderEjecucionFuente() {
   if (sinIngreso) {
     wrap.innerHTML = '<div class="detalle-empty">Sin ingreso cargado para esta selección — el gráfico aparece cuando hay Ingreso anual Total para medir el % de ejecución.</div>';
   } else {
-    const chart = ejecucionChartSVG(serie, showRem, showBys, { corteIdx: r.corteMin, showTotal, metaLabel: '100% del ingreso', marginRight: 92 });
+    const chart = ejecucionChartSVG(serie, showRem, showBys, { corteIdx: r.corteMin, showTotal, showHon, metaLabel: '100% del ingreso', marginRight: 92 });
     wrap.innerHTML = chart.svg + '<div class="ejec-tooltip" id="ejecTooltip"></div>';
     ejecWireTooltip(wrap, chart, serie, (m, idx) =>
       `<div class="tt-title">${MESES_CARGA_TITLE[idx]} · ${m.tipo === 'real' ? 'Real' : m.tipo === 'proy' ? 'Proyectado' : 'Mixto'}</div>` +
       `<div class="tt-row">Ingreso del mes: <strong>${fmtCLP(m.ingresoMes)}</strong></div>` +
       (showRem ? `<div class="tt-row"><span class="tt-key" style="background:var(--series-1)"></span>Remuneraciones: <strong>${ejecPctTxt(m.pctRemAcum)}</strong> acum. (${fmtCLP(m.gastoRemMes)} ese mes)</div>` : '') +
+      (showHon ? `<div class="tt-row"><span class="tt-key" style="background:var(--series-hon)"></span>Honorarios (Subt. 21): <strong>${ejecPctTxt(m.pctHonAcum)}</strong> acum. (${fmtCLP(m.gastoHonMes)} ese mes)</div>` : '') +
       (showBys ? `<div class="tt-row"><span class="tt-key" style="background:var(--series-2)"></span>Bienes y Servicios: <strong>${ejecPctTxt(m.pctBysAcum)}</strong> acum. (${fmtCLP(m.gastoBysMes)} ese mes)</div>` : '') +
       (showTotal ? `<div class="tt-row"><span class="tt-key" style="background:var(--series-3)"></span>Total: <strong>${ejecPctTxt(m.pctTotalAcum)}</strong> acum. (${fmtCLP(m.gastoRemMes + m.gastoHonMes + m.gastoBysMes)} ese mes)</div>` : ''));
   }
@@ -9383,6 +9807,9 @@ function renderEjecucionFuente() {
       <td class="num">${fmtCLP(m.gastoRemMes)}</td>
       <td class="num">${deltaHTML(m.gastoRemMes, prev ? prev.gastoRemMes : undefined)}</td>
       <td class="num">${ejecPctTxt(m.pctRemAcum)}</td>
+      <td class="num">${fmtCLP(m.gastoHonMes)}</td>
+      <td class="num">${deltaHTML(m.gastoHonMes, prev ? prev.gastoHonMes : undefined)}</td>
+      <td class="num">${ejecPctTxt(m.pctHonAcum)}</td>
       <td class="num">${fmtCLP(m.gastoBysMes)}</td>
       <td class="num">${deltaHTML(m.gastoBysMes, prev ? prev.gastoBysMes : undefined)}</td>
       <td class="num">${ejecPctTxt(m.pctBysAcum)}</td>
@@ -9446,6 +9873,7 @@ function renderEjecucion() {
 document.getElementById('ejecRbdSelect').addEventListener('change', renderEjecucion);
 document.getElementById('ejecShowRem').addEventListener('change', renderEjecucion);
 document.getElementById('ejecShowBys').addEventListener('change', renderEjecucion);
+document.getElementById('ejecShowHon').addEventListener('change', renderEjecucion);
 document.getElementById('ejecShowTotal').addEventListener('change', renderEjecucion);
 
 function csvEscape(val) {
@@ -9731,10 +10159,12 @@ function buildEjecucionPrintHTML() {
   // como texto simple para que el color de cada línea se siga entendiendo en el PDF.
   const esSep = ejecFuenteSel === 'sep';
   const showTotal = !esSep && document.getElementById('ejecShowTotal').checked;
+  const showHon = !esSep && document.getElementById('ejecShowHon').checked;
   const legendHtml = `<div class="ejec-print-legend">
     ${showRem ? `<span><span class="swatch" style="background:var(--series-1)"></span>${escHtml(document.getElementById('ejecLblRem').textContent)}</span>` : ''}
+    ${showHon ? `<span><span class="swatch" style="background:var(--series-hon)"></span>Honorarios (Subt. 21)</span>` : ''}
     ${showBys ? `<span><span class="swatch" style="background:var(--series-2)"></span>${escHtml(document.getElementById('ejecLblBys').textContent)}</span>` : ''}
-    ${showTotal ? `<span><span class="swatch" style="background:var(--series-3)"></span>Total (Rem. + B&amp;S)</span>` : ''}
+    ${showTotal ? `<span><span class="swatch" style="background:var(--series-3)"></span>Total (Rem. + Hon. + B&amp;S)</span>` : ''}
   </div>`;
   return `
     <div class="detalle-header" style="margin-bottom:14px;">
@@ -10710,6 +11140,17 @@ function aplicarSnapshot(snapshot) {
           entry.compras = comprasOF;
           entry.bys_doc_items = itemsFromComprasConcepto(comprasOF);
         }
+        // Honorarios (Subt. 21, PR-3): boletas (solo entradas que son objetos; una dañada no rompe al resto) y proyección por cuenta/concepto (la clave del mapa ES la cuenta o el concepto).
+        const honOF = {};
+        // Recuperación LLMM (solo ingresos) no lleva honorarios: si un documento trae boletas o proyección, se ignoran (no se borran de Firestore).
+        Object.entries(f.sinGasto ? {} : objetoPlano(raw.honorarios)).forEach(([id, h]) => { if (h && typeof h === 'object' && !Array.isArray(h)) honOF[id] = sanitizaHonorario(h, honPorConcepto(f.key)); });
+        entry.honorarios = honOF;
+        const honProyRaw = f.sinGasto ? {} : objetoPlano(raw.hon_proyeccion_items);
+        entry.hon_proy = { items: Object.keys(honProyRaw).map(clave => {
+          const meses = mesesNum(objetoPlano(honProyRaw[clave]).meses);
+          return { [honPorConcepto(f.key) ? 'concepto' : 'codigo']: clave, meses, total: totalDeMeses(meses) };
+        }), meses: {}, total: 0 };
+        recomputeHonOtraFuente(entry, f.key);
         of[f.key] = entry;
       });
       nuevoOtrasFuentes[rbd] = of;

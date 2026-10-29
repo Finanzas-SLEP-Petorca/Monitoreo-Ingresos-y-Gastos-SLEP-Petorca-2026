@@ -144,11 +144,11 @@ export function leerFilasFuente(page, key) {
     document.querySelectorAll(`#otrasFuentesTbody-${k} tr[data-rbd]`).forEach(tr => {
       const c = Array.from(tr.children).map(td => td.cloneNode(true));
       const split = tr.querySelector('.of-bys-split');
-      const bysCell = c[5];
+      const bysCell = c[6]; // la columna 5 es «Gasto Honorarios» (PR-3)
       const sp = bysCell.querySelector('.of-bys-split');
       if (sp) sp.remove();
       out[tr.dataset.rbd] = {
-        ingreso: c[3].textContent.trim(), rem: c[4].textContent.trim(), bys: bysCell.textContent.trim(), gasto: c[6].textContent.trim(), saldo: c[7].textContent.trim(),
+        ingreso: c[3].textContent.trim(), rem: c[4].textContent.trim(), hon: c[5].textContent.trim(), bys: bysCell.textContent.trim(), gasto: c[7].textContent.trim(), saldo: c[8].textContent.trim(),
         split: split ? split.textContent.trim() : '',
       };
     });

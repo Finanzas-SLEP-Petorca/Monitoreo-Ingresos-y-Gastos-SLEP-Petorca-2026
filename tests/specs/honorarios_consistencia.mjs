@@ -1,6 +1,6 @@
 // Honorarios (PR-1) · INVARIANTE entre vistas: con boletas y proyección cargadas, el gasto total y el saldo de SEP son los MISMOS en la pestaña SEP, el Panel principal (tarjeta SEP, franja
 // consolidada, evolución mensual, «Atención»), % Ejecución (SEP y Consolidado) y Reportes (Visualizador y Reporte personalizado), en las vistas Total / Real / Proyectado.
-// La «tercera serie Honorarios» completa de esas vistas llega con el PR-3; aquí lo que importa es que los honorarios estén DENTRO del gasto total en todas partes (y que se vean como línea o con nota).
+// (La serie «Honorarios» de las fuentes y del Consolidado llegó con el PR-3: ver honorarios_fuentes_totales y honorarios_series.) Aquí lo que importa es que los honorarios de SEP estén DENTRO del gasto total en todas partes.
 import { boot, clickTab, cargarFixture, textoDe } from '../lib/boot.mjs';
 import { correrSpec } from '../lib/spec.mjs';
 import { honDe, MESES, leerCLP, tarjetas, filaSepTexto, clp } from '../lib/honorarios.mjs';
@@ -94,7 +94,9 @@ await correrSpec('honorarios_consistencia', async (t) => {
   t.ok(/^Rem\. \+ Hon\. \+ B&S a diciembre/.test(anual.d), 'Consolidado: el Total se rotula «Rem. + Hon. + B&S»', anual.d);
   t.eq(montoDe(anual.d, 'Rem\\. \\+ Hon\\. \\+ B&S a diciembre'), total, 'Consolidado: el gasto total a diciembre es EXACTAMENTE el «Gasto Total» de la franja del Panel principal');
   const nota = await textoDe(page, '#ejecCorteNota');
-  t.ok(nota.includes(`El Total incluye los honorarios (Subt. 21) de SEP — ${clp(oracle.bol)} reales y ${clp(hon)} a diciembre —, que todavía no tienen columna ni serie propia en esta vista`), 'Consolidado: una nota dice que el Total incluye los honorarios de SEP (aún sin serie propia)', nota);
+  t.ok(/Honorarios \(Subt\. 21\): boletas siempre reales y proyección siempre proyectada/.test(nota), 'Consolidado: la nota aclara cómo se tratan los honorarios (desde el PR-3 tienen serie propia)', nota);
+  const filasCons = await page.evaluate(() => Array.from(document.querySelectorAll('#ejecTbody tr')).map(tr => Array.from(tr.children).map(td => td.textContent.trim())));
+  t.eq(filasCons.reduce((s, f) => s + leerCLP(f[6]), 0), hon, 'Consolidado: la columna «Gasto Hon. (mes)» suma los honorarios de SEP (las fuentes del fixture `honorarios` no tienen)');
   const tbl = await page.evaluate(() => Array.from(document.querySelectorAll('#ejecTbody tr')).map(tr => Array.from(tr.children).map(td => td.textContent.trim())));
   t.eq(tbl.length, 12, 'Consolidado: 12 meses');
   // fuente que NO es SEP: sin nota ni cambio

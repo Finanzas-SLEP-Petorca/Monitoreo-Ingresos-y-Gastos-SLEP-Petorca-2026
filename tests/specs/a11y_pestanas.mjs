@@ -10,7 +10,7 @@ import { boot } from '../lib/boot.mjs';
 import { axDe, landmarks } from '../lib/a11y.mjs';
 import { correrSpec } from '../lib/spec.mjs';
 
-const ORDEN = ['dashboard', 'panel', 'of-general', 'of-pie', 'of-mantenimiento', 'of-prorretencion', 'of-junji', 'of-faep', 'of-figa', 'of-aporte_educ', 'of-aporte_junji', 'ejecucion', 'reportes'];
+const ORDEN = ['dashboard', 'panel', 'of-general', 'of-pie', 'of-mantenimiento', 'of-prorretencion', 'of-junji', 'of-faep', 'of-subt31_proyectos', 'of-recuperacion_llmm', 'of-asignacion_familiar', 'of-fondos_fijos', 'of-figa', 'of-aporte_educ', 'of-aporte_junji', 'ejecucion', 'reportes'];
 
 // Estado de las pestañas y de los paneles: debe ser coherente tras CUALQUIER activación.
 const estado = (page) => page.evaluate(() => {
@@ -47,7 +47,7 @@ await correrSpec('a11y_pestanas', async (t) => {
       paneles: document.querySelectorAll('main > .tab-content').length, panelesFueraDeMain: document.querySelectorAll('.tab-content').length - document.querySelectorAll('main .tab-content').length,
     }));
     t.ok(dom.header === 1 && dom.nav === 1 && dom.main === 1 && dom.rolesBanner === 0, 'L2) sin landmarks duplicados en el DOM (1 header, 1 nav, 1 main)', dom);
-    t.ok(dom.navDentroDeWrap && dom.mainDentroDeWrap && dom.paneles === 13 && dom.panelesFueraDeMain === 0, 'L2) los 13 paneles cuelgan de <main> y <nav>/<main> de .wrap', dom);
+    t.ok(dom.navDentroDeWrap && dom.mainDentroDeWrap && dom.paneles === 17 && dom.panelesFueraDeMain === 0, 'L2) los 17 paneles cuelgan de <main> y <nav>/<main> de .wrap', dom);
   });
 
   // ======================================================================== estructura ARIA
@@ -62,10 +62,10 @@ await correrSpec('a11y_pestanas', async (t) => {
       return { listas, tabs, paneles };
     });
     t.eq(r.listas.map((l) => l.label), ['Inicio', 'Fuentes de financiamiento', 'Análisis'], 'S1) 3 role="tablist" con aria-label (Inicio / Fuentes de financiamiento / Análisis)');
-    t.eq(r.listas.map((l) => l.n), [2, 9, 2], 'S1) con 2 + 9 + 2 pestañas');
-    t.ok(r.tabs.length === 13 && r.tabs.every((x) => x.rol === 'tab' && x.tablistPadre && /^tabbtn-/.test(x.id)), 'S2) las 13 pestañas son role="tab" dentro de un tablist y con id', r.tabs.filter((x) => x.rol !== 'tab'));
+    t.eq(r.listas.map((l) => l.n), [2, 13, 2], 'S1) con 2 + 13 + 2 pestañas (12 fuentes y Fondos Fijos)');
+    t.ok(r.tabs.length === 17 && r.tabs.every((x) => x.rol === 'tab' && x.tablistPadre && /^tabbtn-/.test(x.id)), 'S2) las 17 pestañas son role="tab" dentro de un tablist y con id', r.tabs.filter((x) => x.rol !== 'tab'));
     t.ok(r.tabs.every((x) => x.panelExiste && x.panelRol === 'tabpanel' && x.panelLb === x.id), 'S2) cada pestaña tiene aria-controls → su role="tabpanel" cuyo aria-labelledby apunta de vuelta a ella', r.tabs.filter((x) => !(x.panelExiste && x.panelRol === 'tabpanel' && x.panelLb === x.id)));
-    t.ok(r.paneles.length === 13 && r.paneles.every((p) => p.rol === 'tabpanel' && p.existeLb), 'S3) los 13 paneles son role="tabpanel" con aria-labelledby válido', r.paneles);
+    t.ok(r.paneles.length === 17 && r.paneles.every((p) => p.rol === 'tabpanel' && p.existeLb), 'S3) los 17 paneles son role="tabpanel" con aria-labelledby válido', r.paneles);
     t.eq(r.tabs.filter((x) => x.sel === 'true').map((x) => x.tab), ['dashboard'], 'S4) al cargar solo "Panel principal" tiene aria-selected="true"');
     t.eq(r.tabs.filter((x) => x.ti === 0).map((x) => x.tab), ['dashboard'], 'S4) y solo ella está en el orden de Tab (tabindex itinerante; las otras 12 con tabindex=-1)');
     const ax = await axDe(page, '#tabbtn-dashboard');
@@ -75,8 +75,8 @@ await correrSpec('a11y_pestanas', async (t) => {
     const axl = await axDe(page, '[role="tablist"][aria-label="Fuentes de financiamiento"]');
     t.ok(axl && axl.rol === 'tablist' && axl.nombre === 'Fuentes de financiamiento', 'S5) los tablist tienen nombre', axl);
     t.eq(await page.evaluate(() => Array.from(document.querySelectorAll('.tab-btn')).map((b) => b.textContent.replace(/\s+/g, ' ').trim()).join(' | ')),
-      '🏠 Panel principal | 🎓 SEP | 💰 General | 🧩 PIE | 🔧 Mantención | 📌 Pro-Retención | 🧸 JUNJI | 🏗️ FAEP | 🌐 FIGA | 🏛️ Aporte Educ. | 🍼 Aporte JUNJI | 📉 % Ejecución | 📈 Reportes',
-      'S6) el texto visible de las 13 pestañas no cambia');
+      '🏠 Panel principal | 🎓 SEP | 💰 General | 🧩 PIE | 🔧 Mantención | 📌 Pro-Retención | 🧸 JUNJI | 🏗️ FAEP | 🧱 Subt. 31 | 🩺 Recup. LLMM | 👨‍👩‍👧 Asig. Familiar | 💼 Fondos Fijos | 🌐 FIGA | 🏛️ Aporte Educ. | 🍼 Aporte JUNJI | 📉 % Ejecución | 📈 Reportes',
+      'S6) el texto visible de las 17 pestañas no cambia');
   });
 
   // ======================================================================== mouse: sigue igual
@@ -104,7 +104,7 @@ await correrSpec('a11y_pestanas', async (t) => {
     e = await estado(page);
     t.ok(e.focoEsTab && e.foco === 'dashboard', 'K1) Shift+Tab vuelve a la pestaña activa');
 
-    // flechas: recorren las 13 en orden, entre los 3 grupos, activando
+    // flechas: recorren las 17 en orden, entre los 3 grupos, activando
     for (let i = 1; i < ORDEN.length; i++) {
       await page.keyboard.press('ArrowRight');
       await h.waitIdle();

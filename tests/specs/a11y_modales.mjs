@@ -107,8 +107,8 @@ await correrSpec('a11y_modales', async (t) => {
       t.ok(r.rol === 'dialog' && r.modal === 'true' && r.lb === m.titulo && r.tituloExiste, `E0) ${m.nombre}: role="dialog" aria-modal="true" aria-labelledby="${m.titulo}" (el título existe)`, r);
       t.ok(!r.dentroDeWrap, `E0) ${m.nombre}: el diálogo está FUERA de .wrap (para poder inertizar el fondo sin inertizarlo a él)`, r);
     }
-    t.eq(await page.evaluate(() => document.querySelectorAll('.modal-overlay').length), 3, 'E0) inventario: exactamente 3 diálogos modales propios (.modal-overlay)');
-    t.eq(await page.evaluate(() => document.querySelectorAll('[role="dialog"], [role="alertdialog"], dialog').length), 3, 'E0) y ningún otro role="dialog" / <dialog> en la página');
+    t.eq(await page.evaluate(() => document.querySelectorAll('.modal-overlay').length), 4, 'E0) inventario: exactamente 4 diálogos modales propios (.modal-overlay)');
+    t.eq(await page.evaluate(() => document.querySelectorAll('[role="dialog"], [role="alertdialog"], dialog').length), 4, 'E0) y ningún otro role="dialog" / <dialog> en la página');
     t.eq(await page.evaluate(() => document.querySelector('#app .wrap').hasAttribute('inert')), false, 'E0) con todos cerrados la página NO está inert');
   });
 

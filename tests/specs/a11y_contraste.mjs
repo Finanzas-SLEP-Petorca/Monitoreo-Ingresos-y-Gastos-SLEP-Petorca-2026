@@ -8,7 +8,7 @@
 // #0f9d58 de las tarjetas y de "▲ Superávit" (3,2:1), el blanco sobre el naranja #eb6834 (3,2:1) y sobre el verde #1e8a4c (4,38:1), el rojo #d03b3b sobre fondos tintados
 // (3,8–4,1:1), el ámbar #a3630a (4,3:1), "Real"/"Proy." de 8,5 px con opacidad .85 (3,4–3,7:1) y el placeholder "0" de las celdas (1,95:1).
 import { boot } from '../lib/boot.mjs';
-import { recorrerVistas, recorrerLogin, recorrerHonorarios, recorrerConceptos } from '../lib/a11y-vistas.mjs';
+import { recorrerVistas, recorrerLogin, recorrerHonorarios, recorrerHonorariosFuentes, recorrerConceptos } from '../lib/a11y-vistas.mjs';
 import { analizarContraste, formatearFallasContraste } from '../lib/a11y.mjs';
 import { correrSpec } from '../lib/spec.mjs';
 
@@ -68,6 +68,14 @@ await correrSpec('a11y_contraste', async (t) => {
     await recorrerHonorarios(hh, async ({ nombre, scope }) => { registrar('honorarios.' + nombre, await analizarContraste(hh.page, { scope })); });
     t.noErrores(hh);
     await hh.close();
+  });
+
+  // Honorarios (Subt. 21) en las 9 fuentes (PR-3): columna «Gasto Honorarios», bloque del detalle con cuenta y con concepto, formulario en edición con avisos y la serie en % Ejecución
+  await escenario(t, 'HF', async () => {
+    const hf = await boot({ fixture: 'honorarios_fuentes', viewport: { width: 1500, height: 1000 } });
+    await recorrerHonorariosFuentes(hf, async ({ nombre, scope }) => { registrar('honfuentes.' + nombre, await analizarContraste(hf.page, { scope })); });
+    t.noErrores(hf);
+    await hf.close();
   });
 
   // Registro de compras por CONCEPTO: pestañas con el desglose «Doc. · S/doc.», detalle con tabla, avisos y formulario en edición

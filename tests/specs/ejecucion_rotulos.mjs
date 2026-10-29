@@ -100,7 +100,7 @@ await correrSpec('ejecucion_rotulos', async (t) => {
   await clickTab(page, 'SEP');
   await elegirCorte(page, h, 3);
   await clickTab(page, '% Ejecución');
-  for (const f of FUENTES) {
+  for (const f of FUENTES.filter(x => x.key !== 'recuperacion_llmm')) { // Recuperación LLMM (solo ingresos) no tiene chip en % Ejecución
     await elegirFuente(page, h, f.key);
     const { tipos: esp } = tiposDe(cortesFuente(docs, f.key));
     t.eq((await tipos(page)).map(x => x.txt), esp.map(x => TXT[x]), `${f.corto}: Real / Proy. / Mixto según el "Real hasta" de cada entidad (selector en Marzo; no interviene)`);

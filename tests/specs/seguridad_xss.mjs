@@ -37,6 +37,9 @@ const honPayload = (k, extra = {}) => ({
   montoGasto: 1000, montoDocumento: 1200, documentoContable: `${k} ${P.attr}`, ...extra,
 });
 
+// Boleta de honorarios de una fuente por CONCEPTO (JUNJI, FAEP, FIGA, Aportes): el concepto (texto libre) en lugar de la cuenta.
+const honConcepto = (k, concepto, extra = {}) => { const b = honPayload(k, { concepto, ...extra }); delete b.codigo; return b; };
+
 function armarFixture() {
   const docs = JSON.parse(JSON.stringify(cargarFixture('default').docs));
   const d1121 = docs['1121'];
@@ -52,6 +55,11 @@ function armarFixture() {
   of.general.compras.og2 = ofCompraPayload('GENx', { codigo: P.img });  // cuenta no habilitada -> aviso en el title
   of.general.bys_proy_items = { a: { concepto: P.img, meses: { SEPTIEMBRE: 7 }, total: 7 }, b: { concepto: P.attr, meses: { SEPTIEMBRE: 8 }, total: 8 }, c: { concepto: P.amp, meses: { SEPTIEMBRE: 9 }, total: 9 } };
   of.pie.compras.op1 = ofCompraPayload('PIE');
+  // Honorarios (Subt. 21) en las fuentes (PR-3): con cuenta (General) y por concepto (FAEP), con ids, cuentas y conceptos hostiles.
+  of.general.honorarios = { [ID_RARO]: honPayload('GHON'), [ID_RARO_2]: honPayload('GHON2', { codigo: P.img }) };
+  of.general.hon_proyeccion_items = { [P.attr]: { codigo: P.attr, meses: { SEPTIEMBRE: 6 }, total: 6 } };
+  of.faep.honorarios = { [ID_RARO]: honConcepto('FHON', P.attr), [ID_RARO_2]: honConcepto('FHON2', P.img), f3: honConcepto('FHON3', P.amp) };
+  of.faep.hon_proyeccion_items = { [P.attr]: { concepto: P.attr, meses: { MARZO: 40 }, total: 40 }, [P.amp]: { concepto: P.amp, meses: { MARZO: 50 }, total: 50 }, [P.img]: { concepto: P.img, meses: { MARZO: 60 }, total: 60 } };
   of.faep.bys_items[P.attr] = { concepto: P.attr, meses: { MARZO: 100 }, total: 100 };
   of.faep.bys_items[P.amp] = { concepto: P.amp, meses: { MARZO: 200 }, total: 200 };
   of.faep.bys_items[P.img] = { concepto: P.img, meses: { MARZO: 300 }, total: 300 };
@@ -189,6 +197,20 @@ await correrSpec('seguridad_xss', async (t) => {
       const aviso = await page.evaluate(() => Array.from(document.querySelectorAll('#otrasFuentesModalBody .compra-aviso')).map(e => e.title));
       t.ok(aviso.length >= 1 && aviso.some(a => a.includes(P.img)), 'modal general: el aviso (title) de cuenta no habilitada lleva el código como texto, sin romper el atributo', aviso);
       t.ok(txt.includes(P.img) && txt.includes(P.amp), 'modal general: los conceptos de proyección de B&S se ven literales');
+      // Honorarios (Subt. 21) de General: boletas y proyección con texto libre hostil
+      const honTxt = await page.evaluate(() => document.querySelector('#otrasFuentesModalBody .hon-block').innerText);
+      t.ok(honTxt.includes(`GHON ${P.amp} ${P.img}`) && honTxt.includes(`GHON ${P.svg}`) && honTxt.includes(`GHON ${P.comillas} ${P.img}`) && honTxt.includes(`GHON ${P.attr}`), 'honorarios (General): descripción, N°, prestador y N° DC se ven LITERALES');
+      t.ok(!honTxt.includes('&amp;amp;') && !honTxt.includes('&lt;img'), 'honorarios (General): sin doble escape');
+      const idsHon = await page.evaluate(() => Array.from(document.querySelectorAll('#otrasFuentesModalBody tr[data-hon-id]')).map(tr => tr.dataset.honId));
+      t.ok(idsHon.includes(ID_RARO) && idsHon.includes(ID_RARO_2), 'honorarios (General): los ids con comillas y marcado llegan intactos al DOM (data-hon-id)', idsHon);
+      t.ok(await page.evaluate((cod) => Array.from(document.querySelectorAll('#otrasFuentesModalBody input.celda-input[data-modo="of_hon_proy_item"]')).some(i => i.dataset.codigo === cod), P.attr), 'honorarios (General): la «cuenta» de la proyección con forma de atributo conserva su texto EXACTO en data-codigo');
+      // quitar la boleta con id raro: deleteField de la clave exacta
+      await h.clearWrites();
+      await page.evaluate((id) => { Array.from(document.querySelectorAll('#otrasFuentesModalBody .hon-del-btn')).find(b => b.dataset.honId === id).click(); }, ID_RARO);
+      await h.waitIdle();
+      const wDelHonG = (await h.writes()).filter(w => w.path === RUTA('1121') && w.payload.otras_fuentes);
+      t.ok(wDelHonG.length === 1 && wDelHonG[0].payload.otras_fuentes.general.honorarios[ID_RARO] && wDelHonG[0].payload.otras_fuentes.general.honorarios[ID_RARO].__sentinel === 'deleteField', 'honorarios (General): quitar la boleta con id hostil borra la clave exacta (deleteField)');
+      await limpio('modal general tras quitar la boleta');
     }
     await page.keyboard.press('Escape');
     await page.evaluate((fu) => document.querySelector(`#otrasFuentesTbody-${fu} .row-action-btn[data-action="pdf"][data-rbd="1121"]`).click(), f);
@@ -213,14 +235,39 @@ await correrSpec('seguridad_xss', async (t) => {
   t.ok(txt.includes(P.attr) && txt.includes(P.amp) && txt.includes(P.img), 'modal FAEP: los conceptos se ven literales');
   const conceptos = await page.evaluate(() => Array.from(document.querySelectorAll('#otrasFuentesModalBody input.celda-input[data-concepto]')).map(i => i.dataset.concepto));
   t.ok([P.attr, P.amp, P.img].every(c => conceptos.includes(c)), 'FAEP: data-concepto conserva el texto EXACTO (comillas y & incluidos)', conceptos.slice(0, 4));
+  // Honorarios (Subt. 21) de FAEP por concepto: boletas y proyección con conceptos e ids hostiles
+  const honTxtF = await page.evaluate(() => document.querySelector('#otrasFuentesModalBody .hon-block').innerText);
+  t.ok(honTxtF.includes(P.attr) && honTxtF.includes(P.amp) && honTxtF.includes(P.img) && honTxtF.includes(`FHON ${P.svg}`) && honTxtF.includes(`FHON ${P.comillas} ${P.img}`), 'honorarios (FAEP): los conceptos, el prestador y el N° DC se ven LITERALES');
+  t.ok(!honTxtF.includes('&amp;amp;') && !honTxtF.includes('&lt;img'), 'honorarios (FAEP): sin doble escape');
+  const conceptosHon = await page.evaluate(() => Array.from(document.querySelectorAll('#otrasFuentesModalBody input.celda-input[data-modo="of_hon_proy_item"]')).map(i => i.dataset.concepto));
+  t.ok([P.attr, P.amp, P.img].every(c => conceptosHon.includes(c)), 'honorarios (FAEP): data-concepto de la proyección conserva el texto EXACTO', conceptosHon.slice(0, 4));
+  t.eq(await page.evaluate(() => Array.from(document.querySelectorAll('#ofhonconceptos-1121-faep option')).map(o => o.value).sort()), [P.amp, P.attr, P.img].sort(), 'honorarios (FAEP): las sugerencias del campo Concepto llevan el texto exacto');
+  // editar un mes de la proyección con concepto de atributo roto: se guarda bajo la clave exacta
+  await h.clearWrites();
+  await page.evaluate((c) => { const i = Array.from(document.querySelectorAll('#otrasFuentesModalBody input.celda-input[data-modo="of_hon_proy_item"]')).find(x => x.dataset.modo === 'of_hon_proy_item' && x.dataset.concepto === c && x.dataset.mes === 'ABRIL'); i.focus(); i.value = '11'; i.dispatchEvent(new Event('input', { bubbles: true })); }, P.attr);
+  await h.flushWrites();
+  const wHonF = (await h.writes()).filter(w => w.path === RUTA('1121') && w.payload.otras_fuentes);
+  t.ok(wHonF.length === 1 && Object.keys(wHonF[0].payload.otras_fuentes.faep.hon_proyeccion_items).join('|') === P.attr && wHonF[0].payload.otras_fuentes.faep.hon_proyeccion_items[P.attr].concepto === P.attr, 'honorarios (FAEP): la proyección se guarda bajo la clave exacta (no se crea un ítem paralelo)');
+  // quitar el concepto raro de la proyección y la boleta con id hostil
+  await h.clearWrites();
+  await page.evaluate((c) => { Array.from(document.querySelectorAll('#otrasFuentesModalBody .honproy-del-btn')).find(b => b.dataset.concepto === c).click(); }, P.attr);
+  await h.waitIdle();
+  const wDelProyF = (await h.writes()).filter(w => w.path === RUTA('1121') && w.payload.otras_fuentes);
+  t.ok(wDelProyF.length === 1 && wDelProyF[0].payload.otras_fuentes.faep.hon_proyeccion_items[P.attr].__sentinel === 'deleteField', 'honorarios (FAEP): quitar el concepto hostil de la proyección borra la clave exacta (deleteField)');
+  await h.clearWrites();
+  await page.evaluate((id) => { Array.from(document.querySelectorAll('#otrasFuentesModalBody .hon-del-btn')).find(b => b.dataset.honId === id).click(); }, ID_RARO_2);
+  await h.waitIdle();
+  const wDelHonF = (await h.writes()).filter(w => w.path === RUTA('1121') && w.payload.otras_fuentes);
+  t.ok(wDelHonF.length === 1 && wDelHonF[0].payload.otras_fuentes.faep.honorarios[ID_RARO_2].__sentinel === 'deleteField', 'honorarios (FAEP): quitar la boleta con id hostil borra la clave exacta (deleteField)');
+  await limpio('modal FAEP tras quitar honorarios');
   // editar el concepto con atributo roto: la clave guardada es la exacta y el total de su fila se actualiza
   await h.clearWrites();
   await page.evaluate((c) => {
-    const i = Array.from(document.querySelectorAll('#otrasFuentesModalBody input.celda-input[data-concepto]')).find(x => x.dataset.concepto === c && x.dataset.mes === 'ABRIL');
+    const i = Array.from(document.querySelectorAll('#otrasFuentesModalBody input.celda-input[data-concepto]')).find(x => x.dataset.modo === 'of_bys_item' && x.dataset.concepto === c && x.dataset.mes === 'ABRIL');
     i.focus(); i.value = '55'; i.dispatchEvent(new Event('input', { bubbles: true }));
   }, P.attr);
   const totFaep = await page.evaluate((c) => {
-    const i = Array.from(document.querySelectorAll('#otrasFuentesModalBody input.celda-input[data-concepto]')).find(x => x.dataset.concepto === c && x.dataset.mes === 'ABRIL');
+    const i = Array.from(document.querySelectorAll('#otrasFuentesModalBody input.celda-input[data-concepto]')).find(x => x.dataset.modo === 'of_bys_item' && x.dataset.concepto === c && x.dataset.mes === 'ABRIL');
     return i.closest('tr').querySelector('.item-total').textContent.replace(/\D/g, '');
   }, P.attr);
   t.eq(Number(totFaep), 155, 'FAEP concepto con comillas: el total de su fila se actualiza (100 + 55)');
@@ -230,7 +277,7 @@ await correrSpec('seguridad_xss', async (t) => {
   // concepto con "&amp;": se edita y se guarda bajo su propia clave (antes iba a otra clave por el escape a medias)
   await h.clearWrites();
   await page.evaluate((c) => {
-    const i = Array.from(document.querySelectorAll('#otrasFuentesModalBody input.celda-input[data-concepto]')).find(x => x.dataset.concepto === c && x.dataset.mes === 'ABRIL');
+    const i = Array.from(document.querySelectorAll('#otrasFuentesModalBody input.celda-input[data-concepto]')).find(x => x.dataset.modo === 'of_bys_item' && x.dataset.concepto === c && x.dataset.mes === 'ABRIL');
     i.focus(); i.value = '9'; i.dispatchEvent(new Event('input', { bubbles: true }));
   }, P.amp);
   await h.flushWrites();

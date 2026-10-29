@@ -62,7 +62,7 @@ await correrSpec('compras_conceptos_ui', async (t) => {
   const delRegistro = lista.filter(c => /compra-input|of-add-compra-btn|of-cancelar-edicion-btn|of-compra-(edit|dup|del)-btn/.test(c.sel));
   const cuenta = new Map(); delRegistro.forEach(c => cuenta.set(c.nombre, (cuenta.get(c.nombre) || 0) + 1));
   t.eq(Array.from(cuenta).filter(([, n]) => n > 1), [], 'nombres únicos en el formulario y las acciones del registro (ninguno se repite)');
-  const nombreConcepto = lista.find(c => /compra-input\[field=concepto|data-field=concepto|\[field=concepto\]/.test(c.sel) || (/compra-input/.test(c.sel) && /concepto/i.test(c.nombre) && c.tag === 'input'));
+  const nombreConcepto = lista.find(c => /compra-input/.test(c.sel) && (/field=concepto/.test(c.sel) || (/concepto/i.test(c.nombre) && c.tag === 'input')));   // el del REGISTRO DE COMPRAS (el de honorarios es .hon-input)
   t.ok(nombreConcepto && /^Concepto/.test(nombreConcepto.nombre), 'el campo Concepto del registro tiene nombre que EMPIEZA con su rótulo visible («Concepto…»)', nombreConcepto);
   const conceptoSinDoc = lista.find(c => /juncon-1121-faep/.test(c.sel));
   t.ok(conceptoSinDoc && conceptoSinDoc.nombre !== (nombreConcepto && nombreConcepto.nombre), 'el «Concepto» de «sin documento» tiene otro nombre que el del registro de compras', { a: conceptoSinDoc && conceptoSinDoc.nombre, b: nombreConcepto && nombreConcepto.nombre });

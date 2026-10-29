@@ -1,4 +1,4 @@
-// Generador reproducible de los fixtures deterministas (tests/fixtures/default.json, cierre.json, compras.json, estado.json, honorarios.json, jardines.json y compras_conceptos.json).
+// Generador reproducible de los fixtures deterministas (tests/fixtures/default.json, cierre.json, compras.json, estado.json, honorarios.json, jardines.json, compras_conceptos.json y honorarios_fuentes.json).
 //   node tests/fixtures/generate.mjs            -> escribe default.json y cierre.json
 //   node tests/fixtures/generate.mjs --check    -> verifica que ambos coinciden con lo que generaría (sin escribir)
 //
@@ -21,6 +21,9 @@
 //   estado.json   default + casos de borde del Estado de las entidades (PR D2: L-07 Estado único sin redondear, L-08 JUNJI): saldo exactamente 0, 99,996 %, saldo -$1,
 //                 89,999 % vs 90,000 %, recurso 0 con y sin gasto, Carrera Docente en el recurso, y GESPARVU de JUNJI con el saldo de Operación para B&S negativo.
 //                 Reescribe SOLO los RBD / entidades que nombra (ver más abajo); el resto queda igual que en default.json.
+//
+//   honorarios_fuentes.json  compras_conceptos + Honorarios (Subt. 21) por boleta y proyección en las 9 fuentes (PR-3 de Honorarios) y las boletas de SEP de `honorarios.json`
+//                 (ver el bloque «variante honorarios_fuentes» más abajo): `otras_fuentes.<fuente>.honorarios` / `.hon_proyeccion_items`, sin consumir números aleatorios.
 //
 // Entradas: tests/fixtures/rbds.json (ids/nombres públicos de los 55 RBD de DATA.registros y los 13 GESPARVU).
 // Las CIFRAS son sintéticas (PRNG con semilla fija por entidad): no hay montos reales de ningún RBD.
@@ -315,14 +318,15 @@ docs._meta = { items_22: [], items_29: [], lastModifiedBy: EMAILS[0], lastModifi
 // Así el aviso "entidades con corte distinto al cierre global" lista 8 filas (2 de ingresos, 3 de remuneraciones y 3 de fuentes).
 const docsCierre = JSON.parse(JSON.stringify(docs));
 {
-  const KEYS_RBD_AC = ['general', 'pie', 'mantenimiento', 'prorretencion', 'faep', 'figa', 'aporte_educ'];
-  const KEYS_GESPARVU = ['junji', 'aporte_junji', 'faep', 'figa']; // los jardines también son entidades de FAEP y FIGA
+  // Subt. 31 y Recuperación LLMM (RBD + AC + jardines) y Asignación Familiar (RBD + jardines, sin AC) son las fuentes nuevas de `main`: sus documentos también quedan con el corte «Aplicar a todas».
+  const KEYS_RBD_AC = ['general', 'pie', 'mantenimiento', 'prorretencion', 'faep', 'subt31_proyectos', 'recuperacion_llmm', 'figa', 'aporte_educ'];
+  const KEYS_GESPARVU = ['junji', 'aporte_junji', 'faep', 'subt31_proyectos', 'recuperacion_llmm', 'asignacion_familiar', 'figa']; // los jardines también son entidades de FAEP, FIGA y las fuentes nuevas
   const fijaFuentes = (id, keys) => {
     const d = docsCierre[id];
     d.otras_fuentes = d.otras_fuentes || {};
     keys.forEach(k => { d.otras_fuentes[k] = { ...(d.otras_fuentes[k] || {}), real_hasta_mes: 9 }; }); // como queda un documento tras "Aplicar a todas"
   };
-  registros.forEach(r => { fijaFuentes(r.rbd, KEYS_RBD_AC); if (docsCierre[r.rbd].rem) docsCierre[r.rbd].rem.real_hasta_mes = 9; });
+  registros.forEach(r => { fijaFuentes(r.rbd, [...KEYS_RBD_AC, 'asignacion_familiar']); if (docsCierre[r.rbd].rem) docsCierre[r.rbd].rem.real_hasta_mes = 9; });
   fijaFuentes('AC', KEYS_RBD_AC);
   gesparvu.forEach(g => fijaFuentes(g.rbd, KEYS_GESPARVU));
   docsCierre['1121'].rem.real_hasta_mes = 7;
@@ -621,6 +625,190 @@ const docsCC = JSON.parse(JSON.stringify(docsJar));
   };
 }
 
+// ---------- variante "honorarios_fuentes": Honorarios (Subt. 21) por boleta en las 9 fuentes + SEP (PR-3 de Honorarios) ----------
+// Parte de `compras_conceptos` (jardines + compras por concepto) y AGREGA, sin consumir números aleatorios ni tocar nada más: (1) las boletas y la proyección de SEP de la variante `honorarios`
+// (mismos RBD, para probar el Consolidado y el Panel principal con SEP y fuentes a la vez) y (2) `otras_fuentes.<fuente>.honorarios` y `otras_fuentes.<fuente>.hon_proyeccion_items` en las fuentes.
+// Fuentes con cuenta (General, PIE, Mantención, Pro-Retención): la boleta lleva `codigo` (cuenta del catálogo de honorarios; la columna del Plan de Cuentas de la subvención la habilita o no).
+// Fuentes por concepto (JUNJI, FAEP, FIGA, Aportes): la boleta lleva `concepto` (texto) en vez de cuenta; la proyección también va por concepto. Boletas SIEMPRE Real; proyección SIEMPRE Proyectada.
+//   General / 1121  · 9 boletas: gh1121_1 (410803 BOLHE ENE 400.000) · _2 (410304 BHE MAR 250.000, N° DC DC_801) · _3 (411601 BPST ABR, reparto 150.000 de 400.000) · _especial (texto con & < > " ')
+//                     · _f2025 (2025-12-30: ⚠, suma en DIC) · _invalida (10/03/2026: no suma) · _cuenta_x (999999: no suma) · _tipo_fac (tipo FAC: ⚠) · _tipo_np (410904 con BHE: ⚠)
+//                     + proyección 410803 (ENE 50.000 —se SUMA a la boleta de enero— y AGO-DIC 100.000) y 410304 (SEP-DIC 80.000) + una compra ANTIGUA con tipo de honorarios («⚠ muévelo a Honorarios»)
+//   General / AC    · gh_ac_1 (410304 BOLH ENE 300.000) y gh_ac_nohab (410608: no habilitada para Adm. Central General, suma) + proyección 410910 (JUN-DIC 60.000)
+//   General / 1122 (solo proyección 410304 MAR-DIC 50.000) · General / 1123 (una boleta 411702 AGO 210.000)
+//   PIE / 1121      · 410304 BOLHE FEB 500.000, 410804 BPST JUL 300.000, 411601 (no habilitada para PIE, suma) + proyección 410304 (ABR-DIC 40.000);  PIE / 1122 · proyección 410804 (JUN-DIC 25.000)
+//   Mantención / 1121 · 411601 BPST MAY 700.000, 411701 BOLHE JUN 200.000, 410304 (no habilitada para Mantención, suma) + proyección 411601 (MAR-DIC 100.000)
+//   Pro-Retención / 1121 · 410803 BOLHE FEB 150.000, 410503 BOLH MAY 90.000 + proyección 410803 (OCT-DIC 50.000)
+//   JUNJI / 5402002 (Real hasta julio) · 9 boletas por CONCEPTO: «Apoyo pedagógico» (BOLHE ENE 300.000, BHE FEB 250.000, 2025-12-30 ⚠, fecha inválida, tipo FAC ⚠), «Taller de música» (BPST MAR 120.000 con
+//                     N° DC, BOLH OCT 80.000: después del corte, igual Real), sin concepto (⚠ no suma) y un concepto con & < > " ' + proyección «Apoyo pedagógico» (AGO-DIC 200.000) y «Taller de música» (JUN-DIC 40.000)
+//   JUNJI / 5401003 · Operación 2.000.000, Rem 500.000, B&S 300.000 y honorarios 1.800.000 (todo en enero) → saldo -600.000 (DÉFICIT solo por el saldo total; Operación − B&S = +1.700.000)
+//   JUNJI / 5401005 · Operación 1.000.000 + Homologación 5.000.000, Rem 100.000, B&S 400.000 y honorarios 700.000 → saldo +4.800.000 y Operación − B&S = +600.000: SUPERÁVIT (los honorarios NO se descuentan de
+//                     Operación; si se descontaran, Operación − B&S-hon quedaría en -100.000 → Déficit)
+//   JUNJI / 5401002 (BDL alto, ya Déficit por Operación) · + honorarios 1.000.000: el saldo de Operación sigue en -500.000 (los honorarios no lo tocan)
+//   FAEP / 1121 (Real hasta julio) · «Talleres extraescolares» (BOLHE ENE 200.000, BHE JUN 100.000 con N° DC), «Alimentación» (BOLH SEP 60.000: mismo nombre que un concepto de B&S, línea aparte) + proyección
+//                     «Talleres extraescolares» (AGO-DIC 90.000) + una compra ANTIGUA con tipo de honorarios;  FAEP / AC · «Asesoría técnica» MAR 350.000 + proyección OCT-DIC 100.000;  FAEP / 5402002 (jardín) · «Monitor» MAY 60.000 + proyección AGO-DIC 60.000
+//   FIGA / 1121 · «Talleres» ABR 180.000 + proyección MAY-DIC 30.000;  FIGA / 5404001 (jardín) · «Monitor» BPSTE AGO 45.000
+//   Aporte Educ. / 1121 · «Apoyo docente» FEB 275.000;  Aporte Educ. / AC · «Asesoría» MAY 120.000 + proyección JUL-DIC 20.000;  Aporte JUNJI / 5402002 · «Educadora de apoyo» MAR 150.000 + proyección ABR-DIC 25.000
+const docsHF = JSON.parse(JSON.stringify(docsCC));
+{
+  const rango = (desde, hasta, v) => meses12(i => (i + 1 >= desde && i + 1 <= hasta ? v : 0));
+  const enero = (v) => linea(i => (i === 0 ? v : 0));
+  const conceptos = (o) => Object.fromEntries(Object.entries(o).map(([c, l]) => [c, { concepto: c, ...l }]));
+  const base = (nro, fecha, pago, descripcion, gasto, doc, extra) => ({
+    nroDocumento: String(nro), fechaDocumento: fecha, fechaPago: pago, descripcion,
+    rutProveedor: '11111111-1', nombreProveedor: 'Nombre Apellido Apellido', montoGasto: gasto, montoDocumento: doc === undefined ? gasto : doc, ...extra,
+  });
+  // Boleta con cuenta (General, PIE, Mantención, Pro-Retención) y boleta con concepto (JUNJI, FAEP, FIGA, Aportes).
+  const bol = (codigo, tipoDocumento, nro, fecha, pago, descripcion, gasto, doc, extra = {}) => ({ codigo, tipoDocumento, ...base(nro, fecha, pago, descripcion, gasto, doc, extra) });
+  const bolc = (concepto, tipoDocumento, nro, fecha, pago, descripcion, gasto, doc, extra = {}) => ({ concepto, tipoDocumento, ...base(nro, fecha, pago, descripcion, gasto, doc, extra) });
+  const proyC = (codigo, m) => ({ codigo, meses: m, total: suma(m) });
+  const proyK = (concepto, m) => ({ concepto, meses: m, total: suma(m) });
+  const de = (id, fuente) => {
+    const d = docsHF[id];
+    d.otras_fuentes = d.otras_fuentes || {};
+    d.otras_fuentes[fuente] = d.otras_fuentes[fuente] || {};
+    return d.otras_fuentes[fuente];
+  };
+  // --- SEP: las mismas boletas y proyecciones de la variante `honorarios`
+  ['1120', '1121', '1122', '1123', '1125', '1128'].forEach(id => {
+    ['honorarios', 'hon_proyeccion'].forEach(k => { if (docsHon[id][k]) docsHF[id][k] = JSON.parse(JSON.stringify(docsHon[id][k])); });
+  });
+  // --- General (cuenta) y su fila AC (columna «Adm. Central General» del Plan de Cuentas)
+  const gen = de('1121', 'general');
+  gen.honorarios = {
+    gh1121_1: bol('410803', 'BOLHE', 101, '2026-01-14', '2026-01-21', 'Taller de ajedrez (General)', 400000),
+    gh1121_2: bol('410304', 'BHE', 102, '2026-03-03', '2026-03-10', 'Apoyo administrativo', 250000, undefined, { documentoContable: 'DC_801', rutProveedor: '12345678-5', nombreProveedor: 'Juan Pérez Soto' }),
+    gh1121_3: bol('411601', 'BPST', 103, '2026-04-14', '2026-04-21', 'Reparación de techumbre (reparto entre RBD)', 150000, 400000, { rutProveedor: '76123456-7', nombreProveedor: 'Constructora Aconcagua' }),
+    gh1121_especial: bol('410803', 'BOLHE', 'A&B-<7>', '2026-05-11', '2026-05-18', 'Taller "Robótica" & <b>Lego</b>; O\'Higgins, 2° ciclo', 90000, undefined, {
+      rutProveedor: '9999999-9', nombreProveedor: 'Ñandú <Ltda> & "Co"', documentoContable: "DC_<9> & 'Z'; \"Q\"" }),
+    gh1121_f2025: bol('410802', 'BOLH', 104, '2025-12-30', '2026-01-05', 'Boleta con fecha de 2025', 70000),
+    gh1121_invalida: bol('410803', 'BOLH', 105, '10/03/2026', '2026-03-20', 'Fecha con formato no reconocido', 60000),
+    gh1121_cuenta_x: bol('999999', 'BOLH', 106, '2026-06-02', '2026-06-09', 'Cuenta fuera del catálogo de honorarios', 55000),
+    gh1121_tipo_fac: bol('410803', 'FAC', 107, '2026-06-15', '2026-06-22', 'Tipo que no es de honorarios', 45000),
+    gh1121_tipo_np: bol('410904', 'BHE', 108, '2026-07-01', '2026-07-08', 'Tipo que la cuenta no acepta', 35000),
+  };
+  gen.hon_proyeccion_items = { '410803': proyC('410803', meses12(i => (i === 0 ? 50000 : (i >= 7 ? 100000 : 0)))), '410304': proyC('410304', rango(9, 12, 80000)) };
+  gen.compras = { ...(gen.compras || {}), g1121_hon_antigua: { codigo: '410904', tipoDocumento: 'Boleta de honorarios electrónica', nroDocumento: '77', fechaDocumento: '2026-02-03', fechaPago: '2026-02-10',
+    descripcion: 'Compra antigua con tipo de honorarios', rutProveedor: '76123456-7', nombreProveedor: 'Proveedor Ejemplo SpA', montoGasto: 65000, montoDocumento: 65000, documentoOriginal: '' } };
+  const genAC = de('AC', 'general');
+  genAC.honorarios = {
+    gh_ac_1: bol('410304', 'BOLH', 201, '2026-01-20', '2026-01-27', 'Honorarios de la Administración Central', 300000),
+    gh_ac_nohab: bol('410608', 'BPST', 202, '2026-02-10', '2026-02-17', 'Cuenta no habilitada para Adm. Central General', 90000),
+  };
+  genAC.hon_proyeccion_items = { '410910': proyC('410910', rango(6, 12, 60000)) };
+  de('1122', 'general').hon_proyeccion_items = { '410304': proyC('410304', rango(3, 12, 50000)) };
+  de('1123', 'general').honorarios = { gh1123_1: bol('411702', 'BOLHE', 301, '2026-08-05', '2026-08-12', 'Reparación de vehículo', 210000) };
+  // --- PIE, Mantención y Pro-Retención
+  const pie = de('1121', 'pie');
+  pie.honorarios = {
+    ph1121_1: bol('410304', 'BOLHE', 401, '2026-02-09', '2026-02-16', 'Apoyo PIE', 500000),
+    ph1121_2: bol('410804', 'BPST', 402, '2026-07-14', '2026-07-21', 'Especialista PIE', 300000),
+    ph1121_nohab: bol('411601', 'BOLH', 403, '2026-08-03', '2026-08-10', 'Cuenta no habilitada para PIE', 70000),
+  };
+  pie.hon_proyeccion_items = { '410304': proyC('410304', rango(4, 12, 40000)) };
+  de('1122', 'pie').hon_proyeccion_items = { '410804': proyC('410804', rango(6, 12, 25000)) };
+  const man = de('1121', 'mantenimiento');
+  man.honorarios = {
+    mh1121_1: bol('411601', 'BPST', 501, '2026-05-06', '2026-05-13', 'Reparación de infraestructura', 700000),
+    mh1121_2: bol('411701', 'BOLHE', 502, '2026-06-10', '2026-06-17', 'Mantención de bienes muebles', 200000),
+    mh1121_nohab: bol('410304', 'BHE', 503, '2026-07-08', '2026-07-15', 'Personal (no admitido en Mantención)', 50000),
+  };
+  man.hon_proyeccion_items = { '411601': proyC('411601', rango(3, 12, 100000)) };
+  const pro = de('1121', 'prorretencion');
+  pro.honorarios = {
+    rh1121_1: bol('410803', 'BOLHE', 601, '2026-02-12', '2026-02-19', 'Taller de reforzamiento', 150000),
+    rh1121_2: bol('410503', 'BOLH', 602, '2026-05-15', '2026-05-22', 'Actividad de mejoramiento', 90000),
+  };
+  pro.hon_proyeccion_items = { '410803': proyC('410803', rango(10, 12, 50000)) };
+  // --- JUNJI (concepto, jardines): el caso completo en 5402002 y tres casos del saldo de Operación
+  const jun = de('5402002', 'junji');
+  jun.honorarios = {
+    jh5402002_1: bolc('Apoyo pedagógico', 'BOLHE', 701, '2026-01-12', '2026-01-19', 'Apoyo pedagógico enero', 300000),
+    jh5402002_2: bolc('Apoyo pedagógico', 'BHE', 702, '2026-02-10', '2026-02-17', 'Apoyo pedagógico febrero', 250000),
+    jh5402002_3: bolc('Taller de música', 'BPST', 703, '2026-03-09', '2026-03-16', 'Taller de música', 120000, undefined, { documentoContable: 'DC_901' }),
+    jh5402002_4: bolc('Taller de música', 'BOLH', 704, '2026-10-13', '2026-10-20', 'Taller de octubre (después del corte: igual Real)', 80000),
+    jh5402002_f2025: bolc('Apoyo pedagógico', 'BOLH', 705, '2025-12-30', '2026-01-05', 'Boleta con fecha de 2025', 60000),
+    jh5402002_sinconcepto: bolc('', 'BOLH', 706, '2026-04-02', '2026-04-09', 'Boleta sin concepto', 40000),
+    jh5402002_invalida: bolc('Apoyo pedagógico', 'BOLH', 707, '10/03/2026', '2026-03-20', 'Fecha con formato no reconocido', 30000),
+    jh5402002_especial: bolc('Educadora "extra" & <b>x</b>', 'BOLHE', 'A&B-<7>', '2026-05-05', '2026-05-12', 'Taller <b>x</b> & "y"; O\'Higgins', 55000, undefined, {
+      nombreProveedor: 'Ñandú <Ltda> & "Co"', documentoContable: "DC_<9> & 'Z'; \"Q\"" }),
+    jh5402002_tipo_fac: bolc('Apoyo pedagógico', 'FAC', 708, '2026-06-02', '2026-06-09', 'Tipo que no es de honorarios', 20000),
+  };
+  jun.hon_proyeccion_items = { 'Apoyo pedagógico': proyK('Apoyo pedagógico', rango(8, 12, 200000)), 'Taller de música': proyK('Taller de música', rango(6, 12, 40000)) };
+  jun.compras = { ...(jun.compras || {}), jn5402002_hon_antigua: { concepto: 'Servicios básicos', tipoDocumento: 'Boleta de honorarios manual', nroDocumento: '622', fechaDocumento: '2026-04-06', fechaPago: '2026-04-13',
+    descripcion: 'Compra antigua con tipo de honorarios', rutProveedor: '76123456-7', nombreProveedor: 'Proveedor Ejemplo SpA', montoGasto: 33000, montoDocumento: 33000, documentoOriginal: '' } };
+  // JUNJI de 5401003 y 5401005: se reescribe entero (cifras deterministas de enero) para fijar el caso del saldo de Operación
+  [docsHF['5401003'], docsHF['5401005']].forEach(d => { d.otras_fuentes = d.otras_fuentes || {}; });
+  docsHF['5401003'].otras_fuentes.junji = {
+    ingreso_operacion: enero(2000000), ingreso_homologacion: enero(0), ingreso_carrera_docente: enero(0), ingreso_bdl: enero(0),
+    gasto_rem: enero(500000), bys_items: conceptos({ 'Alimentación': enero(300000) }), real_hasta_mes: 7,
+    honorarios: { jh5401003_1: bolc('Apoyo pedagógico', 'BOLHE', 801, '2026-01-15', '2026-01-22', 'Honorarios que dejan el saldo total en negativo', 1800000) },
+  };
+  docsHF['5401005'].otras_fuentes.junji = {
+    ingreso_operacion: enero(1000000), ingreso_homologacion: enero(5000000), ingreso_carrera_docente: enero(0), ingreso_bdl: enero(0),
+    gasto_rem: enero(100000), bys_items: conceptos({ 'Alimentación': enero(400000) }), real_hasta_mes: 7,
+    honorarios: { jh5401005_1: bolc('Apoyo pedagógico', 'BOLHE', 811, '2026-01-20', '2026-01-27', 'Honorarios financiados por Homologación', 700000) },
+  };
+  de('5401002', 'junji').honorarios = { jh5401002_1: bolc('Apoyo pedagógico', 'BOLHE', 821, '2026-01-25', '2026-01-30', 'Honorarios con BDL alto', 1000000) };
+  // --- FAEP, FIGA y los Aportes (concepto)
+  const fae = de('1121', 'faep');
+  fae.honorarios = {
+    fh1121_1: bolc('Talleres extraescolares', 'BOLHE', 901, '2026-01-19', '2026-01-26', 'Taller de enero', 200000),
+    fh1121_2: bolc('Talleres extraescolares', 'BHE', 902, '2026-06-08', '2026-06-15', 'Taller de junio', 100000, undefined, { documentoContable: 'DC_902' }),
+    fh1121_3: bolc('Alimentación', 'BOLH', 903, '2026-09-14', '2026-09-21', 'Mismo nombre que un concepto de B&S: línea aparte', 60000),
+  };
+  fae.hon_proyeccion_items = { 'Talleres extraescolares': proyK('Talleres extraescolares', rango(8, 12, 90000)) };
+  fae.compras = { ...(fae.compras || {}), fa1121_hon_antigua: { concepto: 'Alimentación', tipoDocumento: 'BOLHE', nroDocumento: '904', fechaDocumento: '2026-02-02', fechaPago: '2026-02-09',
+    descripcion: 'Compra antigua con tipo de honorarios', rutProveedor: '76123456-7', nombreProveedor: 'Proveedor Ejemplo SpA', montoGasto: 90000, montoDocumento: 90000, documentoOriginal: '' } };
+  const faeAC = de('AC', 'faep');
+  faeAC.honorarios = { fh_ac_1: bolc('Asesoría técnica', 'BOLHE', 911, '2026-03-10', '2026-03-17', 'Asesoría técnica de la Administración Central', 350000) };
+  faeAC.hon_proyeccion_items = { 'Asesoría técnica': proyK('Asesoría técnica', rango(10, 12, 100000)) };
+  const faeJ = de('5402002', 'faep');
+  faeJ.honorarios = { fh5402002_1: bolc('Monitor', 'BOLH', 921, '2026-05-04', '2026-05-11', 'Monitor del jardín', 60000) };
+  faeJ.hon_proyeccion_items = { 'Monitor': proyK('Monitor', rango(8, 12, 60000)) };
+  const fig = de('1121', 'figa');
+  fig.honorarios = { gf1121_1: bolc('Talleres', 'BOLHE', 931, '2026-04-13', '2026-04-20', 'Talleres FIGA', 180000) };
+  fig.hon_proyeccion_items = { 'Talleres': proyK('Talleres', rango(5, 12, 30000)) };
+  de('5404001', 'figa').honorarios = { gf5404001_1: bolc('Monitor', 'BPSTE', 941, '2026-08-10', '2026-08-17', 'Monitor del jardín (FIGA)', 45000) };
+  de('1121', 'aporte_educ').honorarios = { ae1121_h1: bolc('Apoyo docente', 'BOLHE', 951, '2026-02-16', '2026-02-23', 'Apoyo docente', 275000) };
+  const aeAC = de('AC', 'aporte_educ');
+  aeAC.honorarios = { aeac_h1: bolc('Asesoría', 'BHE', 952, '2026-05-18', '2026-05-25', 'Asesoría de la Administración Central', 120000) };
+  aeAC.hon_proyeccion_items = { 'Asesoría': proyK('Asesoría', rango(7, 12, 20000)) };
+  const ajj = de('5402002', 'aporte_junji');
+  ajj.honorarios = { aj5402002_h1: bolc('Educadora de apoyo', 'BOLHE', 961, '2026-03-23', '2026-03-30', 'Educadora de apoyo', 150000) };
+  ajj.hon_proyeccion_items = { 'Educadora de apoyo': proyK('Educadora de apoyo', rango(4, 12, 25000)) };
+  // --- Fuentes nuevas de `main` (Subtítulo 31, Asignación Familiar, Recuperación LLMM) + Carrera Docente de General/PIE + Fondos Fijos (todo determinista)
+  //   Subt. 31 (concepto) / 1121 (Real hasta julio) · ingreso ENE 2.000.000, rem ENE 300.000, B&S «Obras menores» ENE 400.000 + «Talleres técnicos» (BOLHE FEB 180.000, BHE AGO 90.000: Real igual) + proyección SEP-DIC 70.000
+//   Subt. 31 / AC · «Asesoría de proyectos» MAR 210.000 con ingreso ENE 1.000.000;  Subt. 31 / 5402002 · «Monitor» MAY 55.000 y proyección OCT-DIC 15.000
+//   Asignación Familiar (solo Remuneraciones; universo RBD + jardines) / 1121 · ingreso ENE 900.000, rem ENE 600.000, «Reemplazo» (BOLHE MAR 250.000) + proyección JUN-DIC 30.000 → saldo ENE-DIC
+//   Asignación Familiar / 5402002 · ingreso ENE 100.000, rem ENE 50.000, honorarios «Reemplazo» (BOLH ABR 80.000) → saldo negativo: Déficit por honorarios
+//   Recuperación LLMM (solo ingresos: NO lleva honorarios) / 1121 · Isapres ENE 40.000, FONASA FEB 30.000, SIL MAR 20.000 + una boleta «Reemplazo» (200.000) que NO debe contarse ni mostrarse
+//   General y PIE / 1121 · Ingreso Carrera Docente ENE 700.000 (General) y 300.000 (PIE): entran al ingreso de la fuente (carrera2);  Fondos Fijos / 1121 · registrado en General MAR 120.000 y JUN 80.000 (se suman a B&S Real de General)
+  const ing12 = (v) => ({ meses: meses12(i => (i === 0 ? v : 0)), total: v });
+  const s31 = de('1121', 'subt31_proyectos');
+  Object.assign(s31, { ingreso: ing12(2000000), gasto_rem: ing12(300000), bys_items: conceptos({ 'Obras menores': enero(400000) }), real_hasta_mes: 7,
+    honorarios: {
+      s31h1121_1: bolc('Talleres técnicos', 'BOLHE', 1001, '2026-02-11', '2026-02-18', 'Taller técnico de febrero', 180000),
+      s31h1121_2: bolc('Talleres técnicos', 'BHE', 1002, '2026-08-12', '2026-08-19', 'Taller técnico de agosto (después del corte: igual Real)', 90000, undefined, { documentoContable: 'DC_1002' }),
+    },
+    hon_proyeccion_items: { 'Talleres técnicos': proyK('Talleres técnicos', rango(9, 12, 70000)) } });
+  const s31AC = de('AC', 'subt31_proyectos');
+  Object.assign(s31AC, { ingreso: ing12(1000000), honorarios: { s31hac_1: bolc('Asesoría de proyectos', 'BOLHE', 1011, '2026-03-16', '2026-03-23', 'Asesoría de proyectos', 210000) } });
+  const s31J = de('5402002', 'subt31_proyectos');
+  Object.assign(s31J, { honorarios: { s31hj_1: bolc('Monitor', 'BOLH', 1021, '2026-05-12', '2026-05-19', 'Monitor del jardín (Subt. 31)', 55000) }, hon_proyeccion_items: { 'Monitor': proyK('Monitor', rango(10, 12, 15000)) } });
+  const af = de('1121', 'asignacion_familiar');
+  Object.assign(af, { ingreso: ing12(900000), gasto_rem: ing12(600000),
+    honorarios: { afh1121_1: bolc('Reemplazo', 'BOLHE', 1101, '2026-03-09', '2026-03-16', 'Reemplazo de marzo', 250000) },
+    hon_proyeccion_items: { 'Reemplazo': proyK('Reemplazo', rango(6, 12, 30000)) } });
+  const afJ = de('5402002', 'asignacion_familiar');
+  Object.assign(afJ, { ingreso: ing12(100000), gasto_rem: ing12(50000), honorarios: { afhj_1: bolc('Reemplazo', 'BOLH', 1111, '2026-04-14', '2026-04-21', 'Reemplazo en el jardín', 80000) } });
+  const llm = de('1121', 'recuperacion_llmm');
+  Object.assign(llm, { ingreso_llmm_isapres: linea(i => (i === 0 ? 40000 : 0)), ingreso_llmm_fonasa: linea(i => (i === 1 ? 30000 : 0)), ingreso_llmm_sil: linea(i => (i === 2 ? 20000 : 0)),
+    honorarios: { llmh1121_1: bolc('Reemplazo', 'BOLHE', 1201, '2026-03-02', '2026-03-09', 'Boleta que la fuente sin gasto debe ignorar', 200000) } });
+  Object.assign(de('1121', 'general'), { ingreso_carrera_docente: ing12(700000) });
+  Object.assign(de('1121', 'pie'), { ingreso_carrera_docente: ing12(300000) });
+  docsHF['1121'].fondos_fijos = { cupo: 500000, meses: { MARZO: { saldo_inicial: 500000, rendido: 150000, observado: 30000, registrado_general: 120000, compensado_sigfe: 0, reposicion: 0, folio: 'FF-3' }, JUNIO: { rendido: 80000, registrado_general: 80000 } } };
+}
+
 // ---------- salida ----------
 function serializar(docsX, extra = {}) {
   const ids = Object.keys(docsX).sort();
@@ -641,6 +829,7 @@ const SALIDAS = [
   { archivo: path.join(AQUI, 'honorarios.json'), ...serializar(docsHon, { variante: 'honorarios' }) },
   { archivo: path.join(AQUI, 'jardines.json'), ...serializar(docsJar, { variante: 'jardines' }) },
   { archivo: path.join(AQUI, 'compras_conceptos.json'), ...serializar(docsCC, { variante: 'compras_conceptos' }) },
+  { archivo: path.join(AQUI, 'honorarios_fuentes.json'), ...serializar(docsHF, { variante: 'honorarios_fuentes' }) },
 ];
 
 if (process.argv.includes('--check')) {

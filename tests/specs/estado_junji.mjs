@@ -114,7 +114,7 @@ await correrSpec('estado_junji', async (t) => {
   t.ok(pr && /DÉFICIT/i.test(pr.printWrap) && /Saldo Operación para B&S negativo/i.test(pr.printWrap), 'PDF individual de 5401005: Estado Déficit con la causa');
 
   // ---------------------------------------------------------------- 6) sin cambio donde no aplica
-  t.eq(FUENTES.filter(f => f.key !== 'junji').length, 8, 'las otras 8 fuentes tienen una sola línea de ingreso (incomeShape single): no hay líneas restringidas');
+  t.eq(FUENTES.filter(f => f.key !== 'junji').length, 11, 'las otras 11 fuentes no tienen líneas de ingreso restringidas (single, carrera2 de General/PIE y llmm3): solo JUNJI tiene la regla de Operación');
   for (const f of FUENTES.filter(f => f.key !== 'junji')) {
     await clickTab(page, f.key);
     const fs = await filasFuente(page, f.key);

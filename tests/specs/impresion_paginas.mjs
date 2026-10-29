@@ -22,7 +22,7 @@ const LIMITE = Number(process.env.IMPRESION_DETALLE) || 12;
 const SESION = ['#signout-btn', '#helpBtn', '.user-box', '.sync-bar', '#sync-indicator', '#sync-text', '#user-display-name', '#user-avatar'];
 
 await correrSpec('impresion_paginas', async (t) => {
-  const h = await boot({ viewport: { width: 1366, height: 768 } });
+  const h = await boot({ fixture: 'honorarios_fuentes', viewport: { width: 1366, height: 768 } }); // con boletas y proyección de Honorarios en SEP y en las fuentes (PR-3): los PDF por fila y las tablas de cada fuente traen su bloque y su columna
   const { page } = h;
   // El panel limpia #printSingleWrap 300 ms después de imprimir: se congela esa limpieza para poder medir y generar el PDF del estado de impresión.
   await page.evaluate(() => { window.__setTimeout = window.setTimeout; window.setTimeout = (fn, ms, ...a) => (ms === 300 ? 0 : window.__setTimeout(fn, ms, ...a)); });

@@ -266,6 +266,8 @@ const NOMBRES_TAB = {
   general: 'of-general', pie: 'of-pie', 'mantención': 'of-mantenimiento', mantencion: 'of-mantenimiento', mantenimiento: 'of-mantenimiento',
   'pro-retención': 'of-prorretencion', 'pro-retencion': 'of-prorretencion', prorretencion: 'of-prorretencion',
   junji: 'of-junji', faep: 'of-faep', figa: 'of-figa',
+  'subt. 31': 'of-subt31_proyectos', subt31_proyectos: 'of-subt31_proyectos', 'recup. llmm': 'of-recuperacion_llmm', recuperacion_llmm: 'of-recuperacion_llmm',
+  'asig. familiar': 'of-asignacion_familiar', asignacion_familiar: 'of-asignacion_familiar', 'fondos fijos': 'of-fondos_fijos', fondos_fijos: 'of-fondos_fijos',
   'aporte educ.': 'of-aporte_educ', aporte_educ: 'of-aporte_educ', 'aporte educ': 'of-aporte_educ',
   'aporte junji': 'of-aporte_junji', aporte_junji: 'of-aporte_junji',
   '% ejecución': 'ejecucion', '% ejecucion': 'ejecucion', ejecucion: 'ejecucion', 'ejecución': 'ejecucion',
@@ -274,7 +276,7 @@ const NOMBRES_TAB = {
 export function claveTab(nombre) {
   const n = String(nombre).trim().toLowerCase();
   if (NOMBRES_TAB[n]) return NOMBRES_TAB[n];
-  if (/^(of-)?[a-z_]+$/.test(n)) return n;
+  if (/^(of-)?[a-z0-9_]+$/.test(n)) return n;
   throw new Error(`Pestaña desconocida: ${nombre}`);
 }
 export async function clickTab(page, nombre) {

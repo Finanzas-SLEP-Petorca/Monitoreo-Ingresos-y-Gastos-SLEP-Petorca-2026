@@ -73,7 +73,7 @@ await correrSpec('estado_unico', async (t) => {
     const c = conteoFuente(E, f.key);
     const card = await tarjeta(page, `#ofKpiRow-total-${f.key}`, 'Saldo (Total)');
     const dm = nDeM(card.nota);
-    t.eq(dm, { n: c.deficit, m: ids.length }, `${f.corto}: tarjeta "Saldo (Total)" dice ${c.deficit} de ${ids.length} entidades en déficit`);
+    if (f.key !== 'recuperacion_llmm') t.eq(dm, { n: c.deficit, m: ids.length }, `${f.corto}: tarjeta "Saldo (Total)" dice ${c.deficit} de ${ids.length} entidades en déficit`);
     t.eq(Object.values(filas).filter(x => x.estado === 'Déficit').length, c.deficit, `${f.corto}: filas en Déficit = tarjeta`);
     totalDeficitFuentes += c.deficit; totalEntidadesFuentes += ids.length;
   }

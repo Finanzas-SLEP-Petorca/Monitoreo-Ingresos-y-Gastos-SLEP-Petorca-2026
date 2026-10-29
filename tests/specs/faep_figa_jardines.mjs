@@ -41,9 +41,10 @@ const sumaBloques = (docs, key, vista) => idsDeUniverso('rbd_ac_gesparvu').reduc
   return a;
 }, { ingreso: 0, rem: 0, bys: 0, gasto: 0, saldo: 0 });
 
-const leerTabla = (page, key) => page.evaluate((k) => Array.from(document.querySelectorAll(`#otrasFuentesTbody-${k} tr[data-rbd]`)).map(tr => ({
-  rbd: tr.dataset.rbd, nombre: tr.children[1].textContent.trim(), corte: tr.children[2].textContent.trim(), cifras: [3, 4, 5, 6, 7].map(i => tr.children[i].textContent.trim()),
-})), key);
+// Las columnas se ubican por el rótulo del encabezado (Asignación Familiar no lleva B&S y Recuperación LLMM solo ingreso y saldo; los honorarios no se comparan aquí).
+const leerTabla = (page, key) => page.evaluate((k) => { const cols = Array.from(document.querySelectorAll(`#otrasFuentesTable-${k} thead th`)).map(th => th.textContent.trim()); const ix = [/^Ingreso/, /^Gasto Remuneraciones/, /^Gasto Bienes/, /^Gasto Total/, /^Saldo/].map(re => cols.findIndex(t => re.test(t))); return Array.from(document.querySelectorAll(`#otrasFuentesTbody-${k} tr[data-rbd]`)).map(tr => ({
+  rbd: tr.dataset.rbd, nombre: tr.children[1].textContent.trim(), corte: tr.children[2].textContent.trim(), cifras: ix.map(i => (i < 0 ? '' : tr.children[i].textContent.trim())),
+})); }, key);
 const cifrasDe = (b) => [b.ingreso, b.rem, b.bys, b.gasto, b.saldo];
 const tituloModal = (page) => page.evaluate(() => document.getElementById('otrasFuentesModalTitle').textContent.trim());
 async function vista(page, key, v) {
@@ -62,7 +63,7 @@ await correrSpec('faep_figa_jardines', async (t) => {
 
   // ---------------------------------------------------------------- 0) oráculo y arranque sin siembra
   t.eq(idsDeUniverso('rbd_ac_gesparvu').length, 69, 'oráculo: el universo combinado son 69 entidades (55 RBD + AC + 13 GESPARVU)');
-  t.eq(FUENTES.filter(f => f.universo === 'rbd_ac_gesparvu').map(f => f.key), FAEP_FIGA, 'oráculo: SOLO FAEP y FIGA usan el universo combinado');
+  t.eq(FUENTES.filter(f => f.universo === 'rbd_ac_gesparvu').map(f => f.key), [...FAEP_FIGA.slice(0, 1), 'subt31_proyectos', 'recuperacion_llmm', ...FAEP_FIGA.slice(1)], 'oráculo: FAEP, FIGA y las fuentes nuevas Subt. 31 y Recuperación LLMM usan el universo combinado');
   t.eq((await h.writes()).length, 0, 'el arranque no escribe nada (los documentos de los jardines ya existen: no se siembran ni se pisan)');
 
   // ---------------------------------------------------------------- 1) universo y orden de las 9 pestañas
@@ -70,7 +71,7 @@ await correrSpec('faep_figa_jardines', async (t) => {
     await clickTab(page, f.key);
     const ids = (await leerTabla(page, f.key)).map(x => x.rbd);
     const esperado = idsDeUniverso(f.universo);
-    const orden = { rbd_ac: 'RBD y AC', gesparvu: 'los jardines', rbd_ac_gesparvu: 'RBD, AC y los jardines' }[f.universo];
+    const orden = { rbd_ac: 'RBD y AC', gesparvu: 'los jardines', rbd_ac_gesparvu: 'RBD, AC y los jardines', rbd_gesparvu: 'RBD y los jardines (sin AC)' }[f.universo];
     t.eq(ids, esperado, `${f.corto}: la tabla lista exactamente ${esperado.length} entidades (${orden}) en ese orden (universo ${f.universo})`);
   }
   await clickTab(page, 'faep');
@@ -311,7 +312,7 @@ await correrSpec('faep_figa_jardines', async (t) => {
   // ---------------------------------------------------------------- 9) Excel: exportar, archivo nuevo, archivo antiguo (sin jardines) y fila de un jardín sin FAEP previo
   await clickTab(p2, 'faep');
   const x1 = await exportar(p2, () => p2.click('#downloadExcelOFBtn-faep'));
-  t.eq(x1.libro.orden, ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'META'], 'Excel FAEP: las hojas de siempre');
+  t.eq(x1.libro.orden, ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'], 'Excel FAEP: las hojas de siempre más HONORARIOS y HON_PROYECCION (PR-3)');
   const colA = (hoja) => x1.libro.hojas[hoja].slice(1).map(r => String(r[0]));
   t.eq(colA('INGRESO'), idsDeUniverso('rbd_ac_gesparvu'), 'Excel FAEP · INGRESO: 69 filas, RBD, AC y luego los 13 jardines');
   t.eq(colA('META'), idsDeUniverso('rbd_ac_gesparvu'), 'Excel FAEP · META: las 69 entidades (con su «Real hasta»)');
