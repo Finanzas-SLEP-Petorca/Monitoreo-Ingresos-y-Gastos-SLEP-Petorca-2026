@@ -121,6 +121,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .kpi-card.tone-red   .value, .kpi-card.tone-red.critical .value { color:var(--tone-red-fg); }
   .kpi-card.tone-gray  { background:var(--tone-gray-bg);  border-color:var(--tone-gray-border); }
   .kpi-card.tone-gray  .value { color:var(--tone-gray-fg); }
+  .detalle-table tr.ff-calculada td { background:rgba(42,120,214,0.055); font-weight:600; }
+  .detalle-table tr.ff-calculada td.item-label { color:var(--text-primary); }
   .kpi-row-real .kpi-card { border-left:3px solid #0ca35c; }
   .kpi-row-proy .kpi-card { border-left:3px solid #e08a00; }
 
@@ -527,9 +529,9 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .dash-pdf-btn { padding:7px 12px; border-radius:8px; border:1px solid #374151; background:#374151; color:#fff; font-size:12.5px; font-weight:600; cursor:pointer; }
   .dash-aviso { background:var(--tone-amber-bg); border:1px solid var(--tone-amber-border); color:var(--tone-amber-fg); border-radius:8px; padding:8px 12px; font-size:12.5px; margin-bottom:14px; }
   .dash-strip { display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); gap:12px; margin-bottom:22px; }
-  .dash-tile { border-radius:12px; padding:12px 14px; border:1px solid var(--border); background:var(--surface-1); min-width:0; }
+  .dash-tile { border-radius:12px; padding:12px 14px; border:1px solid var(--border); background:var(--surface-1); min-width:0; display:grid; grid-template-rows:29px auto 1fr; }
   .dash-tile .t-label { font-size:11.5px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.03em; }
-  .dash-tile .t-value { font-size:clamp(15px, 1.45vw, 21px); font-weight:700; margin-top:4px; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .dash-tile .t-value { font-size:clamp(13px, 1.1vw, 18px); font-weight:700; margin-top:4px; font-variant-numeric:tabular-nums; letter-spacing:-0.025em; line-height:1.15; text-align:center; white-space:nowrap; align-self:start; }
   .dash-tile .t-sub { font-size:11.5px; color:var(--text-muted); margin-top:2px; }
   .dash-tile.tone-blue { background:var(--tone-blue-bg); border-color:var(--tone-blue-border); } .dash-tile.tone-blue .t-value { color:var(--tone-blue-fg); }
   .dash-tile.tone-amber { background:var(--tone-amber-bg); border-color:var(--tone-amber-border); } .dash-tile.tone-amber .t-value { color:var(--tone-amber-fg); }
@@ -865,6 +867,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <button class="tab-btn" data-tab="of-prorretencion" type="button" role="tab" id="tabbtn-of-prorretencion" aria-controls="tab-of-prorretencion" aria-selected="false" tabindex="-1"><span aria-hidden="true">📌</span> Pro-Retención</button>
       <button class="tab-btn" data-tab="of-junji" type="button" role="tab" id="tabbtn-of-junji" aria-controls="tab-of-junji" aria-selected="false" tabindex="-1"><span aria-hidden="true">🧸</span> JUNJI</button>
       <button class="tab-btn" data-tab="of-faep" type="button" role="tab" id="tabbtn-of-faep" aria-controls="tab-of-faep" aria-selected="false" tabindex="-1"><span aria-hidden="true">🏗️</span> FAEP</button>
+      <button class="tab-btn" data-tab="of-subt31_proyectos" type="button" title="Subtítulo 31 (Proyectos)" role="tab" id="tabbtn-of-subt31_proyectos" aria-controls="tab-of-subt31_proyectos" aria-selected="false" tabindex="-1"><span aria-hidden="true">🧱</span> Subt. 31</button>
+      <button class="tab-btn" data-tab="of-recuperacion_llmm" type="button" title="Recuperación Licencias Médicas" role="tab" id="tabbtn-of-recuperacion_llmm" aria-controls="tab-of-recuperacion_llmm" aria-selected="false" tabindex="-1"><span aria-hidden="true">🩺</span> Recup. LLMM</button>
+      <button class="tab-btn" data-tab="of-asignacion_familiar" type="button" title="Asignación Familiar" role="tab" id="tabbtn-of-asignacion_familiar" aria-controls="tab-of-asignacion_familiar" aria-selected="false" tabindex="-1"><span aria-hidden="true">👨‍👩‍👧</span> Asig. Familiar</button>
+      <button class="tab-btn" data-tab="of-fondos_fijos" type="button" title="Control operativo de Fondos Fijos" role="tab" id="tabbtn-of-fondos_fijos" aria-controls="tab-of-fondos_fijos" aria-selected="false" tabindex="-1"><span aria-hidden="true">💼</span> Fondos Fijos</button>
       <button class="tab-btn" data-tab="of-figa" type="button" role="tab" id="tabbtn-of-figa" aria-controls="tab-of-figa" aria-selected="false" tabindex="-1"><span aria-hidden="true">🌐</span> FIGA</button>
       <button class="tab-btn" data-tab="of-aporte_educ" type="button" title="Aporte Fiscal Extraordinario Educación" role="tab" id="tabbtn-of-aporte_educ" aria-controls="tab-of-aporte_educ" aria-selected="false" tabindex="-1"><span aria-hidden="true">🏛️</span> Aporte Educ.</button>
       <button class="tab-btn" data-tab="of-aporte_junji" type="button" title="Aporte Fiscal Extraordinario JUNJI" role="tab" id="tabbtn-of-aporte_junji" aria-controls="tab-of-aporte_junji" aria-selected="false" tabindex="-1"><span aria-hidden="true">🍼</span> Aporte JUNJI</button>
@@ -897,6 +903,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <div class="dash-strip" id="dashStrip"></div>
       <h3 class="dash-h3">Por fuente de financiamiento <span style="font-weight:400; color:var(--text-muted); font-size:12px;">— haz clic en una tarjeta para ir a su pestaña</span></h3>
       <div class="dash-cards" id="dashCards"></div>
+      <div id="dashFondosFijos" style="margin-top:12px;"></div>
       <div class="dash-grid2">
         <div class="dash-panel">
           <div class="dash-panel-head">
@@ -1489,6 +1496,46 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     </section>
   </div>
   <!-- /#tab-of-faep -->
+
+  <div id="tab-of-subt31_proyectos" class="tab-content hidden" role="tabpanel" aria-labelledby="tabbtn-of-subt31_proyectos">
+    <section><h2>Subtítulo 31 (Proyectos)</h2><div class="panel">
+      <div class="detalle-empty">Seguimiento de proyectos por Ingreso vs. Gasto, sin meta 70/30. Incluye establecimientos, Administración Central (AC) y los GESPARVU de jardines infantiles, igual que FAEP.</div>
+      <div class="table-controls"><button id="downloadExcelOFBtn-subt31_proyectos" type="button" style="background:#1b8247; border-color:#1b8247;">⬇ Excel</button><button id="importExcelOFBtn-subt31_proyectos" type="button" style="background:#6b46c1; border-color:#6b46c1;">⬆ Importar Excel</button><input type="file" id="importExcelOFInput-subt31_proyectos" accept=".xlsx" style="display:none;"><button id="exportPdfOFBtn-subt31_proyectos" type="button" style="background:#374151; border-color:#374151;">🖨 Exportar PDF</button><button id="downloadCargaOFBtn-subt31_proyectos" type="button" style="background:var(--series-2-btn); border-color:var(--series-2-btn);">⬇ Descargar carga (JSON)</button></div>
+      <div class="table-scroll" style="margin-top:12px;"><table class="data-table" id="otrasFuentesTable-subt31_proyectos"><thead><tr><th>RBD / GESPARVU</th><th>Nombre</th><th>Real hasta</th><th class="num">Ingreso</th><th class="num">Gasto Remuneraciones</th><th class="num" title="Honorarios (Subt. 21): boletas + proyección, en su propia línea (sin 70/30)">Gasto Honorarios (Subt. 21)</th><th class="num">Gasto Bienes y Servicios</th><th class="num">Gasto Total</th><th class="num">Saldo</th><th>Estado (Total)</th><th class="col-acciones">Acciones</th></tr></thead><tbody id="otrasFuentesTbody-subt31_proyectos"></tbody></table></div>
+    </div></section>
+  </div>
+
+  <div id="tab-of-recuperacion_llmm" class="tab-content hidden" role="tabpanel" aria-labelledby="tabbtn-of-recuperacion_llmm">
+    <section><h2>Recuperación Licencias Médicas</h2><div class="panel">
+      <div class="detalle-empty">Fuente exclusivamente de ingresos: Recuperación LLMM Isapres, Recuperación LLMM FONASA y Recuperación LLMM SIL. No registra gastos asociados.</div>
+      <div class="table-controls"><button id="downloadExcelOFBtn-recuperacion_llmm" type="button" style="background:#1b8247; border-color:#1b8247;">⬇ Excel</button><button id="importExcelOFBtn-recuperacion_llmm" type="button" style="background:#6b46c1; border-color:#6b46c1;">⬆ Importar Excel</button><input type="file" id="importExcelOFInput-recuperacion_llmm" accept=".xlsx" style="display:none;"><button id="exportPdfOFBtn-recuperacion_llmm" type="button" style="background:#374151; border-color:#374151;">🖨 Exportar PDF</button><button id="downloadCargaOFBtn-recuperacion_llmm" type="button" style="background:var(--series-2-btn); border-color:var(--series-2-btn);">⬇ Descargar carga (JSON)</button></div>
+      <div class="table-scroll" style="margin-top:12px;"><table class="data-table" id="otrasFuentesTable-recuperacion_llmm"><thead><tr><th>RBD / GESPARVU</th><th>Nombre</th><th>Real hasta</th><th class="num">Ingreso</th><th class="num">Saldo</th><th>Estado (Total)</th><th class="col-acciones">Acciones</th></tr></thead><tbody id="otrasFuentesTbody-recuperacion_llmm"></tbody></table></div>
+    </div></section>
+  </div>
+
+  <div id="tab-of-asignacion_familiar" class="tab-content hidden" role="tabpanel" aria-labelledby="tabbtn-of-asignacion_familiar">
+    <section><h2>Asignación Familiar</h2><div class="panel">
+      <div class="detalle-empty">Seguimiento de Ingresos Percibidos y Gastos de Asignación Familiar, exclusivamente en Remuneraciones. Incluye todos los RBD y GESPARVU; no registra Bienes y Servicios.</div>
+      <div class="table-controls"><button id="downloadExcelOFBtn-asignacion_familiar" type="button" style="background:#1b8247; border-color:#1b8247;">⬇ Excel</button><button id="importExcelOFBtn-asignacion_familiar" type="button" style="background:#6b46c1; border-color:#6b46c1;">⬆ Importar Excel</button><input type="file" id="importExcelOFInput-asignacion_familiar" accept=".xlsx" style="display:none;"><button id="exportPdfOFBtn-asignacion_familiar" type="button" style="background:#374151; border-color:#374151;">🖨 Exportar PDF</button><button id="downloadCargaOFBtn-asignacion_familiar" type="button" style="background:var(--series-2-btn); border-color:var(--series-2-btn);">⬇ Descargar carga (JSON)</button></div>
+      <div class="table-scroll" style="margin-top:12px;"><table class="data-table" id="otrasFuentesTable-asignacion_familiar"><thead><tr><th>RBD / GESPARVU</th><th>Nombre</th><th>Real hasta</th><th class="num">Ingreso Percibido</th><th class="num">Gasto Remuneraciones</th><th class="num" title="Honorarios (Subt. 21): boletas + proyección, en su propia línea (sin 70/30)">Gasto Honorarios (Subt. 21)</th><th class="num">Gasto Total</th><th class="num">Saldo</th><th>Estado (Total)</th><th class="col-acciones">Acciones</th></tr></thead><tbody id="otrasFuentesTbody-asignacion_familiar"></tbody></table></div>
+    </div></section>
+  </div>
+
+  <div id="tab-of-fondos_fijos" class="tab-content hidden" role="tabpanel" aria-labelledby="tabbtn-of-fondos_fijos">
+    <section><h2>Fondos Fijos — control operativo</h2><div class="panel">
+      <div class="detalle-empty"><strong>No es una fuente de financiamiento ni genera ingreso.</strong> Controla anticipos, rendiciones y compensación. El gasto aceptado se registra una sola vez en Subvención General; aquí solo se concilia su rendición, registro y compensación SIGFE. Incluye todos los RBD y GESPARVU.</div>
+      <div class="table-controls" style="margin-top:12px;"><button id="importFondosFijosBtn" type="button" style="background:#6b46c1; border-color:#6b46c1;">⬆ Importar Control Fondos Fijos</button><input type="file" id="importFondosFijosInput" accept=".xlsx" style="display:none;"><span class="detalle-sub">Lee la hoja “FONDOS FIJOS P02”. Importa cupo, saldo inicial, rendido, observado y folio; reposición, registro en General y compensación SIGFE quedan sin cargar para conciliarlos.</span></div>
+      <div id="fondosFijosKpis" class="kpi-row" style="margin-top:12px;"></div>
+      <div class="table-scroll" style="margin-top:12px;"><table class="data-table" id="fondosFijosTable"><thead><tr><th>RBD / GESPARVU</th><th>Nombre</th><th class="num">Cupo vigente</th><th class="num">Gasto aceptado</th><th class="num">Registrado en General</th><th class="num">Pendiente General</th><th class="num">Compensado SIGFE</th><th class="num">Pendiente SIGFE</th><th>Estado</th><th class="col-acciones">Acciones</th></tr></thead><tbody id="fondosFijosTbody"></tbody></table></div>
+    </div></section>
+  </div>
+
+  <div id="fondosFijosModal" class="modal-overlay hidden">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="fondosFijosModalTitle" tabindex="-1">
+      <div class="modal-header"><div><h3 id="fondosFijosModalTitle"></h3><div class="modal-subtitle" id="fondosFijosModalSubtitle"></div></div><button id="fondosFijosModalCloseBtn" type="button" class="modal-close" aria-label="Cerrar">✕</button></div>
+      <div class="modal-body" id="fondosFijosModalBody"></div>
+    </div>
+  </div>
 
   <div id="tab-of-figa" class="tab-content hidden" role="tabpanel" aria-labelledby="tabbtn-of-figa">
     <section>
@@ -2416,23 +2463,37 @@ const ITEMS_29 = CUENTAS_SEP_29.map(c => c.nombre);
 // revisado) y los dos Aportes Fiscales Extraordinarios (ingresos aparte, no rendibles por el libro
 // de compras SUPEREDUC; se llevan separados por Educación y por JUNJI).
 const FUENTES_OTRAS = [
-  { key: 'general', label: 'Subvención General', incomeShape: 'single', bysMode: 'compras', universo: 'rbd_ac', codigoSupereduc: 'GENERAL', colPlan: 'general', colPlanAC: 'adm_central_general' },
-  { key: 'pie', label: 'PIE', incomeShape: 'single', bysMode: 'compras', universo: 'rbd_ac', codigoSupereduc: 'PIE', colPlan: 'pie' },
+  { key: 'general', label: 'Subvención General', incomeShape: 'carrera2', bysMode: 'compras', universo: 'rbd_ac', codigoSupereduc: 'GENERAL', colPlan: 'general', colPlanAC: 'adm_central_general' },
+  { key: 'pie', label: 'PIE', incomeShape: 'carrera2', bysMode: 'compras', universo: 'rbd_ac', codigoSupereduc: 'PIE', colPlan: 'pie' },
   { key: 'mantenimiento', label: 'Subv. Mantención', incomeShape: 'single', bysMode: 'compras', universo: 'rbd_ac', codigoSupereduc: 'MANTENIMIENTO', colPlan: 'mantenimiento' },
   { key: 'prorretencion', label: 'Subv. Pro-Retención', incomeShape: 'single', bysMode: 'compras', universo: 'rbd_ac', codigoSupereduc: 'PRORETENCION', colPlan: 'proretencion' },
   { key: 'junji', label: 'JUNJI', incomeShape: 'junji3', bysMode: 'concepto', universo: 'gesparvu', codigoSupereduc: null },
   { key: 'faep', label: 'FAEP', incomeShape: 'single', bysMode: 'concepto', universo: 'rbd_ac_gesparvu', codigoSupereduc: null },
+  { key: 'subt31_proyectos', label: 'Subtítulo 31 (Proyectos)', incomeShape: 'single', bysMode: 'concepto', universo: 'rbd_ac_gesparvu', codigoSupereduc: null },
+  { key: 'recuperacion_llmm', label: 'Recuperación Licencias Médicas', incomeShape: 'llmm3', bysMode: 'none', universo: 'rbd_ac_gesparvu', codigoSupereduc: null, sinGasto: true },
+  { key: 'asignacion_familiar', label: 'Asignación Familiar', incomeShape: 'single', bysMode: 'none', universo: 'rbd_gesparvu', codigoSupereduc: null, soloRem: true },
   { key: 'figa', label: 'FIGA', incomeShape: 'single', bysMode: 'concepto', universo: 'rbd_ac_gesparvu', codigoSupereduc: null },
   { key: 'aporte_educ', label: 'Aporte Fiscal Extraord. Educación', incomeShape: 'single', bysMode: 'concepto', universo: 'rbd_ac', codigoSupereduc: null },
   { key: 'aporte_junji', label: 'Aporte Fiscal Extraord. JUNJI', incomeShape: 'single', bysMode: 'concepto', universo: 'gesparvu', codigoSupereduc: null },
 ];
 const FUENTES_OTRAS_BY_KEY = {};
 FUENTES_OTRAS.forEach(f => { FUENTES_OTRAS_BY_KEY[f.key] = f; });
+function lineasIngresoOtraFuente(fuente, of) {
+  if (fuente && fuente.incomeShape === 'junji3') return [of.ingreso_operacion, of.ingreso_homologacion, of.ingreso_carrera_docente, of.ingreso_bdl];
+  if (fuente && fuente.incomeShape === 'llmm3') return [of.ingreso_llmm_isapres, of.ingreso_llmm_fonasa, of.ingreso_llmm_sil];
+  return fuente && fuente.incomeShape === 'carrera2' ? [of.ingreso, of.ingreso_carrera_docente] : [of.ingreso];
+}
 // ¿El registro de compras de la fuente lleva CONCEPTO (texto libre) en vez de Código de cuenta? Son las fuentes bysMode:'concepto' (JUNJI, FAEP, FIGA y los dos
 // Aportes Fiscales). Su mapa `compras` tiene la misma forma que el de las demás (tipo, N°, fechas, proveedor, montos, N° DC, Doc. original) con `concepto` en lugar de `codigo`.
 function comprasPorConcepto(fuenteKey) {
   const f = FUENTES_OTRAS_BY_KEY[fuenteKey];
   return !!f && f.bysMode === 'concepto';
+}
+// Honorarios: ¿la fuente los registra por CONCEPTO (texto libre) en vez de por cuenta del catálogo? Las fuentes con Plan de Cuentas (General, PIE, Mantención,
+// Pro-Retención) usan cuenta; todas las demás (JUNJI, FAEP, Subt. 31, Recuperación LLMM, Asignación Familiar, FIGA, Aportes) usan concepto.
+function honPorConcepto(fuenteKey) {
+  const f = FUENTES_OTRAS_BY_KEY[fuenteKey];
+  return !!f && !f.colPlan;
 }
 // Columna del Plan de Cuentas que rige a una entidad en una fuente con compras. La fila AC usa la
 // columna «Adm. Central» cuando el manual la tiene (solo Subv. General); si no, la de la fuente.
@@ -2484,6 +2545,7 @@ const GESPARVU_REGISTROS = [
 // Tipos de entidad que componen cada universo: 'rbd' (establecimiento de DATA.registros), 'ac' (la fila fija AC) y 'gesparvu' (jardín infantil / sala cuna).
 const UNIVERSO_TIPOS = {
   rbd_ac: ['rbd', 'ac'],
+  rbd_gesparvu: ['rbd', 'gesparvu'],
   gesparvu: ['gesparvu'],
   rbd_ac_gesparvu: ['rbd', 'ac', 'gesparvu'],
 };
@@ -2501,10 +2563,196 @@ function universoIncluyeTipo(universo, tipo) {
 function filasDeUniverso(universo) {
   if (universo === 'gesparvu') return GESPARVU_REGISTROS;
   const rbdAc = [...DATA.registros, AC_PSEUDO_RBD];
+  if (universo === 'rbd_gesparvu') return [...DATA.registros, ...GESPARVU_REGISTROS];
   return universo === 'rbd_ac_gesparvu' ? [...rbdAc, ...GESPARVU_REGISTROS] : rbdAc;
 }
 function filasOtrasFuentes(fuenteKey) {
-  return filasDeUniverso(FUENTES_OTRAS_BY_KEY[fuenteKey].universo);
+  const fuente = FUENTES_OTRAS_BY_KEY[fuenteKey];
+  const filas = filasDeUniverso(fuente.universo);
+  // General normalmente muestra RBD + AC. Un GESPARVU se incorpora solo cuando tiene Fondo Fijo
+  // registrado en General: así el gasto queda visible sin llenar la pestaña de filas vacías.
+  if (fuenteKey !== 'general') return filas;
+  return filas.concat(GESPARVU_REGISTROS.filter(g => resumenFondoFijo(g.rbd).registrado > 0));
+}
+
+// Fondos Fijos es deliberadamente un control operativo separado: no se incorpora a FUENTES_OTRAS,
+// al saldo consolidado, al déficit ni a los CSV. El gasto aceptado se debe contabilizar una sola vez
+// bajo Subvención General; aquí se conserva la conciliación de la rendición con General y SIGFE.
+function filasFondosFijos() { return filasDeUniverso('rbd_gesparvu'); }
+function mesesFondosFijosVacios() {
+  const meses = {};
+  MESES_CARGA.forEach(m => { meses[m] = { saldo_inicial: 0, rendido: 0, observado: 0, registrado_general: 0, compensado_sigfe: 0, reposicion: 0, folio: '' }; });
+  return meses;
+}
+function ensureFondoFijo(rbd) {
+  if (!CARGA_MANUAL.fondos_fijos_por_rbd) CARGA_MANUAL.fondos_fijos_por_rbd = {};
+  if (!CARGA_MANUAL.fondos_fijos_por_rbd[rbd]) CARGA_MANUAL.fondos_fijos_por_rbd[rbd] = { cupo: 0, meses: mesesFondosFijosVacios() };
+  const ff = CARGA_MANUAL.fondos_fijos_por_rbd[rbd];
+  if (!ff.meses) ff.meses = mesesFondosFijosVacios();
+  MESES_CARGA.forEach(m => { ff.meses[m] = Object.assign({ saldo_inicial: 0, rendido: 0, observado: 0, registrado_general: 0, compensado_sigfe: 0, reposicion: 0, folio: '' }, ff.meses[m] || {}); });
+  return ff;
+}
+function mesesFondosFijosRegistradosEnGeneral(rbd) {
+  const ff = ensureFondoFijo(rbd), meses = mesesEnCero();
+  MESES_CARGA.forEach(m => { meses[m] = num(ff.meses[m].registrado_general); });
+  return meses;
+}
+function resumenFondoFijo(rbd) {
+  const ff = ensureFondoFijo(rbd);
+  const total = { cupo: num(ff.cupo), rendido: 0, observado: 0, aceptado: 0, registrado: 0, compensado: 0, reposicion: 0, saldoCaja: 0 };
+  MESES_CARGA.forEach(m => {
+    const x = ff.meses[m];
+    const aceptado = Math.max(0, num(x.rendido) - num(x.observado));
+    total.rendido += num(x.rendido); total.observado += num(x.observado); total.aceptado += aceptado;
+    total.registrado += num(x.registrado_general); total.compensado += num(x.compensado_sigfe); total.reposicion += num(x.reposicion);
+    total.saldoCaja = num(x.saldo_inicial) - aceptado + num(x.reposicion);
+  });
+  total.pendienteGeneral = Math.max(0, total.aceptado - total.registrado);
+  total.pendienteSigfe = Math.max(0, total.aceptado - total.compensado);
+  return total;
+}
+function estadoFondoFijo(t) {
+  if (!t.cupo && !t.rendido && !t.aceptado) return { label: 'Sin datos', cls: 'nd' };
+  if (t.observado > 0) return { label: 'Con observaciones', cls: 'mal' };
+  if (t.pendienteGeneral > 0) return { label: 'Pendiente General', cls: 'mal' };
+  if (t.pendienteSigfe > 0) return { label: 'Pendiente SIGFE', cls: 'mal' };
+  return { label: 'Conciliado', cls: 'ok' };
+}
+function tagFondoFijo(t) { const e = estadoFondoFijo(t); return `<span class="c-estado ${e.cls}">${e.label}</span>`; }
+function totalFondosFijos() {
+  const t = { cupo: 0, rendido: 0, observado: 0, aceptado: 0, registrado: 0, compensado: 0, reposicion: 0, saldoCaja: 0, pendienteGeneral: 0, pendienteSigfe: 0 };
+  filasFondosFijos().forEach(r => { const x = resumenFondoFijo(r.rbd); Object.keys(t).forEach(k => t[k] += x[k] || 0); });
+  return t;
+}
+function kpiFondoFijo(label, value, detail, tone) { return `<div class="kpi-card tone-${tone}"><div class="label">${label}</div><div class="value">${fmtCLP(value)}</div><div class="delta">${detail}</div></div>`; }
+function renderFondosFijos() {
+  const tbody = document.getElementById('fondosFijosTbody');
+  if (!tbody) return;
+  const total = totalFondosFijos();
+  document.getElementById('fondosFijosKpis').innerHTML = [
+    kpiFondoFijo('Cupo vigente', total.cupo, 'Referencial; no es ingreso', 'blue'),
+    kpiFondoFijo('Gasto aceptado', total.aceptado, 'Rendido menos observado', 'amber'),
+    kpiFondoFijo('Pendiente en General', total.pendienteGeneral, 'Por registrar una vez en Subv. General', total.pendienteGeneral ? 'red' : 'green'),
+    kpiFondoFijo('Pendiente SIGFE', total.pendienteSigfe, 'Aceptado menos compensado', total.pendienteSigfe ? 'red' : 'green'),
+    kpiFondoFijo('Observado', total.observado, 'No se rinde hasta su regularización', total.observado ? 'red' : 'gray'),
+  ].join('');
+  tbody.innerHTML = filasFondosFijos().map(r => {
+    const t = resumenFondoFijo(r.rbd);
+    return `<tr class="otras-fuentes-row" data-ff-rbd="${escHtml(r.rbd)}"><td>${escHtml(r.rbd)}</td><td><span class="nombre-txt" title="${escHtml(r.nombre)}">${escHtml(r.nombre)}</span></td><td class="num">${fmtCLP(t.cupo)}</td><td class="num">${fmtCLP(t.aceptado)}</td><td class="num">${fmtCLP(t.registrado)}</td><td class="num" style="color:${t.pendienteGeneral ? 'var(--status-critical)' : 'inherit'}">${fmtCLP(t.pendienteGeneral)}</td><td class="num">${fmtCLP(t.compensado)}</td><td class="num" style="color:${t.pendienteSigfe ? 'var(--status-critical)' : 'inherit'}">${fmtCLP(t.pendienteSigfe)}</td><td>${tagFondoFijo(t)}</td><td class="col-acciones"><button type="button" class="row-action-btn" data-ff-abrir="${escHtml(r.rbd)}">Ver / editar</button></td></tr>`;
+  }).join('');
+}
+function renderDashFondosFijos() {
+  const host = document.getElementById('dashFondosFijos'); if (!host) return;
+  const t = totalFondosFijos();
+  host.innerHTML = `<div class="dash-panel"><div class="dash-panel-head"><h3>💼 Fondos Fijos — control operativo</h3><button type="button" class="link-btn" onclick="irAPestana('of-fondos_fijos')">Abrir control</button></div><p class="dash-nota-chart">No participa en el ingreso, gasto, saldo ni déficit consolidados. Gasto aceptado: <strong>${fmtCLP(t.aceptado)}</strong> · Pendiente General: <strong style="color:${t.pendienteGeneral ? 'var(--status-critical)' : 'inherit'}">${fmtCLP(t.pendienteGeneral)}</strong> · Pendiente SIGFE: <strong style="color:${t.pendienteSigfe ? 'var(--status-critical)' : 'inherit'}">${fmtCLP(t.pendienteSigfe)}</strong>.</p></div>`;
+}
+let fondosFijosRbdAbierto = null;
+function tablaFondosFijosDetalleHTML(rbd, ff, total) {
+  const campos = [
+    ['saldo_inicial', 'Saldo inicial', 'input'],
+    ['rendido', 'Rendido por director(a)', 'input'],
+    ['observado', 'Monto observado', 'input'],
+    ['aceptado', 'Gasto aceptado', 'calc'],
+    ['registrado_general', 'Registrado en General', 'input'],
+    ['pendiente_general', 'Pendiente General', 'calc'],
+    ['compensado_sigfe', 'Compensado SIGFE', 'input'],
+    ['pendiente_sigfe', 'Pendiente SIGFE', 'calc'],
+    ['reposicion', 'Reposición entregada', 'input'],
+    ['saldo_final', 'Saldo final de caja', 'calc'],
+    ['folio', 'Folio rendición', 'folio'],
+  ];
+  const valorMes = (x, campo) => {
+    const aceptado = Math.max(0, num(x.rendido) - num(x.observado));
+    if (campo === 'aceptado') return aceptado;
+    if (campo === 'pendiente_general') return Math.max(0, aceptado - num(x.registrado_general));
+    if (campo === 'pendiente_sigfe') return Math.max(0, aceptado - num(x.compensado_sigfe));
+    if (campo === 'saldo_final') return num(x.saldo_inicial) - aceptado + num(x.reposicion);
+    return x[campo];
+  };
+  const totalCampo = (campo) => {
+    if (campo === 'saldo_inicial' || campo === 'saldo_final' || campo === 'folio') return '—';
+    if (campo === 'aceptado') return fmtCLP(total.aceptado);
+    if (campo === 'pendiente_general') return fmtCLP(total.pendienteGeneral);
+    if (campo === 'pendiente_sigfe') return fmtCLP(total.pendienteSigfe);
+    return fmtCLP(MESES_CARGA.reduce((s, m) => s + num(ff.meses[m][campo]), 0));
+  };
+  return `<div class="compras-section" style="margin-top:14px;"><div class="detalle-header"><strong>Detalle mensual del Fondo Fijo</strong> — <span class="detalle-sub">Escribe solo las filas editables. Gasto aceptado, pendientes y saldo de caja se calculan automáticamente.</span></div><div class="detalle-scroll"><table class="detalle-table">${DETALLE_COLGROUP}<thead><tr><th>Control</th>${MESES_CARGA.map(m => `<th class="num">${escHtml(MESES_CARGA_ABREV[MESES_CARGA.indexOf(m)])}</th>`).join('')}<th class="num">Total</th></tr></thead><tbody>${campos.map(([campo, etiqueta, tipo]) => `<tr class="${tipo === 'calc' ? 'ff-calculada' : ''}"><td class="item-label">${etiqueta}</td>${MESES_CARGA.map(m => { const x = ff.meses[m], valor = valorMes(x, campo); if (tipo === 'calc') return `<td class="num">${fmtCLP(valor)}</td>`; const inputType = tipo === 'folio' ? 'text' : 'number'; const attrs = tipo === 'folio' ? '' : ' min="0" step="1"'; return `<td class="num"><input type="${inputType}"${attrs} class="celda-input ff-input" data-ff-rbd="${rbd}" data-ff-mes="${m}" data-ff-campo="${campo}" value="${escHtml(String(valor || ''))}" aria-label="${escHtml(etiqueta + ' ' + m)}"></td>`; }).join('')}<td class="num item-total"><strong>${totalCampo(campo)}</strong></td></tr>`).join('')}</tbody></table></div></div>`;
+}
+function abrirFondosFijosModal(rbd) {
+  const r = filasFondosFijos().find(x => x.rbd === rbd); if (!r) return;
+  fondosFijosRbdAbierto = rbd;
+  const ff = ensureFondoFijo(rbd), t = resumenFondoFijo(rbd);
+  document.getElementById('fondosFijosModalTitle').textContent = `${otrasFuentesTituloEntidad(r)} — ${r.nombre} · Fondos Fijos`;
+  document.getElementById('fondosFijosModalSubtitle').innerHTML = `Gasto aceptado: <strong>${fmtCLP(t.aceptado)}</strong> · Pendiente General: <strong>${fmtCLP(t.pendienteGeneral)}</strong> · Pendiente SIGFE: <strong>${fmtCLP(t.pendienteSigfe)}</strong>`;
+  document.getElementById('fondosFijosModalBody').innerHTML = `<div class="detalle-empty">Registra montos consolidados de la rendición, sin repetir sus comprobantes menores. El <strong>gasto aceptado</strong> es Rendición menos Observado y se debe cargar una sola vez en Subvención General.</div><div class="compra-form-grid" style="margin-top:12px;"><label class="compra-field"><span class="compra-field-label">Cupo vigente (referencial)</span><input type="number" min="0" step="1" class="ff-input" data-ff-rbd="${rbd}" data-ff-campo="cupo" value="${ff.cupo || ''}"></label></div>${tablaFondosFijosDetalleHTML(rbd, ff, t)}`;
+  document.getElementById('fondosFijosModal').classList.remove('hidden'); document.body.style.overflow = 'hidden';
+}
+function cerrarFondosFijosModal() { fondosFijosRbdAbierto = null; document.getElementById('fondosFijosModal').classList.add('hidden'); document.body.style.overflow = ''; }
+function guardarCampoFondoFijo(input) {
+  const rbd = input.dataset.ffRbd, campo = input.dataset.ffCampo, mes = input.dataset.ffMes, ff = ensureFondoFijo(rbd);
+  const valor = campo === 'folio' ? input.value.trim() : Math.max(0, Number(input.value) || 0);
+  if (mes) ff.meses[mes][campo] = valor; else ff[campo] = valor;
+  const r = filasFondosFijos().find(x => x.rbd === rbd);
+  const payload = mes ? { meses: { [mes]: { [campo]: valor } } } : { [campo]: valor };
+  scheduleRbdSave(rbd, { nombre: r ? r.nombre : rbd, fondos_fijos: payload });
+  recomputeOtraFuente(rbd, 'general');
+  renderFondosFijos(); renderDashFondosFijos();
+  renderOtrasFuentesTable('general');
+  renderDashboard();
+  if (otrasFuentesRbdAbierto === rbd && otrasFuentesSel === 'general') renderOtrasFuentesModalContenido();
+  if (fondosFijosRbdAbierto === rbd) abrirFondosFijosModal(rbd);
+}
+// Importador del libro operativo vigente. Solo toma datos que están explícitos en P02: cupo,
+// saldo inicial, rendido, observado y folio. Nunca infiere una reposición, registro en General ni
+// compensación SIGFE a partir de la fórmula de saldo, pues son hitos distintos de conciliación.
+const MAPA_COLUMNAS_FONDOS_FIJOS = [
+  ['MARZO', 7, 13], ['ABRIL', 15, 21], ['MAYO', 23, 29], ['JUNIO', 31, 37], ['JULIO', 39, 45],
+  ['AGOSTO', 47, 53], ['SEPTIEMBRE', 55, 61], ['OCTUBRE', 63, null], ['NOVIEMBRE', 69, null], ['DICIEMBRE', 75, null],
+];
+function montoImportadoFondoFijo(v) { return Math.max(0, Number(v) || 0); }
+async function importarControlFondosFijos(file) {
+  if (!currentUser) { alert('Inicia sesión antes de importar.'); return; }
+  if (typeof XLSX === 'undefined') { alert('No se pudo cargar la librería de Excel. Intenta de nuevo con conexión a internet.'); return; }
+  if (!confirm('Se cargarán cupos, saldos iniciales, rendido, observado y folios desde “FONDOS FIJOS P02”. No se modificarán los ingresos, gastos ni consolidado. Los campos Registrado en General, Compensado SIGFE y Reposición se conservarán si ya existen y, si no, quedarán pendientes. ¿Continuar?')) return;
+  try {
+    const wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
+    const nombreHoja = wb.SheetNames.find(n => String(n).trim().toUpperCase() === 'FONDOS FIJOS P02');
+    if (!nombreHoja) { alert('No se encontró la hoja “FONDOS FIJOS P02”. No se importó nada.'); return; }
+    const rows = rowsFromSheet(wb.Sheets[nombreHoja]);
+    const permitidos = new Set(filasFondosFijos().map(r => r.rbd));
+    const cambios = [];
+    let omitidos = 0;
+    for (let i = 2; i < rows.length; i++) {
+      const row = rows[i] || [];
+      // rowsFromSheet usa defval:0; una fila separadora vacía llega como 0 y no es una entidad omitida.
+      if (row[0] === undefined || row[0] === null || String(row[0]).trim() === '' || Number(row[0]) === 0) continue;
+      const rbd = String(Math.trunc(Number(row[0])));
+      if (!permitidos.has(rbd)) { omitidos++; continue; }
+      const ff = ensureFondoFijo(rbd);
+      ff.cupo = montoImportadoFondoFijo(row[6]);
+      const meses = {};
+      MAPA_COLUMNAS_FONDOS_FIJOS.forEach(([mes, inicio, colFolio]) => {
+        const actual = ff.meses[mes];
+        actual.saldo_inicial = montoImportadoFondoFijo(row[inicio]);
+        actual.rendido = montoImportadoFondoFijo(row[inicio + 2]);
+        actual.observado = montoImportadoFondoFijo(row[inicio + 3]);
+        if (colFolio !== null) actual.folio = textoSeguro(row[colFolio]);
+        meses[mes] = { saldo_inicial: actual.saldo_inicial, rendido: actual.rendido, observado: actual.observado, ...(colFolio !== null ? { folio: actual.folio } : {}) };
+      });
+      const entidad = filasFondosFijos().find(x => x.rbd === rbd);
+      cambios.push({ rbd, nombre: entidad ? entidad.nombre : rbd, datos: { cupo: ff.cupo, meses } });
+    }
+    if (!cambios.length) { alert('No se encontraron RBD o GESPARVU coincidentes para importar.'); return; }
+    for (const cambio of cambios) {
+      scheduleRbdSave(cambio.rbd, { nombre: cambio.nombre, fondos_fijos: cambio.datos });
+      await flushRbdSave(cambio.rbd);
+    }
+    renderFondosFijos(); renderDashFondosFijos();
+    alert(`Importación terminada: ${cambios.length} entidades cargadas${omitidos ? `; ${omitidos} filas omitidas por no pertenecer al universo RBD/GESPARVU.` : ''}.\n\nQuedan pendientes de conciliación los campos Reposición entregada, Registrado en General y Compensado SIGFE, porque la planilla fuente no los identifica por separado.`);
+  } catch (err) {
+    console.error('Error importando Fondos Fijos', err);
+    alert('No se pudo importar el archivo: ' + err.message);
+  }
 }
 let otrasFuentesSel = FUENTES_OTRAS[0].key;
 let otrasFuentesRbdAbierto = null; // rbd (o "AC") cuyo detalle está abierto en el modal de Otras Fuentes
@@ -3228,13 +3476,13 @@ function ctxHonSep(rbd) {
     tras: () => honTrasCambio(rbd),
   };
 }
-// Contexto de Honorarios de UNA entidad en UNA de las 9 fuentes (General, PIE, Mantención, Pro-Retención: con cuenta del catálogo; JUNJI, FAEP, FIGA y los Aportes: con concepto). Las boletas
+// Contexto de Honorarios de UNA entidad en UNA de las fuentes (General, PIE, Mantención, Pro-Retención: con cuenta del catálogo; JUNJI, FAEP, Subt. 31, Asignación Familiar, FIGA y los Aportes: con concepto; Recuperación LLMM es solo de ingresos y no lleva honorarios). Las boletas
 // viven en `otras_fuentes.<fuente>.honorarios` y la proyección en `otras_fuentes.<fuente>.hon_proyeccion_items` (clave = cuenta o concepto); en memoria `of.honorarios`, `of.hon_agregado`
 // (derivado de las boletas) y `of.hon_proy` (los ítems de la proyección y su suma).
 function ctxHonOtraFuente(fuenteKey, rbd) {
   rbd = String(rbd);
   const f = FUENTES_OTRAS_BY_KEY[fuenteKey];
-  const porConcepto = comprasPorConcepto(fuenteKey);
+  const porConcepto = honPorConcepto(fuenteKey);
   const campoClave = porConcepto ? 'concepto' : 'codigo';
   const of = () => ensureOtraFuente(rbd, fuenteKey);
   const etiqueta = otrasFuentesTituloEntidad({ rbd }, fuenteKey);
@@ -3351,7 +3599,7 @@ function recomputeHonDesdeBoletas(rbd) {
 }
 // Fuentes (PR-3): deriva de las boletas de la entidad su agregado por cuenta/concepto y mes (`of.hon_agregado`) y la suma de su proyección (`of.hon_proy`). Nunca se guarda: se recalcula siempre.
 function recomputeHonOtraFuente(of, fuenteKey) {
-  const porConcepto = comprasPorConcepto(fuenteKey);
+  const porConcepto = honPorConcepto(fuenteKey);
   of.honorarios = objetoPlano(of.honorarios);
   const ag = honAgregadoDesdeBoletas('', '', of.honorarios, porConcepto);
   of.hon_agregado = { items: ag.items, meses: ag.meses, total: ag.total };
@@ -3594,8 +3842,13 @@ function ensureOtraFuente(rbd, fuenteKey) {
       entry.ingreso_carrera_docente = { meses: mesesEnCero(), total: 0 };
       entry.ingreso_bdl = { meses: mesesEnCero(), total: 0 };
       entry.saldo_operacion_bys = 0;
+    } else if (fuente.incomeShape === 'llmm3') {
+      entry.ingreso_llmm_isapres = { meses: mesesEnCero(), total: 0 };
+      entry.ingreso_llmm_fonasa = { meses: mesesEnCero(), total: 0 };
+      entry.ingreso_llmm_sil = { meses: mesesEnCero(), total: 0 };
     } else {
       entry.ingreso = { meses: mesesEnCero(), total: 0 };
+      if (fuente.incomeShape === 'carrera2') entry.ingreso_carrera_docente = { meses: mesesEnCero(), total: 0 };
     }
     // bysMode:'compras': las compras son siempre Real; la proyección de B&S vive aparte en
     // bys_proy_items (por concepto libre, siempre Proyectada).
@@ -3610,7 +3863,15 @@ function ensureOtraFuente(rbd, fuenteKey) {
     computeRealProyOtraFuente(entry, fuenteKey);
     CARGA_MANUAL.otras_fuentes_por_rbd[rbd][fuenteKey] = entry;
   }
-  return CARGA_MANUAL.otras_fuentes_por_rbd[rbd][fuenteKey];
+  const resultado = CARGA_MANUAL.otras_fuentes_por_rbd[rbd][fuenteKey];
+  const fuente = FUENTES_OTRAS_BY_KEY[fuenteKey] || {};
+  if (fuente.incomeShape === 'carrera2' && !resultado.ingreso_carrera_docente) resultado.ingreso_carrera_docente = { meses: mesesEnCero(), total: 0 };
+  if (fuente.incomeShape === 'llmm3') {
+    ['ingreso_llmm_isapres', 'ingreso_llmm_fonasa', 'ingreso_llmm_sil'].forEach(campo => {
+      if (!resultado[campo]) resultado[campo] = { meses: mesesEnCero(), total: 0 };
+    });
+  }
+  return resultado;
 }
 // Bienes y Servicios de las fuentes bysMode:'compras' (Real) = la suma de las compras cargadas
 // (mismo criterio de itemsFromCompras, agrupando por código de cuenta y mes de Fecha Documento).
@@ -3662,12 +3923,10 @@ function bloqueRealProy(ingreso, rem, bys, hon) {
   const gasto = rem + (hon || 0) + bys;
   return hon === undefined ? { ingreso, rem, bys, gasto, saldo: ingreso - gasto } : { ingreso, rem, hon, bys, gasto, saldo: ingreso - gasto };
 }
-function computeRealProyOtraFuente(of, fuenteKey) {
+function computeRealProyOtraFuente(of, fuenteKey, rbd) {
   const fuente = FUENTES_OTRAS_BY_KEY[fuenteKey] || {};
   const corte = realHastaMesOtraFuente(of);
-  const lineasIngreso = fuente.incomeShape === 'junji3'
-    ? [of.ingreso_operacion, of.ingreso_homologacion, of.ingreso_carrera_docente, of.ingreso_bdl]
-    : [of.ingreso];
+  const lineasIngreso = lineasIngresoOtraFuente(fuente, of);
   let ingReal = 0, ingProy = 0;
   lineasIngreso.forEach(l => { const s = splitRealProyMeses(l && l.meses, corte); ingReal += s.real; ingProy += s.proy; });
   const rem = splitRealProyMeses(of.gasto_rem && of.gasto_rem.meses, corte);
@@ -3683,8 +3942,14 @@ function computeRealProyOtraFuente(of, fuenteKey) {
     bysDoc = (of.bys_doc_items || []).reduce((s, it) => s + (it.total || 0), 0);
   }
   // Honorarios (Subt. 21): las boletas (por mes de su Fecha Documento) son SIEMPRE Real, sin importar el corte; la proyección, siempre Proyectada. Ambas se suman al gasto de la fuente.
-  const honReal = Math.round((of.hon_agregado && of.hon_agregado.total) || 0);
-  const honProy = Math.round((of.hon_proy && of.hon_proy.total) || 0);
+  const honReal = fuente.sinGasto ? 0 : Math.round((of.hon_agregado && of.hon_agregado.total) || 0); // sinGasto (Recuperación LLMM): fuente solo de ingresos, sin honorarios
+  const honProy = fuente.sinGasto ? 0 : Math.round((of.hon_proy && of.hon_proy.total) || 0);
+  // El Fondo Fijo no crea una segunda fuente: su monto ya registrado se suma SOLO a B&S Real de
+  // Subvención General, desde el mismo RBD/GESPARVU y mes. Compensación SIGFE no interviene aquí.
+  if (fuenteKey === 'general' && rbd) {
+    const mesesFondos = mesesFondosFijosRegistradosEnGeneral(rbd);
+    bysReal += MESES_CARGA.reduce((s, m) => s + mesesFondos[m], 0);
+  }
   // B&S de una fuente por concepto = sin documento + documentado (cada parte redondeada a pesos, así `bys = bysSin + bysDoc` cuadra siempre; sin documentos queda igual que antes).
   const real = bloqueRealProy(Math.round(ingReal), Math.round(rem.real), Math.round(bysReal) + (porConcepto ? Math.round(bysDoc) : 0), honReal);
   const proy = bloqueRealProy(Math.round(ingProy), Math.round(rem.proy), Math.round(bysProy), honProy);
@@ -3704,7 +3969,7 @@ function computeRealProyOtraFuente(of, fuenteKey) {
 function recomputeOtraFuente(rbd, fuenteKey) {
   const of = ensureOtraFuente(rbd, fuenteKey);
   const fuente = FUENTES_OTRAS_BY_KEY[fuenteKey] || {};
-  const rp = computeRealProyOtraFuente(of, fuenteKey);
+  const rp = computeRealProyOtraFuente(of, fuenteKey, rbd);
   of.ingreso_total = rp.total.ingreso;
   of.gasto_bys_total = rp.total.bys;
   of.gasto_total = rp.total.gasto;
@@ -4525,7 +4790,8 @@ function buildDetalleHTML(rbd, printMode) {
         const v = it ? (it.meses[m] || 0) : 0;
         return celdaInputHTML(rbd, 'ingreso_item', m, v, `data-item="${escHtml(itemName)}"`, printMode, itemName);
       }).join('');
-      return `<tr><td class="item-label">${itemName}</td>${cells}<td class="num item-total" id="ingresoitemtotal-${rbd}-${idx}">${fmtCLP(total)}</td></tr>`;
+      const etiqueta = itemName === 'Carrera Docente' ? 'Ingreso Carrera Docente SEP' : itemName;
+      return `<tr><td class="item-label">${etiqueta}</td>${cells}<td class="num item-total" id="ingresoitemtotal-${rbd}-${idx}">${fmtCLP(total)}</td></tr>`;
     }).join('');
     // Corte propio de ingresos de ESTE RBD (misma apariencia y lugar que "Remuneraciones reales hasta"). Si el RBD no tiene corte propio el
     // selector muestra el efectivo (mes de cierre global o DATA.n_meses) y una nota lo dice. En el PDF (printMode) va como texto simple.
@@ -5890,6 +6156,18 @@ function kpiCardsOtraFuente(fuenteKey, tipo, b, t) {
   const saldoTxt = tipo === 'total'
     ? `Ingreso − Gasto · ${t.nDeficit} de ${t.nEntidades} entidades en déficit`
     : `Ingreso ${suf} − Gasto ${suf}`;
+  if (fuente.sinGasto) return [
+    { label: `Ingreso (${suf})`, value: fmtCLP(b.ingreso), full: corteTxt, tone: 'blue' },
+    { label: `Sin gastos asociados (${suf})`, value: fmtCLP(0), full: 'Fuente exclusivamente de ingresos', tone: 'green' },
+    { label: `Saldo (${suf})`, value: fmtCLP(b.saldo), full: 'Corresponde al ingreso recuperado', tone: 'green' },
+  ];
+  if (fuente.soloRem) return [
+    { label: `Ingreso Percibido (${suf})`, value: fmtCLP(b.ingreso), full: corteTxt, tone: 'blue' },
+    { label: `Gasto Remuneraciones (${suf})`, value: fmtCLP(b.rem), full: corteTxt, tone: 'amber' },
+    { label: `Gasto Honorarios (${suf})`, value: fmtCLP(b.hon), full: 'Boletas + proyección de honorarios (Subt. 21)', tone: 'amber' },
+    { label: `Gasto Total (${suf})`, value: fmtCLP(b.gasto), full: 'Remuneraciones + Honorarios', tone: 'amber' },
+    { label: `Saldo (${suf})`, value: fmtCLP(b.saldo), full: saldoTxt, critical: b.saldo < 0, tone: b.saldo < 0 ? 'red' : 'green' },
+  ];
   return [
     { label: `Ingreso (${suf})`, value: fmtCLP(b.ingreso), full: corteTxt, tone: 'blue' },
     { label: `Gasto Remuneraciones (${suf})`, value: fmtCLP(b.rem), full: corteTxt, tone: 'amber' },
@@ -5949,6 +6227,7 @@ function bysSplitCeldaHTML(b) {
 // pinta la tabla de la fuente pedida, no las 9 de una vez, para no recalcular lo que no se ve.
 function renderOtrasFuentesTable(fuenteKey) {
   const key = fuenteKey || otrasFuentesSel;
+  const fuente = FUENTES_OTRAS_BY_KEY[key];
   const tbody = document.getElementById('otrasFuentesTbody-' + key);
   if (!tbody) return;
   const vista = otrasFuentesVista;
@@ -5961,10 +6240,7 @@ function renderOtrasFuentesTable(fuenteKey) {
       <td class="rbd-clickable" data-abrir-otra-fuente="${escHtml(r.rbd)}"><span class="nombre-txt" title="${escHtml(r.nombre)}">${escHtml(r.nombre)}</span></td>
       <td class="of-real-hasta">${corteTxt}</td>
       <td class="num">${fmtCLP(b.ingreso)}</td>
-      <td class="num">${fmtCLP(b.rem)}</td>
-      <td class="num">${fmtCLP(b.hon)}</td>
-      <td class="num">${fmtCLP(b.bys)}${bysSplitCeldaHTML(b)}</td>
-      <td class="num">${fmtCLP(b.gasto)}</td>
+      ${fuente.sinGasto ? '' : fuente.soloRem ? `<td class="num">${fmtCLP(b.rem)}</td><td class="num">${fmtCLP(b.hon)}</td><td class="num">${fmtCLP(b.gasto)}</td>` : `<td class="num">${fmtCLP(b.rem)}</td><td class="num">${fmtCLP(b.hon)}</td><td class="num">${fmtCLP(b.bys)}${bysSplitCeldaHTML(b)}</td><td class="num">${fmtCLP(b.gasto)}</td>`}
       <td class="num" style="color:${b.saldo < 0 ? 'var(--status-critical)' : 'var(--text-primary)'}">${fmtCLP(b.saldo)}</td>
       <td>${otrasFuentesEstadoTagHTML(of, key)}${otrasFuentesEstadoCausaHTML(of, key)}</td>
       <td class="col-acciones">${otrasFuentesAccionesHTML(key, r.rbd)}</td>
@@ -6054,6 +6330,20 @@ FUENTES_OTRAS.forEach(f => {
     if (e.repeat) return; // mantener la tecla apretada no reabre el detalle
     abrirOtrasFuentesModal(fila.getAttribute('data-rbd'));
   });
+});
+
+document.getElementById('fondosFijosTable').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-ff-abrir]');
+  if (b) abrirFondosFijosModal(b.dataset.ffAbrir);
+});
+document.getElementById('fondosFijosModalCloseBtn').addEventListener('click', cerrarFondosFijosModal);
+document.getElementById('fondosFijosModal').addEventListener('click', (e) => { if (e.target.id === 'fondosFijosModal') cerrarFondosFijosModal(); });
+document.getElementById('fondosFijosModalBody').addEventListener('change', (e) => { if (e.target.classList.contains('ff-input')) guardarCampoFondoFijo(e.target); });
+document.getElementById('importFondosFijosBtn').addEventListener('click', () => document.getElementById('importFondosFijosInput').click());
+document.getElementById('importFondosFijosInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (file) await importarControlFondosFijos(file);
+  e.target.value = '';
 });
 
 // Al abrir, el foco entra al modal (botón de cerrar) para que Tab recorra su contenido en vez de la página que queda detrás (U-05 / U-09); al cerrar vuelve a
@@ -6406,6 +6696,16 @@ function bysConceptoSectionHTML(rbd, fuenteKey, of, mostrarSaldoOperacion, opts)
     </div>`;
 }
 
+// Línea de solo lectura que explica qué parte de B&S General viene de una rendición consolidada
+// de Fondo Fijo. Se deriva del control operativo, de modo que editarlo allí ajusta General sin
+// crear una compra ficticia ni duplicar un gasto.
+function fondosFijosEnGeneralHTML(rbd) {
+  const meses = mesesFondosFijosRegistradosEnGeneral(rbd);
+  const total = MESES_CARGA.reduce((s, m) => s + meses[m], 0);
+  if (!total) return '';
+  return `<div class="compras-section" style="margin-top:14px;"><div class="detalle-header"><strong>Fondos Fijos rendidos — B&S General</strong> — <span class="detalle-sub">Solo lectura. Montos registrados desde Fondos Fijos para esta entidad; cada columna corresponde al mes de la rendición. Edita el campo “Registrado en General” en Fondos Fijos.</span></div><div class="detalle-scroll"><table class="detalle-table">${DETALLE_COLGROUP}<thead><tr><th>Origen</th>${MESES_CARGA.map((m, i) => `<th class="num">${escHtml(MESES_CARGA_ABREV[i])}</th>`).join('')}<th class="num">Total</th></tr></thead><tbody><tr class="ff-calculada"><td class="item-label">Rendición Fondo Fijo</td>${MESES_CARGA.map(m => `<td class="num">${meses[m] ? fmtCLP(meses[m]) : '—'}</td>`).join('')}<td class="num item-total"><strong>${fmtCLP(total)}</strong></td></tr></tbody></table></div></div>`;
+}
+
 function buildOtrasFuentesDetalleHTML(rbd, fuenteKey) {
   const of = recomputeOtraFuente(rbd, fuenteKey);
   const fuente = FUENTES_OTRAS_BY_KEY[fuenteKey];
@@ -6413,7 +6713,7 @@ function buildOtrasFuentesDetalleHTML(rbd, fuenteKey) {
   const corte = realHastaMesOtraFuente(of);
   const compras = fuente.bysMode === 'compras';
   const corteSelectHTML = `<div class="of-modal-corte"><label class="of-ctl-label">Real hasta el mes: <select class="of-modal-corte-select" data-rbd="${rbd}" data-fuente="${fuenteKey}">${MESES_CARGA_TITLE.map((m, i) => `<option value="${i + 1}"${i + 1 === corte ? ' selected' : ''}>${m}</option>`).join('')}</select></label>
-    <span class="detalle-sub">Los meses hasta el corte son <strong>Real</strong> y los siguientes <strong>Proyectado</strong>${compras ? ' (las compras siempre son Real; la proyección de Bienes y Servicios se carga aparte, más abajo).' : ' (Bienes y Servicios «sin documento» sigue el corte; lo documentado con compras siempre es Real).'} Las boletas de honorarios siempre son Real y su proyección, Proyectada.</span></div>`;
+    <span class="detalle-sub">Los meses hasta el corte son <strong>Real</strong> y los siguientes <strong>Proyectado</strong>${fuente.bysMode === 'none' ? ' (esta fuente no registra Bienes y Servicios).' : compras ? ' (las compras siempre son Real; la proyección de Bienes y Servicios se carga aparte, más abajo).' : ' (Bienes y Servicios «sin documento» sigue el corte; lo documentado con compras siempre es Real).'} Las boletas de honorarios siempre son Real y su proyección, Proyectada.</span></div>`;
 
   let headerHTML, tablasMesesHTML;
   if (fuente.incomeShape === 'junji3') {
@@ -6424,17 +6724,27 @@ function buildOtrasFuentesDetalleHTML(rbd, fuenteKey) {
     ${otrasFuentesTablaMes('Ingreso Carrera Docente', rbd, fuenteKey, 'of_ingreso_carrera_docente', of.ingreso_carrera_docente, `oftotal-${rbd}-${fuenteKey}-of_ingreso_carrera_docente`)}
     ${otrasFuentesTablaMes('Ingreso Bono Desempeño Laboral (BDL)', rbd, fuenteKey, 'of_ingreso_bdl', of.ingreso_bdl, `oftotal-${rbd}-${fuenteKey}-of_ingreso_bdl`)}
     ${otrasFuentesTablaMes('Gasto Remuneraciones', rbd, fuenteKey, 'of_gasto_rem', of.gasto_rem, `oftotal-${rbd}-${fuenteKey}-of_gasto_rem`)}`;
+  } else if (fuente.incomeShape === 'llmm3') {
+    headerHTML = `<strong>Detalle por mes — Recuperación de Licencias Médicas</strong> — <span class="detalle-sub">Esta fuente registra exclusivamente ingresos; no tiene gastos asociados.</span>`;
+    tablasMesesHTML = `
+    ${otrasFuentesTablaMes('Recuperación LLMM Isapres', rbd, fuenteKey, 'of_ingreso_llmm_isapres', of.ingreso_llmm_isapres, `oftotal-${rbd}-${fuenteKey}-of_ingreso_llmm_isapres`)}
+    ${otrasFuentesTablaMes('Recuperación LLMM FONASA', rbd, fuenteKey, 'of_ingreso_llmm_fonasa', of.ingreso_llmm_fonasa, `oftotal-${rbd}-${fuenteKey}-of_ingreso_llmm_fonasa`)}
+    ${otrasFuentesTablaMes('Recuperación LLMM SIL', rbd, fuenteKey, 'of_ingreso_llmm_sil', of.ingreso_llmm_sil, `oftotal-${rbd}-${fuenteKey}-of_ingreso_llmm_sil`)}`;
   } else {
-    const bysSubtitle = compras
+    const etiquetaIngreso = fuente.soloRem ? 'Ingresos Percibidos' : `Ingreso (${fuenteLabel})`;
+    const bysSubtitle = fuente.bysMode === 'none'
+      ? 'Esta fuente solo permite gastos en Remuneraciones; no registra Bienes y Servicios.'
+      : compras
       ? 'Bienes y Servicios se carga como "Registro de compras" más abajo; su total mensual se calcula solo.'
       : 'Bienes y Servicios se carga como "Registro de compras" por documento (con concepto) o, sin documento, como montos mensuales por concepto, más abajo; los totales se calculan solos.';
     headerHTML = `<strong>Detalle por mes — Ingreso, Remuneraciones y Honorarios (${fuenteLabel})</strong> — <span class="detalle-sub">${bysSubtitle}</span>`;
     tablasMesesHTML = `
-    ${otrasFuentesTablaMes(`Ingreso (${fuenteLabel})`, rbd, fuenteKey, 'of_ingreso', of.ingreso, `oftotal-${rbd}-${fuenteKey}-of_ingreso`)}
+    ${otrasFuentesTablaMes(etiquetaIngreso, rbd, fuenteKey, 'of_ingreso', of.ingreso, `oftotal-${rbd}-${fuenteKey}-of_ingreso`)}
+    ${fuente.incomeShape === 'carrera2' ? otrasFuentesTablaMes(`Ingreso Carrera Docente ${fuenteKey === 'general' ? 'General' : 'PIE'}`, rbd, fuenteKey, 'of_ingreso_carrera_docente', of.ingreso_carrera_docente || { meses: mesesEnCero(), total: 0 }, `oftotal-${rbd}-${fuenteKey}-of_ingreso_carrera_docente`) : ''}
     ${otrasFuentesTablaMes(`Gasto Remuneraciones (${fuenteLabel})`, rbd, fuenteKey, 'of_gasto_rem', of.gasto_rem, `oftotal-${rbd}-${fuenteKey}-of_gasto_rem`)}`;
   }
 
-  const bysHTML = compras
+  const bysHTML = (fuente.sinGasto || fuente.bysMode === 'none') ? '' : (compras
     ? comprasSectionOtraFuenteHTML(rbd, fuenteKey, of, fuenteLabel) + bysConceptoSectionHTML(rbd, fuenteKey, of, false, {
         lista: 'bys_proy_items', modo: 'of_bys_proy_item', forzarProy: true,
         titulo: 'Proyección Bienes y Servicios (por concepto)',
@@ -6452,7 +6762,7 @@ function buildOtrasFuentesDetalleHTML(rbd, fuenteKey) {
           nota: 'Montos mensuales por concepto, sin documento (lo que ya estaba cargado antes del registro de compras). Se suman APARTE de lo documentado: cada ítem se identifica por un concepto libre y sigue el corte "Real hasta".',
           listaConceptosId: ctx.listaConceptosId,
         });
-    })();
+    })()) + (fuenteKey === 'general' ? fondosFijosEnGeneralHTML(rbd) : '');
 
   return `
   <div class="detalle-wrap">
@@ -6462,7 +6772,7 @@ function buildOtrasFuentesDetalleHTML(rbd, fuenteKey) {
     </div>
     <div class="detalle-scroll">
     ${tablasMesesHTML}
-    ${honSectionHTML(ctxHonOtraFuente(fuenteKey, rbd), false)}
+    ${fuente.sinGasto ? '' : honSectionHTML(ctxHonOtraFuente(fuenteKey, rbd), false)}
     ${bysHTML}
     </div>
   </div>`;
@@ -6528,6 +6838,9 @@ const OTRA_FUENTE_MODO_CAMPO = {
   of_ingreso_homologacion: 'ingreso_homologacion',
   of_ingreso_carrera_docente: 'ingreso_carrera_docente',
   of_ingreso_bdl: 'ingreso_bdl',
+  of_ingreso_llmm_isapres: 'ingreso_llmm_isapres',
+  of_ingreso_llmm_fonasa: 'ingreso_llmm_fonasa',
+  of_ingreso_llmm_sil: 'ingreso_llmm_sil',
 };
 function onOtraFuenteCeldaInput(input) {
   const rbd = input.dataset.rbd, fuenteKey = input.dataset.fuente, mes = input.dataset.mes, modo = input.dataset.modo;
@@ -6938,7 +7251,7 @@ function sheetOtraFuenteComprasAOA(fuenteKey, onlyRbd) {
 // HONORARIOS de una fuente (PR-3): una fila por boleta, con su ID (mismas columnas que la hoja HONORARIOS de SEP: Libro de Honorarios A–L + N° DC), con «Concepto» en lugar de «Codigo» en las
 // fuentes por concepto (JUNJI, FAEP, FIGA, Aportes). Texto libre neutralizado contra fórmulas; el tipo va como CÓDIGO (BOLHE).
 function sheetOtraFuenteHonorariosAOA(fuenteKey, onlyRbd) {
-  const porConcepto = comprasPorConcepto(fuenteKey);
+  const porConcepto = honPorConcepto(fuenteKey);
   const headers = ['ID', 'RBD', 'Nombre', porConcepto ? 'Concepto' : 'Codigo', 'TipoDocumento', 'NroDocumento', 'FechaDocumento', 'FechaPago', 'Descripcion', 'RutProveedor', 'NombreProveedor', 'MontoGasto', 'MontoDocumento', 'N° DC'];
   const rows = [headers];
   filasOtraFuenteExport(fuenteKey, onlyRbd).forEach(r => {
@@ -6951,7 +7264,7 @@ function sheetOtraFuenteHonorariosAOA(fuenteKey, onlyRbd) {
 }
 // HON_PROYECCION de una fuente: por cuenta (Codigo + Item + 12 meses, como la de SEP) o por concepto (Concepto + 12 meses, como BYS_ITEMS).
 function sheetOtraFuenteHonProyeccionAOA(fuenteKey, onlyRbd) {
-  const porConcepto = comprasPorConcepto(fuenteKey);
+  const porConcepto = honPorConcepto(fuenteKey);
   const rows = [['RBD', 'Nombre', ...(porConcepto ? ['Concepto'] : ['Codigo', 'Item']), ...MESES_CARGA_TITLE, 'Total Año']];
   filasOtraFuenteExport(fuenteKey, onlyRbd).forEach(r => {
     const of = (CARGA_MANUAL.otras_fuentes_por_rbd || {})[r.rbd]?.[fuenteKey];
@@ -6992,10 +7305,24 @@ function buildOtraFuenteCargaWorkbook(fuenteKey, onlyRbd) {
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso_homologacion', onlyRbd)), 'ING_HOMOLOGACION');
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso_carrera_docente', onlyRbd)), 'ING_CARRERA_DOCENTE');
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso_bdl', onlyRbd)), 'ING_BDL');
+  } else if (fuente.incomeShape === 'llmm3') {
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso_llmm_isapres', onlyRbd)), 'ING_LLMM_ISAPRES');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso_llmm_fonasa', onlyRbd)), 'ING_LLMM_FONASA');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso_llmm_sil', onlyRbd)), 'ING_LLMM_SIL');
   } else {
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso', onlyRbd)), 'INGRESO');
+    if (fuente.incomeShape === 'carrera2') XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso_carrera_docente', onlyRbd)), 'ING_CARRERA_DOCENTE');
   }
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'gasto_rem', onlyRbd)), 'REMUNERACIONES');
+  if (!fuente.sinGasto) XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'gasto_rem', onlyRbd)), 'REMUNERACIONES');
+  if (fuente.sinGasto || fuente.bysMode === 'none') {
+    // Sin B&S: solo las hojas de honorarios (la fuente sin gasto no las lleva).
+    if (!fuente.sinGasto) {
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteHonorariosAOA(fuenteKey, onlyRbd)), 'HONORARIOS');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteHonProyeccionAOA(fuenteKey, onlyRbd)), 'HON_PROYECCION');
+    }
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetMetaAOA(fuenteKey, onlyRbd)), 'META');
+    return wb;
+  }
   if (fuente.bysMode === 'compras') {
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteComprasAOA(fuenteKey, onlyRbd)), 'COMPRAS');
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetBysItemsAOA(fuenteKey, 'bys_proy_items', onlyRbd)), 'BYS_PROY_ITEMS');
@@ -7115,7 +7442,7 @@ function importOtraFuenteComprasSheet(ws, fuenteKey) {
 // en el archivo no se toca; el N° DC solo se escribe si el archivo trae la columna. La hoja de una fuente con cuenta trae «Codigo» y la de una fuente por concepto «Concepto»: la que no corresponde se rechaza entera.
 // Devuelve { n, noHabilitadas } (cuenta del catálogo pero no habilitada para esa subvención: se importa igual y queda marcada ⚠).
 function importOtraFuenteHonorariosSheet(ws, fuenteKey) {
-  const porConcepto = comprasPorConcepto(fuenteKey);
+  const porConcepto = honPorConcepto(fuenteKey);
   const label = FUENTES_OTRAS_BY_KEY[fuenteKey].label;
   const rows = rowsFromSheet(ws);
   const encabezado = String((rows[0] || [])[3] == null ? '' : (rows[0] || [])[3]).trim();
@@ -7192,7 +7519,7 @@ function importOtraFuenteHonorariosSheet(ws, fuenteKey) {
 // Importar la hoja HON_PROYECCION de una fuente: por cuenta (Codigo, Item, 12 meses) o por concepto (Concepto, 12 meses). Una cuenta fuera del catálogo de honorarios, un concepto vacío o inválido
 // o una entidad que no es de la fuente se informan y se omiten.
 function importOtraFuenteHonProyeccionSheet(ws, fuenteKey) {
-  const porConcepto = comprasPorConcepto(fuenteKey);
+  const porConcepto = honPorConcepto(fuenteKey);
   const label = FUENTES_OTRAS_BY_KEY[fuenteKey].label;
   const rows = rowsFromSheet(ws);
   const encabezado = String((rows[0] || [])[2] == null ? '' : (rows[0] || [])[2]).trim();
@@ -7301,10 +7628,26 @@ function importOtraFuenteWorkbook(wbIn, fuenteKey) {
     if (wbIn.Sheets['ING_HOMOLOGACION']) resumen.push('ING_HOMOLOGACION: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_HOMOLOGACION'], fuenteKey, 'ingreso_homologacion') + ' filas');
     if (wbIn.Sheets['ING_CARRERA_DOCENTE']) resumen.push('ING_CARRERA_DOCENTE: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_CARRERA_DOCENTE'], fuenteKey, 'ingreso_carrera_docente') + ' filas');
     if (wbIn.Sheets['ING_BDL']) resumen.push('ING_BDL: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_BDL'], fuenteKey, 'ingreso_bdl') + ' filas'); // un Excel anterior al BDL no trae la hoja: se importa igual y no toca el BDL guardado
+  } else if (fuente.incomeShape === 'llmm3') {
+    if (wbIn.Sheets['ING_LLMM_ISAPRES']) resumen.push('ING_LLMM_ISAPRES: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_LLMM_ISAPRES'], fuenteKey, 'ingreso_llmm_isapres') + ' filas');
+    if (wbIn.Sheets['ING_LLMM_FONASA']) resumen.push('ING_LLMM_FONASA: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_LLMM_FONASA'], fuenteKey, 'ingreso_llmm_fonasa') + ' filas');
+    if (wbIn.Sheets['ING_LLMM_SIL']) resumen.push('ING_LLMM_SIL: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_LLMM_SIL'], fuenteKey, 'ingreso_llmm_sil') + ' filas');
   } else {
     if (wbIn.Sheets['INGRESO']) resumen.push('INGRESO: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['INGRESO'], fuenteKey, 'ingreso') + ' filas');
+    if (fuente.incomeShape === 'carrera2' && wbIn.Sheets['ING_CARRERA_DOCENTE']) resumen.push('ING_CARRERA_DOCENTE: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_CARRERA_DOCENTE'], fuenteKey, 'ingreso_carrera_docente') + ' filas');
   }
-  if (wbIn.Sheets['REMUNERACIONES']) resumen.push('REMUNERACIONES: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['REMUNERACIONES'], fuenteKey, 'gasto_rem') + ' filas');
+  if (!fuente.sinGasto && wbIn.Sheets['REMUNERACIONES']) resumen.push('REMUNERACIONES: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['REMUNERACIONES'], fuenteKey, 'gasto_rem') + ' filas');
+  if (fuente.sinGasto || fuente.bysMode === 'none') {
+    // Sin B&S: solo se leen las hojas de honorarios (la fuente sin gasto no las lleva).
+    if (!fuente.sinGasto) {
+      if (wbIn.Sheets['HONORARIOS']) {
+        const rh = importOtraFuenteHonorariosSheet(wbIn.Sheets['HONORARIOS'], fuenteKey);
+        resumen.push('HONORARIOS: ' + rh.n + ' filas');
+      }
+      if (wbIn.Sheets['HON_PROYECCION']) resumen.push('HON_PROYECCION: ' + importOtraFuenteHonProyeccionSheet(wbIn.Sheets['HON_PROYECCION'], fuenteKey) + ' filas');
+    }
+    renderOtrasFuentesTable(fuenteKey); return resumen.concat(resumenRechazosImportacion());
+  }
   if (fuente.bysMode === 'compras') {
     if (wbIn.Sheets['COMPRAS']) {
       const rc = importOtraFuenteComprasSheet(wbIn.Sheets['COMPRAS'], fuenteKey);
@@ -7372,19 +7715,27 @@ function csvDetalleMensualOtraFuenteLines(fuenteKey, rbd) {
     push(fila('Ingreso Homologación', tipoPorCorte, of.ingreso_homologacion));
     push(fila('Ingreso Carrera Docente', tipoPorCorte, of.ingreso_carrera_docente));
     push(fila('Ingreso Bono Desempeño Laboral (BDL)', tipoPorCorte, of.ingreso_bdl));
+  } else if (fuente.incomeShape === 'llmm3') {
+    push(fila('Recuperación LLMM Isapres', tipoPorCorte, of.ingreso_llmm_isapres));
+    push(fila('Recuperación LLMM FONASA', tipoPorCorte, of.ingreso_llmm_fonasa));
+    push(fila('Recuperación LLMM SIL', tipoPorCorte, of.ingreso_llmm_sil));
   } else {
     push(fila('Ingreso', tipoPorCorte, of.ingreso));
   }
-  push(fila('Gasto Remuneraciones', tipoPorCorte, of.gasto_rem));
+  if (!fuente.sinGasto) push(fila('Gasto Remuneraciones', tipoPorCorte, of.gasto_rem));
   // Honorarios (Subt. 21): boletas por cuenta/concepto (siempre Real) y proyección (siempre Proyectado); N° DC, RUT y nombre del prestador nunca van en este CSV.
-  ((of.hon_agregado && of.hon_agregado.items) || []).forEach(it => push(fila(`Honorarios boletas - ${fuente.bysMode === 'compras' ? `${it.codigo} ${it.item}` : it.concepto}`, 'Real', it)));
-  ((of.hon_proy && of.hon_proy.items) || []).forEach(it => push(fila(`Honorarios proyeccion - ${fuente.bysMode === 'compras' ? (HON_CUENTAS_BY_CODIGO[it.codigo] ? `${it.codigo} ${HON_CUENTAS_BY_CODIGO[it.codigo].nombre}` : it.codigo) : it.concepto}`, 'Proyectado', it)));
+  ((of.hon_agregado && of.hon_agregado.items) || []).forEach(it => push(fila(`Honorarios boletas - ${!honPorConcepto(fuente.key) ? `${it.codigo} ${it.item}` : it.concepto}`, 'Real', it)));
+  ((of.hon_proy && of.hon_proy.items) || []).forEach(it => push(fila(`Honorarios proyeccion - ${!honPorConcepto(fuente.key) ? (HON_CUENTAS_BY_CODIGO[it.codigo] ? `${it.codigo} ${HON_CUENTAS_BY_CODIGO[it.codigo].nombre}` : it.codigo) : it.concepto}`, 'Proyectado', it)));
   if (fuente.bysMode === 'compras') {
     (of.bys_items || []).forEach(it => push(fila(`B&S compras - ${it.codigo} ${it.item}`, 'Real', it)));
     (of.bys_proy_items || []).forEach(it => push(fila(`B&S proyeccion - ${it.concepto}`, 'Proyectado', it)));
   } else {
     (of.bys_items || []).forEach(it => push(fila(`B&S - ${it.concepto}`, tipoPorCorte, it)));
     (of.bys_doc_items || []).forEach(it => push(fila(`B&S documentado - ${it.concepto}`, 'Real', it))); // compras por documento (siempre Real); N° DC y demás datos del documento nunca van en este CSV
+  }
+  if (fuenteKey === 'general') {
+    const mesesFondos = mesesFondosFijosRegistradosEnGeneral(rbd);
+    if (MESES_CARGA.some(m => mesesFondos[m])) push(fila('B&S Fondos Fijos rendidos', 'Real', { meses: mesesFondos }));
   }
   const vacios = MESES_CARGA.map(() => '');
   [['real', 'Real'], ['proy', 'Proyectado'], ['total', 'Total (Real+Proyectado)']].forEach(([k, etiqueta]) => {
@@ -7441,9 +7792,13 @@ function buildOtraFuenteEntidadPrintHTML(rbd, fuenteKey) {
   };
   const tablasIngreso = fuente.incomeShape === 'junji3'
     ? [['Ingreso Operación', of.ingreso_operacion], ['Ingreso Homologación', of.ingreso_homologacion], ['Ingreso Carrera Docente', of.ingreso_carrera_docente], ['Ingreso Bono Desempeño Laboral (BDL)', of.ingreso_bdl]]
-    : [['Ingreso', of.ingreso]];
+    : fuente.incomeShape === 'llmm3'
+      ? [['Recuperación LLMM Isapres', of.ingreso_llmm_isapres], ['Recuperación LLMM FONASA', of.ingreso_llmm_fonasa], ['Recuperación LLMM SIL', of.ingreso_llmm_sil]]
+      : [['Ingreso', of.ingreso]];
   let bysHTML;
-  if (fuente.bysMode === 'compras') {
+  if (fuente.bysMode === 'none') {
+    bysHTML = '';
+  } else if (fuente.bysMode === 'compras') {
     const compras = Object.values(of.compras || {}).sort((a, b) => (a.fechaDocumento || '').localeCompare(b.fechaDocumento || ''));
     const filasCompras = compras.map(c => {
       const cat = CUENTAS_COMPRAS_BY_CODIGO[c.codigo];
@@ -7479,8 +7834,8 @@ function buildOtraFuenteEntidadPrintHTML(rbd, fuenteKey) {
     <div class="kpi-section-label">Total (Real + Proyectado)</div>
     <div class="kpi-row of-kpi-row" style="margin-bottom:10px;">${kpis('total')}</div>
     ${tablasIngreso.map(([titulo, obj]) => tablaMesesEstaticaHTML(titulo, [{ label: titulo, obj }], corte, false)).join('')}
-    ${tablaMesesEstaticaHTML('Gasto Remuneraciones', [{ label: 'Gasto Remuneraciones', obj: of.gasto_rem }], corte, false)}
-    ${honSectionHTML(ctxHonOtraFuente(fuenteKey, rbd), true)}
+    ${fuente.sinGasto ? '' : tablaMesesEstaticaHTML('Gasto Remuneraciones', [{ label: 'Gasto Remuneraciones', obj: of.gasto_rem }], corte, false)}
+    ${fuente.sinGasto ? '' : honSectionHTML(ctxHonOtraFuente(fuenteKey, rbd), true)}
     ${bysHTML}`;
 }
 function exportOtraFuenteEntidadPdf(fuenteKey, rbd) {
@@ -7560,6 +7915,9 @@ const DASH_META = {
   prorretencion: { corto: 'Pro-Retención', icono: '📌' },
   junji: { corto: 'JUNJI', icono: '🧸' },
   faep: { corto: 'FAEP', icono: '🏗️' },
+  subt31_proyectos: { corto: 'Subt. 31', icono: '🧱' },
+  recuperacion_llmm: { corto: 'Recup. LLMM', icono: '🩺' },
+  asignacion_familiar: { corto: 'Asig. Familiar', icono: '👨‍👩‍👧' },
   figa: { corto: 'FIGA', icono: '🌐' },
   aporte_educ: { corto: 'Aporte Fiscal Educ.', icono: '🏛️' },
   aporte_junji: { corto: 'Aporte Fiscal JUNJI', icono: '🍼' },
@@ -7808,7 +8166,7 @@ function partesMensualesOtraFuente(fuenteKey, out, entidadFiltro) {
       const k = siempre || (i + 1 <= corte ? 'real' : 'proy');
       out[k][tipo][i] += v;
     });
-    const lineasIng = fuente.incomeShape === 'junji3' ? [of.ingreso_operacion, of.ingreso_homologacion, of.ingreso_carrera_docente, of.ingreso_bdl] : [of.ingreso];
+    const lineasIng = lineasIngresoOtraFuente(fuente, of);
     lineasIng.forEach(l => sumar(l && l.meses, 'ing'));
     sumar(of.gasto_rem && of.gasto_rem.meses, 'rem');
     if (fuente.bysMode === 'compras') {
@@ -7821,6 +8179,7 @@ function partesMensualesOtraFuente(fuenteKey, out, entidadFiltro) {
     // Honorarios (Subt. 21): boletas siempre reales (por mes de Fecha Documento) y proyección siempre proyectada, como en SEP.
     ((of.hon_agregado && of.hon_agregado.items) || []).forEach(it => sumar(it.meses, 'hon', 'real'));
     ((of.hon_proy && of.hon_proy.items) || []).forEach(it => sumar(it.meses, 'hon', 'proy'));
+    if (fuenteKey === 'general') sumar(mesesFondosFijosRegistradosEnGeneral(r.rbd), 'bys', 'real');
   });
   return cortes;
 }
@@ -8009,6 +8368,7 @@ function renderDashboard() {
   renderDashCierre();
   document.querySelectorAll('.dash-chips button').forEach(b => b.classList.toggle('active', b.dataset.dashVista === dashVista));
   renderDashCards(fuentes);
+  renderDashFondosFijos();
   renderDashComparativo(fuentes);
   renderDashComposicion(fuentes);
   renderDashMensual();
@@ -8123,7 +8483,9 @@ function reporteLineasOtraFuente(fuenteKey, sel) {
     const corte = realHastaMesOtraFuente(of);
     const lineasIng = f.incomeShape === 'junji3'
       ? [['Ingreso Operación', of.ingreso_operacion], ['Ingreso Homologación', of.ingreso_homologacion], ['Ingreso Carrera Docente', of.ingreso_carrera_docente], ['Ingreso Bono Desempeño Laboral (BDL)', of.ingreso_bdl]]
-      : [['Ingreso', of.ingreso]];
+      : f.incomeShape === 'llmm3'
+        ? [['Recuperación LLMM Isapres', of.ingreso_llmm_isapres], ['Recuperación LLMM FONASA', of.ingreso_llmm_fonasa], ['Recuperación LLMM SIL', of.ingreso_llmm_sil]]
+        : [['Ingreso', of.ingreso]];
     lineasIng.forEach(([nombre, l]) => vzSumar(mapa, { fuenteKey, tipo: 'ingreso', grupo: 'ingreso', concepto: nombre }, l && l.meses, corte));
     vzSumar(mapa, { fuenteKey, tipo: 'gasto', grupo: 'rem', concepto: 'Remuneraciones' }, of.gasto_rem && of.gasto_rem.meses, corte);
     // Honorarios (Subt. 21): tercera serie del gasto. Boletas por cuenta (o por concepto; siempre reales) y proyección (siempre proyectada).
@@ -8136,6 +8498,7 @@ function reporteLineasOtraFuente(fuenteKey, sel) {
       (of.bys_items || []).forEach(it => vzSumar(mapa, { fuenteKey, tipo: 'gasto', grupo: 'bys_concepto', concepto: it.concepto }, it.meses, corte));
       (of.bys_doc_items || []).forEach(it => vzSumar(mapa, { fuenteKey, tipo: 'gasto', grupo: 'bys_doc', concepto: it.concepto }, it.meses, 'real')); // documentado: siempre Real
     }
+    if (fuenteKey === 'general') vzSumar(mapa, { fuenteKey, tipo: 'gasto', grupo: 'fondos_fijos', concepto: 'Fondos Fijos rendidos' }, mesesFondosFijosRegistradosEnGeneral(r.rbd), 'real');
   });
   return Array.from(mapa.values());
 }
@@ -8587,6 +8950,8 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
       const div = document.getElementById('tab-of-' + f.key);
       if (div) div.classList.toggle('hidden', tab !== 'of-' + f.key);
     });
+    const fondosFijosTab = document.getElementById('tab-of-fondos_fijos');
+    if (fondosFijosTab) fondosFijosTab.classList.toggle('hidden', tab !== 'of-fondos_fijos');
     if (tab === 'ejecucion') renderEjecucion();
     if (tab === 'dashboard') renderDashboard();
     if (tab === 'reportes') {
@@ -8603,6 +8968,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
       otrasFuentesSel = fuenteDelTab.key;
       renderOtrasFuentesTable(fuenteDelTab.key);
     }
+    if (tab === 'of-fondos_fijos') renderFondosFijos();
   });
 });
 
@@ -8677,9 +9043,9 @@ function reporteConceptosDinamicos(f) {
     (of.bys_proy_items || []).forEach(it => { if (it.concepto && conDatos(it)) proy.add(it.concepto); });
     (of.bys_doc_items || []).forEach(it => { if (it.concepto && conDatos(it)) docs.add(it.concepto); });
     // Honorarios (Subt. 21): una línea por cuenta (o por concepto) de las boletas y de la proyección que tengan datos.
-    const claveHon = it => (f.bysMode === 'concepto' ? it.concepto : it.codigo);
-    ((of.hon_agregado && of.hon_agregado.items) || []).forEach(it => { const k = claveHon(it); if (k && conDatos(it)) hon.set(k, f.bysMode === 'concepto' ? k : `${k} · ${(HON_CUENTAS_BY_CODIGO[k] || { nombre: it.item }).nombre}`); });
-    ((of.hon_proy && of.hon_proy.items) || []).forEach(it => { const k = claveHon(it); if (k && conDatos(it)) honProy.set(k, f.bysMode === 'concepto' ? k : `${k} · ${nombreItemHonProyeccion(k).replace(/^\d+ · /, '')}`); });
+    const claveHon = it => (honPorConcepto(f.key) ? it.concepto : it.codigo);
+    ((of.hon_agregado && of.hon_agregado.items) || []).forEach(it => { const k = claveHon(it); if (k && conDatos(it)) hon.set(k, honPorConcepto(f.key) ? k : `${k} · ${(HON_CUENTAS_BY_CODIGO[k] || { nombre: it.item }).nombre}`); });
+    ((of.hon_proy && of.hon_proy.items) || []).forEach(it => { const k = claveHon(it); if (k && conDatos(it)) honProy.set(k, honPorConcepto(f.key) ? k : `${k} · ${nombreItemHonProyeccion(k).replace(/^\d+ · /, '')}`); });
   });
   const ordenar = m => Array.from(m, ([clave, etiqueta]) => ({ clave, etiqueta })).sort((a, b) => String(a.clave).localeCompare(String(b.clave), 'es', { numeric: true }));
   return {
@@ -8700,10 +9066,21 @@ function reporteConceptosFuente(f) {
     add('ingreso_homologacion', 'Ingreso Homologación');
     add('ingreso_carrera_docente', 'Ingreso Carrera Docente');
     add('ingreso_bdl', 'Ingreso Bono Desempeño Laboral (BDL)');
+  } else if (f.incomeShape === 'llmm3') {
+    add('ingreso_llmm_isapres', 'Recuperación LLMM Isapres');
+    add('ingreso_llmm_fonasa', 'Recuperación LLMM FONASA');
+    add('ingreso_llmm_sil', 'Recuperación LLMM SIL');
   } else add('ingreso', 'Ingreso');
   add('rem', 'Remuneraciones');
+  if (f.sinGasto) return out; // fuente solo de ingresos: sin honorarios
   add('hon', 'Honorarios (Subt. 21) — boletas');
   add('hon_proy', 'Honorarios (Proyección) — total');
+  if (f.bysMode === 'none') {
+    const dn = reporteConceptosDinamicos(f);
+    dn.hon.forEach(h => add(`hon_item|${h.clave}`, `Honorarios — ${h.etiqueta}`));
+    dn.honProy.forEach(h => add(`hon_proy_item|${h.clave}`, `Honorarios Proyección — ${h.etiqueta}`));
+    return out;
+  }
   add('bys_total', 'Bienes y Servicios — total (Real+Proy)');
   if (f.bysMode === 'compras') add('bys_proy', 'Bienes y Servicios Proyección — total');
   const din = reporteConceptosDinamicos(f);
@@ -8746,6 +9123,9 @@ function serieConceptoOF(rbd, key) {
     case 'ingreso_homologacion': return of.ingreso_homologacion ? of.ingreso_homologacion.meses : {};
     case 'ingreso_carrera_docente': return of.ingreso_carrera_docente ? of.ingreso_carrera_docente.meses : {};
     case 'ingreso_bdl': return of.ingreso_bdl ? of.ingreso_bdl.meses : {};
+    case 'ingreso_llmm_isapres': return of.ingreso_llmm_isapres ? of.ingreso_llmm_isapres.meses : {};
+    case 'ingreso_llmm_fonasa': return of.ingreso_llmm_fonasa ? of.ingreso_llmm_fonasa.meses : {};
+    case 'ingreso_llmm_sil': return of.ingreso_llmm_sil ? of.ingreso_llmm_sil.meses : {};
     case 'rem': return of.gasto_rem ? of.gasto_rem.meses : {};
     case 'hon': return sumaItemsMeses(honItems);                          // boletas de honorarios (siempre reales)
     case 'hon_proy': return sumaItemsMeses(honProyItems);                 // proyección de honorarios (siempre proyectada)
@@ -10609,6 +10989,7 @@ function aplicarSnapshot(snapshot) {
   const nuevoAgregado = {}, nuevoIngreso = {}, nuevoRem = {}, nuevoCompras = {}, nuevoBysProyeccion = {};
   const nuevoHonorarios = {}, nuevoHonAgregado = {}, nuevoHonProyeccion = {};
   const nuevoOtrasFuentes = {};
+  const nuevoFondosFijos = {};
   const presentIds = new Set();
   const docsInvalidos = [];
   let latestAt = null, latestEmail = null;
@@ -10723,9 +11104,20 @@ function aplicarSnapshot(snapshot) {
           entry.ingreso_carrera_docente = { meses: mCarreraDocente, total: totalDeMeses(mCarreraDocente) };
           entry.ingreso_bdl = { meses: mBdl, total: totalDeMeses(mBdl) };
           entry.saldo_operacion_bys = 0;
+        } else if (f.incomeShape === 'llmm3') {
+          const mIsapres = mesesDesde(raw, 'ingreso_llmm_isapres');
+          const mFonasa = mesesDesde(raw, 'ingreso_llmm_fonasa');
+          const mSil = mesesDesde(raw, 'ingreso_llmm_sil');
+          entry.ingreso_llmm_isapres = { meses: mIsapres, total: totalDeMeses(mIsapres) };
+          entry.ingreso_llmm_fonasa = { meses: mFonasa, total: totalDeMeses(mFonasa) };
+          entry.ingreso_llmm_sil = { meses: mSil, total: totalDeMeses(mSil) };
         } else {
           const mIngreso = mesesDesde(raw, 'ingreso');
           entry.ingreso = { meses: mIngreso, total: totalDeMeses(mIngreso) };
+          if (f.incomeShape === 'carrera2') {
+            const mCarreraDocente = mesesDesde(raw, 'ingreso_carrera_docente');
+            entry.ingreso_carrera_docente = { meses: mCarreraDocente, total: totalDeMeses(mCarreraDocente) };
+          }
         }
         const mRem = mesesDesde(raw, 'gasto_rem');
         entry.gasto_rem = { meses: mRem, total: totalDeMeses(mRem) };
@@ -10748,17 +11140,27 @@ function aplicarSnapshot(snapshot) {
         }
         // Honorarios (Subt. 21, PR-3): boletas (solo entradas que son objetos; una dañada no rompe al resto) y proyección por cuenta/concepto (la clave del mapa ES la cuenta o el concepto).
         const honOF = {};
-        Object.entries(objetoPlano(raw.honorarios)).forEach(([id, h]) => { if (h && typeof h === 'object' && !Array.isArray(h)) honOF[id] = sanitizaHonorario(h, f.bysMode === 'concepto'); });
+        Object.entries(objetoPlano(raw.honorarios)).forEach(([id, h]) => { if (h && typeof h === 'object' && !Array.isArray(h)) honOF[id] = sanitizaHonorario(h, honPorConcepto(f.key)); });
         entry.honorarios = honOF;
         const honProyRaw = objetoPlano(raw.hon_proyeccion_items);
         entry.hon_proy = { items: Object.keys(honProyRaw).map(clave => {
           const meses = mesesNum(objetoPlano(honProyRaw[clave]).meses);
-          return { [f.bysMode === 'concepto' ? 'concepto' : 'codigo']: clave, meses, total: totalDeMeses(meses) };
+          return { [honPorConcepto(f.key) ? 'concepto' : 'codigo']: clave, meses, total: totalDeMeses(meses) };
         }), meses: {}, total: 0 };
         recomputeHonOtraFuente(entry, f.key);
         of[f.key] = entry;
       });
       nuevoOtrasFuentes[rbd] = of;
+
+      // Fondos Fijos se lee aparte de otras_fuentes porque no participa del consolidado financiero.
+      const ffRaw = objetoPlano(data.fondos_fijos);
+      const ffMeses = mesesFondosFijosVacios();
+      Object.keys(ffMeses).forEach(m => {
+        const x = objetoPlano(objetoPlano(ffRaw.meses)[m]);
+        ['saldo_inicial', 'rendido', 'observado', 'registrado_general', 'compensado_sigfe', 'reposicion'].forEach(c => { ffMeses[m][c] = Math.max(0, num(x[c])); });
+        ffMeses[m].folio = textoSeguro(x.folio);
+      });
+      nuevoFondosFijos[rbd] = { cupo: Math.max(0, num(ffRaw.cupo)), meses: ffMeses };
 
       if (data.lastModifiedAt) {
         const t = data.lastModifiedAt.toDate ? data.lastModifiedAt.toDate() : new Date(data.lastModifiedAt);
@@ -10771,7 +11173,7 @@ function aplicarSnapshot(snapshot) {
       console.error('Documento con datos inválidos en Firestore, se omite:', rbd, err);
       docsInvalidos.push(rbd);
       // Descarta lo que alcanzó a armarse de este documento (nada a medias).
-      [nuevoAgregado, nuevoIngreso, nuevoRem, nuevoCompras, nuevoBysProyeccion, nuevoHonorarios, nuevoHonAgregado, nuevoHonProyeccion, nuevoOtrasFuentes].forEach(o => { delete o[rbd]; });
+      [nuevoAgregado, nuevoIngreso, nuevoRem, nuevoCompras, nuevoBysProyeccion, nuevoHonorarios, nuevoHonAgregado, nuevoHonProyeccion, nuevoOtrasFuentes, nuevoFondosFijos].forEach(o => { delete o[rbd]; });
     }
   });
 
@@ -10784,6 +11186,7 @@ function aplicarSnapshot(snapshot) {
   CARGA_MANUAL.hon_agregado_por_rbd = nuevoHonAgregado;
   CARGA_MANUAL.hon_proyeccion_por_rbd = nuevoHonProyeccion;
   CARGA_MANUAL.otras_fuentes_por_rbd = nuevoOtrasFuentes;
+  CARGA_MANUAL.fondos_fijos_por_rbd = nuevoFondosFijos;
   aplicarMetaCierre(superponerEdicionesSinConfirmar(META_DOC_ID, metaData)); // antes de recalcular: el mes de cierre mueve el default de los ingresos
 
   DATA.registros.forEach(recomputeRegistro);
@@ -10795,6 +11198,7 @@ function aplicarSnapshot(snapshot) {
   renderReportFilters();
   renderTable();
   renderOtrasFuentesTable();
+  renderFondosFijos();
   if (otrasFuentesRbdAbierto) renderOtrasFuentesModalContenido(); // el modal de una fuente refleja cambios y borrados remotos (SEP: renderTable → renderModalContenido)
   renderDashboard();
   if (!document.getElementById('tab-reportes').classList.contains('hidden')) renderVisualizador();
