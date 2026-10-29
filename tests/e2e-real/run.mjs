@@ -33,6 +33,7 @@ const SPECS = [
   { id: '12', archivo: '12_jardines_bdl.mjs', titulo: 'Jardines en FAEP/FIGA y BDL de JUNJI', esperado: { tree: 'PASS', '@069f9dd': 'FAIL' } },
   { id: '13', archivo: '13_compras_conceptos.mjs', titulo: 'Registro de compras por concepto (fuentes por concepto)', esperado: { tree: 'PASS', '@069f9dd': 'FAIL' } },
   { id: '14', archivo: '14_honorarios_fuentes.mjs', titulo: 'Honorarios por boleta en las fuentes (PR-3)', esperado: { tree: 'PASS', '@069f9dd': 'FAIL' } },
+  { id: '15', archivo: '15_fondos_fijos.mjs', titulo: 'Fondos Fijos: merge por campo, importación en lote y lectura dañada (PR K)', esperado: { tree: 'PASS', '@069f9dd': 'FAIL' } },
 ];
 
 const args = process.argv.slice(2);

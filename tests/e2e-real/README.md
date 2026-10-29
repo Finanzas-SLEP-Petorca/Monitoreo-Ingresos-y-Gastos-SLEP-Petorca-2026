@@ -55,7 +55,7 @@ tests/e2e-real/
   lib/netproxy.mjs    proxy TCP navegador→emulador que se puede CORTAR de verdad (resetea las conexiones) y restablecer
   lib/harness.mjs     boot(): servidor estático + Chromium + page.route + instrumentos (indicador, bitácora de writes/snapshots…)
   lib/spec.mjs        mini-arnés de specs (OK / FALLA por aserción, t.bug(), RESULT:, process.exit(1))
-  specs/01…12         los casos (abajo)
+  specs/01…15         los casos (abajo)
   parches/            parches PROPUESTOS para index.html (no aplicados; ver «Hallazgos»)
 ```
 
