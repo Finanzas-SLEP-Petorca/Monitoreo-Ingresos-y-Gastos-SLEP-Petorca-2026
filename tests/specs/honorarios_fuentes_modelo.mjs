@@ -434,6 +434,14 @@ await correrSpec('honorarios_fuentes_modelo', async (t) => {
     t.eq(await h.page.evaluate(() => !!document.querySelector('#otrasFuentesModalBody .hon-form-grid [data-field="concepto"]') && !document.querySelector('#otrasFuentesModalBody .hon-form-grid [data-field="codigo"]')), true, `${fuente} / ${id}: el formulario pide Concepto (no cuenta)`);
     await cerrarModal(h);
   }
+  // Encabezados: las boletas son SIEMPRE Real (los 12 meses, sin importar el «Real hasta» de la entidad) y la proyección SIEMPRE Proy.
+  for (const [fuente, id] of [['general', '1121'], ['junji', '5402002'], ['subt31_proyectos', '1121'], ['asignacion_familiar', '1121']]) {
+    await abrirModal(h, fuente, id);
+    const tags = await h.page.evaluate(() => { const t = (re) => Array.from(document.querySelectorAll('#otrasFuentesModalBody .hon-block table.detalle-table thead')).filter(x => re.test(x.textContent)).map(x => Array.from(x.querySelectorAll('.mes-tag')).map(m => m.textContent)); return { bol: t(/— boletas/), proy: t(/\(Proyección\)/) }; });
+    t.eq([tags.bol.length, tags.bol[0].every(x => x === 'Real'), tags.bol[0].length], [1, true, 12], `${fuente} / ${id}: el encabezado de las boletas marca los 12 meses «Real» aunque la entidad tenga corte anterior`);
+    t.eq([tags.proy.length, tags.proy[0].every(x => x === 'Proy.')], [1, true], `${fuente} / ${id}: el encabezado de la proyección de honorarios marca los 12 meses «Proy.»`);
+    await cerrarModal(h);
+  }
   // alta en vivo en Asignación Familiar: un write merge SOLO de `otras_fuentes.asignacion_familiar.honorarios.<id>`; el gasto, el saldo y el Estado de la fila se mueven
   await abrirModal(h, 'asignacion_familiar', '5402002');
   const antesAF = (await leerFilas(h.page, 'asignacion_familiar'))['5402002'];

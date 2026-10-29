@@ -1,6 +1,6 @@
 # Arnés de pruebas del panel (Playwright + mock local de Firebase)
 
-Pruebas de regresión para `index.html` (panel SEP + 9 fuentes + Panel principal + % Ejecución + Reportes).
+Pruebas de regresión para `index.html` (panel SEP + 12 fuentes + Panel principal + % Ejecución + Reportes).
 Viven **dentro del repo** para que no se pierdan y para detectar regresiones al hacer cambios grandes.
 
 - **Todo es local**: Firebase (Auth + Firestore) se reemplaza por un mock en memoria; cualquier otra petición de red se
@@ -350,6 +350,31 @@ Los 6 `honorarios_*` son nuevos; los otros 11 se **extendieron** con su parte de
 `seguridad_xss` y `formulas_csv_excel` (texto libre de boletas: se ve literal, apóstrofo solo en descripción, nombre del prestador y N° DC), `modal_equivalencia` (40 pasos con boletas y proyección y la comprobación de que el bloque está en el modal), `escritura_modal_tecleo` (teclear en el formulario de honorarios y en la proyección con cambios ajenos),
 `csv_supereduc_formato` (aviso «muévelo al registro de Honorarios») y `a11y_nombres` / `a11y_contraste` / `a11y_foco` (el bloque de honorarios en los recorridos de vistas, `recorrerHonorarios` de `tests/lib/a11y-vistas.mjs`).
 
+### Honorarios PR-3 (boletas y proyección por fuente + analítica): qué falla contra el panel anterior (`APP_HTML=@1bb8ccc`)
+
+`1bb8ccc` es el `index.html` justo antes de PR-3. Fixture nuevo `honorarios_fuentes` (`tests/fixtures/generate.mjs`, bloque «variante honorarios_fuentes»; **sin números aleatorios**, `default.json` no cambia): parte de
+`compras_conceptos` y agrega boletas y proyección en SEP y en las fuentes (por cuenta y por concepto, fila AC, jardines, casos del saldo de Operación de JUNJI, textos con `& < > " '`, fechas de 2025 o inválidas,
+cuentas fuera del catálogo y compras antiguas con tipo de honorarios), más las fuentes nuevas de `main` (Subt. 31, Asignación Familiar, una boleta que Recuperación LLMM debe ignorar), el ingreso de Carrera Docente
+de General/PIE y Fondos Fijos registrados en General. El oráculo `tests/lib/honorarios_fuentes.mjs` calcula lo esperado de forma independiente a partir de los documentos (12 fuentes, universos incluido
+`rbd_gesparvu`, ingreso `carrera2`/`llmm3`/`junji3`, Fondos Fijos).
+
+| Spec | Qué prueba |
+|---|---|
+| `honorarios_fuentes_modelo` | lectura sin escribir, fila de boletas, proyección y registro contra el oráculo en cada fuente (cuenta y concepto, AC, jardines, Subt. 31, Asignación Familiar); selectores por columna del Plan de Cuentas; alta/edición/duplicado/borrado = un write merge de solo `otras_fuentes.<fuente>.honorarios.<id>`; validaciones sin write; proyección; otra persona editando; documentos dañados; compras antiguas «⚠ muévelo a Honorarios»; Recuperación LLMM sin honorarios |
+| `honorarios_fuentes_totales` | invariante: mismos números en la pestaña de cada fuente (tarjetas Real/Proyectado/Total y fila), Panel principal (tarjetas, franja, tabla por fuente, gráfico apilado, evolución mensual, «Atención»), % Ejecución, Visualizador y Reporte personalizado; sin 70/30 (`gasto = rem + hon + B&S`); JUNJI: los honorarios no entran en el saldo de Operación; sin honorarios las cifras no cambian |
+| `honorarios_fuentes_excel` | hojas `HONORARIOS` y `HON_PROYECCION` antes de `META` (no en Recuperación LLMM), encabezados por cuenta o concepto, neutralización de fórmulas solo en texto libre, exportar → importar → exportar idempotente, XLS por fila, filas rechazadas |
+| `honorarios_series` | serie «Honorarios» de % Ejecución (cada fuente, una entidad, Consolidado) y del Visualizador, y evolución mensual |
+| `honorarios_fuentes_ui` | formulario y registro del modal en cada fuente, accesibilidad, teclado, estados de edición, avisos y reconciliación en vivo |
+
+```bash
+APP_HTML=@1bb8ccc node tests/run.mjs spec honorarios_fuentes_modelo honorarios_fuentes_totales honorarios_fuentes_excel honorarios_series honorarios_fuentes_ui
+APP_HTML=@1bb8ccc node tests/e2e-real/run.mjs 14   # el spec 14 del arnés real (boletas por fuente contra SDK real + emulador) también FALLA
+```
+
+También se **extendieron** `compras_conceptos_*`, `faep_figa_jardines`, `junji_bdl`, `honorarios_consistencia`, `impresion_paginas`, `seguridad_xss`, `claves_invalidas` y `a11y_*` (y el golden: sección `honorarios_fuentes`).
+Se **ajustaron** por cambios de `main` (fuentes nuevas, Fondos Fijos): `estado_unico`, `mes_cierre_global` (el fixture `cierre` fija el corte también en las fuentes nuevas), `faep_figa_jardines`, `a11y_modales` (4 diálogos),
+`a11y_pestanas` (17 pestañas) y `tests/lib/corte.mjs` (`FUENTES` con las 12 fuentes).
+
 ### Ajustes de fuentes (jardines en FAEP/FIGA + BDL de JUNJI): qué falla contra el panel anterior (`APP_HTML=@ff7a666`)
 
 `ff7a666` es el `index.html` justo antes de esta PR (merge de la PR #64). Estos specs **fallan** contra él y **pasan** con el árbol:
@@ -408,7 +433,7 @@ El mock de arriba es rápido y determinista, pero lo escribimos nosotros: no dem
 `setup.sh`; las dependencias, unos 280 MB, se instalan fuera del repositorio en `E2E_HOME`, por defecto `/home/user/.e2e-real`).
 
 ```bash
-bash tests/e2e-real/setup.sh && node tests/e2e-real/run.mjs        # los 13 specs contra el árbol (el 11 es Honorarios por boleta; el 12, jardines en FAEP/FIGA y BDL de JUNJI; el 13, registro de compras por concepto), ≈ 9 min
+bash tests/e2e-real/setup.sh && node tests/e2e-real/run.mjs        # los 14 specs contra el árbol (el 11 es Honorarios por boleta; el 12, jardines en FAEP/FIGA y BDL de JUNJI; el 13, registro de compras por concepto; el 14, Honorarios por boleta en las fuentes), ≈ 9 min
 node tests/e2e-real/run.mjs --matriz                                # además contra @069f9dd y @baseline, ≈ 15 min
 ```
 

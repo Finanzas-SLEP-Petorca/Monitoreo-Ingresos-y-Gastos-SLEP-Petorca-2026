@@ -34,7 +34,7 @@ async function recorrer(t, h, etiqueta) {
   // % Ejecución: todas las fuentes + consolidado
   await clickTab(page, '% Ejecución');
   const chips = await page.evaluate(() => Array.from(document.querySelectorAll('#ejecFuenteChips .of-chip')).map(b => b.dataset.ejecFuente));
-  t.eq(chips.length, 11, `[${etiqueta}] % Ejecución ofrece SEP + 9 fuentes + Consolidado`);
+  t.eq(chips.length, 13, `[${etiqueta}] % Ejecución ofrece SEP + 11 fuentes con gasto + Consolidado (Recuperación LLMM no tiene % de ejecución)`);
   for (const key of chips) {
     await page.click(`#ejecFuenteChips .of-chip[data-ejec-fuente="${key}"]`);
     await h.waitIdle();

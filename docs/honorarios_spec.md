@@ -1,6 +1,6 @@
 # Especificación funcional: Libro de Honorarios en el panel
 
-Estado: **PR-1 implementado (Honorarios en SEP: datos + modal + totales); PR-2 y PR-3 pendientes**. Análisis redactado el 2026-10-22
+Estado: **PR-1 implementado (Honorarios en SEP: datos + modal + totales); PR-3 implementado (boletas por fuente + analítica, ver «Implementación de PR-3»); PR-2 (CSV del Libro) pendiente**. Análisis redactado el 2026-10-22
 para el repo `Finanzas-SLEP-Petorca/Monitoreo-Ingresos-y-Gastos-SEP-2026` (panel de una sola página `index.html`); las decisiones del
 usuario (22-23 oct) están abajo y **prevalecen sobre las recomendaciones por defecto** de las secciones 6 y 7, que se conservan como
 registro del análisis.
@@ -473,7 +473,7 @@ Detalle: como Carrera Docente solo puede pagar remuneraciones, conviene mostrar 
 **Orden sugerido:**
 - **PR-1 — Honorarios en SEP (datos + modal + totales) — IMPLEMENTADO:** catálogo, modelo, formulario/tabla por boleta, proyección, 70/30 (A/B), tarjetas SEP, Excel SEP, cambio en Compras, pruebas 1, 2, 4 y golden. Entrega visible y autocontenida.
 - **PR-2 — CSV del Libro de Honorarios + acciones:** exportador exacto del manual, validaciones, botones por fila y general, PDF individual, prueba 3 y validación con un archivo subido de verdad a SUPEREDUC.
-- **PR-3 — Fuentes, AC y analítica:** General/PIE/Mantención/Pro-Retención y AC (reusando el exportador), Panel principal, Visualizador, Reportes, % Ejecución, «CSV RBD completo», README.
+- **PR-3 — Fuentes, AC y analítica — IMPLEMENTADO** (sin el CSV, que es PR-2, ni «CSV RBD completo»): ver «Implementación de PR-3» al final.
 
 ## 7. Preguntas abiertas para el usuario (máx. 8)
 
@@ -485,7 +485,7 @@ Detalle: como Carrera Docente solo puede pagar remuneraciones, conviene mostrar 
 | **P4** | Retención: ¿se registra solo el bruto de la boleta o también retención y líquido? | **Bruto = Monto Gasto = Monto Documento** (salvo reparto); sin campos de retención en la primera entrega (el CSV no los usa). | **RESUELTA:** solo bruto, sin retención ni líquido (decisión 3). |
 | **P5** | ¿A qué mes se imputa una boleta: *Fecha Documento* o *Fecha Pago*? | **Fecha Documento**, igual que Compras; la Fecha de Pago se exige y valida (2026) pero no mueve el mes. | **RESUELTA:** *Fecha de Documento* (decisión 4). |
 | **P6** | ¿Se necesita Administración Central? En especial honorarios de AC SEP (10 %, glosa 06 de los SLEP; MC p. 24-25), que hoy el panel no tiene. | **AC General sí** (la fila AC ya existe en las fuentes). **AC SEP:** fuera de la primera entrega; el modelo la admite y se puede sumar un indicador del tope 10 % después. | **RESUELTA:** «AC SEP» no se crea y no hay tope de 10 % (decisión 6); la fila AC de las demás fuentes llega con PR-3 (decisión 7). |
-| **P7** | ¿En qué fuentes va Honorarios? | **SEP + General, PIE, Mantención, Pro-Retención** (las que tienen código SUPEREDUC). No JUNJI, FAEP, FIGA ni los Aportes; Internado y Refuerzo no tienen pestaña. | **RESUELTA:** todas las fuentes con código SUPEREDUC, pero **en PR-3**; PR-1 es solo SEP (decisión 7). |
+| **P7** | ¿En qué fuentes va Honorarios? | **SEP + General, PIE, Mantención, Pro-Retención** (las que tienen código SUPEREDUC). No JUNJI, FAEP, FIGA ni los Aportes; Internado y Refuerzo no tienen pestaña. | **RESUELTA y AMPLIADA:** en PR-3 van en **todas** las fuentes con gasto (las 4 con código SUPEREDUC por cuenta; JUNJI, FAEP, Subt. 31, Asignación Familiar, FIGA y los Aportes por concepto); Recuperación LLMM, que es solo de ingresos, no los lleva. |
 | **P8** | ¿Se acepta guardar RUT y nombre de las personas (datos personales) en el panel, con acceso de los 19 correos de la lista? ¿Y se quiere el indicador informativo del tope de 50 % de contrataciones SEP (opción D)? | **Sí a los datos** (el CSV los exige) con la lista de acceso actual. **Indicador del 50 %:** dejar para una entrega posterior. | **RESUELTA:** sí a RUT y nombre visibles para los 19 autorizados; **no** hay indicador de 50 % (decisión 6). |
 
 ## 8. Anexo: verificación y límites de este análisis
@@ -494,3 +494,28 @@ Detalle: como Carrera Docente solo puede pagar remuneraciones, conviene mostrar 
 - **Leído como imagen:** encabezado de la plantilla del CSV (Cap. IV, PDF p. 8, Ilustración 09) y matriz de la Sección 12 (MC p. 120-123). No se transcribió la matriz completa; las págs. **124-129** (cuentas 4110xx-4118xx) no se revisaron visualmente: la lista de documentos de esas cuentas sale del texto de cada cuenta. Mirar esas páginas antes de fijar el catálogo (en especial 411801). **Actualización (PR-1):** la pág. 124 (4111xx-4118xx) se revisó en imagen y 411801 queda confirmada como solo BHE; apareció además 411404 (ver «Decisiones del usuario»). Ver `data/honorarios_cuentas_2026_verificacion.md`.
 - **No pude ver:** los reportes de errores reales de SUPEREDUC (las «reglas» exactas); el archivo `Plantilla_Honorarios.csv` descargable (solo su captura); ni los datos reales de Firestore (si existen compras con tipos de honorarios).
 - **Contraste con el repositorio:** `data/plan_cuentas_2026.json` y `data/plan_cuentas_2026_verificacion.md` (matriz del plan de cuentas, págs. 112-119) coinciden con los flags de subvención leídos del texto de cada cuenta para las 35 cuentas de la sección 3.
+
+## Implementación de PR-3 (boletas y proyección por fuente + analítica)
+
+**Alcance.** Honorarios (Subt. 21) por boleta en las 12 fuentes de `FUENTES_OTRAS`, incluidas las agregadas en `main` después de PR-1 (Subtítulo 31, Asignación Familiar, Recuperación LLMM), con la
+fila AC y los jardines. **Clave de la boleta**: cuenta del catálogo en las fuentes con Plan de Cuentas (`colPlan`: General, PIE, Mantención, Pro-Retención; AC de General usa «Adm. Central General») y
+**concepto** (texto libre) en las demás (`honPorConcepto(fuenteKey) = !colPlan`). **Recuperación LLMM no lleva honorarios** (`sinGasto`: fuente exclusivamente de ingresos): no hay formulario, hojas
+de Excel ni conceptos de Reporte, y una boleta que un documento traiga se ignora al leer (no se borra de Firestore).
+
+**Reglas.**
+- Sin 70/30 en las fuentes: `gasto_total = rem + hon + bys` (Asignación Familiar: `rem + hon`, `bysMode:'none'`); el saldo y el Estado los incluyen. Boletas siempre Real (mes = Fecha Documento), proyección siempre
+  Proyectada y se suma a las boletas.
+- JUNJI: los honorarios son gasto de personal y **no** entran en `saldo_operacion_bys = Ingreso Operación − B&S` (verificado: la causa `operacion_bys` de `causasDeficitOtraFuente` solo mira ese saldo).
+- Los ingresos de Carrera Docente de General y PIE (`incomeShape:'carrera2'`) y los Fondos Fijos registrados en Subvención General (B&S Real) ya forman parte del ingreso y del gasto de la fuente: los honorarios se suman
+  aparte y los totales cuadran con ambos (cubierto por `honorarios_fuentes_totales`).
+- Modelo y lectura tolerantes: merge por boleta (`otras_fuentes.{fuente}.honorarios.{id}`), claves de mapa validadas (`validarClaveMapa`), texto libre escapado (XSS) y neutralizado contra fórmulas en Excel, superposición de
+  ediciones pendientes y reconciliación `morphContenedor` al llegar datos de otra persona.
+- Las compras con tipos de honorarios dejaron de ofrecerse; las antiguas siguen sumando en B&S con «⚠ muévelo a Honorarios» (por cuenta o por concepto). No hay botón de migración.
+
+**Vistas.** Tarjeta y columna «Gasto Honorarios» en cada fuente; Panel principal (tarjetas, franja, tabla por fuente, gráfico apilado, evolución mensual, «Atención»); % Ejecución (tercera serie; chips de Subt. 31 y
+Asignación Familiar —Recuperación LLMM no tiene % de ejecución—); Visualizador y Reporte personalizado; PDF y XLS por fila; Excel de carga con hojas `HONORARIOS` y `HON_PROYECCION` antes de `META`.
+
+**Fuera de alcance.** CSV del Libro de Honorarios (PR-2) y «CSV RBD completo».
+
+**Pruebas.** `honorarios_fuentes_modelo`, `honorarios_fuentes_totales`, `honorarios_fuentes_excel`, `honorarios_fuentes_ui`, `honorarios_series` (fixture `honorarios_fuentes`, sin aleatorios) y
+`tests/e2e-real/specs/14_honorarios_fuentes.mjs` contra el SDK real + emulador. Ver `tests/README.md`.

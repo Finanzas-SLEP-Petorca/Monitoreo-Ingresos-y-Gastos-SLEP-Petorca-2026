@@ -395,6 +395,33 @@ Manual de Usuario). En el detalle de cada RBD de **SEP**, justo debajo de «Remu
 - **Pendiente (PR-2)**: el CSV del Libro de Honorarios (formato y validaciones del manual) y sus botones. **No existe todavía**: el «⬇ CSV SEP» sigue
   siendo solo de compras.
 
+### Honorarios (Subt. 21) en las fuentes de financiamiento (PR-3)
+
+El mismo bloque «Honorarios (Subt. 21)» de SEP (fila mensual de boletas siempre Real, proyección, formulario único para agregar/editar/duplicar, registro con avisos
+⚠) está en el modal de **cada entidad de cada fuente** —RBD, Administración Central y jardines (GESPARVU)—, debajo de Remuneraciones. Lo único que cambia entre fuentes es la
+**clave** de la boleta y de la proyección:
+
+| Fuentes | Clave | Selector de tipo |
+|---|---|---|
+| Subv. General, PIE, Mantención, Pro-Retención | **cuenta** del catálogo de honorarios (36 cuentas); la habilita la columna del Plan de Cuentas de la subvención (la fila AC de General usa «Adm. Central General») | solo los tipos que acepta la cuenta |
+| JUNJI, FAEP, Subtítulo 31, Asignación Familiar, FIGA, Aporte Fiscal Educación y Aporte Fiscal JUNJI | **concepto** (texto libre, con sugerencias; sin `__x__` ni más de 1400 bytes) | los 5 tipos de honorarios |
+| Recuperación Licencias Médicas | **no lleva honorarios**: es una fuente exclusivamente de ingresos (sin gasto) | — |
+
+- **No hay 70/30 en las fuentes**: `gasto total = remuneraciones + honorarios + B&S` (Asignación Familiar: remuneraciones + honorarios), y el saldo y el Estado (Déficit ⇔ saldo < 0)
+  los incluyen. Las boletas son siempre **Real** (mes = Fecha Documento, sin importar el «Real hasta» de la entidad) y la proyección siempre **Proyectada**, y se SUMA a las boletas.
+- **JUNJI**: los honorarios son gasto de personal; entran en el saldo total y el Estado pero **no** en el saldo de Operación para B&S (`saldo_operacion_bys = ingreso de Operación − B&S`), igual que las
+  Remuneraciones; el BDL, la Homologación y la Carrera Docente tampoco se descuentan ahí.
+- **Tipos de honorarios en las compras**: ya no son opción del selector de compras de ninguna fuente. Una compra antigua con esos tipos (por cuenta o por concepto) sigue sumando en B&S y
+  muestra «⚠ muévelo a Honorarios»; no hay botón de migración.
+- **Vistas**: tarjeta «Gasto Honorarios» (Real / Proyectado / Total) y columna «Gasto Honorarios (Subt. 21)» en la tabla de cada fuente (también Subt. 31 y Asignación Familiar); el Panel principal
+  (tarjetas, franja, tabla por fuente, gráficos apilados con el segmento «Honorarios», evolución mensual y «Atención»), % Ejecución (tercera serie «Honorarios (Subt. 21)» para SEP, cada fuente y el
+  Consolidado; Subt. 31 y Asignación Familiar tienen su chip), Visualizador (serie «Honorarios») y Reporte personalizado (`Honorarios — boletas`, `Honorarios — proyección` y una línea por cuenta o concepto).
+  **Son los mismos números en todas las vistas.** Sin honorarios cargados las cifras no cambian.
+- **Excel y PDF**: las hojas `HONORARIOS` y `HON_PROYECCION` (por cuenta con `Codigo` + `Item` en General/PIE/Mantención/Pro-Retención; por concepto con `Concepto` en las demás) van antes de `META`; el
+  Excel individual (XLS por fila) y el PDF de la entidad las traen; Recuperación LLMM no las exporta. Un Excel anterior sin estas hojas se importa igual y no toca ninguna boleta.
+- **Datos**: `otras_fuentes.{fuente}.honorarios.{id}` (boleta; con `codigo` o `concepto`) y `otras_fuentes.{fuente}.hon_proyeccion_items.{cuenta|concepto}` (`{ meses, total }`). Se escriben por boleta
+  o por mes con `merge`; la lectura es tolerante (entradas que no son objetos, montos de texto o mapas de otro tipo se ignoran sin escribir) y valida las claves de mapa.
+
 ### Real vs. proyectado
 
 Cada tabla del detalle por RBD marca sus columnas de mes en verde ("Real") o naranja
@@ -410,7 +437,7 @@ Cada tabla del detalle por RBD marca sus columnas de mes en verde ("Real") o nar
   o es una estimación, así que cada RBD tiene su propio selector "Remuneraciones reales hasta:
   [mes]" — los meses hasta ahí se ven verdes, el resto naranjas, y siempre son editables. Se
   ajusta por establecimiento, a medida que se van confirmando los pagos reales de cada mes.
-- **Honorarios (Subt. 21, solo SEP)**: las boletas del «Registro de honorarios» siempre son reales (gasto ya documentado, en el mes de su Fecha de
+- **Honorarios (Subt. 21; SEP y todas las fuentes salvo Recuperación LLMM)**: las boletas del «Registro de honorarios» siempre son reales (gasto ya documentado, en el mes de su Fecha de
   Documento) y la «Honorarios (Proyección)» por cuenta siempre es proyectada y se SUMA a las boletas, igual que en Bienes y Servicios. En los chips
   Real/Proyectado y en las tarjetas del Panel principal y de SEP hay una tarjeta «Gasto Honorarios» (Real / Proyectado / total).
 - **Bienes y Servicios**: las compras del "Registro de compras" siempre son reales — son gastos
@@ -759,7 +786,7 @@ el catálogo SEP, la coherencia de Adm. Central y la revisión visual de las 8 p
   reportes (Preferente y Prioritario).
 - **Carrera Docente**: ingreso de uso exclusivo en remuneraciones; no se carga automáticamente,
   se completa a mano mes a mes.
-- **Gasto Remuneraciones (Subt. 21)**, **Gasto Honorarios (Subt. 21, boletas; solo SEP por ahora)** y **Gasto Bienes y Servicios (Subt. 22 / 29)**: se
+- **Gasto Remuneraciones (Subt. 21)**, **Gasto Honorarios (Subt. 21, boletas; en SEP y en las fuentes con gasto)** y **Gasto Bienes y Servicios (Subt. 22 / 29)**: se
   completan a mano en el panel; no vienen precargados desde ningún sistema.
 
 ## Regla 70/30
@@ -776,8 +803,7 @@ el catálogo SEP, la coherencia de Adm. Central y la revisión visual de las 8 p
 - Saldo final = (Ingreso SEP + Carrera Docente) − gasto remuneraciones − gasto honorarios − gasto bienes y
   servicios. Gasto Total = Remuneraciones + Honorarios + Bienes y Servicios.
 - **Un solo número en todas las vistas**: el gasto total y el saldo de SEP son idénticos en la pestaña SEP, el Panel principal (tarjeta, franja, serie mensual
-  y «Atención»), % Ejecución (SEP y Consolidado) y Reportes/Visualizador. Los honorarios de SEP entran en el Consolidado aunque esas vistas aún no tengan
-  columna o serie propia de Honorarios (llega en la PR posterior).
+  y «Atención»), % Ejecución (SEP y Consolidado) y Reportes/Visualizador. Los honorarios de SEP y de las fuentes (PR-3) tienen columna, tarjeta o serie propia en todas esas vistas y suman en el Consolidado.
 
 ### Estado de una entidad: una sola regla (L-07 / L-08)
 

@@ -1742,8 +1742,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <p><strong>Honorarios (Subt. 21) en todas las fuentes.</strong> Debajo de Remuneraciones, el detalle de cada entidad de cada fuente (incluida la fila AC y los jardines) trae el bloque
         <strong>«Honorarios (Subt. 21)»</strong>: una fila mensual de solo lectura con las boletas (siempre <span class="help-tag real">Real</span>, en el mes de su Fecha Documento), la
         <strong>proyección</strong> mensual por cuenta o por concepto (siempre <span class="help-tag proy">Proyectado</span>; se SUMA a las boletas) y el <strong>registro por boleta</strong> (solo monto bruto, con N° DC).
-        En Subv. General, PIE, Mantención y Pro-Retención cada boleta lleva una <strong>cuenta</strong> del catálogo de honorarios habilitada para esa subvención; en JUNJI, FAEP, FIGA y los dos Aportes Fiscales
-        (que no tienen código de cuenta) lleva un <strong>concepto</strong>, igual que su registro de compras. En estas fuentes <strong>no hay 70/30</strong>: los honorarios son gasto de la fuente en su propia línea
+        En Subv. General, PIE, Mantención y Pro-Retención cada boleta lleva una <strong>cuenta</strong> del catálogo de honorarios habilitada para esa subvención; en JUNJI, FAEP, Subtítulo 31, Asignación Familiar, FIGA y los dos Aportes Fiscales
+        (que no tienen código de cuenta) lleva un <strong>concepto</strong>, igual que su registro de compras. <strong>Recuperación Licencias Médicas</strong> es una fuente solo de ingresos: no lleva honorarios. En estas fuentes <strong>no hay 70/30</strong>: los honorarios son gasto de la fuente en su propia línea
         «Honorarios (Subt. 21)», aparte de Remuneraciones y de Bienes y Servicios, y entran en el gasto total, el saldo y el Estado (gasto total = remuneraciones + honorarios + B&S). En JUNJI son gasto de
         <em>personal</em>: se financian como las Remuneraciones (con cualquiera de sus ingresos) y <strong>no</strong> cuentan en el saldo de Operación para Bienes y Servicios. Las compras antiguas con un tipo de documento de
         honorarios (BOLH, BHE, BOLHE, BPST, BPSTE) siguen sumando en Bienes y Servicios y se marcan <strong>«⚠ muévelo a Honorarios»</strong>: muévelas a mano al registro de honorarios. El Excel de cada fuente trae las hojas
@@ -3501,7 +3501,7 @@ function ctxHonOtraFuente(fuenteKey, rbd) {
     payloadProy: (clave, v) => ({ otras_fuentes: { [fuenteKey]: { hon_proyeccion_items: { [clave]: v } } } }),
     nombreItemProy: (clave) => porConcepto ? clave : nombreItemHonProyeccion(clave),
     valorProy: (it) => ({ [campoClave]: it[campoClave], meses: it.meses, total: it.total }),
-    cabeceraMeses: (tipo) => mesHeaderCellsCorteHTML(realHastaMesOtraFuente(of()), tipo === 'hon_proy'),   // boletas: los 12 meses «Real» (siempre reales); proyección: siempre «Proy.»
+    cabeceraMeses: (tipo) => (tipo === 'hon_proy' ? mesHeaderCellsCorteHTML(realHastaMesOtraFuente(of()), true) : mesHeaderCellsCorteHTML(12, false)),   // boletas: los 12 meses «Real» (siempre reales, sin importar el corte); proyección: siempre «Proy.»
     celdasProy: (it, printMode) => {
       const clave = it[campoClave];
       const nombre = 'Proyección honorarios ' + (porConcepto ? clave : nombreItemHonProyeccion(clave));
