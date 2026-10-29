@@ -7492,6 +7492,8 @@ function exportOtraFuenteExcel(fuenteKey) {
 // columna RBD admite tanto número (RBD/GESPARVU) como texto ("AC"). ---
 function importOtraFuenteSimpleSheet(ws, fuenteKey, campo) {
   const rows = rowsFromSheet(ws);
+  const universo = new Set(filasOtrasFuentes(fuenteKey).map(r => r.rbd)); // una fila de una entidad que no es de esta fuente (AC en Asignación Familiar, un id mal escrito) no crea datos ni documentos
+  const label = FUENTES_OTRAS_BY_KEY[fuenteKey].label;
   let n = 0;
   for (let i = 1; i < rows.length; i++) {
     const row = rows[i];
@@ -7499,6 +7501,7 @@ function importOtraFuenteSimpleSheet(ws, fuenteKey, campo) {
     const rbd = String(row[0]).trim();
     const errRbd = validarIdDocumento(rbd, 'El RBD');
     if (errRbd) { rechazarFilaImportacion(campo, i + 1, errRbd); continue; }
+    if (!universo.has(rbd)) { rechazarFilaImportacion(campo, i + 1, `la entidad "${rbd}" no es parte de ${label}`); continue; }
     const nombre = row[1] || rbd;
     const meses = {};
     let total = 0;
@@ -7523,6 +7526,7 @@ function importOtraFuenteComprasSheet(ws, fuenteKey) {
     return { n: 0, noHabilitadas: 0 };
   }
   const idxDc = indiceColumnaDc(rows[0]); // N° DC: -1 en un Excel antiguo (sin la columna) → no se toca el N° DC que ya tenga la compra
+  const universo = new Set(filasOtrasFuentes(fuenteKey).map(r => r.rbd));
   const porRbd = {};
   const indicesPorRbd = {}; // entidad → índice firma→ID de sus compras (ver idCompraParaImportar)
   let n = 0, noHabilitadas = 0;
@@ -7532,6 +7536,7 @@ function importOtraFuenteComprasSheet(ws, fuenteKey) {
     const rbd = String(row[1]).trim();
     const errRbd = validarIdDocumento(rbd, 'El RBD');
     if (errRbd) { rechazarFilaImportacion('COMPRAS', i + 1, errRbd); continue; }
+    if (!universo.has(rbd)) { rechazarFilaImportacion('COMPRAS', i + 1, `la entidad "${rbd}" no es parte de ${FUENTES_OTRAS_BY_KEY[fuenteKey].label}`); continue; }
     const codigoRaw = row[3];
     const codigo = (typeof codigoRaw === 'number') ? String(Math.trunc(codigoRaw)) : String(codigoRaw || '').trim();
     if (!porConcepto && !CUENTAS_COMPRAS_BY_CODIGO[codigo]) continue;
@@ -7712,6 +7717,7 @@ function importOtraFuenteHonProyeccionSheet(ws, fuenteKey) {
 }
 function importBysItemsSheet(ws, fuenteKey, lista = 'bys_items') {
   const rows = rowsFromSheet(ws);
+  const universoItems = new Set(filasOtrasFuentes(fuenteKey).map(r => r.rbd));
   const porRbd = new Set();
   let n = 0;
   for (let i = 1; i < rows.length; i++) {
@@ -7720,6 +7726,7 @@ function importBysItemsSheet(ws, fuenteKey, lista = 'bys_items') {
     const rbd = String(row[0]).trim();
     const errRbd = validarIdDocumento(rbd, 'El RBD');
     if (errRbd) { rechazarFilaImportacion(lista.toUpperCase(), i + 1, errRbd); continue; }
+    if (!universoItems.has(rbd)) { rechazarFilaImportacion(lista.toUpperCase(), i + 1, `la entidad "${rbd}" no es parte de ${FUENTES_OTRAS_BY_KEY[fuenteKey].label}`); continue; }
     const nombre = row[1] || rbd;
     const concepto = String(row[2] || '').trim();
     if (!concepto) continue;
@@ -7745,6 +7752,7 @@ function importBysItemsSheet(ws, fuenteKey, lista = 'bys_items') {
 // crea documentos de entidades que ya tienen ese mismo corte).
 function importOtraFuenteMetaSheet(ws, fuenteKey) {
   const rows = rowsFromSheet(ws);
+  const universoMeta = new Set(filasOtrasFuentes(fuenteKey).map(r => r.rbd));
   let n = 0;
   for (let i = 1; i < rows.length; i++) {
     const row = rows[i];
@@ -7752,6 +7760,7 @@ function importOtraFuenteMetaSheet(ws, fuenteKey) {
     const rbd = String(row[0]).trim();
     const errRbd = validarIdDocumento(rbd, 'El RBD');
     if (errRbd) { rechazarFilaImportacion('META', i + 1, errRbd); continue; }
+    if (!universoMeta.has(rbd)) { rechazarFilaImportacion('META', i + 1, `la entidad "${rbd}" no es parte de ${FUENTES_OTRAS_BY_KEY[fuenteKey].label}`); continue; }
     const mes = normalizarRealHastaMes(row[2]);
     const of = ensureOtraFuente(rbd, fuenteKey);
     if (realHastaMesOtraFuente(of) === mes) continue;
