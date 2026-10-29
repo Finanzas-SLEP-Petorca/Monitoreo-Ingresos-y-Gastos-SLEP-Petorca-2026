@@ -544,7 +544,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   @media (max-width:1000px) { .dash-cards { grid-template-columns:repeat(3, minmax(0, 1fr)); } }
   @media (max-width:720px) { .dash-cards { grid-template-columns:repeat(2, minmax(0, 1fr)); } }
   @media (max-width:480px) { .dash-cards { grid-template-columns:1fr; } }
-  .dash-card { background:var(--surface-1); border:1px solid var(--border); border-radius:12px; padding:14px; cursor:pointer; box-shadow:0 1px 3px rgba(17,24,39,0.05); transition:border-color .12s, box-shadow .12s, transform .12s; min-width:0; }
+  .dash-card { scroll-margin:6px; /* al enfocarla con Tab el navegador la deja a 6 px del borde: el anillo de foco no queda recortado por el contenedor con scroll */ background:var(--surface-1); border:1px solid var(--border); border-radius:12px; padding:14px; cursor:pointer; box-shadow:0 1px 3px rgba(17,24,39,0.05); transition:border-color .12s, box-shadow .12s, transform .12s; min-width:0; }
   .dash-card:hover, .dash-card:focus-visible { border-color:var(--series-1); box-shadow:0 6px 16px rgba(37,99,235,0.13); transform:translateY(-1px); }
   .dash-card .c-head { display:flex; align-items:center; justify-content:space-between; gap:8px; }
   .dash-card .c-name { font-weight:700; font-size:14px; display:flex; align-items:center; gap:6px; min-width:0; }
@@ -9531,6 +9531,8 @@ const EJEC_FUENTES = [
   { key: 'prorretencion', label: 'Pro-Retención' },
   { key: 'junji', label: 'JUNJI' },
   { key: 'faep', label: 'FAEP' },
+  { key: 'subt31_proyectos', label: 'Subt. 31' },
+  { key: 'asignacion_familiar', label: 'Asig. Familiar' },
   { key: 'figa', label: 'FIGA' },
   { key: 'aporte_educ', label: 'Aporte Educ.' },
   { key: 'aporte_junji', label: 'Aporte JUNJI' },
@@ -11140,9 +11142,10 @@ function aplicarSnapshot(snapshot) {
         }
         // Honorarios (Subt. 21, PR-3): boletas (solo entradas que son objetos; una dañada no rompe al resto) y proyección por cuenta/concepto (la clave del mapa ES la cuenta o el concepto).
         const honOF = {};
-        Object.entries(objetoPlano(raw.honorarios)).forEach(([id, h]) => { if (h && typeof h === 'object' && !Array.isArray(h)) honOF[id] = sanitizaHonorario(h, honPorConcepto(f.key)); });
+        // Recuperación LLMM (solo ingresos) no lleva honorarios: si un documento trae boletas o proyección, se ignoran (no se borran de Firestore).
+        Object.entries(f.sinGasto ? {} : objetoPlano(raw.honorarios)).forEach(([id, h]) => { if (h && typeof h === 'object' && !Array.isArray(h)) honOF[id] = sanitizaHonorario(h, honPorConcepto(f.key)); });
         entry.honorarios = honOF;
-        const honProyRaw = objetoPlano(raw.hon_proyeccion_items);
+        const honProyRaw = f.sinGasto ? {} : objetoPlano(raw.hon_proyeccion_items);
         entry.hon_proy = { items: Object.keys(honProyRaw).map(clave => {
           const meses = mesesNum(objetoPlano(honProyRaw[clave]).meses);
           return { [honPorConcepto(f.key) ? 'concepto' : 'codigo']: clave, meses, total: totalDeMeses(meses) };

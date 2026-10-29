@@ -422,4 +422,41 @@ await correrSpec('honorarios_fuentes_modelo', async (t) => {
   t.ok(eG.total.bys > 0, 'sanity');
   t.noErrores(h);
   await h.close();
+
+  // ============================== 9. FUENTES NUEVAS de `main`: Subt. 31 y Asignación Familiar (concepto) llevan honorarios; Recuperación LLMM (solo ingresos) NO ==============================
+  h = await boot({ fixture: 'honorarios_fuentes' });
+  for (const [fuente, id] of [['subt31_proyectos', '1121'], ['subt31_proyectos', 'AC'], ['subt31_proyectos', '5402002'], ['asignacion_familiar', '1121'], ['asignacion_familiar', '5402002']]) {
+    await abrirModal(h, fuente, id);
+    const hon = honFuenteDe(docs, id, fuente);
+    t.eq(enMeses(await filaBoletasMeses(h.page)), hon.porMes, `${fuente} / ${id}: la fila «Honorarios (Subt. 21)» = boletas por mes (siempre Real) del cálculo independiente`);
+    t.eq((await filasRegistroHon(h.page)).map(x => x.id).sort(), Object.keys(docs[id].otras_fuentes[fuente].honorarios).sort(), `${fuente} / ${id}: el registro lista todas las boletas`);
+    for (const [clave, meses] of Object.entries(hon.proyPorClave)) t.eq(enMeses(await filaProyeccionOF(h.page, clave, true) || {}), meses, `${fuente} / ${id}: proyección «${clave}» (por concepto)`);
+    t.eq(await h.page.evaluate(() => !!document.querySelector('#otrasFuentesModalBody .hon-form-grid [data-field="concepto"]') && !document.querySelector('#otrasFuentesModalBody .hon-form-grid [data-field="codigo"]')), true, `${fuente} / ${id}: el formulario pide Concepto (no cuenta)`);
+    await cerrarModal(h);
+  }
+  // alta en vivo en Asignación Familiar: un write merge SOLO de `otras_fuentes.asignacion_familiar.honorarios.<id>`; el gasto, el saldo y el Estado de la fila se mueven
+  await abrirModal(h, 'asignacion_familiar', '5402002');
+  const antesAF = (await leerFilas(h.page, 'asignacion_familiar'))['5402002'];
+  await h.clearWrites();
+  await llenarFormHonOF(h.page, { concepto: 'Refuerzo', tipoDocumento: 'BOLHE', nroDocumento: '12', fechaDocumento: '2026-06-02', fechaPago: '2026-06-09', montoGasto: '40000' });
+  await h.page.click(BTN_ADD);
+  await h.flushWrites(); await h.waitIdle();
+  const wAF = await escritosDe(h, '5402002');
+  t.eq([wAF.length, Object.keys(wAF[0].payload), Object.keys(wAF[0].payload.otras_fuentes), Object.keys(wAF[0].payload.otras_fuentes.asignacion_familiar)], [1, ['nombre', 'otras_fuentes', 'lastModifiedBy', 'lastModifiedAt'], ['asignacion_familiar'], ['honorarios']], 'Asignación Familiar: agregar una boleta = un write de SOLO `otras_fuentes.asignacion_familiar.honorarios.<id>`');
+  const docsAF = clon(docs); docsAF['5402002'].otras_fuentes.asignacion_familiar.honorarios.nueva = { concepto: 'Refuerzo', tipoDocumento: 'BOLHE', nroDocumento: '12', fechaDocumento: '2026-06-02', fechaPago: '2026-06-09', montoGasto: 40000, montoDocumento: 40000 };
+  await cerrarModal(h);
+  const despuesAF = (await leerFilas(h.page, 'asignacion_familiar'))['5402002'];
+  const eAF = entidadDe(docsAF, '5402002', 'asignacion_familiar');
+  t.eq([clp(despuesAF.hon), clp(despuesAF.gasto), clp(despuesAF.saldo)], [eAF.total.hon, eAF.total.gasto, eAF.total.saldo], 'Asignación Familiar: la fila refleja la boleta nueva en honorarios, gasto total y saldo');
+  t.eq(clp(despuesAF.gasto) - clp(antesAF.gasto), 40000, 'Asignación Familiar: el gasto sube exactamente el monto de la boleta');
+  t.eq(clp(despuesAF.gasto), clp(despuesAF.rem) + clp(despuesAF.hon), 'Asignación Familiar: gasto total = remuneraciones + honorarios (sin B&S ni 70/30)');
+  // Recuperación LLMM: ni formulario, ni fila, ni tarjeta, ni columna, ni catálogo; la boleta que el fixture dejó guardada no cuenta
+  await abrirModal(h, 'recuperacion_llmm', '1121');
+  t.eq(await h.page.evaluate(() => ({ bloque: !!document.querySelector('#otrasFuentesModalBody .hon-block, #otrasFuentesModalBody .hon-form-grid'), texto: /Honorarios/.test(document.getElementById('otrasFuentesModalBody').innerText) })), { bloque: false, texto: false }, 'Recuperación LLMM: el modal no trae bloque de honorarios (fuente solo de ingresos)');
+  await cerrarModal(h);
+  const filaLLMM = (await leerFilas(h.page, 'recuperacion_llmm'))['1121'];
+  t.eq([clp(filaLLMM.ingreso), clp(filaLLMM.hon), clp(filaLLMM.gasto)], [90000, 0, 0], 'Recuperación LLMM / 1121: ingreso 90.000 (Isapres + FONASA + SIL), sin gasto: la boleta guardada en el documento se ignora');
+  t.eq(await h.page.evaluate(() => /Honorarios/.test(document.getElementById('tab-of-recuperacion_llmm').innerText)), false, 'Recuperación LLMM: la pestaña no menciona honorarios');
+  t.noErrores(h);
+  await h.close();
 }, { modoBug: 'enforced' });

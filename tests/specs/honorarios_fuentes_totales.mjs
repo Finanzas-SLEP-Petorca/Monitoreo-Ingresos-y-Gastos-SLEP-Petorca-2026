@@ -35,17 +35,17 @@ await correrSpec('honorarios_fuentes_totales', async (t) => {
 
   // ================================================================ 1. Pestaña de cada fuente: tarjetas y filas
   for (const f of FUENTES) {
-    await clickTab(page, f.corto === 'Subv. General' ? 'General' : (f.key === 'mantenimiento' ? 'Mantención' : (f.key === 'prorretencion' ? 'Pro-Retención' : (f.key === 'aporte_educ' ? 'Aporte Educ.' : (f.key === 'aporte_junji' ? 'Aporte JUNJI' : f.corto)))));
+    await clickTab(page, 'of-' + f.key);
     const tj = await leerTarjetas(page, f.key);
     for (const vista of ['real', 'proy', 'total']) {
       const b = esp[f.key].suma[vista], suf = SUF[vista];
-      const lee = (rot) => clp((tj[vista][`${rot} (${suf})`] || {}).valor);
+      const lee = (rot) => clp((tj[vista][`${rot === 'Ingreso' && f.key === 'asignacion_familiar' ? 'Ingreso Percibido' : rot} (${suf})`] || {}).valor);
       t.eq([lee('Ingreso'), lee('Gasto Remuneraciones'), lee('Gasto Honorarios'), lee('Gasto Bienes y Servicios'), lee('Gasto Total'), lee('Saldo')],
         [b.ingreso, b.rem, b.hon, b.bys, b.gasto, b.saldo], `${f.key} · tarjetas ${suf}: Ingreso, Rem., Honorarios, B&S, Gasto Total y Saldo = cálculo independiente`);
       t.eq(b.gasto, b.rem + b.hon + b.bys, `${f.key} · ${suf}: gasto total = remuneraciones + honorarios + B&S (sin 70/30)`);
     }
-    t.ok(/Honorarios/.test((tj.total['Gasto Total (Total)'] || {}).nota), `${f.key}: la nota del Gasto Total dice «Remuneraciones + Honorarios + Bienes y Servicios»`, (tj.total['Gasto Total (Total)'] || {}).nota);
-    t.ok(new RegExp(`${esp[f.key].suma.nDeficit} de ${esp[f.key].suma.nEntidades} entidades en déficit`).test((tj.total['Saldo (Total)'] || {}).nota), `${f.key}: «${esp[f.key].suma.nDeficit} de ${esp[f.key].suma.nEntidades} entidades en déficit» (con los honorarios dentro del saldo)`, (tj.total['Saldo (Total)'] || {}).nota);
+    if (f.key !== 'recuperacion_llmm') t.ok(/Honorarios/.test((tj.total['Gasto Total (Total)'] || {}).nota), `${f.key}: la nota del Gasto Total dice «Remuneraciones + Honorarios + Bienes y Servicios»`, (tj.total['Gasto Total (Total)'] || {}).nota);
+    if (f.key !== 'recuperacion_llmm') t.ok(new RegExp(`${esp[f.key].suma.nDeficit} de ${esp[f.key].suma.nEntidades} entidades en déficit`).test((tj.total['Saldo (Total)'] || {}).nota), `${f.key}: «${esp[f.key].suma.nDeficit} de ${esp[f.key].suma.nEntidades} entidades en déficit» (con los honorarios dentro del saldo)`, (tj.total['Saldo (Total)'] || {}).nota);
     const filas = await leerFilas(page, f.key);
     const malas = [];
     Object.entries(esp[f.key].porId).forEach(([id, e]) => {
@@ -107,10 +107,10 @@ await correrSpec('honorarios_fuentes_totales', async (t) => {
     const s = await strip(page);
     const lee = (r) => leerCLP(s[r] || s[r.toUpperCase()]);
     const gastoStrip = lee('Gasto Total');
-    t.eq(gastoStrip, sumaTarjetas(tj, 'gasto'), `Panel principal (${vista}): el «Gasto Total» de la franja es la suma del gasto de las 10 tarjetas`);
+    t.eq(gastoStrip, sumaTarjetas(tj, 'gasto'), `Panel principal (${vista}): el «Gasto Total» de la franja es la suma del gasto de las tarjetas (SEP y las 12 fuentes)`);
     t.eq(lee('Gasto Remuneraciones') + lee('Gasto Honorarios (Subt. 21)') + lee('Gasto Bienes y Servicios'), gastoStrip, `Panel principal (${vista}): Remuneraciones + Honorarios + B&S = Gasto Total en la franja`);
     const honEsp = vista === 'total' ? honSep.bol + honSep.proy + honFuentes : (vista === 'real' ? honSep.bol + FUENTES.reduce((x, f) => x + esp[f.key].suma.real.hon, 0) : honSep.proy + FUENTES.reduce((x, f) => x + esp[f.key].suma.proy.hon, 0));
-    t.eq(lee('Gasto Honorarios (Subt. 21)'), honEsp, `Panel principal (${vista}): «Gasto Honorarios» de la franja = honorarios de SEP + de las 9 fuentes`);
+    t.eq(lee('Gasto Honorarios (Subt. 21)'), honEsp, `Panel principal (${vista}): «Gasto Honorarios» de la franja = honorarios de SEP + de las 12 fuentes`);
     t.ok(/SEP \+ 9 fuentes/.test(await page.evaluate(() => Array.from(document.querySelectorAll('#dashStrip .dash-tile')).find(x => /Honorarios/i.test(x.querySelector('.t-label').textContent)).querySelector('.t-sub').textContent)), `Panel principal (${vista}): la tile de honorarios ya no dice «solo SEP»`);
     t.eq(sumaTarjetas(tj, 'saldo'), lee('Saldo consolidado'), `Panel principal (${vista}): el saldo consolidado es la suma de los saldos de las tarjetas`);
     const m = await filaMensualTotal(page);
@@ -122,7 +122,7 @@ await correrSpec('honorarios_fuentes_totales', async (t) => {
     t.ok(!malasApil.length, `Panel principal (${vista}): el gráfico apilado muestra el segmento «Honorarios» exactamente en las fuentes que tienen honorarios`, malasApil);
     if (vista === 'total') {
       const tabla = await page.evaluate(() => Array.from(document.querySelectorAll('#dashTablaFuentesBody tbody tr')).map(tr => Array.from(tr.children).map(td => td.textContent.trim())));
-      const malasT = FUENTES.filter(f => { const fila = tabla.find(r => r[0] === ({ general: 'Subv. General', pie: 'PIE', mantenimiento: 'Mantención', prorretencion: 'Pro-Retención', junji: 'JUNJI', faep: 'FAEP', figa: 'FIGA', aporte_educ: 'Aporte Fiscal Educ.', aporte_junji: 'Aporte Fiscal JUNJI' })[f.key]); return !fila || leerCLP(fila[3]) !== esp[f.key].suma.total.hon; }).map(f => f.key);
+      const malasT = FUENTES.filter(f => { const fila = tabla.find(r => r[0] === f.corto); return !fila || leerCLP(fila[3]) !== esp[f.key].suma.total.hon; }).map(f => f.key);
       t.ok(!malasT.length, 'la tabla «por fuente» tiene la columna «Honorarios (Subt. 21)» de cada fuente = cálculo independiente', malasT);
       // «Atención»: entidades en Déficit de cada fuente con su saldo (con los honorarios dentro)
       const at = await page.evaluate(() => Array.from(document.querySelectorAll('#dashAtencion li[data-atencion-rbd]')).map(li => ({ f: li.dataset.atencionFuente, id: li.dataset.atencionRbd, saldo: li.querySelector('.a-saldo').textContent.trim() })));
@@ -131,7 +131,7 @@ await correrSpec('honorarios_fuentes_totales', async (t) => {
       const saldos = at.map(a => leerCLP(a.saldo));
       t.eq(saldos, saldos.slice().sort((x, y) => x - y), '«Atención»: ordenada por saldo, la más negativa primero');
       const nTotal = tj.sep.def.match(/^(\d+) de/) ? Number(tj.sep.def.match(/^(\d+) de/)[1]) + FUENTES.reduce((n, f) => n + esp[f.key].suma.nDeficit, 0) : -1;
-      t.ok(new RegExp(`— ${nTotal} en total`).test(await page.evaluate(() => document.getElementById('dashNotaAtencion').textContent)), `«Atención» cuenta ${nTotal} entidades en Déficit entre SEP y las 9 fuentes (con los honorarios dentro de cada saldo)`);
+      t.ok(new RegExp(`— ${nTotal} en total`).test(await page.evaluate(() => document.getElementById('dashNotaAtencion').textContent)), `«Atención» cuenta ${nTotal} entidades en Déficit entre SEP y las 12 fuentes (con los honorarios dentro de cada saldo)`);
     }
   }
   await dashVista(h, 'total');
@@ -143,7 +143,7 @@ await correrSpec('honorarios_fuentes_totales', async (t) => {
   const sumaCol = (filas, i) => filas.reduce((s, f) => s + leerCLP(f[i]), 0);
   const EJEC_COLS = { ing: 2, rem: 3, hon: 6, bys: 9 };
   t.eq(await page.evaluate(() => 0), 0, 'sanity');
-  for (const f of FUENTES) {
+  for (const f of FUENTES.filter(x => x.key !== 'recuperacion_llmm')) { // Recuperación LLMM es solo de ingresos: no tiene % de ejecución
     await page.click(`#ejecFuenteChips .of-chip[data-ejec-fuente="${f.key}"]`);
     await h.waitIdle();
     const th = await page.evaluate(() => Array.from(document.querySelectorAll('#ejecTable thead th')).map(x => x.textContent.trim()));
@@ -176,14 +176,14 @@ await correrSpec('honorarios_fuentes_totales', async (t) => {
   t.ok((await polilineas()) < n3, 'desmarcar «Honorarios (Subt. 21)» quita su línea del gráfico (tercera serie)');
   await page.evaluate(() => { const c = document.getElementById('ejecShowHon'); c.checked = true; c.dispatchEvent(new Event('change', { bubbles: true })); });
   await page.selectOption('#ejecRbdSelect', '');
-  // Consolidado: SEP + las 9 fuentes; el Total es EXACTAMENTE el del Panel principal
+  // Consolidado: SEP + las 12 fuentes; el Total es EXACTAMENTE el del Panel principal
   await page.click('#ejecFuenteChips .of-chip[data-ejec-fuente="consolidado"]');
   await h.waitIdle();
   filasE = await leerEjec();
   const honConsol = honSep.bol + honSep.proy + honFuentes;
-  t.eq(sumaCol(filasE, 6), honConsol, '% Ejecución Consolidado: «Gasto Hon. (mes)» suma los honorarios de SEP y de las 9 fuentes');
+  t.eq(sumaCol(filasE, 6), honConsol, '% Ejecución Consolidado: «Gasto Hon. (mes)» suma los honorarios de SEP y de las 12 fuentes');
   const remConsol = sep.total.rem + FUENTES.reduce((s, f) => s + esp[f.key].suma.total.rem, 0), bysConsol = sep.total.bys + FUENTES.reduce((s, f) => s + esp[f.key].suma.total.bys, 0);
-  t.eq([sumaCol(filasE, 3), sumaCol(filasE, 9)], [remConsol, bysConsol], '% Ejecución Consolidado: remuneraciones y B&S = SEP + las 9 fuentes');
+  t.eq([sumaCol(filasE, 3), sumaCol(filasE, 9)], [remConsol, bysConsol], '% Ejecución Consolidado: remuneraciones y B&S = SEP + las 12 fuentes');
   t.eq(sumaCol(filasE, 3) + sumaCol(filasE, 6) + sumaCol(filasE, 9), totalDash, '% Ejecución Consolidado: rem + hon + B&S a diciembre = el «Gasto Total» de la franja del Panel principal');
   const kc = await page.evaluate(() => Array.from(document.querySelectorAll('#ejecKpiRow .kpi-card')).map(c => ({ l: c.querySelector('.label').textContent.trim(), d: c.querySelector('.delta').textContent.trim() })));
   const anual = kc.find(k => k.l === '% Ejec. Total — Real+Proy a diciembre');
@@ -226,7 +226,10 @@ await correrSpec('honorarios_fuentes_totales', async (t) => {
   await page.click('#reporteVistaChips [data-reporte-vista="personalizado"]');
   await h.waitIdle();
   const catalogo = await page.evaluate(() => Array.from(document.querySelectorAll('#reporteConceptoList input[data-concepto-check]')).map(e => e.dataset.conceptoCheck));
-  for (const f of FUENTES) t.ok(catalogo.includes(`of|${f.key}|hon`) && catalogo.includes(`of|${f.key}|hon_proy`), `Reporte personalizado: el catálogo de ${f.key} trae «Honorarios (Subt. 21) — boletas» y «Honorarios (Proyección) — total»`);
+  for (const f of FUENTES) {
+    const lleva = f.key !== 'recuperacion_llmm'; // Recuperación LLMM es solo de ingresos: su catálogo NO ofrece honorarios
+    t.eq(catalogo.includes(`of|${f.key}|hon`) && catalogo.includes(`of|${f.key}|hon_proy`), lleva, `Reporte personalizado: el catálogo de ${f.key} ${lleva ? 'trae «Honorarios (Subt. 21) — boletas» y «Honorarios (Proyección) — total»' : 'no ofrece honorarios (fuente solo de ingresos)'}`);
+  }
   t.ok(catalogo.includes('of|general|hon_item|410803') && catalogo.includes('of|junji|hon_item|Apoyo pedagógico') && catalogo.includes('of|junji|hon_proy_item|Taller de música'), 'Reporte personalizado: una línea por cuenta (General) y por concepto (JUNJI), también en la proyección');
   await page.click('#reporteRbdNinguno');
   await page.click('#reporteConceptoNinguno');
@@ -262,10 +265,10 @@ await correrSpec('honorarios_fuentes_totales', async (t) => {
   const docs2 = docsDe('compras_conceptos');
   const malas0 = [];
   for (const f of FUENTES) {
-    await h2.clickTab(f.key === 'general' ? 'General' : (f.key === 'mantenimiento' ? 'Mantención' : (f.key === 'prorretencion' ? 'Pro-Retención' : (f.key === 'aporte_educ' ? 'Aporte Educ.' : (f.key === 'aporte_junji' ? 'Aporte JUNJI' : f.corto)))));
+    await h2.clickTab('of-' + f.key);
     const e = fuenteEsperada(docs2, f.key);
     const tj = await leerTarjetas(h2.page, f.key);
-    for (const vista of ['real', 'proy', 'total']) {
+    for (const vista of f.key === 'recuperacion_llmm' ? [] : ['real', 'proy', 'total']) {
       const suf = SUF[vista];
       if (clp(tj[vista][`Gasto Honorarios (${suf})`].valor) !== 0) malas0.push(`${f.key} ${vista}: honorarios ≠ $0`);
       if (clp(tj[vista][`Gasto Total (${suf})`].valor) !== e.suma[vista].rem + e.suma[vista].bys) malas0.push(`${f.key} ${vista}: gasto ≠ rem + B&S`);
@@ -274,7 +277,7 @@ await correrSpec('honorarios_fuentes_totales', async (t) => {
     const filas = await leerFilas(h2.page, f.key);
     Object.entries(e.porId).forEach(([id, en]) => { if (clp(filas[id].hon) !== 0 || clp(filas[id].gasto) !== en.total.rem + en.total.bys || filas[id].estado !== (en.estado === 'deficit' ? 'Déficit' : 'Superávit')) malas0.push(`${f.key} ${id}`); });
   }
-  t.ok(!malas0.length, 'sin honorarios cargados: «Gasto Honorarios» = $0 en las 9 fuentes y el gasto, el saldo y el Estado son los de siempre (remuneraciones + B&S)', malas0.slice(0, 5));
+  t.ok(!malas0.length, 'sin honorarios cargados: «Gasto Honorarios» = $0 en las 12 fuentes y el gasto, el saldo y el Estado son los de siempre (remuneraciones + B&S)', malas0.slice(0, 5));
   t.noErrores(h2);
   await h2.close();
 

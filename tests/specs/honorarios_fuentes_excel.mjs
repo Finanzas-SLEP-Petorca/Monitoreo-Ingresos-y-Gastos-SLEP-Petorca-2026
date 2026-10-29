@@ -18,9 +18,11 @@ const ENC_K = ENC_C.map((e, i) => (i === 3 ? 'Concepto' : e));
 const MES_T = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 const ENC_PC = ['RBD', 'Nombre', 'Codigo', 'Item', ...MES_T, 'Total Año'];
 const ENC_PK = ['RBD', 'Nombre', 'Concepto', ...MES_T, 'Total Año'];
-const TAB = { general: 'General', pie: 'PIE', mantenimiento: 'Mantención', prorretencion: 'Pro-Retención', junji: 'JUNJI', faep: 'FAEP', figa: 'FIGA', aporte_educ: 'Aporte Educ.', aporte_junji: 'Aporte JUNJI' };
+const TAB = Object.fromEntries(FUENTES.map(f => [f.key, 'of-' + f.key]));
 const HOJAS = {
-  general: ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_PROY_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'], pie: ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_PROY_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'],
+  general: ['INGRESO', 'ING_CARRERA_DOCENTE', 'REMUNERACIONES', 'COMPRAS', 'BYS_PROY_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'], pie: ['INGRESO', 'ING_CARRERA_DOCENTE', 'REMUNERACIONES', 'COMPRAS', 'BYS_PROY_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'],
+  subt31_proyectos: ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'], asignacion_familiar: ['INGRESO', 'REMUNERACIONES', 'HONORARIOS', 'HON_PROYECCION', 'META'],
+  recuperacion_llmm: ['ING_LLMM_ISAPRES', 'ING_LLMM_FONASA', 'ING_LLMM_SIL', 'META'], // fuente solo de ingresos: sin hojas de honorarios
   mantenimiento: ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_PROY_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'], prorretencion: ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_PROY_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'],
   junji: ['ING_OPERACION', 'ING_HOMOLOGACION', 'ING_CARRERA_DOCENTE', 'ING_BDL', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'],
   faep: ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'], figa: ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'],
@@ -79,7 +81,8 @@ await correrSpec('honorarios_fuentes_excel', async (t) => {
     const k = f.key;
     await clickTab(page, TAB[k]);
     const x = await exportar(h, () => page.click(`#downloadExcelOFBtn-${k}`));
-    t.eq(x.libro.orden, HOJAS[k], `${k}: el libro trae HONORARIOS y HON_PROYECCION antes de META`);
+    t.eq(x.libro.orden, HOJAS[k], `${k}: el libro trae HONORARIOS y HON_PROYECCION antes de META${k === 'recuperacion_llmm' ? ' (Recuperación LLMM: no las trae)' : ''}`);
+    if (k === 'recuperacion_llmm') continue;
     t.eq(x.libro.hojas.HONORARIOS[0], esConcepto(k) ? ENC_K : ENC_C, `${k}: encabezados de HONORARIOS (${esConcepto(k) ? '«Concepto»' : '«Codigo»'})`);
     t.eq(x.libro.hojas.HON_PROYECCION[0], esConcepto(k) ? ENC_PK : ENC_PC, `${k}: encabezados de HON_PROYECCION`);
     const n = nBoletasDoc(docsBase, k);
@@ -150,7 +153,7 @@ await correrSpec('honorarios_fuentes_excel', async (t) => {
     const sAntes = documentos(await h.store());
     const e1 = await exportar(h, () => h.page.click(`#downloadExcelOFBtn-${k}`));
     const m1 = await importar(h, `#importExcelOFInput-${k}`, e1);
-    t.ok(/^Carga importada correctamente/.test(m1[0] || '') && /HONORARIOS: \d+ filas/.test(m1[0] || '') && /HON_PROYECCION: \d+ filas/.test(m1[0] || '') && !/NO se import/.test(m1[0] || ''), `${k}: la importación informa éxito, lista HONORARIOS y HON_PROYECCION y no rechaza ninguna fila`, m1);
+    t.ok(/^Carga importada correctamente/.test(m1[0] || '') && (k === 'recuperacion_llmm' || (/HONORARIOS: \d+ filas/.test(m1[0] || '') && /HON_PROYECCION: \d+ filas/.test(m1[0] || ''))) && !/NO se import/.test(m1[0] || ''), `${k}: la importación informa éxito, lista HONORARIOS y HON_PROYECCION y no rechaza ninguna fila`, m1);
     t.eq(await h.page.evaluate((key) => document.getElementById('tab-of-' + key).innerText, k), tAntes, `${k}: la pestaña queda idéntica tras reimportar (los totales no cambian)`);
     const e2 = await exportar(h, () => h.page.click(`#downloadExcelOFBtn-${k}`));
     t.eq(igualLibros(e1.libro, e2.libro), null, `${k}: exportar → importar → exportar da exactamente las mismas hojas (HONORARIOS y HON_PROYECCION incluidas)`);

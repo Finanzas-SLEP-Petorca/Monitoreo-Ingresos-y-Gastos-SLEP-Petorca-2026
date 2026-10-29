@@ -8,13 +8,21 @@
 //   · NO hay 70/30 en las fuentes: gasto = remuneraciones + honorarios + B&S; saldo = ingreso − gasto; Déficit ⇔ saldo < 0. JUNJI: además Déficit si Operación − B&S < 0, y los honorarios (gasto de
 //     personal) NO entran en ese saldo de Operación (se financian como las Remuneraciones, con cualquiera de sus ingresos).
 import { MESES, FUENTES, idsDeUniverso, corteFuente } from './corte.mjs';
-import { entidadDe as entidadConceptoDe, serieMensualEsperada as serieConceptoEsperada } from './compras_conceptos.mjs';
+import { documentadoDe } from './compras_conceptos.mjs';
 import { CATALOGO, CUENTAS_HON, mesDeFecha } from './honorarios.mjs';
 
 export { MESES, FUENTES };
 export const FUENTES_CUENTA = ['general', 'pie', 'mantenimiento', 'prorretencion'];
-export const FUENTES_CONCEPTO = ['junji', 'faep', 'figa', 'aporte_educ', 'aporte_junji'];
+export const FUENTES_CONCEPTO = ['junji', 'faep', 'subt31_proyectos', 'recuperacion_llmm', 'asignacion_familiar', 'figa', 'aporte_educ', 'aporte_junji'];
 export const esConcepto = (key) => FUENTES_CONCEPTO.includes(key);
+/** Recuperación LLMM es solo de ingresos: no lleva honorarios (una boleta guardada en su documento no cuenta). Asignación Familiar solo lleva Remuneraciones y honorarios (sin B&S). */
+export const SIN_GASTO = ['recuperacion_llmm'];
+export const SIN_BYS = ['recuperacion_llmm', 'asignacion_familiar'];
+const lineasIngreso = (key, of) => (key === 'junji' ? [of.ingreso_operacion, of.ingreso_homologacion, of.ingreso_carrera_docente, of.ingreso_bdl]
+  : key === 'recuperacion_llmm' ? [of.ingreso_llmm_isapres, of.ingreso_llmm_fonasa, of.ingreso_llmm_sil]
+  : (key === 'general' || key === 'pie') ? [of.ingreso, of.ingreso_carrera_docente] : [of.ingreso]);
+/** Meses (12) de Fondos Fijos ya registrados en el gasto de Subvención General de la entidad. */
+const fondosGeneral = (docs, id) => MESES.map(m => num(docs[id] && docs[id].fondos_fijos && docs[id].fondos_fijos.meses && docs[id].fondos_fijos.meses[m] && docs[id].fondos_fijos.meses[m].registrado_general));
 /** Columna del Plan de Cuentas que rige a una entidad en una fuente con cuenta (la fila AC de General usa la de «Adm. Central General»). null en las fuentes por concepto. */
 export const colPlan = (key, id) => ({ general: id === 'AC' ? 'adm_central_general' : 'general', pie: 'pie', mantenimiento: 'mantenimiento', prorretencion: 'proretencion' })[key] || null;
 /** Cuentas del catálogo habilitadas para la entidad en la fuente, en el orden del manual. */
@@ -34,6 +42,7 @@ export function honFuenteDe(docs, id, key) {
   const porConcepto = esConcepto(key);
   const porMes = z12(), proyPorMes = z12(), porClave = {}, proyPorClave = {}, excluidas = [];
   let nBoletas = 0;
+  if (SIN_GASTO.includes(key)) return { porMes, proyPorMes, boletas: 0, proy: 0, total: 0, porClave, proyPorClave, excluidas, nBoletas };
   Object.entries(plano(of.honorarios)).forEach(([bid, h]) => {
     if (!h || typeof h !== 'object' || Array.isArray(h)) return;
     nBoletas++;
@@ -56,17 +65,25 @@ export function entidadDe(docs, id, key) {
   const r = Math.round;
   const honReal = r(hon.boletas), honProy = r(hon.proy);
   let real, proy, total, saldoOp = null;
+  const of = ofDe(docs, id, key);
+  const corte = corteFuente(docs, id, key);
+  const parte = (l) => { let a = 0, b = 0; MESES.forEach((m, i) => { const v = num(l && l.meses && l.meses[m]); if (i + 1 <= corte) a += v; else b += v; }); return { real: a, proy: b }; };
+  const ing = lineasIngreso(key, of).map(parte).reduce((a, p) => ({ real: a.real + p.real, proy: a.proy + p.proy }), { real: 0, proy: 0 });
+  const rem = SIN_GASTO.includes(key) ? { real: 0, proy: 0 } : parte(of.gasto_rem);
   if (esConcepto(key)) {
-    const e = entidadConceptoDe(docs, id, key);   // oráculo del registro de compras por concepto (sin honorarios)
-    real = { ...e.real }; proy = { ...e.proy }; total = { ...e.total }; saldoOp = e.saldoOp;
+    // por concepto: «sin documento» (montos mensuales, Real hasta el corte y Proyectado después) + «documentado» (compras, siempre Real); ni una ni otra en las fuentes sin B&S
+    const sin = SIN_BYS.includes(key) ? { real: 0, proy: 0 } : Object.values(plano(of.bys_items)).filter(it => it && typeof it === 'object').map(parte).reduce((a, p) => ({ real: a.real + p.real, proy: a.proy + p.proy }), { real: 0, proy: 0 });
+    const doc = SIN_BYS.includes(key) ? { total: 0 } : documentadoDe(docs, id, key);
+    const bysDoc = r(doc.total), bysSinReal = r(sin.real), bysSinProy = r(sin.proy);
+    real = { ingreso: r(ing.real), rem: r(rem.real), bys: bysSinReal + bysDoc };
+    proy = { ingreso: r(ing.proy), rem: r(rem.proy), bys: bysSinProy };
+    total = { ingreso: real.ingreso + proy.ingreso, rem: real.rem + proy.rem, bys: real.bys + proy.bys };
+    if (key === 'junji') saldoOp = r(sumaMeses(of.ingreso_operacion)) - total.bys;
   } else {
-    const of = ofDe(docs, id, key);
-    const corte = corteFuente(docs, id, key);
-    const parte = (l) => { let a = 0, b = 0; MESES.forEach((m, i) => { const v = num(l && l.meses && l.meses[m]); if (i + 1 <= corte) a += v; else b += v; }); return { real: a, proy: b }; };
-    const ing = parte(of.ingreso), rem = parte(of.gasto_rem);
     const compras = Object.values(plano(of.compras)).filter(c => c && typeof c === 'object').reduce((s, c) => s + (/^nota de cr[eé]dito/i.test(texto(c.tipoDocumento)) ? -Math.abs(num(c.montoGasto)) : (/^nota de d[eé]bito/i.test(texto(c.tipoDocumento)) ? Math.abs(num(c.montoGasto)) : num(c.montoGasto))), 0);
+    const fondos = key === 'general' ? fondosGeneral(docs, id).reduce((a, b) => a + b, 0) : 0; // Fondos Fijos registrados en General: B&S Real
     const bysProy = Object.values(plano(of.bys_proy_items)).reduce((s, it) => s + sumaMeses(it), 0);
-    real = { ingreso: r(ing.real), rem: r(rem.real), bys: r(compras) };
+    real = { ingreso: r(ing.real), rem: r(rem.real), bys: r(compras + fondos) };
     proy = { ingreso: r(ing.proy), rem: r(rem.proy), bys: r(bysProy) };
     total = { ingreso: real.ingreso + proy.ingreso, rem: real.rem + proy.rem, bys: real.bys + proy.bys };
   }
@@ -97,16 +114,19 @@ export function fuenteEsperada(docs, key) {
 export function serieMensual(docs, key, soloId = null) {
   const f = FUENTES.find(x => x.key === key);
   const out = { ing: { real: z12(), proy: z12() }, rem: { real: z12(), proy: z12() }, hon: { real: z12(), proy: z12() }, bys: { real: z12(), proy: z12() }, gas: { real: z12(), proy: z12() } };
-  if (esConcepto(key)) {
-    const e = serieConceptoEsperada(docs, key, soloId);
-    ['ing', 'rem', 'bys'].forEach(k => { out[k].real = e[k].real.slice(); out[k].proy = e[k].proy.slice(); });
-  } else {
-    idsDeUniverso(f.universo).forEach(id => {
-      if (soloId && id !== soloId) return;
-      const of = ofDe(docs, id, key);
-      const corte = corteFuente(docs, id, key);
-      const poner = (l, dst) => MESES.forEach((m, i) => { const v = num(l && l.meses && l.meses[m]); (i + 1 <= corte ? dst.real : dst.proy)[i] += v; });
-      poner(of.ingreso, out.ing); poner(of.gasto_rem, out.rem);
+  idsDeUniverso(f.universo).forEach(id => {
+    if (soloId && id !== soloId) return;
+    const of = ofDe(docs, id, key);
+    const corte = corteFuente(docs, id, key);
+    const poner = (l, dst) => MESES.forEach((m, i) => { const v = num(l && l.meses && l.meses[m]); (i + 1 <= corte ? dst.real : dst.proy)[i] += v; });
+    lineasIngreso(key, of).forEach(l => poner(l, out.ing));
+    if (!SIN_GASTO.includes(key)) poner(of.gasto_rem, out.rem);
+    if (esConcepto(key)) {
+      if (!SIN_BYS.includes(key)) {
+        Object.values(plano(of.bys_items)).filter(it => it && typeof it === 'object').forEach(it => poner(it, out.bys));
+        documentadoDe(docs, id, key).porMes.forEach((v, i) => { out.bys.real[i] += v; });
+      }
+    } else {
       Object.values(plano(of.compras)).filter(c => c && typeof c === 'object').forEach(c => {
         const i = idx(c.fechaDocumento);
         if (i === null) return;
@@ -114,8 +134,9 @@ export function serieMensual(docs, key, soloId = null) {
         out.bys.real[i] += /^nota de cr[eé]dito/i.test(t) ? -Math.abs(v) : (/^nota de d[eé]bito/i.test(t) ? Math.abs(v) : v);
       });
       Object.values(plano(of.bys_proy_items)).forEach(it => MESES.forEach((m, i) => { out.bys.proy[i] += num(it && it.meses && it.meses[m]); }));
-    });
-  }
+      if (key === 'general') fondosGeneral(docs, id).forEach((v, i) => { out.bys.real[i] += v; });
+    }
+  });
   idsDeUniverso(f.universo).forEach(id => {
     if (soloId && id !== soloId) return;
     const h = honFuenteDe(docs, id, key);
@@ -147,11 +168,16 @@ export function leerTarjetas(page, key) {
 export function leerFilas(page, key) {
   return page.evaluate((k) => {
     const out = {};
+    const tabla = document.querySelector(`#otrasFuentesTable-${k}`);
+    // las columnas se ubican por el rótulo del encabezado: Asignación Familiar no lleva B&S y Recuperación LLMM solo ingreso y saldo
+    const cols = Array.from(tabla.querySelectorAll('thead th')).map(th => th.textContent.trim());
+    const col = (re) => cols.findIndex(t => re.test(t));
+    const ix = { ingreso: col(/^Ingreso/), rem: col(/^Gasto Remuneraciones/), hon: col(/^Gasto Honorarios/), bys: col(/^Gasto Bienes/), gasto: col(/^Gasto Total/), saldo: col(/^Saldo/) };
     document.querySelectorAll(`#otrasFuentesTbody-${k} tr[data-rbd]`).forEach(tr => {
       const c = Array.from(tr.children).map(td => td.cloneNode(true));
-      const bys = c[6]; const sp = bys.querySelector('.of-bys-split'); if (sp) sp.remove();
+      const leer = (n) => { if (n < 0) return '—'; const sp = c[n].querySelector('.of-bys-split'); if (sp) sp.remove(); return c[n].textContent.trim(); };
       const tag = tr.querySelector('.tag');
-      out[tr.dataset.rbd] = { ingreso: c[3].textContent.trim(), rem: c[4].textContent.trim(), hon: c[5].textContent.trim(), bys: bys.textContent.trim(), gasto: c[7].textContent.trim(), saldo: c[8].textContent.trim(), estado: tag ? tag.textContent.trim() : '' };
+      out[tr.dataset.rbd] = { ingreso: leer(ix.ingreso), rem: leer(ix.rem), hon: leer(ix.hon), bys: leer(ix.bys), gasto: leer(ix.gasto), saldo: leer(ix.saldo), estado: tag ? tag.textContent.trim() : '' };
     });
     return out;
   }, key);

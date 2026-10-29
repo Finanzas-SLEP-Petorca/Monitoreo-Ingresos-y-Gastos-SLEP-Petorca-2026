@@ -20,13 +20,16 @@ export const FUENTES = [
   { key: 'prorretencion', label: 'Subv. Pro-Retención', corto: 'Pro-Retención', universo: 'rbd_ac' },
   { key: 'junji', label: 'JUNJI', corto: 'JUNJI', universo: 'gesparvu' },
   { key: 'faep', label: 'FAEP', corto: 'FAEP', universo: 'rbd_ac_gesparvu' },
+  { key: 'subt31_proyectos', label: 'Subtítulo 31 (Proyectos)', corto: 'Subt. 31', universo: 'rbd_ac_gesparvu' },
+  { key: 'recuperacion_llmm', label: 'Recuperación Licencias Médicas', corto: 'Recup. LLMM', universo: 'rbd_ac_gesparvu' },
+  { key: 'asignacion_familiar', label: 'Asignación Familiar', corto: 'Asig. Familiar', universo: 'rbd_gesparvu' },
   { key: 'figa', label: 'FIGA', corto: 'FIGA', universo: 'rbd_ac_gesparvu' },
   { key: 'aporte_educ', label: 'Aporte Fiscal Extraord. Educación', corto: 'Aporte Fiscal Educ.', universo: 'rbd_ac' },
   { key: 'aporte_junji', label: 'Aporte Fiscal Extraord. JUNJI', corto: 'Aporte Fiscal JUNJI', universo: 'gesparvu' },
 ];
 // Universos de entidades de las fuentes: 'rbd_ac' (55 RBD + AC), 'gesparvu' (13 jardines) y 'rbd_ac_gesparvu' (los tres, en ese orden: FAEP y FIGA desde «ajustes de fuentes»).
 // Es lo que debe listar cada pestaña y de lo que participa cada documento; se calcula aquí, sin pasar por el código del panel.
-export const idsDeUniverso = (universo) => (universo === 'gesparvu' ? GESPARVU_IDS : (universo === 'rbd_ac_gesparvu' ? [...RBD_IDS, 'AC', ...GESPARVU_IDS] : [...RBD_IDS, 'AC']));
+export const idsDeUniverso = (universo) => (universo === 'gesparvu' ? GESPARVU_IDS : (universo === 'rbd_gesparvu' ? [...RBD_IDS, ...GESPARVU_IDS] : universo === 'rbd_ac_gesparvu' ? [...RBD_IDS, 'AC', ...GESPARVU_IDS] : [...RBD_IDS, 'AC']));
 // Rótulo de una entidad: lo decide su tipo, no la fuente.
 export const tituloEntidad = (id) => (id === 'AC' ? 'Administración Central' : (GESPARVU_IDS.includes(id) ? 'GESPARVU ' + id : 'RBD ' + id));
 export const clon = (o) => JSON.parse(JSON.stringify(o));

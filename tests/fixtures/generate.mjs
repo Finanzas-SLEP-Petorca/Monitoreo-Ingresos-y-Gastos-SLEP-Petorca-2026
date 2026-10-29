@@ -318,14 +318,15 @@ docs._meta = { items_22: [], items_29: [], lastModifiedBy: EMAILS[0], lastModifi
 // Así el aviso "entidades con corte distinto al cierre global" lista 8 filas (2 de ingresos, 3 de remuneraciones y 3 de fuentes).
 const docsCierre = JSON.parse(JSON.stringify(docs));
 {
-  const KEYS_RBD_AC = ['general', 'pie', 'mantenimiento', 'prorretencion', 'faep', 'figa', 'aporte_educ'];
-  const KEYS_GESPARVU = ['junji', 'aporte_junji', 'faep', 'figa']; // los jardines también son entidades de FAEP y FIGA
+  // Subt. 31 y Recuperación LLMM (RBD + AC + jardines) y Asignación Familiar (RBD + jardines, sin AC) son las fuentes nuevas de `main`: sus documentos también quedan con el corte «Aplicar a todas».
+  const KEYS_RBD_AC = ['general', 'pie', 'mantenimiento', 'prorretencion', 'faep', 'subt31_proyectos', 'recuperacion_llmm', 'figa', 'aporte_educ'];
+  const KEYS_GESPARVU = ['junji', 'aporte_junji', 'faep', 'subt31_proyectos', 'recuperacion_llmm', 'asignacion_familiar', 'figa']; // los jardines también son entidades de FAEP, FIGA y las fuentes nuevas
   const fijaFuentes = (id, keys) => {
     const d = docsCierre[id];
     d.otras_fuentes = d.otras_fuentes || {};
     keys.forEach(k => { d.otras_fuentes[k] = { ...(d.otras_fuentes[k] || {}), real_hasta_mes: 9 }; }); // como queda un documento tras "Aplicar a todas"
   };
-  registros.forEach(r => { fijaFuentes(r.rbd, KEYS_RBD_AC); if (docsCierre[r.rbd].rem) docsCierre[r.rbd].rem.real_hasta_mes = 9; });
+  registros.forEach(r => { fijaFuentes(r.rbd, [...KEYS_RBD_AC, 'asignacion_familiar']); if (docsCierre[r.rbd].rem) docsCierre[r.rbd].rem.real_hasta_mes = 9; });
   fijaFuentes('AC', KEYS_RBD_AC);
   gesparvu.forEach(g => fijaFuentes(g.rbd, KEYS_GESPARVU));
   docsCierre['1121'].rem.real_hasta_mes = 7;
@@ -775,6 +776,37 @@ const docsHF = JSON.parse(JSON.stringify(docsCC));
   const ajj = de('5402002', 'aporte_junji');
   ajj.honorarios = { aj5402002_h1: bolc('Educadora de apoyo', 'BOLHE', 961, '2026-03-23', '2026-03-30', 'Educadora de apoyo', 150000) };
   ajj.hon_proyeccion_items = { 'Educadora de apoyo': proyK('Educadora de apoyo', rango(4, 12, 25000)) };
+  // --- Fuentes nuevas de `main` (Subtítulo 31, Asignación Familiar, Recuperación LLMM) + Carrera Docente de General/PIE + Fondos Fijos (todo determinista)
+  //   Subt. 31 (concepto) / 1121 (Real hasta julio) · ingreso ENE 2.000.000, rem ENE 300.000, B&S «Obras menores» ENE 400.000 + «Talleres técnicos» (BOLHE FEB 180.000, BHE AGO 90.000: Real igual) + proyección SEP-DIC 70.000
+//   Subt. 31 / AC · «Asesoría de proyectos» MAR 210.000 con ingreso ENE 1.000.000;  Subt. 31 / 5402002 · «Monitor» MAY 55.000 y proyección OCT-DIC 15.000
+//   Asignación Familiar (solo Remuneraciones; universo RBD + jardines) / 1121 · ingreso ENE 900.000, rem ENE 600.000, «Reemplazo» (BOLHE MAR 250.000) + proyección JUN-DIC 30.000 → saldo ENE-DIC
+//   Asignación Familiar / 5402002 · ingreso ENE 100.000, rem ENE 50.000, honorarios «Reemplazo» (BOLH ABR 80.000) → saldo negativo: Déficit por honorarios
+//   Recuperación LLMM (solo ingresos: NO lleva honorarios) / 1121 · Isapres ENE 40.000, FONASA FEB 30.000, SIL MAR 20.000 + una boleta «Reemplazo» (200.000) que NO debe contarse ni mostrarse
+//   General y PIE / 1121 · Ingreso Carrera Docente ENE 700.000 (General) y 300.000 (PIE): entran al ingreso de la fuente (carrera2);  Fondos Fijos / 1121 · registrado en General MAR 120.000 y JUN 80.000 (se suman a B&S Real de General)
+  const ing12 = (v) => ({ meses: meses12(i => (i === 0 ? v : 0)), total: v });
+  const s31 = de('1121', 'subt31_proyectos');
+  Object.assign(s31, { ingreso: ing12(2000000), gasto_rem: ing12(300000), bys_items: conceptos({ 'Obras menores': enero(400000) }), real_hasta_mes: 7,
+    honorarios: {
+      s31h1121_1: bolc('Talleres técnicos', 'BOLHE', 1001, '2026-02-11', '2026-02-18', 'Taller técnico de febrero', 180000),
+      s31h1121_2: bolc('Talleres técnicos', 'BHE', 1002, '2026-08-12', '2026-08-19', 'Taller técnico de agosto (después del corte: igual Real)', 90000, undefined, { documentoContable: 'DC_1002' }),
+    },
+    hon_proyeccion_items: { 'Talleres técnicos': proyK('Talleres técnicos', rango(9, 12, 70000)) } });
+  const s31AC = de('AC', 'subt31_proyectos');
+  Object.assign(s31AC, { ingreso: ing12(1000000), honorarios: { s31hac_1: bolc('Asesoría de proyectos', 'BOLHE', 1011, '2026-03-16', '2026-03-23', 'Asesoría de proyectos', 210000) } });
+  const s31J = de('5402002', 'subt31_proyectos');
+  Object.assign(s31J, { honorarios: { s31hj_1: bolc('Monitor', 'BOLH', 1021, '2026-05-12', '2026-05-19', 'Monitor del jardín (Subt. 31)', 55000) }, hon_proyeccion_items: { 'Monitor': proyK('Monitor', rango(10, 12, 15000)) } });
+  const af = de('1121', 'asignacion_familiar');
+  Object.assign(af, { ingreso: ing12(900000), gasto_rem: ing12(600000),
+    honorarios: { afh1121_1: bolc('Reemplazo', 'BOLHE', 1101, '2026-03-09', '2026-03-16', 'Reemplazo de marzo', 250000) },
+    hon_proyeccion_items: { 'Reemplazo': proyK('Reemplazo', rango(6, 12, 30000)) } });
+  const afJ = de('5402002', 'asignacion_familiar');
+  Object.assign(afJ, { ingreso: ing12(100000), gasto_rem: ing12(50000), honorarios: { afhj_1: bolc('Reemplazo', 'BOLH', 1111, '2026-04-14', '2026-04-21', 'Reemplazo en el jardín', 80000) } });
+  const llm = de('1121', 'recuperacion_llmm');
+  Object.assign(llm, { ingreso_llmm_isapres: linea(i => (i === 0 ? 40000 : 0)), ingreso_llmm_fonasa: linea(i => (i === 1 ? 30000 : 0)), ingreso_llmm_sil: linea(i => (i === 2 ? 20000 : 0)),
+    honorarios: { llmh1121_1: bolc('Reemplazo', 'BOLHE', 1201, '2026-03-02', '2026-03-09', 'Boleta que la fuente sin gasto debe ignorar', 200000) } });
+  Object.assign(de('1121', 'general'), { ingreso_carrera_docente: ing12(700000) });
+  Object.assign(de('1121', 'pie'), { ingreso_carrera_docente: ing12(300000) });
+  docsHF['1121'].fondos_fijos = { cupo: 500000, meses: { MARZO: { saldo_inicial: 500000, rendido: 150000, observado: 30000, registrado_general: 120000, compensado_sigfe: 0, reposicion: 0, folio: 'FF-3' }, JUNIO: { rendido: 80000, registrado_general: 80000 } } };
 }
 
 // ---------- salida ----------
