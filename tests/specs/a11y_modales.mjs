@@ -1,4 +1,4 @@
-// a11y_modales — U-09: los 3 diálogos modales del panel (detalle SEP, detalle de una fuente y "Cómo usar") son diálogos de verdad.
+// a11y_modales — U-09: los 4 diálogos modales del panel (detalle SEP, detalle de una fuente, Fondos Fijos y "Cómo usar") son diálogos de verdad.
 //
 // Antes: sin role="dialog" / aria-modal / nombre accesible; el foco no entraba al abrir (SEP, "Cómo usar"), Tab salía del diálogo hacia la página que
 // queda detrás, y al cerrar el foco no volvía a quien lo abrió (SEP, "Cómo usar", panel "Atención"). Ahora: role="dialog" aria-modal="true" aria-labelledby → título,
@@ -6,7 +6,7 @@
 // al elemento que lo abrió (o a su equivalente si ese se repintó o quedó oculto). Y el reconciliador del modal (morphContenedor, PR #57) no pierde el foco, el
 // cursor ni lo tecleado, ni borra los atributos de rol/aria, ante snapshots remotos.
 //
-// Inventario (grep de `modal-overlay`, `role=`, `position:fixed`, `confirm(`): exactamente 3 diálogos propios (#rbdModal, #otrasFuentesModal, #helpModal); el panel
+// Inventario (grep de `modal-overlay`, `role=`, `position:fixed`, `confirm(`): exactamente 4 diálogos propios (#rbdModal, #otrasFuentesModal, #fondosFijosModal, #helpModal); el panel
 // "Atención" del Panel principal es una LISTA (no un modal): abre el detalle de la entidad en el modal de SEP o de la fuente, y eso también se verifica aquí.
 import { boot } from '../lib/boot.mjs';
 import { axDe } from '../lib/a11y.mjs';
@@ -16,6 +16,7 @@ const MODALES = [
   { id: 'rbdModal', titulo: 'modalTitle', cerrar: 'modalCloseBtn', nombre: 'SEP (detalle por RBD)' },
   { id: 'otrasFuentesModal', titulo: 'otrasFuentesModalTitle', cerrar: 'otrasFuentesModalCloseBtn', nombre: 'fuentes (detalle por entidad)' },
   { id: 'helpModal', titulo: 'helpModalTitle', cerrar: 'helpModalCloseBtn', nombre: 'Cómo usar' },
+  { id: 'fondosFijosModal', titulo: 'fondosFijosModalTitle', cerrar: 'fondosFijosModalCloseBtn', nombre: 'Fondos Fijos (detalle por entidad)' },
 ];
 
 const abierto = (page, id) => page.evaluate((i) => !document.getElementById(i).classList.contains('hidden'), id);
@@ -96,7 +97,7 @@ await correrSpec('a11y_modales', async (t) => {
   const h = await boot({ fixture: 'default', viewport: { width: 1400, height: 900 } });
   const { page } = h;
 
-  // ======================================================================== 0) marcado estático de los 3 diálogos
+  // ======================================================================== 0) marcado estático de los 4 diálogos
   await escenario(t, 'E0', async () => {
     for (const m of MODALES) {
       const r = await page.evaluate((mm) => {
@@ -270,6 +271,70 @@ await correrSpec('a11y_modales', async (t) => {
     }
   });
 
+  // ======================================================================== G) Fondos Fijos (control operativo): modal de la pestaña «Fondos Fijos»
+  const ff = MODALES[3];
+  const botonFF = (id) => `#fondosFijosTbody [data-ff-abrir="${id}"]`;
+  const activoFF = (pg) => pg.evaluate(() => { const a = document.activeElement; return { abrir: a && a.getAttribute ? a.getAttribute('data-ff-abrir') : null, id: a && a.id, esBody: a === document.body, esCelda: !!(a && a.matches && a.matches('input.ff-input')), mes: a && a.dataset ? a.dataset.ffMes : null, campo: a && a.dataset ? a.dataset.ffCampo : null }; });
+  await escenario(t, 'G', async () => {
+    await h.clickTab('fondos fijos');
+    await page.focus(botonFF('1121'));
+    await page.keyboard.press('Shift+Tab'); await page.keyboard.press('Tab');
+    await page.keyboard.press('Enter');
+    await h.waitIdle();
+    t.ok(await abierto(page, ff.id), 'G1) Enter sobre «Ver / editar» abre el detalle de Fondos Fijos');
+    await verificarAbierto(t, h, ff, 'G1) Fondos Fijos', 'RBD 1121');
+    await page.keyboard.press('Escape');
+    await h.waitIdle();
+    t.ok(!(await abierto(page, ff.id)), 'G2) Escape cierra el detalle de Fondos Fijos');
+    t.ok(!(await paginaInerte(page)), 'G2) y la página deja de estar inert');
+    const a = await activoFF(page);
+    t.ok(a.abrir === '1121', 'G2) el foco vuelve al «Ver / editar» de la entidad que lo abrió', a);
+    t.eq(await page.evaluate(() => document.querySelectorAll('.modal-overlay:not(.hidden)').length), 0, 'G2) no queda ningún diálogo abierto');
+
+    // ✕ y clic en el velo
+    await page.click(botonFF('1122'));
+    await h.waitIdle();
+    t.ok((await activo(page)).id === ff.cerrar, 'G3) con clic también entra el foco al diálogo');
+    await page.click(`#${ff.cerrar}`);
+    await h.waitIdle();
+    t.ok(!(await abierto(page, ff.id)) && (await activoFF(page)).abrir === '1122', 'G3) ✕ cierra y el foco vuelve a la fila de esa entidad');
+    await page.click(botonFF('5402002'));
+    await h.waitIdle();
+    await page.mouse.click(5, 450);
+    await h.waitIdle();
+    t.ok(!(await abierto(page, ff.id)) && (await activoFF(page)).abrir === '5402002', 'G4) el clic en el velo cierra y devuelve el foco (GESPARVU)');
+
+    // editar con Tab: el foco pasa de una celda a la siguiente (antes el modal se reconstruía y el foco se perdía en <body>)
+    await page.click(botonFF('1122'));
+    await h.waitIdle();
+    const rendidoAbr = '#fondosFijosModalBody input.ff-input[data-ff-mes="ABRIL"][data-ff-campo="rendido"]';
+    await page.fill(rendidoAbr, '120000');
+    await page.keyboard.press('Tab');
+    await h.waitIdle();
+    const trasTab = await activoFF(page);
+    t.ok(trasTab.esCelda && !trasTab.esBody, 'G5) al guardar una celda con Tab el foco pasa a la celda siguiente del modal (no se pierde en <body>)', trasTab);
+    t.eq(await page.evaluate((s) => document.querySelector(s).value, rendidoAbr), '120000', 'G5) y la celda editada conserva su valor');
+    t.ok(await paginaInerte(page) && await abierto(page, ff.id), 'G5) el modal sigue abierto con el fondo inert');
+
+    // reconciliación con cambios remotos: foco, cursor y texto de la celda en edición intactos; la otra celda se actualiza
+    const celda = '#fondosFijosModalBody input.ff-input[data-ff-mes="MAYO"][data-ff-campo="saldo_inicial"]';
+    await page.click(celda);
+    await page.keyboard.press('End');
+    await page.keyboard.type('77');
+    const antes = await page.evaluate((s) => { const el = document.querySelector(s); return { v: el.value, pos: el.selectionStart }; }, celda);
+    await h.remoto('1125', 'd.fondos_fijos = { cupo: 1, meses: { ENERO: { rendido: 5 } } }');
+    await h.remoto('1122', 'd.fondos_fijos = d.fondos_fijos || { meses: {} }; d.fondos_fijos.meses.JUNIO = { observado: 424242 }');
+    await h.waitIdle();
+    const despues = await page.evaluate((s) => { const el = document.querySelector(s); return { v: el.value, pos: el.selectionStart, foco: document.activeElement === el }; }, celda);
+    t.ok(despues.foco && despues.v === antes.v && despues.pos === antes.pos, 'G6) tras snapshots remotos la celda en edición conserva foco, texto y cursor', { antes, despues });
+    const junio = await page.evaluate(() => document.querySelector('#fondosFijosModalBody input.ff-input[data-ff-mes="JUNIO"][data-ff-campo="observado"]').value);
+    t.eq(junio, '424242', 'G6) y el cambio remoto de otra celda sí se refleja en el modal abierto (el modal se reconcilia con cada snapshot)');
+    const attrs = await page.evaluate(() => { const p = document.querySelector('#fondosFijosModal .modal-panel'); return { rol: p.getAttribute('role'), modal: p.getAttribute('aria-modal'), lb: p.getAttribute('aria-labelledby'), inert: document.querySelector('#app .wrap').hasAttribute('inert') }; });
+    t.ok(attrs.rol === 'dialog' && attrs.modal === 'true' && attrs.lb === 'fondosFijosModalTitle' && attrs.inert, 'G6) role/aria-modal/aria-labelledby y fondo inert se conservan', attrs);
+    await page.keyboard.press('Escape');
+    await h.waitIdle();
+  });
+
   // ======================================================================== F) la sesión termina con un diálogo abierto
   await escenario(t, 'F', async () => {
     await h.clickTab('SEP');
@@ -284,4 +349,19 @@ await correrSpec('a11y_modales', async (t) => {
 
   t.noErrores(h);
   await h.close();
+
+  // ======================================================================== H) la sesión termina con el modal de Fondos Fijos abierto
+  await escenario(t, 'H', async () => {
+    const h2 = await boot({ fixture: 'default', viewport: { width: 1400, height: 900 } });
+    await h2.clickTab('fondos fijos');
+    await h2.page.click('#fondosFijosTbody [data-ff-abrir="1121"]');
+    await h2.waitIdle();
+    t.ok(await paginaInerte(h2.page) && await abierto(h2.page, ff.id), 'H1) con el modal de Fondos Fijos abierto la página está inert');
+    await h2.page.evaluate(() => window.__mockfb.auth.setUser(null));
+    await h2.page.waitForFunction(() => !document.getElementById('login-screen').classList.contains('hidden'), null, { timeout: 5000 });
+    t.ok(!(await abierto(h2.page, ff.id)), 'H1) al mostrarse la pantalla de acceso el modal de Fondos Fijos queda cerrado');
+    t.ok(!(await paginaInerte(h2.page)), 'H1) y la página no queda inert');
+    t.noErrores(h2);
+    await h2.close();
+  });
 });

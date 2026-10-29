@@ -2,7 +2,7 @@
 //
 // Antes el número de DC (DC_344, DC-33, "DC_22 - No hay PME"…) se anotaba en "Doc. original", que en realidad solo sirve para
 // las notas de crédito/débito del CSV de SUPEREDUC. Ahora:
-//   · SEP y las 4 fuentes con compras (General, PIE, Mantención, Pro-Retención, también la entidad AC) tienen el campo "N° DC" en el
+//   · SEP y las 4 fuentes con compras (General, PIE, Mantenimiento, Pro-Retención, también la entidad AC) tienen el campo "N° DC" en el
 //     formulario y en la tabla (columna visible siempre, justo antes de "Doc. original"); ✏️ / ⧉ / 🗑 siguen funcionando;
 //   · "Doc. original" queda para NC/ND: se ATENÚA (no se deshabilita) con otro tipo de documento;
 //   · un DC legado en "Doc. original" se MUESTRA como N° DC (derivado, en cursiva) y el botón admin "Migrar DC (n)" lo mueve;
@@ -303,7 +303,7 @@ await correrSpec('n_dc', async (t) => {
     await h.close();
   });
 
-  // ============================================================================================ 6) Fuentes con compras (General, PIE, Mantención, Pro-Retención y la entidad AC)
+  // ============================================================================================ 6) Fuentes con compras (General, PIE, Mantenimiento, Pro-Retención y la entidad AC)
   await escenario(t, 'Fuentes', async () => {
     const h = await boot({ fixture: 'default' });
     const { page } = h;
@@ -358,7 +358,7 @@ await correrSpec('n_dc', async (t) => {
     const idsAc = Object.keys(((w[0] || {}).payload || {}).otras_fuentes?.general?.compras || {});
     t.ok(w.length === 1 && idsAc.length === 1 && w[0].payload.otras_fuentes.general.compras[idsAc[0]].documentoContable === 'DC_AC_1', 'General › AC: el write va a sep_carga_rbd/AC con documentoContable', w[0] && w[0].payload);
     await cerrarModales(h);
-    // PIE y Mantención: mismo comportamiento
+    // PIE y Mantenimiento: mismo comportamiento
     await abrirFuente(h, 'pie');
     t.eq((await celdaDc(page, MODAL_OF, 'opi_1121_1')).texto, 'DC_88', 'PIE › 1121: muestra su N° DC propio');
     await cerrarModales(h);
@@ -369,7 +369,7 @@ await correrSpec('n_dc', async (t) => {
     await h.flushWrites();
     w = writesDe(await h.writes(), '1121');
     const idsM = Object.keys(((w[0] || {}).payload || {}).otras_fuentes?.mantenimiento?.compras || {});
-    t.ok(idsM.length === 1 && w[0].payload.otras_fuentes.mantenimiento.compras[idsM[0]].documentoContable === 'DC_M_1', 'Mantención: el write incluye documentoContable en otras_fuentes.mantenimiento.compras', w[0] && w[0].payload);
+    t.ok(idsM.length === 1 && w[0].payload.otras_fuentes.mantenimiento.compras[idsM[0]].documentoContable === 'DC_M_1', 'Mantenimiento: el write incluye documentoContable en otras_fuentes.mantenimiento.compras', w[0] && w[0].payload);
     await cerrarModales(h);
     await abrirFuente(h, 'prorretencion');
     await h.clearWrites();

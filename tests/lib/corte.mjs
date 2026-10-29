@@ -16,7 +16,7 @@ export const GESPARVU_IDS = RBDS.gesparvu.map(g => g.rbd);
 export const FUENTES = [
   { key: 'general', label: 'Subvención General', corto: 'Subv. General', universo: 'rbd_ac' },
   { key: 'pie', label: 'PIE', corto: 'PIE', universo: 'rbd_ac' },
-  { key: 'mantenimiento', label: 'Subv. Mantención', corto: 'Mantención', universo: 'rbd_ac' },
+  { key: 'mantenimiento', label: 'Subv. Mantenimiento', corto: 'Mantenimiento', universo: 'rbd_ac' },
   { key: 'prorretencion', label: 'Subv. Pro-Retención', corto: 'Pro-Retención', universo: 'rbd_ac' },
   { key: 'junji', label: 'JUNJI', corto: 'JUNJI', universo: 'gesparvu' },
   { key: 'faep', label: 'FAEP', corto: 'FAEP', universo: 'rbd_ac_gesparvu' },

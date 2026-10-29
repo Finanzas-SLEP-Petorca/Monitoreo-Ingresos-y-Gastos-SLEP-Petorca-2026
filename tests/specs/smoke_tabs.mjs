@@ -5,7 +5,7 @@ import { correrSpec } from '../lib/spec.mjs';
 
 const TABS = [
   ['Panel principal', 'dashboard', 'tab-dashboard'], ['SEP', 'panel', 'tab-panel'],
-  ['General', 'of-general', 'tab-of-general'], ['PIE', 'of-pie', 'tab-of-pie'], ['Mantención', 'of-mantenimiento', 'tab-of-mantenimiento'],
+  ['General', 'of-general', 'tab-of-general'], ['PIE', 'of-pie', 'tab-of-pie'], ['Mantenimiento', 'of-mantenimiento', 'tab-of-mantenimiento'],
   ['Pro-Retención', 'of-prorretencion', 'tab-of-prorretencion'], ['JUNJI', 'of-junji', 'tab-of-junji'], ['FAEP', 'of-faep', 'tab-of-faep'],
   ['FIGA', 'of-figa', 'tab-of-figa'], ['Aporte Educ.', 'of-aporte_educ', 'tab-of-aporte_educ'], ['Aporte JUNJI', 'of-aporte_junji', 'tab-of-aporte_junji'],
   ['% Ejecución', 'ejecucion', 'tab-ejecucion'], ['Reportes', 'reportes', 'tab-reportes'],

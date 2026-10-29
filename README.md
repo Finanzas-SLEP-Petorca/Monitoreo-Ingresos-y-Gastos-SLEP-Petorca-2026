@@ -21,13 +21,14 @@ La barra de pestañas va en tres grupos, siempre en este orden:
 
 1. **Inicio**: 🏠 **Panel principal** (dashboard, la pestaña que se abre al entrar) y 🎓 **SEP** (lo que antes
    se llamaba "Panel principal": la tabla "Estado por RBD" con la regla 70/30; conserva todo su contenido).
-2. **Fuentes de financiamiento** (una pestaña por fuente, sin selector): General, PIE, Mantención,
-   Pro-Retención, JUNJI, FAEP, FIGA, Aporte Educ. y Aporte JUNJI.
+2. **Fuentes de financiamiento** (una pestaña por fuente, sin selector): General, PIE, Mantenimiento,
+   Pro-Retención, JUNJI, FAEP, Subt. 31, Recup. LLMM, Asig. Familiar, **💼 Fondos Fijos** (control operativo: no es una fuente de
+   financiamiento, ver «Fondos Fijos»), FIGA, Aporte Educ. y Aporte JUNJI. Son **12 fuentes** más la pestaña de Fondos Fijos.
 3. **Análisis**: 📉 % Ejecución y 📈 Reportes (siempre al final).
 
-Los rótulos de las fuentes son cortos para que las 13 pestañas quepan en **una sola fila** desde ~1360 px de
-ancho (General, PIE, Mantención, Pro-Retención, JUNJI, FAEP, FIGA, Aporte Educ. y Aporte JUNJI; el nombre
-completo está en el `title` de cada botón y en el título de su pestaña). En pantallas más angostas la barra
+Los rótulos de las fuentes son cortos (General, PIE, Mantenimiento, Pro-Retención, JUNJI, FAEP, Subt. 31, Recup. LLMM, Asig. Familiar,
+Fondos Fijos, FIGA, Aporte Educ. y Aporte JUNJI; el nombre completo está en el `title` de cada botón y en el título de su pestaña). Con las 17
+pestañas la barra ya no cabe en una sola fila a todos los anchos: envuelve por grupos y, de 760 px hacia abajo, hace scroll horizontal (ver abajo). En pantallas más angostas la barra
 envuelve por grupos (y el grupo de fuentes se parte en varias líneas si hace falta) y, desde 760 px o menos,
 pasa a una sola fila con scroll horizontal propio: el borde que tiene más pestañas ocultas se difumina para
 indicarlo.
@@ -42,9 +43,9 @@ hacia abajo. A 1440 px o más el diseño es el mismo de siempre.
 #### % Ejecución por fuente
 
 La pestaña **% Ejecución** tiene una fila de botones para elegir la fuente: **SEP** (comportamiento de
-siempre, contra la meta 70/30), las 9 fuentes y **Consolidado** (SEP + las 9). Para las fuentes que no son
+siempre, contra la meta 70/30), las fuentes con gasto (11 de las 12: **Recuperación LLMM**, que es solo de ingresos, no tiene serie de ejecución) y **Consolidado** (SEP + las 12). Para las fuentes que no son
 SEP no hay meta ni techo, así que el % de ejecución se define **sobre el Ingreso anual Total (Real+Proy)** de
-la selección (suma de sus líneas de ingreso, 4 en JUNJI: Operación, Homologación, Carrera Docente y BDL):
+la selección (suma de sus líneas de ingreso: 4 en JUNJI —Operación, Homologación, Carrera Docente y BDL—, 2 en General y PIE —Ingreso + Ingreso Carrera Docente—):
 
 - % Ejec. Remuneraciones acumulado = Σ gasto en Remuneraciones hasta el mes / Ingreso anual Total.
 - % Ejec. B&S acumulado = Σ gasto en Bienes y Servicios hasta el mes / Ingreso anual Total.
@@ -70,12 +71,12 @@ NINGUNO (mes > el mayor) y **Mixto** entre medio — es decir, cuando la selecci
 remuneraciones de un mismo RBD tienen cortes distintos (p. ej. ingresos hasta agosto y remuneraciones hasta julio: agosto sale "Mixto"). El
 Reporte personalizado, que colorea celda por celda, deja sin color la que mezcla ambos tipos.
 
-El **Panel principal** resume SEP + las 9 fuentes de un vistazo (todo en tiempo real, sin cargar nada aparte):
+El **Panel principal** resume SEP + las 12 fuentes de un vistazo (todo en tiempo real, sin cargar nada aparte):
 
 - **Chips Total (Real+Proy) / Real / Proyectado**: cambian todas las cifras y gráficos de la pantalla.
 - **Franja consolidada**: Ingreso, Gasto Remuneraciones, Gasto Bienes y Servicios, Gasto Total, Saldo y
-  entidades en déficit (suma de SEP y las 9 fuentes; siempre sobre el Total, ver "Estado de una entidad").
-- **Una tarjeta por fuente** (10): saldo destacado (verde/rojo con ▲/▼ y etiqueta, nunca solo color), Ingreso
+  entidades en déficit (suma de SEP y las 12 fuentes; siempre sobre el Total, ver "Estado de una entidad"). La franja y los gráficos NO incluyen Fondos Fijos.
+- **Una tarjeta por fuente** (13: SEP y las 12 fuentes): saldo destacado (verde/rojo con ▲/▼ y etiqueta, nunca solo color), Ingreso
   vs. Gasto en mini barras, % de ejecución (Gasto/Ingreso, con barra de progreso) y "N de M entidades en
   déficit". **Clic (o Enter/Espacio) en una tarjeta abre la pestaña de esa fuente.** Las cifras coinciden
   exactamente con las tarjetas KPI de la pestaña correspondiente en la misma vista (para SEP, "Ingreso" =
@@ -94,6 +95,8 @@ El **Panel principal** resume SEP + las 9 fuentes de un vistazo (todo en tiempo 
   entidad"): en la vista Total son exactamente las entidades con Estado Déficit —las mismas que cuenta la franja— y, en JUNJI, las que lo están
   por el saldo de Operación para B&S llevan su causa; en las vistas Real y Proyectado, las de saldo negativo en esa vista (el Estado se
   calcula siempre sobre el Total).
+- **💼 Fondos Fijos — control operativo** (recuadro, `renderDashFondosFijos`): gasto aceptado, pendiente de registrar en General y pendiente SIGFE de las 68 entidades, con un enlace a la pestaña. No suma
+  a ninguna cifra del panel (ver «Fondos Fijos»).
 - **Mes de cierre** (solo lectura): bajo el título hay una línea "📅 Mes de cierre: Septiembre · ⚠ N entidades con corte
   distinto al cierre global" con un enlace a la pestaña SEP, donde está el control (ver abajo).
 - **🖨 Exportar PDF** del dashboard (mismo mecanismo de impresión del navegador; se ocultan la barra de
@@ -121,10 +124,11 @@ que tanto la pantalla de login como el panel interno compartan la misma paleta.
 El panel se puede usar sin ratón y con lector de pantalla. Qué hay y cómo se comprueba:
 
 - **Estructura de la página.** `<header>` (banner), `<nav aria-label="Secciones del panel">` con la barra de pestañas y un único `<main>` que
-  contiene los 13 paneles. Los tres diálogos (detalle por RBD, detalle de una fuente y "❓ Cómo usar") cuelgan fuera de la zona principal.
+  contiene los 17 paneles. Los cuatro diálogos (detalle por RBD, detalle de una fuente, detalle de Fondos Fijos y "❓ Cómo usar") cuelgan fuera de la zona principal
+  (si el de Fondos Fijos quedara dentro de ella, no se podría inertizar el fondo).
 - **Pestañas** (patrón WAI-ARIA *tabs*). Los tres grupos (Inicio / Fuentes de financiamiento / Análisis) son `role="tablist"`; cada pestaña es
   `role="tab"` con `aria-selected` y `aria-controls`, y cada panel `role="tabpanel"` con `aria-labelledby`. Solo la pestaña activa está en el orden de
-  **Tab** (las otras 12 tienen `tabindex="-1"`). Con el foco en la barra: **← / →** pasan a la pestaña vecina **y la abren** (las 13 forman una sola
+  **Tab** (las otras 16 tienen `tabindex="-1"`). Con el foco en la barra: **← / →** pasan a la pestaña vecina **y la abren** (las 17 forman una sola
   secuencia aunque estén en tres grupos; del final se vuelve al principio), **Inicio / Fin** van a la primera / última, **Enter** o **Espacio** también
   activan. Al abrir una pestaña desde una tarjeta del Panel principal, el foco pasa a esa pestaña (antes se perdía).
 - **Diálogos modales.** Cada uno es `role="dialog" aria-modal="true"` con nombre (su título). Al abrirlo el foco entra al botón **✕ Cerrar**, **Tab /
@@ -132,7 +136,8 @@ El panel se puede usar sin ratón y con lector de pantalla. Qué hay y cómo se 
   cierran. Al cerrar, el foco vuelve a lo que lo abrió (la fila o el botón ▸, o "❓ Cómo usar"); si esa fila se repintó por un cambio de otra persona se
   usa la fila vigente de la misma entidad, y si se abrió desde el panel "Atención" (que cambia de pestaña) vuelve a la fila de esa entidad. El contenido del
   diálogo se sigue reconciliando con cada cambio remoto sin mover el foco, el cursor ni lo tecleado.
-- **Nombres accesibles.** Toda celda de monto se llama `<concepto>, <mes>, <entidad>` (p. ej. "Remuneraciones (Subt. 21), enero, RBD 1121"); los
+- **Nombres accesibles.** Toda celda de monto se llama `<concepto>, <mes>, <entidad>` (p. ej. "Remuneraciones (Subt. 21), enero, RBD 1121"; en el modal de Fondos Fijos `<campo> <MES>`, p. ej.
+  "Rendido por director(a) MARZO", y cada «Ver / editar» dice de qué entidad es); los
   buscadores, filtros y selectores tienen etiqueta; los botones solo-icono (✕, 🗑, ✏️, ⧉, 🖨, 📅, ▸) llevan `aria-label` y las acciones de cada fila dicen
   de qué entidad son ("Descargar PDF del RBD 1121"). Regla: ningún control depende de `title` o `placeholder` como único nombre.
 - **Contraste.** Todo texto visible (también en estado *hover*, con foco y en los avisos de sincronización) cumple 4,5:1 (3:1 si mide ≥ 24 px, o ≥ 18,66 px
@@ -144,7 +149,7 @@ El panel se puede usar sin ratón y con lector de pantalla. Qué hay y cómo se 
   tablas con scroll se dibuja hacia adentro para que no lo recorten). Solo aparece al navegar con el teclado: el clic del ratón no lo muestra, y los estilos
   de *hover* no cambian.
 
-Pruebas automáticas (Playwright): `a11y_modales`, `a11y_pestanas`, `a11y_nombres`, `a11y_contraste` y `a11y_foco` (ver `tests/README.md`).
+Pruebas automáticas (Playwright): `a11y_modales` (los 4 diálogos, incluido el de Fondos Fijos), `a11y_pestanas`, `a11y_nombres`, `a11y_contraste` y `a11y_foco`, que también recorren la pestaña y el modal de Fondos Fijos y las pestañas de las fuentes nuevas (ver `tests/README.md`).
 
 ### Formato de números (presentación es-CL)
 
@@ -224,7 +229,7 @@ Honorarios, Cap. IV, no en el de Compras); si cancelas el aviso no se descarga n
 libre de hasta 100 caracteres, p. ej. `DC_344`): el número del documento contable interno, es decir, la
 carpeta/SET donde está el respaldo del gasto y la única pista de que ese gasto ya fue registrado. Está en el
 formulario y en la tabla de compras (columna siempre visible, junto a *Doc. original*) del modal de SEP y del modal
-de las 4 fuentes con registro de compras (General, PIE, Mantención, Pro-Retención, incluida la entidad AC), y sigue
+de las 4 fuentes con registro de compras (General, PIE, Mantenimiento, Pro-Retención, incluida la entidad AC), y sigue
 las mismas reglas que el resto de la compra (editar ✏️, duplicar ⧉, eliminar 🗑, guardado en tiempo real: la clave
 `documentoContable` va en el mismo mapa de la compra y se fusiona celda a celda).
 
@@ -403,7 +408,7 @@ El mismo bloque «Honorarios (Subt. 21)» de SEP (fila mensual de boletas siempr
 
 | Fuentes | Clave | Selector de tipo |
 |---|---|---|
-| Subv. General, PIE, Mantención, Pro-Retención | **cuenta** del catálogo de honorarios (36 cuentas); la habilita la columna del Plan de Cuentas de la subvención (la fila AC de General usa «Adm. Central General») | solo los tipos que acepta la cuenta |
+| Subv. General, PIE, Mantenimiento, Pro-Retención | **cuenta** del catálogo de honorarios (36 cuentas); la habilita la columna del Plan de Cuentas de la subvención (la fila AC de General usa «Adm. Central General») | solo los tipos que acepta la cuenta |
 | JUNJI, FAEP, Subtítulo 31, Asignación Familiar, FIGA, Aporte Fiscal Educación y Aporte Fiscal JUNJI | **concepto** (texto libre, con sugerencias; sin `__x__` ni más de 1400 bytes) | los 5 tipos de honorarios |
 | Recuperación Licencias Médicas | **no lleva honorarios**: es una fuente exclusivamente de ingresos (sin gasto) | — |
 
@@ -417,7 +422,7 @@ El mismo bloque «Honorarios (Subt. 21)» de SEP (fila mensual de boletas siempr
   (tarjetas, franja, tabla por fuente, gráficos apilados con el segmento «Honorarios», evolución mensual y «Atención»), % Ejecución (tercera serie «Honorarios (Subt. 21)» para SEP, cada fuente y el
   Consolidado; Subt. 31 y Asignación Familiar tienen su chip), Visualizador (serie «Honorarios») y Reporte personalizado (`Honorarios — boletas`, `Honorarios — proyección` y una línea por cuenta o concepto).
   **Son los mismos números en todas las vistas.** Sin honorarios cargados las cifras no cambian.
-- **Excel y PDF**: las hojas `HONORARIOS` y `HON_PROYECCION` (por cuenta con `Codigo` + `Item` en General/PIE/Mantención/Pro-Retención; por concepto con `Concepto` en las demás) van antes de `META`; el
+- **Excel y PDF**: las hojas `HONORARIOS` y `HON_PROYECCION` (por cuenta con `Codigo` + `Item` en General/PIE/Mantenimiento/Pro-Retención; por concepto con `Concepto` en las demás) van antes de `META`; el
   Excel individual (XLS por fila) y el PDF de la entidad las traen; Recuperación LLMM no las exporta. Un Excel anterior sin estas hojas se importa igual y no toca ninguna boleta.
 - **Datos**: `otras_fuentes.{fuente}.honorarios.{id}` (boleta; con `codigo` o `concepto`) y `otras_fuentes.{fuente}.hon_proyeccion_items.{cuenta|concepto}` (`{ meses, total }`). Se escriben por boleta
   o por mes con `merge`; la lectura es tolerante (entradas que no son objetos, montos de texto o mapas de otro tipo se ignoran sin escribir) y valida las claves de mapa.
@@ -467,15 +472,15 @@ Cada tabla del detalle por RBD marca sus columnas de mes en verde ("Real") o nar
   `13`, `null`, `7,5`…) equivale a "sin definir".
 - **Corte efectivo del ingreso de un RBD** = su `ingreso_real_hasta_mes` si es válido → el mes de cierre global si está
   definido → `DATA.n_meses` (hoy 7 = julio, constante embebida en `index.html`). **Mientras no se defina nada, las cifras son exactamente las de antes.**
-  Remuneraciones y las 9 fuentes mantienen su propio corte (por defecto `DATA.n_meses`): el mes de cierre solo mueve el
+  Remuneraciones y las 12 fuentes mantienen su propio corte (por defecto `DATA.n_meses`): el mes de cierre solo mueve el
   default de los **ingresos de SEP** sin corte propio.
 - **Control en la pestaña SEP** (arriba de las tarjetas KPI): "📅 Mes de cierre: Septiembre · fijado por … el …" (o "sin definir" mientras nadie lo fije). Solo quien
   está en `ADMIN_EMAILS` ve además el selector **"Cambiar a:"** y el botón **"Aplicar a todas las entidades"**; el resto
   lo ve como texto de solo lectura. Cambiar el selector guarda en `_meta` y **no toca ningún corte explícito** de una entidad.
 - **"Aplicar a todas las entidades"** (solo admin, como "Migrar DC"): pide confirmación mostrando cuántas entidades
   cambian y por origen (SEP — Ingresos, SEP — Remuneraciones y cada fuente) y fija el mes de cierre en todas: `ingreso_real_hasta_mes`
-  y `rem.real_hasta_mes` de SEP y `otras_fuentes.{fuente}.real_hasta_mes` de las 9 fuentes (cada entidad en las fuentes de su
-  universo: RBD + AC; GESPARVU en JUNJI y Aporte JUNJI; los tres en FAEP y FIGA). Solo escribe lo que cambia (un ingreso sin corte propio ya sigue
+  y `rem.real_hasta_mes` de SEP y `otras_fuentes.{fuente}.real_hasta_mes` de las 12 fuentes (cada entidad en las fuentes de su
+  universo: RBD + AC; GESPARVU en JUNJI y Aporte JUNJI; los tres en FAEP, Subt. 31, Recuperación LLMM y FIGA; RBD + GESPARVU en Asignación Familiar). Solo escribe lo que cambia (un ingreso sin corte propio ya sigue
   al cierre, así que no recibe campo), un `set` con `merge:true` por documento, en `writeBatch` de a lo más 400 operaciones
   (cada documento cuenta 2: el `set` y el `serverTimestamp` de la auditoría; hasta 200 documentos por lote); la pantalla se
   actualiza al instante; repetirlo no escribe nada; si un lote falla, se avisa y repetir solo reintenta lo que falta.
@@ -522,7 +527,7 @@ Es la última pestaña de la barra y tiene dos vistas, que se eligen con los chi
 
 **Visualizador (multi-fuente).** Consolida **todas las fuentes de financiamiento** al estilo del
 Visualizador de la plataforma de Rendición de Cuentas de SUPEREDUC (Manual, Cap. VII): filtros por
-Fuente (SEP + las 9 fuentes, chips con "Todas / Ninguna") y por Entidad (55 RBD, "AC" y los 13
+Fuente (SEP + las 12 fuentes, chips con "Todas / Ninguna") y por Entidad (55 RBD, "AC" y los 13
 GESPARVU —jardines infantiles—, con buscador; al elegir solo AC o solo GESPARVU quedan únicamente las fuentes
 cuyo universo los incluye), un panel **Saldo disponible** (Ingresos − Gastos) y dos tablas
 expandibles, **Ingresos** y **Gastos**, con columnas **Real / Proyectado / Total**:
@@ -543,21 +548,23 @@ expandibles, **Ingresos** y **Gastos**, con columnas **Real / Proyectado / Total
   fuente coinciden con las tarjetas del Panel principal y de cada pestaña.
 
 **Reporte personalizado.** Cruce **entidad × concepto × mes(es)** con coloreo real/proyectado por
-celda, ahora para **SEP y las 9 fuentes de financiamiento**:
+celda, ahora para **SEP y las 12 fuentes de financiamiento**:
 
 - **Entidades**: los 55 RBD + "AC — Administración Central" + los 13 GESPARVU, en la misma lista
   (agrupada con encabezados, con buscador y Todos/Ninguno; todas marcadas por defecto). Un par
   entidad × concepto que no corresponde (un GESPARVU con un concepto de SEP, un RBD con un concepto
-  de JUNJI) simplemente no genera fila: RBD → SEP y las fuentes por RBD (incluidas FAEP y FIGA); AC → las fuentes por RBD, sin SEP;
-  GESPARVU → JUNJI, Aporte Fiscal JUNJI, FAEP y FIGA. El grupo de la lista se llama «GESPARVU (jardines infantiles)».
+  de JUNJI) simplemente no genera fila: RBD → SEP y todas las fuentes salvo JUNJI y Aporte Fiscal JUNJI; AC → las fuentes cuyo universo la incluye (General, PIE, Mantenimiento, Pro-Retención, FAEP, Subt. 31,
+  Recuperación LLMM, FIGA y Aporte Educación; no SEP ni Asignación Familiar);
+  GESPARVU → JUNJI, Aporte Fiscal JUNJI, FAEP, Subt. 31, Recuperación LLMM, Asignación Familiar y FIGA, y **Subv. General solo si tiene Fondos Fijos registrados en General**. El grupo de la lista se llama «GESPARVU (jardines infantiles)».
 - **Conceptos agrupados por fuente** (un grupo plegable por fuente; SEP abierto por defecto) con
   chips de fuente encima del buscador (solo filtran qué grupos se ven, no lo seleccionado). Los de
   SEP conservan sus keys y etiquetas de siempre (3 ingresos SEP, Remuneraciones, cada ítem de
   compras Subt.22/29, la proyección de B&S total y por ítem). Los de las fuentes llevan prefijo
-  `[Fuente]`: Ingreso (o las 4 líneas de JUNJI: Operación, Homologación, Carrera Docente y «Ingreso Bono Desempeño Laboral (BDL)»), Remuneraciones, Bienes y Servicios total
+  `[Fuente]`: Ingreso (o las 4 líneas de JUNJI: Operación, Homologación, Carrera Docente y «Ingreso Bono Desempeño Laboral (BDL)»; «Ingreso Carrera Docente» en General y PIE; las 3 líneas de Recuperación LLMM,
+  que no ofrece nada más), Remuneraciones, Bienes y Servicios total
   (Real+Proy) y, en las fuentes con compras, Proyección de B&S total; además, **dinámicos** (solo si
   hay datos): B&S por código de cuenta (compras), B&S por concepto libre y proyección de B&S por
-  concepto. Un mismo código en dos fuentes es un concepto distinto por fuente.
+  concepto, y «Fondos Fijos rendidos (control operativo)» en General cuando hay algo registrado (siempre Real; también entra en «B&S total»). Un mismo código en dos fuentes es un concepto distinto por fuente.
 - **Real / proyectado por celda**: en SEP, las mismas reglas de siempre (Ingresos según el corte de
   ingresos de cada RBD y Remuneraciones según su corte propio, compras siempre reales, proyección
   siempre proyectada). En las fuentes,
@@ -579,9 +586,9 @@ acumulado hasta el mes" de la pestaña SEP, que solo afecta a las tarjetas KPI (
 ### Pestaña "Otras Fuentes"
 
 Primer paso de una ampliación mayor: hacer el seguimiento de fuentes de financiamiento distintas
-de SEP. Hoy son 9: Subvención General, PIE, Subvención de Mantención, Subvención Pro-Retención,
-JUNJI, FAEP, FIGA, Aporte Fiscal Extraordinario Educación y Aporte Fiscal Extraordinario JUNJI
-(estos dos últimos van como fuentes separadas a pedido del usuario). A diferencia de SEP, estas fuentes **no tienen marco anual ni meta 70/30** —
+de SEP. Hoy son 12: Subvención General, PIE, Subvención de Apoyo al Mantenimiento («Mantenimiento»), Subvención Pro-Retención,
+JUNJI, FAEP, Subtítulo 31 (Proyectos), Recuperación Licencias Médicas, Asignación Familiar, FIGA, Aporte Fiscal Extraordinario Educación y Aporte Fiscal Extraordinario JUNJI
+(estos dos últimos van como fuentes separadas a pedido del usuario; Subt. 31, Recuperación LLMM y Asignación Familiar se agregaron después, ver «Fuentes agregadas»). A diferencia de SEP, estas fuentes **no tienen marco anual ni meta 70/30** —
 el seguimiento es simplemente Ingreso vs. Gasto por fuente, con un Estado de solo dos valores
 (Superávit/Déficit; ver "Estado de una entidad").
 
@@ -598,29 +605,34 @@ el seguimiento es simplemente Ingreso vs. Gasto por fuente, con un Estado de sol
 con tres campos en vez de un único flag binario (necesario desde que FAEP/FIGA y los Aportes
 Fiscales agregaron combinaciones nuevas):
 
-- `incomeShape`: `'single'` (1 línea de Ingreso) o `'junji3'` (4 líneas — Operación,
-  Homologación, Carrera Docente y Bono Desempeño Laboral (BDL) — hoy solo JUNJI). Solo decide cuántas líneas de ingreso hay (y si
-  aplica el "Saldo Operación disponible para B&S"); ya no determina el universo de entidades.
+- `incomeShape`: `'single'` (1 línea de Ingreso), `'carrera2'` (2 líneas — `ingreso` e `ingreso_carrera_docente` — General y PIE), `'llmm3'` (3 líneas — Isapres, FONASA y SIL — Recuperación LLMM)
+  o `'junji3'` (4 líneas — Operación, Homologación, Carrera Docente y Bono Desempeño Laboral (BDL) — hoy solo JUNJI). Solo decide cuántas líneas de ingreso hay (y si
+  aplica el "Saldo Operación disponible para B&S"); ya no determina el universo de entidades (`lineasIngresoOtraFuente` las enumera).
 - `universo`: `'rbd_ac'` (los 55 RBD + la fila fija "AC"), `'gesparvu'` (los 13 **GESPARVU** —
-  jardín infantil / sala cuna —, sin AC) o `'rbd_ac_gesparvu'` (los tres: 55 RBD + AC + 13 GESPARVU = 69 entidades; hoy solo FAEP y FIGA).
+  jardín infantil / sala cuna —, sin AC), `'rbd_ac_gesparvu'` (los tres: 55 RBD + AC + 13 GESPARVU = 69 entidades; FAEP, FIGA, Subt. 31 y Recuperación LLMM) o `'rbd_gesparvu'` (55 RBD + 13 GESPARVU = 68, **sin AC**: Asignación Familiar).
+  Lo guardado en `otras_fuentes.<fuente>` de una entidad que no es del universo de esa fuente **se ignora al leer** (`aplicarSnapshot`), y una fila de esa entidad en un Excel se rechaza («la entidad "AC" no es parte de Asignación Familiar»).
   Define qué filas lista la pestaña y de qué fuentes participa cada entidad (un mismo GESPARVU puede tener datos en JUNJI, Aporte Fiscal JUNJI,
   FAEP y FIGA, bajo claves distintas de `otras_fuentes`, sin pisarse). La participación se decide por el **tipo** de la entidad
   (`tipoEntidadDeRbd`: `rbd` / `ac` / `gesparvu`, con `universoIncluyeTipo`), no por la fuente; por la misma razón el rótulo
   («RBD 1121», «Administración Central», «GESPARVU 5402002») sale del tipo de entidad en todas las vistas.
 - `bysMode`: `'compras'` (Bienes y Servicios como "Registro de compras" con código de cuenta
-  SUPEREDUC + documento/proveedor — General/PIE/Mantención/Pro-Retención) o `'concepto'` (Bienes y
-  Servicios por **concepto** libre, sin código de cuenta — JUNJI/FAEP/FIGA/Aportes Fiscales, ninguna es parte
-  del sistema de rendición de cuentas de SUPEREDUC; ver «Registro de compras por concepto» más abajo).
+  SUPEREDUC + documento/proveedor — General/PIE/Mantenimiento/Pro-Retención), `'concepto'` (Bienes y
+  Servicios por **concepto** libre, sin código de cuenta — JUNJI/FAEP/Subt. 31/FIGA/Aportes Fiscales, ninguna es parte
+  del sistema de rendición de cuentas de SUPEREDUC; ver «Registro de compras por concepto» más abajo) o `'none'` (sin Bienes y Servicios: Recuperación LLMM y Asignación Familiar).
 
 | Fuente | `incomeShape` | `bysMode` | `universo` | CSV SUPEREDUC |
 |---|---|---|---|---|
-| General / PIE / Mantención / Pro-Retención | `single` | `compras` | `rbd_ac` | Sí |
+| General / PIE | `carrera2` | `compras` | `rbd_ac` | Sí |
+| Mantenimiento / Pro-Retención | `single` | `compras` | `rbd_ac` | Sí |
 | FAEP / FIGA | `single` | `concepto` | `rbd_ac_gesparvu` | No |
+| Subtítulo 31 (Proyectos) | `single` | `concepto` | `rbd_ac_gesparvu` | No |
+| Recuperación Licencias Médicas (`sinGasto`) | `llmm3` | `none` | `rbd_ac_gesparvu` | No |
+| Asignación Familiar (`soloRem`) | `single` | `none` | `rbd_gesparvu` | No |
 | Aporte Fiscal Extraord. Educación | `single` | `concepto` | `rbd_ac` | No |
 | JUNJI | `junji3` | `concepto` | `gesparvu` | No |
 | Aporte Fiscal Extraord. JUNJI | `single` | `concepto` | `gesparvu` | No |
 
-**Registro de compras por concepto (JUNJI, FAEP, FIGA y los dos Aportes Fiscales).** Estas 5 fuentes (`bysMode:'concepto'`, todas sus entidades: RBD/AC/GESPARVU según su
+**Registro de compras por concepto (JUNJI, FAEP, Subt. 31, FIGA y los dos Aportes Fiscales).** Estas 6 fuentes (`bysMode:'concepto'`, todas sus entidades: RBD/AC/GESPARVU según su
 `universo`) tienen, además de los montos mensuales por concepto, un **registro de compras por documento** (identificar a qué corresponde el gasto: tipo y N° de documento,
 fechas de documento y de pago, proveedor, montos, pago). Es el mismo mapa `compras` de las fuentes con código de cuenta pero con **`concepto`** (texto libre, con lista de
 sugerencias de los conceptos de esa entidad y fuente; un concepto nuevo pasa a existir como concepto de la entidad sin escribir nada más que la compra) en lugar de `codigo`:
@@ -675,6 +687,50 @@ Bienes y Servicios y no se rinden por el libro de compras de SUPEREDUC. El de Ed
 universo `rbd_ac` (55 RBD + "AC"); el de JUNJI usa el universo `gesparvu` (los 13 GESPARVU, sin
 AC) y tiene una sola línea de Ingreso (a diferencia de la fuente JUNJI, que tiene 4).
 
+**Fuentes agregadas: Subtítulo 31, Recuperación LLMM, Asignación Familiar y el Ingreso Carrera Docente de General / PIE.** Se agregaron directamente a `main` (PR K las endureció y las cubrió con pruebas):
+
+- **Subtítulo 31 (Proyectos)** — clave `subt31_proyectos`, `single` / `concepto` / `rbd_ac_gesparvu` (69 entidades, igual que FAEP): Ingreso vs. Gasto de proyectos, sin meta 70/30, con Remuneraciones, Honorarios (PR-3),
+  registro de compras por concepto y B&S «sin documento». Hojas del Excel: `INGRESO`, `REMUNERACIONES`, `COMPRAS`, `BYS_ITEMS`, `HONORARIOS`, `HON_PROYECCION`, `META`.
+- **Recuperación Licencias Médicas** — clave `recuperacion_llmm`, `llmm3` / `none` / `rbd_ac_gesparvu` (69 entidades), `sinGasto`: **solo ingresos**, tres líneas (`ingreso_llmm_isapres`, `ingreso_llmm_fonasa`, `ingreso_llmm_sil`; celdas
+  `of_ingreso_llmm_*`; hojas `ING_LLMM_ISAPRES`, `ING_LLMM_FONASA`, `ING_LLMM_SIL` y `META`). No tiene Remuneraciones, B&S ni honorarios (una boleta guardada en su documento no cuenta y su modal no trae el bloque; su Excel no trae
+  `REMUNERACIONES` ni `HONORARIOS`, y si el archivo las trae se ignoran). Su saldo es el ingreso recuperado («Sin gastos asociados $0»). No tiene serie de % Ejecución (no hay gasto que ejecutar), pero sí tarjeta en el Panel principal,
+  fila en el Visualizador (3 líneas de ingreso) y los 3 conceptos de ingreso en el Reporte personalizado (sin «Remuneraciones»).
+- **Asignación Familiar** — clave `asignacion_familiar`, `single` / `none` / `rbd_gesparvu` (**68 entidades, sin AC**), `soloRem`: «Ingreso Percibido» y gasto **solo en Remuneraciones y Honorarios** (sin B&S ni compras). Hojas del Excel: `INGRESO`,
+  `REMUNERACIONES`, `HONORARIOS`, `HON_PROYECCION` y `META`.
+- **Honorarios (PR-3 / PR #67)**: Subt. 31 y Asignación Familiar los llevan (por concepto); **Recuperación LLMM no** (fuente solo de ingresos).
+- **Ingreso Carrera Docente de General y PIE** (`incomeShape:'carrera2'`): una segunda línea de ingreso, `otras_fuentes.{general|pie}.ingreso_carrera_docente` (`{meses, total}`; celda `of_ingreso_carrera_docente`; hoja `ING_CARRERA_DOCENTE` del Excel,
+  entre `INGRESO` y `REMUNERACIONES`; un Excel anterior sin la hoja se importa sin tocar la Carrera Docente guardada). El ingreso de la fuente es **Ingreso + Ingreso Carrera Docente** en todas las vistas (tarjetas, Estado, Panel principal, % Ejecución,
+  Visualizador —línea «Ingreso Carrera Docente»—, Reporte personalizado —concepto `of|<fuente>|ingreso_carrera_docente`—, PDF por fila). No confundir con el «Ingreso Carrera Docente SEP», que sigue dentro del ingreso de SEP.
+- **Lectura tolerante**: todos esos campos se leen con `mesesDesde` / `num` / `objetoPlano` (texto numérico → número; nulos, objetos, arreglos y textos → 0) y no tumban el documento ni escriben nada.
+- **Universo**: lo guardado fuera del universo de la fuente se ignora al leer y una fila fuera de él en un Excel se rechaza con aviso (ver `universo`).
+
+### Fondos Fijos (control operativo)
+
+Pestaña 💼 **Fondos Fijos** (entre Asig. Familiar y FIGA): **no es una fuente de financiamiento ni genera ingreso**; controla los anticipos de cada RBD y GESPARVU (68 entidades; **AC no es entidad de Fondos Fijos**) y concilia su rendición con
+Subvención General y con SIGFE. Es un control operativo separado: **no entra en `FUENTES_OTRAS`, ni en el saldo consolidado, ni en el déficit, ni en el CSV de compras de SUPEREDUC**. Lo único que sale de ahí hacia las cifras es lo que
+se escribe en **«Registrado en General»**.
+
+- **Modelo** (campo `fondos_fijos` del documento de cada RBD / GESPARVU): `{ cupo, meses: { <MES>: { saldo_inicial, rendido, observado, registrado_general, compensado_sigfe, reposicion, folio } } }`. Cada celda se guarda con `merge:true`
+  y solo ese campo (`fondos_fijos.meses.<MES>.<campo>`, o `fondos_fijos.cupo`); `scheduleRbdSave` los junta con el resto de las ediciones del RBD y el indicador de sincronización / errores permanentes (PR #57) los cubre igual que a cualquier celda.
+  Lectura (`aplicarSnapshot`): tolerante (`montoFondoFijoLeido`: texto numérico → número; nulos, objetos, negativos y ≥ `MONTO_ABS_MAX` → 0; `recortarFolioFondoFijo`: el folio que no es texto se convierte, los espacios de los bordes se quitan y se recorta a
+  **40 caracteres**); un `fondos_fijos` dañado no tumba el documento ni escribe nada. Se ignora el de cualquier documento que no sea RBD / GESPARVU (AC).
+- **Cálculo**: gasto aceptado = Rendido − Observado (≥ 0); Pendiente en General = aceptado − Registrado en General (≥ 0); Pendiente SIGFE = aceptado − Compensado SIGFE (≥ 0); saldo final de caja = saldo inicial − aceptado + reposición (solo informativo). Estado de cada
+  entidad: «Sin datos» (sin cupo, rendido ni aceptado) → «Con observaciones» (observado > 0) → «Pendiente General» → «Pendiente SIGFE» → «Conciliado».
+- **Validación de lo tecleado** (`guardarCampoFondoFijo`): los montos deben ser números **finitos, no negativos y menores que `MONTO_ABS_MAX`** (1e13); vacío = 0. Un valor inválido (negativo, ≥ tope, texto a medias como «1e») NO se guarda, avisa con un mensaje claro
+  («Monto observado de Abril: no puede ser negativo. No se guardó…») y la celda vuelve a lo guardado. El folio de más de 40 caracteres se guarda recortado y se avisa. Solo se guardan entidades de Fondos Fijos y campos / meses conocidos: un `data-ff-*` manipulado no
+  escribe ni crea documentos. Los atributos `data-ff-*` se escapan con `escHtml`.
+- **Vínculo con General** (`mesesFondosFijosRegistradosEnGeneral`): lo registrado se suma **una sola vez** al B&S **Real** de Subvención General de la **misma entidad y mes** (siempre Real, sin importar el «Real hasta»; Compensado SIGFE no interviene). Un GESPARVU con algo
+  registrado es además **fila de General** (`filasOtrasFuentes`); los demás jardines no. La misma cifra sale en la pestaña General (tarjetas, fila, modal —bloque de solo lectura «Fondos Fijos rendidos — B&S General»— y PDF de la fila), el Panel principal, % Ejecución,
+  el Visualizador (grupo «Bienes y Servicios — Fondos Fijos rendidos», también en el CSV y el Excel) y el Reporte personalizado (concepto «Fondos Fijos rendidos (control operativo)» y dentro de «B&S total»). No aparece en el Excel de General ni en su CSV SUPEREDUC (el libro
+  de compras no cambia).
+- **Importador** («⬆ Importar Control Fondos Fijos», hoja **«FONDOS FIJOS P02»**; `importarControlFondosFijos`): lee cupo (columna G), y de marzo a diciembre saldo inicial, rendido, observado y —de marzo a septiembre— folio (`MAPA_COLUMNAS_FONDOS_FIJOS`); **nunca** infiere Reposición, Registrado en General
+  ni Compensado SIGFE (se conservan). Valida todo el archivo antes de tocar nada: las filas vacías se saltan; las de un id que no es RBD / GESPARVU (AC, inexistente, decimal, negativo, texto) se **omiten y se cuentan**; una fila con un monto no numérico, infinito,
+  negativo o ≥ `MONTO_ABS_MAX` se **rechaza completa** con el motivo; un folio vacío queda vacío (no «0») y uno de más de 40 caracteres se recorta con aviso. Luego aplica en pantalla todo de una vez y guarda entidad por entidad (`flushRbdSave`): el resumen dice «N de M entidades
+  guardadas», **cuáles no y por qué** (rechazo permanente: el cambio queda en pantalla, el indicador de sincronización pasa a rojo con «Reintentar» y también se puede reimportar el mismo archivo), cuáles quedan pendientes de confirmar (error transitorio: reintento automático) y,
+  sin conexión, no deja la pantalla esperando (plazo `IMPORT_FONDOS_FIJOS_PLAZO_MS` = 20 s por la primera entidad; el resto se envía sin esperar y el SDK conserva la cola). Reimportar el mismo archivo es idempotente. El libro es la fuente de marzo a diciembre: una celda vacía deja ese campo en 0.
+- **Modal** (accesible como los otros tres: `role="dialog"`, foco al abrir, fondo `inert`, Escape, foco de vuelta, aviso de sincronización roja con «Reintentar» dentro del modal): se reconcilia con cada cambio remoto sin mover la celda en edición, y Tab pasa de una celda a la siguiente.
+- **Pruebas**: `fondos_fijos_modelo`, `fondos_fijos_validacion`, `fondos_fijos_importador`, `fondos_fijos_general` y los `a11y_*` (ver `tests/README.md`).
+
 **Real / Proyectado / Total.** Cada pestaña de fuente distingue lo ejecutado de lo proyectado,
 con el mismo criterio que las remuneraciones de SEP:
 
@@ -685,7 +741,7 @@ con el mismo criterio que las remuneraciones de SEP:
   Bienes y Servicios por concepto (JUNJI, FAEP, FIGA, Aportes) — los ítems de B&S. El corte se
   cambia por entidad en el modal, o para todas las entidades de la fuente con el control "Real
   hasta el mes → Aplicar a todas las entidades" de la pestaña.
-- En las fuentes con **registro de compras** (General, PIE, Mantención, Pro-Retención) las compras
+- En las fuentes con **registro de compras** (General, PIE, Mantenimiento, Pro-Retención) las compras
   son **siempre Real** (gasto ya documentado, no depende del corte) y la proyección de Bienes y
   Servicios se carga aparte en la sección "Proyección Bienes y Servicios (por concepto)" del modal
   (`otras_fuentes.{fuente}.bys_proy_items`, concepto libre, siempre Proyectada).
@@ -700,17 +756,17 @@ con el mismo criterio que las remuneraciones de SEP:
   que devuelve `{ real, proy, total }` (cada uno `{ ingreso, rem, bys, gasto, saldo }`) más
   `nEntidades / nDeficit / nSuperavit`; por entidad el desglose es `of.rp`.
 
-**Importar / exportar.** Cada una de las 9 pestañas tiene su propia fila de botones, igual
+**Importar / exportar.** Cada una de las 12 pestañas de fuente tiene su propia fila de botones, igual
 criterio que la pestaña SEP pero leyendo/escribiendo `otras_fuentes` en vez de los datos de SEP:
 
-- **⬇ Compras SUPEREDUC (CSV)** — solo en las 4 fuentes `bysMode:'compras'` (no en JUNJI/FAEP/
+- **⬇ Compras SUPEREDUC (CSV)** — solo en las 4 fuentes `bysMode:'compras'` (no en JUNJI/FAEP/Subt. 31/
   FIGA, que no son parte de ese sistema de rendición): mismas 13 columnas y misma normalización
   (tipo por código, fechas dd-mm-aaaa, descripción ≤ 100, RUT con guion, Documento Original solo en
   NC/ND, aviso previo de filas que se rechazarían) que el de SEP, con el código de Subvención
   oficial de cada una en la columna "Subvencion" (`GENERAL`, `PIE`, `MANTENIMIENTO`, `PRORETENCION`).
 - **⬇ Excel / ⬆ Importar Excel** — carga completa de la fuente en hojas (Ingreso, Remuneraciones,
   Compras + `BYS_PROY_ITEMS` para las `bysMode:'compras'`; hojas de Ingreso + Remuneraciones +
-  `COMPRAS` (con `Concepto`) + `BYS_ITEMS` —lo «sin documento»— para las `bysMode:'concepto'`) y una hoja `META` con el corte "Real hasta
+  `COMPRAS` (con `Concepto`) + `BYS_ITEMS` —lo «sin documento»— para las `bysMode:'concepto'`; `ING_CARRERA_DOCENTE` en General y PIE; `ING_LLMM_*` en Recuperación LLMM; sin B&S en Asignación Familiar) y una hoja `META` con el corte "Real hasta
   el mes" de cada entidad, reimportable tal cual se exporta (el corte y la proyección de B&S
   sobreviven al round-trip; si una hoja falta en el archivo, el import no toca esos datos).
 - **🖨 Exportar PDF** — mismo mecanismo de impresión del navegador que ya usa la pestaña SEP;
@@ -730,9 +786,9 @@ general:
 - **⬇ XLS** — Excel solo de esa entidad, con el mismo formato que el "⬇ Excel" de la pestaña (hojas
   de ingreso, remuneraciones, compras o ítems de B&S, proyección y `META` con el corte), así que se
   puede volver a cargar con "⬆ Importar Excel" de la misma pestaña sin tocar a las demás entidades.
-- **⬇ CSV SUPEREDUC** (General, PIE, Mantención, Pro-Retención) — las compras de esa entidad en la
+- **⬇ CSV SUPEREDUC** (General, PIE, Mantenimiento, Pro-Retención) — las compras de esa entidad en la
   plantilla de 13 columnas de SUPEREDUC (con la misma normalización y el mismo aviso previo). En las fuentes que no son parte de ese sistema (JUNJI,
-  FAEP, FIGA y los dos Aportes Fiscales) el botón es **⬇ CSV** y baja el **detalle mensual** de la
+  FAEP, Subt. 31, Recuperación LLMM, Asignación Familiar, FIGA y los dos Aportes Fiscales) el botón es **⬇ CSV** y baja el **detalle mensual** de la
   entidad: una fila por línea (ingresos, remuneraciones, ítems de B&S) con su tipo
   (Real / Proyectado / Mixto), seguida de los totales Real, Proyectado y Total, el Estado y el mes
   de corte "Real hasta".
@@ -742,21 +798,21 @@ general:
 
 #### Plan de Cuentas SUPEREDUC 2026 en el registro de compras
 
-El selector de **Código de cuenta** del "Registro de compras" de **Subv. General, PIE, Mantención y
+El selector de **Código de cuenta** del "Registro de compras" de **Subv. General, PIE, Mantenimiento y
 Pro-Retención** ya no usa el catálogo completo de SEP: ofrece solo las cuentas que el Manual de
 Cuentas SUPEREDUC 2026 (sección 11, matriz «Plan de Cuentas Rendición Recursos 2026») habilita para
 esa subvención. Lo que se ve y cómo funciona:
 
 - **Selector acotado** por subvención (Subt. 22 y 29): Subv. General 77 cuentas, PIE 28,
-  Mantención 28, Pro-Retención 23 (SEP, que no cambia, sigue con sus 51). Las cuentas **●**
+  Mantenimiento 28, Pro-Retención 23 (SEP, que no cambia, sigue con sus 51). Las cuentas **●**
   (habilitadas *sujetas a exigencias de pertinencia*, secciones 9 y 10 del manual) llevan el punto
   junto al nombre: se pueden usar, pero hay que poder justificar la pertinencia.
 - **Fila AC (Administración Central)**: en **Subv. General** usa la columna «Adm. Central Subv.
-  Gral.» del manual (52 cuentas). El manual no trae columna de Adm. Central para PIE, Mantención ni
+  Gral.» del manual (52 cuentas). El manual no trae columna de Adm. Central para PIE, Mantenimiento ni
   Pro-Retención, así que ahí la fila AC usa la misma columna de la fuente (decisión de producto, no
   del manual).
 - **Nota del registro**: bajo el título dice cuántas cuentas están habilitadas y, si la subvención
-  no admite personal (Mantención: ninguna cuenta 4101xx-4104xx), lo avisa — y marca con ⚠ si ya hay
+  no admite personal (Mantenimiento: ninguna cuenta 4101xx-4104xx), lo avisa — y marca con ⚠ si ya hay
   Remuneraciones cargadas.
 - **Validación al agregar**: una cuenta no habilitada para esa subvención (o inexistente) se
   rechaza con un aviso, sin guardar nada.
@@ -807,15 +863,15 @@ el catálogo SEP, la coherencia de Adm. Central y la revisión visual de las 8 p
 
 ### Estado de una entidad: una sola regla (L-07 / L-08)
 
-Una única función, `estadoDeEntidad(recurso, gasto, conRiesgo)`, decide el Estado de **SEP y de las 9 fuentes** (antes SEP lo decidía con el % ya
+Una única función, `estadoDeEntidad(recurso, gasto, conRiesgo)`, decide el Estado de **SEP y de las 12 fuentes** (antes SEP lo decidía con el % ya
 redondeado a 1 decimal y las fuentes con el signo del saldo, así que un mismo caso salía distinto). Trabaja con montos en pesos enteros y **sin
 redondear ningún porcentaje**: los % que se muestran siguen redondeados a 1 decimal, pero no deciden nada.
 
 | Estado | Regla | Dónde existe |
 |---|---|---|
-| **Déficit** | el saldo es negativo (gasto total > recurso total). Un saldo de exactamente $0 **no** es déficit; recurso $0 con gasto > $0 sí | SEP y las 9 fuentes |
+| **Déficit** | el saldo es negativo (gasto total > recurso total). Un saldo de exactamente $0 **no** es déficit; recurso $0 con gasto > $0 sí | SEP y las 12 fuentes |
 | **Riesgo** | no es déficit y gasto / recurso ≥ 90 % **exacto** (se compara `gasto × 10 ≥ recurso × 9`, sin punto flotante); sin recurso no hay cociente | solo SEP |
-| **Superávit** | todo lo demás (también recurso $0 sin gasto) | SEP y las 9 fuentes |
+| **Superávit** | todo lo demás (también recurso $0 sin gasto) | SEP y las 12 fuentes |
 
 - **SEP**: recurso = Ingreso SEP (Preferente + Prioritario) + Carrera Docente; gasto = remuneraciones + Bienes y Servicios (compras + proyección), año completo
   (Real + Proy). Un 99,996 % se muestra "100,0 %" pero es **Riesgo** (no Déficit); un 89,999 % se muestra "90,0 %" y es **Superávit**; un 100 % exacto (saldo $0)
@@ -886,8 +942,8 @@ data/                 plan_cuentas_2026.json (matriz de cuentas por subvención,
 docs/                 honorarios_spec.md: especificación del Libro de Honorarios, decisiones del
                        usuario y plan en 3 PR (PR-1 hecha: SEP; PR-2: CSV; PR-3: otras fuentes y analítica).
 tests/                Arnés de pruebas (Playwright + mock local de Firebase): specs, golden master
-                       y fixtures sintéticos (default, cierre, compras, estado, honorarios, jardines). Ver tests/README.md.
-                       Se corre con `node tests/run.mjs` (≈ 15 min la suite completa).
+                       y fixtures sintéticos (default, cierre, compras, estado, honorarios, jardines, compras_conceptos, honorarios_fuentes, fondos_fijos). Ver tests/README.md.
+                       Se corre con `node tests/run.mjs` (≈ 20 min la suite completa).
 tests/e2e-real/       Arnés opcional contra el SDK real de Firestore y su emulador (ver tests/e2e-real/README.md).
 *.pdf (raíz)          Manuales oficiales de SUPEREDUC 2026 de referencia (Manual de Cuentas y capítulos del Manual de
                        Usuario de Rendición de Cuentas); el panel no los lee.
@@ -909,8 +965,8 @@ en una colección propia y separada (`sep_carga_rbd`) que no comparte datos con 
 - **Modelo de datos**: un documento por entidad en `sep_carga_rbd/{id}` —cada RBD de `DATA.registros` (55), `AC` (Administración Central) y cada GESPARVU
   (13)— con los campos `rbd`, `nombre`, `ingreso_items` (Preferente / Prioritario / Carrera Docente, cada uno `{item, meses, total}`),
   `ingreso_real_hasta_mes` (corte propio de ingresos, opcional), `rem` (`meses`, `total`, `real_hasta_mes`), `bys_proyeccion.items.{código}`
-  (proyección de B&S por cuenta), `compras.{id}` (Subt. 22/29 de SEP), `otras_fuentes.{fuente}` (las 9 fuentes: ingreso/s, `gasto_rem`, `compras` (con `codigo`, o con `concepto` en las 5 fuentes por concepto, donde conviven con `bys_items`),
-  `bys_proy_items`, `real_hasta_mes`), `lastModifiedBy` y `lastModifiedAt`. El antiguo `agregado.items` ya no se guarda (el B&S por ítem y mes se deriva de
+  (proyección de B&S por cuenta), `compras.{id}` (Subt. 22/29 de SEP), `otras_fuentes.{fuente}` (las 12 fuentes: ingreso/s —`ingreso`, `ingreso_carrera_docente` en General / PIE, `ingreso_llmm_*` en Recuperación LLMM—, `gasto_rem`, `compras` (con `codigo`, o con `concepto` en las 5 fuentes por concepto, donde conviven con `bys_items`),
+  `bys_proy_items`, `real_hasta_mes`), `fondos_fijos` (control operativo de los RBD y GESPARVU, ver «Fondos Fijos»), `lastModifiedBy` y `lastModifiedAt`. El antiguo `agregado.items` ya no se guarda (el B&S por ítem y mes se deriva de
   las compras); los totales nunca se leen de Firestore, siempre se recalculan. Más un documento `sep_carga_rbd/_meta`
   con la lista compartida de conceptos de gasto (`items_22`, `items_29`, que el panel ignora) y el **mes de cierre global**
   (`mes_cierre`, `mes_cierre_por`, `mes_cierre_en`; ver "Corte de ingresos y mes de cierre"). `_meta` solo se escribe con `merge`

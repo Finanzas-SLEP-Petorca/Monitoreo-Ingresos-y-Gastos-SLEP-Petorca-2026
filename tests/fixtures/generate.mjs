@@ -25,6 +25,9 @@
 //   honorarios_fuentes.json  compras_conceptos + Honorarios (Subt. 21) por boleta y proyección en las 9 fuentes (PR-3 de Honorarios) y las boletas de SEP de `honorarios.json`
 //                 (ver el bloque «variante honorarios_fuentes» más abajo): `otras_fuentes.<fuente>.honorarios` / `.hon_proyeccion_items`, sin consumir números aleatorios.
 //
+//   fondos_fijos.json  honorarios_fuentes + Fondos Fijos (`fondos_fijos`) en 8 entidades, más datos de Subt. 31 / Asignación Familiar / Recuperación LLMM / Carrera Docente y «ruido» fuera del universo
+//                 (ver el bloque «variante fondos_fijos» más abajo; PR K).
+//
 // Entradas: tests/fixtures/rbds.json (ids/nombres públicos de los 55 RBD de DATA.registros y los 13 GESPARVU).
 // Las CIFRAS son sintéticas (PRNG con semilla fija por entidad): no hay montos reales de ningún RBD.
 //
@@ -809,6 +812,57 @@ const docsHF = JSON.parse(JSON.stringify(docsCC));
   docsHF['1121'].fondos_fijos = { cupo: 500000, meses: { MARZO: { saldo_inicial: 500000, rendido: 150000, observado: 30000, registrado_general: 120000, compensado_sigfe: 0, reposicion: 0, folio: 'FF-3' }, JUNIO: { rendido: 80000, registrado_general: 80000 } } };
 }
 
+// ---------- variante fondos_fijos (PR K: Fondos Fijos + fuentes nuevas + Carrera Docente) ----------
+// honorarios_fuentes + (1) Fondos Fijos (`fondos_fijos`) en 8 entidades con todos los estados posibles, (2) más datos de las fuentes nuevas de `main` (Subtítulo 31, Asignación Familiar, Recuperación LLMM) y
+// de Carrera Docente en General / PIE, y (3) «ruido» fuera del universo que el panel debe ignorar. Todo determinista (sin números aleatorios); `default.json` y los demás fixtures no cambian.
+//   Fondos Fijos (partes de mes con solo los campos que escribe el panel, como el guardado parcial; MARZO de 1121 con todos los campos):
+//     1121      cupo 500.000 · MAR saldo_inicial 500.000, rendido 150.000, observado 30.000, registrado_general 120.000, compensado_sigfe 60.000, reposicion 100.000, folio «FF-0001/2026»
+//                            · JUN rendido 80.000, registrado_general 80.000, compensado_sigfe 80.000, folio «FF-0002/2026» · SEP rendido 40.000, observado 40.000, folio «FF-0003/2026»
+//               → rendido 270.000, observado 70.000, aceptado 200.000, registrado 200.000, compensado 140.000, pendiente General 0, pendiente SIGFE 60.000 (Con observaciones)
+//     1122      cupo 300.000 · ABR rendido 100.000, folio «FF-0100» → aceptado 100.000, nada registrado: Pendiente General
+//     1125      cupo 250.000 · OCT rendido 60.000, registrado_general 60.000, compensado_sigfe 60.000 (mes posterior al corte de General: igual Real) → Conciliado
+//     1128      cupo 0 · FEB rendido 20.000, registrado_general 20.000 → Pendiente SIGFE
+//     1129      cupo 10.000 · ENE rendido 10.000, registrado 10.000, compensado 10.000, folio con marcado `<img src=x onerror=alert(1)>&"'` (XSS) → Conciliado
+//     5402002   (GESPARVU) cupo 200.000 · MAY rendido 90.000, registrado 90.000, compensado 90.000, folio «FF-J01»; AGO rendido 10.000, registrado 10.000 → entra a la pestaña General (Déficit por el B&S de Fondos Fijos)
+//     5401006   (GESPARVU) cupo 100.000 · JUL rendido 50.000 (sin registrar: NO entra a General)
+//     1123, resto: sin `fondos_fijos` («Sin datos»)
+//     AC        `fondos_fijos` con registrado_general 5.000 en ENE: AC NO es entidad de Fondos Fijos (solo RBD y GESPARVU), así que NO debe sumar a General
+//   Fuentes nuevas y Carrera Docente (además de lo de honorarios_fuentes): Subt. 31 / 1122 ingreso ENE 500.000 y / 5402004 ingreso ENE 120.000; Asignación Familiar / 1122 ingreso ENE 400.000, rem ENE 100.000;
+//     Recuperación LLMM / AC Isapres ENE 25.000 y / 5402002 FONASA MAR 15.000; General / 1122 Carrera Docente ENE 250.000 y MAR 50.000; PIE / 1122 Carrera Docente ENE 100.000; General / AC Carrera Docente ENE 80.000.
+//   Ruido fuera del universo (no se lee): General en el jardín 5402002 con ingreso ENE 999.999; Asignación Familiar en AC con ingreso ENE 888.888.
+const docsFF = JSON.parse(JSON.stringify(docsHF));
+{
+  const mes = (o) => o;
+  const ffDe = (id, cupo, meses) => { docsFF[id].fondos_fijos = { cupo, meses }; };
+  ffDe('1121', 500000, {
+    MARZO: mes({ saldo_inicial: 500000, rendido: 150000, observado: 30000, registrado_general: 120000, compensado_sigfe: 60000, reposicion: 100000, folio: 'FF-0001/2026' }),
+    JUNIO: mes({ rendido: 80000, registrado_general: 80000, compensado_sigfe: 80000, folio: 'FF-0002/2026' }),
+    SEPTIEMBRE: mes({ rendido: 40000, observado: 40000, folio: 'FF-0003/2026' }),
+  });
+  ffDe('1122', 300000, { ABRIL: mes({ rendido: 100000, folio: 'FF-0100' }) });
+  ffDe('1125', 250000, { OCTUBRE: mes({ rendido: 60000, registrado_general: 60000, compensado_sigfe: 60000, folio: 'FF-OCT' }) });
+  ffDe('1128', 0, { FEBRERO: mes({ rendido: 20000, registrado_general: 20000 }) });
+  ffDe('1129', 10000, { ENERO: mes({ rendido: 10000, registrado_general: 10000, compensado_sigfe: 10000, folio: '<img src=x onerror=alert(1)>&"\'' }) });
+  ffDe('5402002', 200000, {
+    MAYO: mes({ rendido: 90000, registrado_general: 90000, compensado_sigfe: 90000, folio: 'FF-J01' }),
+    AGOSTO: mes({ rendido: 10000, registrado_general: 10000 }),
+  });
+  ffDe('5401006', 100000, { JULIO: mes({ rendido: 50000 }) });
+  ffDe('AC', 0, { ENERO: mes({ rendido: 5000, registrado_general: 5000 }) });
+  const ing12 = (v) => ({ meses: meses12(i => (i === 0 ? v : 0)), total: v });
+  const de = (id, fuente) => { const d = docsFF[id]; d.otras_fuentes = d.otras_fuentes || {}; d.otras_fuentes[fuente] = d.otras_fuentes[fuente] || {}; return d.otras_fuentes[fuente]; };
+  Object.assign(de('1122', 'subt31_proyectos'), { ingreso: ing12(500000) });
+  Object.assign(de('5402004', 'subt31_proyectos'), { ingreso: ing12(120000) });
+  Object.assign(de('1122', 'asignacion_familiar'), { ingreso: ing12(400000), gasto_rem: ing12(100000) });
+  Object.assign(de('AC', 'recuperacion_llmm'), { ingreso_llmm_isapres: linea(i => (i === 0 ? 25000 : 0)) });
+  Object.assign(de('5402002', 'recuperacion_llmm'), { ingreso_llmm_fonasa: linea(i => (i === 2 ? 15000 : 0)) });
+  Object.assign(de('1122', 'general'), { ingreso_carrera_docente: { meses: meses12(i => (i === 0 ? 250000 : (i === 2 ? 50000 : 0))), total: 300000 } });
+  Object.assign(de('1122', 'pie'), { ingreso_carrera_docente: ing12(100000) });
+  Object.assign(de('AC', 'general'), { ingreso_carrera_docente: ing12(80000) });
+  Object.assign(de('5402002', 'general'), { ingreso: ing12(999999) });
+  Object.assign(de('AC', 'asignacion_familiar'), { ingreso: ing12(888888) });
+}
+
 // ---------- salida ----------
 function serializar(docsX, extra = {}) {
   const ids = Object.keys(docsX).sort();
@@ -830,6 +884,7 @@ const SALIDAS = [
   { archivo: path.join(AQUI, 'jardines.json'), ...serializar(docsJar, { variante: 'jardines' }) },
   { archivo: path.join(AQUI, 'compras_conceptos.json'), ...serializar(docsCC, { variante: 'compras_conceptos' }) },
   { archivo: path.join(AQUI, 'honorarios_fuentes.json'), ...serializar(docsHF, { variante: 'honorarios_fuentes' }) },
+  { archivo: path.join(AQUI, 'fondos_fijos.json'), ...serializar(docsFF, { variante: 'fondos_fijos' }) },
 ];
 
 if (process.argv.includes('--check')) {

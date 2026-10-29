@@ -279,3 +279,36 @@ export async function recorrerConceptos(h, visitante) {
     await h.waitIdle();
   }
 }
+
+/**
+ * Fondos Fijos y las fuentes nuevas de `main` (PR K), con el fixture `fondos_fijos` ya arrancado en `h`: el recuadro del Panel principal, la pestaña de Fondos Fijos (tarjetas y tabla), las pestañas de Subtítulo 31,
+ * Recuperación LLMM y Asignación Familiar, el modal de Fondos Fijos (RBD con todos los estados, un GESPARVU, el RBD con el folio de marcado y uno sin datos) y los detalles que muestran la Carrera Docente de General / PIE,
+ * los Fondos Fijos rendidos en General (RBD y jardín) y las fuentes nuevas. `visitante({nombre, scope, tipo})` como en recorrerVistas.
+ */
+export async function recorrerFondosFijos(h, visitante) {
+  const { page } = h;
+  const vista = async (nombre) => { await h.waitIdle(); await visitante({ nombre, scope: '#app', tipo: 'vista' }); };
+  const modalFF = async (nombre) => { await h.waitIdle(); await visitante({ nombre, scope: '#fondosFijosModal .modal-panel', tipo: 'modal' }); };
+  const modalOF = async (nombre) => { await h.waitIdle(); await visitante({ nombre, scope: '#otrasFuentesModal .modal-panel', tipo: 'modal' }); };
+  await h.clickTab('Panel principal');
+  await vista('ff.dashboard');
+  for (const k of ['subt31_proyectos', 'recuperacion_llmm', 'asignacion_familiar']) { await h.clickTab('of-' + k); await vista(`ff.of.${k}`); }
+  await h.clickTab('fondos fijos');
+  await vista('ff.pestana');
+  for (const id of ['1121', '5402002', '1129', '1123']) {
+    await h.clickTab('fondos fijos');
+    await page.click(`#fondosFijosTbody [data-ff-abrir="${id}"]`);
+    await h.waitIdle();
+    await modalFF(`ff.modal.${id}`);
+    await page.keyboard.press('Escape');
+    await h.waitIdle();
+  }
+  for (const [fuente, id] of [['general', '1121'], ['general', '5402002'], ['pie', '1121'], ['subt31_proyectos', '1121'], ['recuperacion_llmm', '1121'], ['asignacion_familiar', '1121']]) {
+    await h.clickTab('of-' + fuente);
+    await page.click(`#otrasFuentesTbody-${fuente} td[data-abrir-otra-fuente="${id}"]`);
+    await h.waitIdle();
+    await modalOF(`ff.modal.of.${fuente}.${id}`);
+    await page.keyboard.press('Escape');
+    await h.waitIdle();
+  }
+}

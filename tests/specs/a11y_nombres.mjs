@@ -8,7 +8,7 @@
 // Cobertura: las vistas y modales de tests/lib/a11y-vistas.mjs (3 vistas del Panel principal, SEP en 4 estados, las 9 fuentes (+ Real/Proy.), % Ejecución en todas sus
 // fuentes, Reportes en sus 2 vistas, 5 modales SEP, 10 modales de fuentes y "Cómo usar"), más la pantalla de acceso en sus 4 estados y el formulario de compra en modo edición.
 import { boot } from '../lib/boot.mjs';
-import { recorrerVistas, recorrerLogin, recorrerHonorarios, recorrerHonorariosFuentes, recorrerJardines, recorrerConceptos } from '../lib/a11y-vistas.mjs';
+import { recorrerVistas, recorrerLogin, recorrerHonorarios, recorrerHonorariosFuentes, recorrerJardines, recorrerConceptos, recorrerFondosFijos } from '../lib/a11y-vistas.mjs';
 import { nombresAccesibles, controlesSinNombre } from '../lib/a11y.mjs';
 import { correrSpec } from '../lib/spec.mjs';
 
@@ -208,6 +208,38 @@ await correrSpec('a11y_nombres', async (t) => {
     t.eq(dup, [], 'K2) nombres únicos en el formulario y la tabla del registro, y celdas «sin documento» únicas');
     t.noErrores(hk);
     await hk.close();
+  });
+
+  // ======================================================================== L) Fondos Fijos (PR K) y las fuentes nuevas: pestaña, modal, recuadro del Panel principal, detalles con Carrera Docente y Fondos Fijos en General
+  await escenario(t, 'L', async () => {
+    const hl = await boot({ fixture: 'fondos_fijos', viewport: { width: 1500, height: 1000 } });
+    const sinNom = [], dup = [], mal = [];
+    let nVistas = 0, nCeldasFF = 0, nBotonesFF = 0;
+    await recorrerFondosFijos(hl, async ({ nombre, scope, tipo }) => {
+      const lista = await nombresAccesibles(hl.page, { scope });
+      nVistas++;
+      controlesSinNombre(lista).forEach((c) => sinNom.push(`${nombre}: ${resumen(c)}`));
+      if (tipo === 'modal' && /^ff\.modal\.\d+$/.test(nombre)) {
+        const celdas = lista.filter((c) => /input\.ff-input|input\.celda-input/.test(c.sel));
+        nCeldasFF += celdas.length;
+        const vistos = new Map(); celdas.forEach((c) => vistos.set(c.nombre, (vistos.get(c.nombre) || 0) + 1));
+        vistos.forEach((n, nom) => { if (n > 1) dup.push(`${nombre}: celda «${nom}» ×${n}`); });
+        celdas.forEach((c) => { if (!/^(Cupo vigente|(Saldo inicial|Rendido por director\(a\)|Monto observado|Registrado en General|Compensado SIGFE|Reposición entregada|Folio rendición) [A-Z]+)/i.test(c.nombre)) mal.push(`${nombre}: ${c.nombre}`); });
+      }
+      if (tipo === 'vista' && nombre === 'ff.pestana') {
+        const acciones = lista.filter((c) => /row-action-btn/.test(c.sel));
+        nBotonesFF += acciones.length;
+        const cuenta = new Map(); acciones.forEach((c) => cuenta.set(c.nombre, (cuenta.get(c.nombre) || 0) + 1));
+        cuenta.forEach((n, nom) => { if (n > 1) dup.push(`${nombre}: acción «${nom}» ×${n} (los 68 «Ver / editar» deben distinguirse por entidad)`); });
+      }
+    });
+    t.ok(nVistas >= 15, `L0) se midieron ${nVistas} vistas/modales de Fondos Fijos y de las fuentes nuevas (${nCeldasFF} celdas del modal de Fondos Fijos, ${nBotonesFF} botones «Ver / editar»)`, { nVistas, nCeldasFF, nBotonesFF });
+    t.eq(nCeldasFF, 4 * (7 * 12 + 1), 'L0) el modal de Fondos Fijos trae 7 filas editables × 12 meses (+ el cupo) en cada una de las 4 entidades medidas');
+    t.eq(sinNom, [], 'L1) ningún control de la pestaña y del modal de Fondos Fijos, ni de las pestañas y detalles de las fuentes nuevas, queda sin nombre accesible');
+    t.eq(mal, [], 'L2) las celdas del modal se llaman "<campo> <MES>" ("Rendido por director(a) MARZO", "Folio rendición ENERO") y el cupo "Cupo vigente"');
+    t.eq(dup, [], 'L3) nombres únicos: sin celdas repetidas en el modal ni «Ver / editar» sin distinguir la entidad');
+    t.noErrores(hl);
+    await hl.close();
   });
 
   // ---- controles concretos de la lista de la auditoría

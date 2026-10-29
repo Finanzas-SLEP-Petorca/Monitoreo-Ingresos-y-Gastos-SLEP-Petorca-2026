@@ -55,7 +55,7 @@ tests/e2e-real/
   lib/netproxy.mjs    proxy TCP navegador→emulador que se puede CORTAR de verdad (resetea las conexiones) y restablecer
   lib/harness.mjs     boot(): servidor estático + Chromium + page.route + instrumentos (indicador, bitácora de writes/snapshots…)
   lib/spec.mjs        mini-arnés de specs (OK / FALLA por aserción, t.bug(), RESULT:, process.exit(1))
-  specs/01…12         los casos (abajo)
+  specs/01…15         los casos (abajo)
   parches/            parches PROPUESTOS para index.html (no aplicados; ver «Hallazgos»)
 ```
 
@@ -92,6 +92,7 @@ tests/e2e-real/
 | `11_honorarios` | Honorarios (Subt. 21) por boleta en SEP (PR-1) con el SDK real: alta / edición / borrado de UNA boleta = un `setDoc` con `merge:true` confirmado que toca solo `honorarios.<id>` (tipo como código, montos numéricos, N° DC; borrar = `deleteField` de ese id; el resto del documento y los demás documentos intactos, `updateTime`), otra persona agregando y editando SU boleta en el mismo RBD (merge por id: ninguna pisa a la otra, el panel abierto la muestra sin recargar), proyección por cuenta (agregar, teclear un mes, quitar = `deleteField` de la cuenta, otra persona agregando otra cuenta), recarga con IndexedDB real, y documentos con honorarios dañados que el servidor sí guarda (boleta nula / de texto / número / arreglo, monto «abc», fecha numérica, `honorarios` o `hon_proyeccion` del tipo equivocado, meses de texto, cuenta de proyección fuera del catálogo): el panel los tolera, queda verde, los demás RBD se ven idénticos y no escribe nada |
 | `12_jardines_bdl` | «Ajustes de fuentes» con el SDK real: FAEP de un jardín (GESPARVU) y el BDL de su JUNJI = dos `setDoc` con `merge:true` confirmados que tocan solo `otras_fuentes.faep…` y `otras_fuentes.junji.ingreso_bdl…` (el documento ya traía `junji` y `aporte_junji`: nada se pisa, `updateTime` de los demás documentos intacto); otra persona escribe otro mes de FAEP en el mismo jardín y el merge anidado conserva ambos; recarga con IndexedDB real sin escribir; documentos de jardines con `ingreso_bdl` dañado (texto, nulo, arreglo, `meses` de texto, meses con basura) tolerados (verde, 13 jardines, 0 writes, `updateTime` intacto); con los 13 documentos de jardines ausentes no se siembra nada y editar uno lo crea con `merge` |
 | `14_honorarios_fuentes` | Honorarios (Subt. 21) por boleta en las FUENTES (PR-3) con el SDK real: alta / edición / borrado de una boleta en una fuente por concepto (Asignación Familiar) = un `setDoc` con `merge:true` confirmado que toca solo `otras_fuentes.<fuente>.honorarios.<id>` (el resto del documento idéntico en el servidor); otra persona edita OTRA boleta y ambas conviven; sobrevive a recargar sin escribir; fuente con cuenta (General), AC y jardín (Subt. 31); proyección por concepto escribe solo ese mes; Recuperación LLMM no ofrece honorarios y su documento queda intacto; documentos dañados (boletas que no son objetos, mapas de otro tipo) en verde sin escribir |
+| `15_fondos_fijos` | Fondos Fijos (PR K) con el SDK real: editar una celda = un `setDoc` con `merge:true` confirmado de SOLO `fondos_fijos.meses.<MES>.<campo>`; un negativo no se envía; folio recortado a 40; otra persona escribe otro mes y conviven; importación en lote (un setDoc por entidad, conserva Registrado en General / Compensado SIGFE / Reposición, idempotente, fila negativa rechazada, rechazo permanente de una entidad con reglas reales → resumen, rojo y «Reintentar»); lectura de `fondos_fijos` dañado (verde, 0 writes, `updateTime` intacto; AC no suma) |
 
 ## Resultados
 
@@ -113,6 +114,7 @@ Emulador 1.19.8, SDK 10.12.0, Chromium headless. «PASS» = todas las aserciones
 | 11 Honorarios por boleta (PR-1) | **PASS** | **FAIL** (4: no existe el registro de honorarios; igual contra `@1f0821b`) | — |
 | 12 Jardines en FAEP/FIGA y BDL de JUNJI | **PASS** | **FAIL** (verificado también contra `@ff7a666`: 7 aserciones) | — |
 | 14 Honorarios por boleta en las fuentes (PR-3) | **PASS** | **FAIL** (3 aserciones; verificado contra `@1bb8ccc`: las fuentes no tienen honorarios) | — |
+| 15 Fondos Fijos (PR K) | **PASS** | **FAIL** (contra `@13653a5`: 11 aserciones) | — |
 
 Con las cuatro correcciones propuestas (`parches/TODOS_B1_a_B4.patch`, aplicadas **a una copia**, nunca a `index.html`) los 9 specs quedan en PASS sin BUG.
 `node tests/run.mjs` (mocks) sobre copias parcheadas: con B1+B2+B4 las 20 pruebas siguen en PASS; con los cuatro parches solo falla `claves_invalidas` (espera que 1500 bytes sea válido: hay que actualizar ese límite a 1400).
