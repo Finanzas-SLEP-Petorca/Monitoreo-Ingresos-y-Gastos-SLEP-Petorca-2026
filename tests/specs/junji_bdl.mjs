@@ -36,7 +36,7 @@ function junji(docs, id, corteOv) {
 }
 const cifrasDe = (b) => [b.ingreso, b.rem, b.bys, b.gasto, b.saldo];
 const leerTabla = (page) => page.evaluate(() => Array.from(document.querySelectorAll('#otrasFuentesTbody-junji tr[data-rbd]')).map(tr => ({
-  rbd: tr.dataset.rbd, corte: tr.children[2].textContent.trim(), cifras: [3, 4, 5, 6, 7].map(i => tr.children[i].textContent.trim()),
+  rbd: tr.dataset.rbd, corte: tr.children[2].textContent.trim(), cifras: [3, 4, 6, 7, 8].map(i => tr.children[i].textContent.trim()),
 })));
 async function exportar(page, disparar) {
   const dl = await capturarDescarga(page, disparar);
@@ -227,7 +227,7 @@ await correrSpec('junji_bdl', async (t) => {
   // ---------------------------------------------------------------- 7) Excel: hoja ING_BDL (exportar, reimportar, archivo anterior sin la hoja, archivo con cambios)
   await clickTab(page, 'junji');
   const x1 = await exportar(page, () => page.click('#downloadExcelOFBtn-junji'));
-  t.eq(x1.libro.orden, ['ING_OPERACION', 'ING_HOMOLOGACION', 'ING_CARRERA_DOCENTE', 'ING_BDL', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'META'], 'Excel de JUNJI: hojas ING_OPERACION, ING_HOMOLOGACION, ING_CARRERA_DOCENTE, ING_BDL, REMUNERACIONES, BYS_ITEMS, META');
+  t.eq(x1.libro.orden, ['ING_OPERACION', 'ING_HOMOLOGACION', 'ING_CARRERA_DOCENTE', 'ING_BDL', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'], 'Excel de JUNJI: hojas ING_OPERACION, ING_HOMOLOGACION, ING_CARRERA_DOCENTE, ING_BDL, REMUNERACIONES, BYS_ITEMS, META');
   t.eq(x1.libro.hojas.ING_BDL[0].slice(0, 3), ['RBD', 'Nombre', 'Enero'], 'ING_BDL tiene las mismas columnas que las otras hojas de ingreso');
   t.eq(x1.libro.hojas.ING_BDL.slice(1).map(r => String(r[0])), GESPARVU_IDS, 'ING_BDL: una fila por jardín (13), en el orden de JUNJI');
   const fb = x1.libro.hojas.ING_BDL.find(r => String(r[0]) === '5402002');
@@ -284,7 +284,7 @@ await correrSpec('junji_bdl', async (t) => {
   t.ok(!/Bono Desempeño|BDL/.test(txtAj) && /Ingreso \(Aporte Fiscal Extraord\. JUNJI\)/.test(txtAj), 'el modal del Aporte Fiscal Extraord. JUNJI sigue con su única línea de ingreso (sin BDL)');
   await cerrar(h);
   const xa = await exportar(page, () => page.click('#downloadExcelOFBtn-aporte_junji'));
-  t.eq(xa.libro.orden, ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'META'], 'el Excel del Aporte JUNJI conserva sus hojas (sin ING_BDL)');
+  t.eq(xa.libro.orden, ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'], 'el Excel del Aporte JUNJI conserva sus hojas (sin ING_BDL)');
   // «Cómo usar»
   await page.click('#helpBtn');
   const ayuda = await page.evaluate(() => document.getElementById('helpModal').textContent);

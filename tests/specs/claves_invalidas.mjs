@@ -158,6 +158,64 @@ await correrSpec('claves_invalidas', async (t) => {
     t.eq((await rechazadas(h)).length, 0, 'C) SEP: ninguna escritura rechazada');
   });
 
+  // ======================================================================== D) Honorarios (PR-3): el concepto de una boleta y de la proyección de una fuente por concepto es una clave en potencia
+  await escenario(t, 'D)', async () => {
+    await clickTab(page, 'FAEP');
+    await page.click('#otrasFuentesTbody-faep td[data-abrir-otra-fuente="1122"]');
+    await h.waitIdle();
+    const llenar = (campos) => page.evaluate((cs) => {
+      const g = document.querySelector('#otrasFuentesModalBody .hon-form-grid');
+      Object.entries(cs).forEach(([f, v]) => { const el = g.querySelector(`.hon-input[data-field="${f}"]`); el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); });
+    }, campos);
+    const base = { tipoDocumento: 'BOLHE', fechaDocumento: '2026-03-09', montoGasto: '1000' };
+    for (const [concepto, patron, desc] of [['__oculto__', /no es válido/, 'concepto «__x__»'], ['', /concepto/i, 'concepto vacío'], ['H'.repeat(1500), /demasiado largo/, 'concepto de más de 1400 bytes']]) {
+      await h.clearWrites();
+      const n0 = h.dialogs.length;
+      await llenar({ ...base, concepto });
+      await page.click('#otrasFuentesModalBody .add-hon-btn');
+      await h.waitIdle();
+      t.ok(patron.test(h.dialogs.slice(n0).map(d => d.message).join(' ')), `D) boleta con ${desc}: se rechaza con un aviso claro`);
+      t.eq((await h.writes()).length, 0, `D) boleta con ${desc}: no se escribe nada`);
+    }
+    // el borde: 1400 bytes se acepta y se guarda sin escrituras rechazadas
+    await h.clearWrites();
+    const largo = 'H'.repeat(1400);
+    await llenar({ ...base, concepto: largo });
+    await page.click('#otrasFuentesModalBody .add-hon-btn');
+    await h.flushWrites(); await h.waitIdle();
+    t.ok(Object.values((await docRbd(h, '1122')).otras_fuentes.faep.honorarios || {}).some(b => b.concepto === largo), 'D) boleta con un concepto de exactamente 1400 bytes: se guarda');
+    t.eq((await rechazadas(h)).length, 0, 'D) el concepto de 1400 bytes no provoca escrituras rechazadas');
+    // proyección: el concepto es la CLAVE de `hon_proyeccion_items`
+    for (const [texto, patron, desc] of [['__x__', /no es válido/, 'concepto «__x__»'], ['I'.repeat(1500), /demasiado largo/, 'concepto de más de 1400 bytes']]) {
+      const n0 = h.dialogs.length;
+      await h.clearWrites();
+      await page.fill('#otrasFuentesModalBody .honproy-add-input', texto);
+      await page.click('#otrasFuentesModalBody .add-honproy-btn');
+      await h.waitIdle();
+      t.ok(patron.test(h.dialogs.slice(n0).map(d => d.message).join(' ')) && (await h.writes()).length === 0, `D) proyección de honorarios con ${desc}: se rechaza sin escribir`);
+    }
+    await page.fill('#otrasFuentesModalBody .honproy-add-input', 'J'.repeat(1400));
+    await page.click('#otrasFuentesModalBody .add-honproy-btn');
+    await h.flushWrites(); await h.waitIdle();
+    t.ok(Object.keys((await docRbd(h, '1122')).otras_fuentes.faep.hon_proyeccion_items || {}).includes('J'.repeat(1400)) && (await rechazadas(h)).length === 0, 'D) proyección con un concepto de exactamente 1400 bytes: se guarda sin escrituras rechazadas');
+    await page.keyboard.press('Escape');
+    // Excel: HONORARIOS y HON_PROYECCION con conceptos inválidos: la fila se omite y se informa; las buenas se importan
+    await h.clearWrites();
+    const filaHon = (id, concepto) => [id, '1122', 'Liceo', concepto, 'BOLHE', 'N-1', '2026-05-05', '', 'desc', '', 'Prestador', 2000, 2000, ''];
+    const hdr = ['ID', 'RBD', 'Nombre', 'Concepto', 'TipoDocumento', 'NroDocumento', 'FechaDocumento', 'FechaPago', 'Descripcion', 'RutProveedor', 'NombreProveedor', 'MontoGasto', 'MontoDocumento', 'N° DC'];
+    const bufH = await xlsx(page, {
+      HONORARIOS: [hdr, filaHon('hOK', 'Concepto bueno'), filaHon('hBad1', '__oculto__'), filaHon('hBad2', 'K'.repeat(1500)), filaHon('__id_malo__', 'Otro bueno')],
+      HON_PROYECCION: [['RBD', 'Nombre', 'Concepto', ...MESES, 'Total Año'], ['1122', 'Liceo', 'Proy buena', ...unoADoce(), 78000], ['1122', 'Liceo', '__proy__', ...unoADoce(), 78000], ['1122', 'Liceo', 'M'.repeat(1500), ...unoADoce(), 78000]],
+    });
+    const msg = await importar(h, '#importExcelOFInput-faep', bufH);
+    t.ok(/HONORARIOS: 1 filas/.test(msg) && /HON_PROYECCION: 1 filas/.test(msg), 'D) Excel: se importan la boleta y la proyección válidas', msg);
+    t.ok(/5 filas NO se importaron/.test(msg) && /"__oculto__"/.test(msg) && /demasiado largo/.test(msg) && /"__id_malo__"/.test(msg) && /"__proy__"/.test(msg), 'D) Excel: se informan las 5 rechazadas (boleta con concepto «__x__» y demasiado largo, ID reservado, y proyección con concepto «__x__» y demasiado largo)', msg);
+    const doc = await docRbd(h, '1122');
+    t.ok(!!doc.otras_fuentes.faep.honorarios.hOK && !doc.otras_fuentes.faep.honorarios.hBad1 && !doc.otras_fuentes.faep.honorarios.hBad2 && !doc.otras_fuentes.faep.honorarios.__id_malo__, 'D) Excel: solo quedó la boleta con clave válida');
+    t.ok(!!doc.otras_fuentes.faep.hon_proyeccion_items['Proy buena'] && !doc.otras_fuentes.faep.hon_proyeccion_items.__proy__, 'D) Excel: solo quedó la proyección con clave válida');
+    t.eq((await rechazadas(h)).length, 0, 'D) Excel: ninguna escritura rechazada');
+  });
+
   t.noErrores(h);
   await h.close();
 }, { modoBug: 'enforced' });

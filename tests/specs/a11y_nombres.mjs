@@ -8,7 +8,7 @@
 // Cobertura: las vistas y modales de tests/lib/a11y-vistas.mjs (3 vistas del Panel principal, SEP en 4 estados, las 9 fuentes (+ Real/Proy.), % Ejecución en todas sus
 // fuentes, Reportes en sus 2 vistas, 5 modales SEP, 10 modales de fuentes y "Cómo usar"), más la pantalla de acceso en sus 4 estados y el formulario de compra en modo edición.
 import { boot } from '../lib/boot.mjs';
-import { recorrerVistas, recorrerLogin, recorrerHonorarios, recorrerJardines, recorrerConceptos } from '../lib/a11y-vistas.mjs';
+import { recorrerVistas, recorrerLogin, recorrerHonorarios, recorrerHonorariosFuentes, recorrerJardines, recorrerConceptos } from '../lib/a11y-vistas.mjs';
 import { nombresAccesibles, controlesSinNombre } from '../lib/a11y.mjs';
 import { correrSpec } from '../lib/spec.mjs';
 
@@ -112,6 +112,39 @@ await correrSpec('a11y_nombres', async (t) => {
   });
 
   // ======================================================================== J) «Ajustes de fuentes»: jardines en FAEP / FIGA y la línea BDL de JUNJI
+  // ======================================================================== HF) Honorarios (Subt. 21) en las 9 fuentes (PR-3): bloque del detalle con cuenta (General) y con concepto (JUNJI, FAEP)
+  await escenario(t, 'HF', async () => {
+    const hf = await boot({ fixture: 'honorarios_fuentes', viewport: { width: 1500, height: 1000 } });
+    const sinNom = [], mal = [], duplicadas = [], iconosSin = [];
+    let nVistas = 0, nControlesHon = 0;
+    await recorrerHonorariosFuentes(hf, async ({ nombre, scope, tipo }) => {
+      const lista = await nombresAccesibles(hf.page, { scope });
+      nVistas++;
+      controlesSinNombre(lista).forEach((c) => sinNom.push(`${nombre}: ${resumen(c)}`));
+      const cel = lista.filter((c) => /^input\.celda-input/.test(c.sel));
+      const vistos = new Map();
+      cel.forEach((c) => { if (!RE_CELDA.test(c.nombre)) mal.push(`${nombre}: ${c.nombre}`); vistos.set(c.nombre, (vistos.get(c.nombre) || 0) + 1); });
+      vistos.forEach((n, nom) => { if (n > 1) duplicadas.push(`${nombre}: «${nom}» ×${n}`); });
+      if (tipo === 'modal') {
+        const nombres = lista.filter((c) => !/^input\.celda-input/.test(c.sel) && /hon-|honorario|Honorario|prestador|boleta|Cuenta de honorarios|Concepto de honorarios|N° boleta|Fecha boleta/i.test(c.sel + ' ' + c.nombre));
+        nControlesHon += nombres.length;
+        const cuenta = new Map(); nombres.forEach((c) => cuenta.set(c.nombre, (cuenta.get(c.nombre) || 0) + 1));
+        cuenta.forEach((n, nom) => { if (n > 1) duplicadas.push(`${nombre}: control «${nom}» ×${n}`); });
+        const compras = lista.filter((c) => /compra-input|add-compra-btn|cancelar-edicion-btn/.test(c.sel)).map((c) => c.nombre);
+        nombres.filter((c) => /hon-input|add-hon-btn|cancelar-edicion-hon-btn/.test(c.sel)).forEach((c) => { if (compras.includes(c.nombre)) duplicadas.push(`${nombre}: «${c.nombre}» coincide con un control de compras`); });
+        const iconos = await hf.page.evaluate(() => Array.from(document.querySelectorAll('#otrasFuentesModalBody .hon-block button')).filter((b) => b.getClientRects().length > 0 && !b.getAttribute('aria-label') && !/[\p{L}\p{N}]/u.test(b.textContent.replace(/\s/g, ''))).map((b) => b.className));
+        iconos.forEach((x) => iconosSin.push(`${nombre}: ${x}`));
+      }
+    });
+    t.ok(nVistas >= 9 && nControlesHon > 60, `HF0) se midieron ${nVistas} vistas/estados con honorarios en las fuentes y ${nControlesHon} controles del bloque «Honorarios (Subt. 21)»`, { nVistas, nControlesHon });
+    t.eq(sinNom, [], 'HF1) ningún control del bloque de honorarios de las fuentes (formulario, campo de concepto, selector de cuenta, ✏️ ⧉ 🗑, proyección) queda sin nombre accesible');
+    t.eq(mal, [], 'HF2) las celdas de la proyección se llaman "<concepto>, <mes>, <entidad>" (p. ej. "Proyección honorarios Apoyo pedagógico, agosto, GESPARVU 5402002")');
+    t.eq(duplicadas, [], 'HF3) nombres únicos: sin celdas ni controles repetidos en el bloque de honorarios ni coincidencias con el formulario de compras del mismo modal');
+    t.eq(iconosSin, [], 'HF4) los botones solo-icono de honorarios tienen aria-label');
+    t.noErrores(hf);
+    await hf.close();
+  });
+
   await escenario(t, 'J', async () => {
     const hj = await boot({ fixture: 'jardines', viewport: { width: 1500, height: 1000 } });
     const sinNom = [], mal = [], dup = [], accionesMal = [];

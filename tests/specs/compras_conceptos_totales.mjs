@@ -105,9 +105,9 @@ await correrSpec('compras_conceptos_totales', async (t) => {
     let filas = await filasEjec();
     const ser = serieMensualEsperada(docs, k);
     const e = esp[k].suma.total;
-    t.eq(filas.map(f => parseCLP(f[6])), ser.bys.real.map((v, i) => Math.round(v + ser.bys.proy[i])), `% Ejecución ${k}: «Gasto B&S (mes)» es mes a mes sin documento + documentado`);
+    t.eq(filas.map(f => parseCLP(f[9])), ser.bys.real.map((v, i) => Math.round(v + ser.bys.proy[i])), `% Ejecución ${k}: «Gasto B&S (mes)» es mes a mes sin documento + documentado`);
     t.eq(filas.map(f => parseCLP(f[3])), ser.rem.real.map((v, i) => Math.round(v + ser.rem.proy[i])), `% Ejecución ${k}: «Gasto Rem. (mes)» mes a mes`);
-    t.eq(filas.reduce((s, f) => s + parseCLP(f[6]), 0), e.bys, `% Ejecución ${k}: los 12 meses de B&S suman el B&S de la pestaña (${e.bys})`);
+    t.eq(filas.reduce((s, f) => s + parseCLP(f[9]), 0), e.bys, `% Ejecución ${k}: los 12 meses de B&S suman el B&S de la pestaña (${e.bys})`);
     const kc = await page.evaluate(() => Array.from(document.querySelectorAll('#ejecKpiRow .kpi-card')).map(c => ({ l: c.querySelector('.label').textContent.trim(), d: c.querySelector('.delta').textContent.trim() })));
     const monto = (rotulo) => { const c = kc.find(x => x.l === rotulo); const m = c && /\((-?\$[\d.]+)\)/.exec(c.d); return m ? parseCLP(m[1]) : null; };
     t.eq([monto('% Ejec. B&S — Real+Proy a diciembre'), monto('% Ejec. Total — Real+Proy a diciembre'), monto('% Ejec. B&S — Real'), monto('% Ejec. Total — Real')],
@@ -120,8 +120,8 @@ await correrSpec('compras_conceptos_totales', async (t) => {
     await h.waitIdle();
     const filas = await filasEjec();
     const ser = serieMensualEsperada(docs, k, id);
-    t.eq(filas.map(f => parseCLP(f[6])), ser.bys.real.map((v, i) => Math.round(v + ser.bys.proy[i])), `% Ejecución ${k} / ${id}: «Gasto B&S (mes)» incluye lo documentado`);
-    t.eq(filas.reduce((s, f) => s + parseCLP(f[6]), 0), esp[k].porId[id].total.bys, `% Ejecución ${k} / ${id}: la suma anual = B&S de la entidad`);
+    t.eq(filas.map(f => parseCLP(f[9])), ser.bys.real.map((v, i) => Math.round(v + ser.bys.proy[i])), `% Ejecución ${k} / ${id}: «Gasto B&S (mes)» incluye lo documentado`);
+    t.eq(filas.reduce((s, f) => s + parseCLP(f[9]), 0), esp[k].porId[id].total.bys, `% Ejecución ${k} / ${id}: la suma anual = B&S de la entidad`);
   }
   await page.selectOption('#ejecRbdSelect', '');
   // Consolidado: el gasto total a diciembre es EXACTAMENTE el «Gasto Total» de la franja del Panel principal (vista Total).

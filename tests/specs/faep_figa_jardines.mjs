@@ -42,7 +42,7 @@ const sumaBloques = (docs, key, vista) => idsDeUniverso('rbd_ac_gesparvu').reduc
 }, { ingreso: 0, rem: 0, bys: 0, gasto: 0, saldo: 0 });
 
 const leerTabla = (page, key) => page.evaluate((k) => Array.from(document.querySelectorAll(`#otrasFuentesTbody-${k} tr[data-rbd]`)).map(tr => ({
-  rbd: tr.dataset.rbd, nombre: tr.children[1].textContent.trim(), corte: tr.children[2].textContent.trim(), cifras: [3, 4, 5, 6, 7].map(i => tr.children[i].textContent.trim()),
+  rbd: tr.dataset.rbd, nombre: tr.children[1].textContent.trim(), corte: tr.children[2].textContent.trim(), cifras: [3, 4, 6, 7, 8].map(i => tr.children[i].textContent.trim()),
 })), key);
 const cifrasDe = (b) => [b.ingreso, b.rem, b.bys, b.gasto, b.saldo];
 const tituloModal = (page) => page.evaluate(() => document.getElementById('otrasFuentesModalTitle').textContent.trim());
@@ -311,7 +311,7 @@ await correrSpec('faep_figa_jardines', async (t) => {
   // ---------------------------------------------------------------- 9) Excel: exportar, archivo nuevo, archivo antiguo (sin jardines) y fila de un jardín sin FAEP previo
   await clickTab(p2, 'faep');
   const x1 = await exportar(p2, () => p2.click('#downloadExcelOFBtn-faep'));
-  t.eq(x1.libro.orden, ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'META'], 'Excel FAEP: las hojas de siempre');
+  t.eq(x1.libro.orden, ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'], 'Excel FAEP: las hojas de siempre más HONORARIOS y HON_PROYECCION (PR-3)');
   const colA = (hoja) => x1.libro.hojas[hoja].slice(1).map(r => String(r[0]));
   t.eq(colA('INGRESO'), idsDeUniverso('rbd_ac_gesparvu'), 'Excel FAEP · INGRESO: 69 filas, RBD, AC y luego los 13 jardines');
   t.eq(colA('META'), idsDeUniverso('rbd_ac_gesparvu'), 'Excel FAEP · META: las 69 entidades (con su «Real hasta»)');

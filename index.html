@@ -384,10 +384,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     /* La tabla SEP (13 columnas) y la fila del PDF individual medían 1.436 / 1.166 px sobre una hoja horizontal de ~975 px útiles: el navegador la encogía
        o, según el tamaño de papel y la escala, la columna Estado (la última) quedaba cortada. Compacta para que quepa entera: fuente 9 px, encabezados
        en varias líneas, barras de % más cortas; los montos siguen sin partirse (nowrap). */
-    #tab-panel table.data-table, #printSingleWrap table.data-table { width:100% !important; font-size:9px !important; }
-    #tab-panel table.data-table th, #tab-panel table.data-table td, #printSingleWrap table.data-table th, #printSingleWrap table.data-table td { padding:3px 3px !important; }
-    #tab-panel table.data-table th, #printSingleWrap table.data-table th { white-space:normal !important; line-height:1.15; vertical-align:bottom; }
-    #tab-panel table.data-table td.num, #printSingleWrap table.data-table td.num { white-space:nowrap; }
+    #tab-panel table.data-table, .tab-content[id^="tab-of-"] table.data-table, #printSingleWrap table.data-table { width:100% !important; font-size:9px !important; }
+    #tab-panel table.data-table th, #tab-panel table.data-table td, .tab-content[id^="tab-of-"] table.data-table th, .tab-content[id^="tab-of-"] table.data-table td, #printSingleWrap table.data-table th, #printSingleWrap table.data-table td { padding:3px 3px !important; }
+    #tab-panel table.data-table th, .tab-content[id^="tab-of-"] table.data-table th, #printSingleWrap table.data-table th { white-space:normal !important; line-height:1.15; vertical-align:bottom; }
+    #tab-panel table.data-table td.num, .tab-content[id^="tab-of-"] table.data-table td.num, #printSingleWrap table.data-table td.num { white-space:nowrap; }
     #tab-panel .pct-bar-track, #printSingleWrap .pct-bar-track { width:22px !important; margin-right:3px !important; }
     #tab-panel .pct-bar-text, #printSingleWrap .pct-bar-text { width:auto !important; }
     #tab-panel .tag, #printSingleWrap .tag { font-size:8px !important; padding:1px 5px !important; }
@@ -408,6 +408,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
        las 4 tablas quedan con exactamente el mismo ancho total y ninguna se corta. */
     table.detalle-table td:first-child, table.detalle-table th:first-child { width:120px !important; max-width:120px !important; overflow:hidden !important; text-overflow:ellipsis !important; white-space:nowrap !important; }
     table.detalle-table td.item-total:last-child, table.detalle-table th:last-child { width:70px !important; max-width:70px !important; }
+    /* Registros por documento (compras y honorarios) del PDF por entidad: 11-13 columnas de texto libre que en pantalla viajan en un scroll horizontal. En la hoja se parten en varias líneas
+       (los montos no) y la primera columna (cuenta / concepto) muestra su texto completo, así ningún registro se sale de la hoja aunque la descripción o el prestador sean largos. */
+    table.compras-table, table.hon-table { width:100% !important; }
+    table.compras-table th, table.compras-table td, table.hon-table th, table.hon-table td { white-space:normal !important; overflow-wrap:anywhere; }
+    table.compras-table td.num, table.compras-table th.num, table.hon-table td.num, table.hon-table th.num { white-space:nowrap !important; }
+    table.compras-table td:first-child, table.compras-table th:first-child, table.hon-table td:first-child, table.hon-table th:first-child { width:auto !important; max-width:none !important; overflow:visible !important; text-overflow:clip !important; }
     table.detalle-table th.mes-real, table.detalle-table th.mes-proy { white-space:nowrap !important; }
     .mes-tag { font-size:7px !important; }
     /* Reemplaza el <input> editable por texto plano alineado a la derecha: en pantalla el
@@ -4172,7 +4178,7 @@ function onCeldaInput(input) {
     totalCell = document.getElementById(`honproyitemtotal-${rbd}-${idSeguro(codigo)}`);
     if (totalCell) totalCell.textContent = fmtCLP(it.total);
     const totalGeneralCell = document.getElementById(`honproytotal-${rbd}`);
-    if (totalGeneralCell) totalGeneralCell.textContent = fmtCLP(hp.total);
+    if (totalGeneralCell) (totalGeneralCell.querySelector('strong') || totalGeneralCell).textContent = fmtCLP(hp.total);
     scheduleRbdSave(rbd, { nombre: hp.nombre, hon_proyeccion: { items: { [codigo]: { meses: { [mes]: val }, total: it.total } } } });
   } else {
     const simple = ensureSimple(rbd, 'rem_por_rbd');
@@ -6543,7 +6549,7 @@ function onOtraFuenteCeldaInput(input) {
     const itemTotalCell = document.getElementById(`honproyitemtotal-${rbd}${ctx.sufijoId}-${idSeguro(clave)}`);
     if (itemTotalCell) itemTotalCell.textContent = fmtCLP(it.total);
     const totalGeneralCell = document.getElementById(`honproytotal-${rbd}${ctx.sufijoId}`);
-    if (totalGeneralCell) totalGeneralCell.textContent = fmtCLP(hp.total);
+    if (totalGeneralCell) (totalGeneralCell.querySelector('strong') || totalGeneralCell).textContent = fmtCLP(hp.total); // la cifra va en negrita: se actualiza el <strong> y no se reemplaza
     recomputeOtraFuente(rbd, fuenteKey);
     scheduleRbdSave(rbd, { nombre: reg ? reg.nombre : rbd, ...ctx.payloadProy(clave, { [campo]: clave, meses: { [mes]: val }, total: it.total }) });
   } else if (modo === 'of_bys_item' || modo === 'of_bys_proy_item') {

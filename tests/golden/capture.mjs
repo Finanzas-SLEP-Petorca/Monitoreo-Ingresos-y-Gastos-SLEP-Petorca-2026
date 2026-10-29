@@ -742,6 +742,99 @@ async function seccionComprasConceptos(h, R) {
   await R.imprimir('compras_conceptos.print.dashboard', () => page.click('#dashPdfBtn'));
 }
 
+// Con el fixture "honorarios_fuentes" (compras_conceptos + Honorarios (Subt. 21) por boleta y proyección en SEP y en las 9 fuentes — ver generate.mjs): el Panel principal (3 vistas: tarjetas por fuente, franja,
+// gráfico apilado), las pestañas de las 9 fuentes con la columna «Gasto Honorarios» (y Real / Proyectado en General y JUNJI), los detalles con el bloque «Honorarios (Subt. 21)» (cuenta en General, AC, PIE, Mantención
+// y Pro-Retención; concepto en JUNJI —incluidos los 3 casos del saldo de Operación—, FAEP, FIGA y los Aportes; jardines), el formulario en edición con avisos, % Ejecución (con su serie), el Visualizador y el
+// Reporte personalizado, y las exportaciones (Excel con HONORARIOS y HON_PROYECCION, XLS / CSV / PDF por fila, JSON de respaldo).
+async function seccionHonorariosFuentes(h, R) {
+  const { page } = h;
+  const fila = (key, rbd, accion) => `#otrasFuentesTbody-${key} button.row-action-btn[data-action="${accion}"][data-rbd="${rbd}"]`;
+  await abrirDetails(page, '#tab-dashboard');
+  for (const v of ['total', 'real', 'proy']) {
+    await page.click(`.dash-chips button[data-dash-vista="${v}"]`);
+    await R.vista(`honorarios_fuentes.dashboard.${v}`, '#tab-dashboard');
+  }
+  await page.click('.dash-chips button[data-dash-vista="total"]');
+  for (const key of FUENTES) {
+    await h.clickTab('of-' + key);
+    await R.vista(`honorarios_fuentes.of.${key}.total`, `#tab-of-${key}`);
+    if (key === 'general' || key === 'junji') {
+      for (const v of ['real', 'proy']) {
+        await page.click(`#tab-of-${key} .of-chip[data-of-vista="${v}"]`);
+        await R.vista(`honorarios_fuentes.of.${key}.${v}`, `#tab-of-${key}`);
+      }
+      await page.click(`#tab-of-${key} .of-chip[data-of-vista="total"]`);
+      await h.waitIdle();
+    }
+  }
+  const modales = [['general', '1121'], ['general', 'AC'], ['general', '1122'], ['general', '1123'], ['pie', '1121'], ['mantenimiento', '1121'], ['prorretencion', '1121'],
+    ['junji', '5402002'], ['junji', '5401003'], ['junji', '5401005'], ['junji', '5401002'], ['faep', '1121'], ['faep', 'AC'], ['faep', '5402002'], ['figa', '1121'], ['figa', '5404001'],
+    ['aporte_educ', '1121'], ['aporte_educ', 'AC'], ['aporte_junji', '5402002']];
+  for (const [fuente, id] of modales) await abrirModalOtraFuente(h, R, fuente, id, `honorarios_fuentes.modal.of.${fuente}.${id}`);
+  // formulario en modo edición con los avisos en vivo (fecha de 2025, pago anterior al documento, gasto mayor que el documento), con cuenta (General) y con concepto (JUNJI)
+  for (const [fuente, id, boleta] of [['general', '1121', 'gh1121_1'], ['junji', '5402002', 'jh5402002_1']]) {
+    await h.clickTab('of-' + fuente);
+    await page.click(`#otrasFuentesTbody-${fuente} td[data-abrir-otra-fuente="${id}"]`);
+    await h.waitIdle();
+    await page.click(`#otrasFuentesModalBody tr[data-hon-id="${boleta}"] .hon-edit-btn`);
+    await page.fill('#otrasFuentesModalBody .hon-form-grid [data-field="fechaDocumento"]', '2025-12-30');
+    await page.fill('#otrasFuentesModalBody .hon-form-grid [data-field="fechaPago"]', '2025-12-01');
+    await page.fill('#otrasFuentesModalBody .hon-form-grid [data-field="montoGasto"]', '900.000');
+    await page.fill('#otrasFuentesModalBody .hon-form-grid [data-field="montoDocumento"]', '100.000');
+    await R.vista(`honorarios_fuentes.modal.of.${fuente}.${id}.formulario-edicion-avisos`, '#otrasFuentesModalBody .hon-form-grid');
+    await page.click('#otrasFuentesModalBody .cancelar-edicion-hon-btn');
+    await page.keyboard.press('Escape');
+    await h.waitIdle();
+  }
+  await h.clickTab('% Ejecución');
+  for (const key of ['general', 'junji', 'faep']) {
+    await page.click(`#ejecFuenteChips .of-chip[data-ejec-fuente="${key}"]`);
+    await R.vista(`honorarios_fuentes.ejec.${key}`, '#tab-ejecucion');
+  }
+  await setSelect(page, '#ejecRbdSelect', '5402002');
+  await R.vista('honorarios_fuentes.ejec.faep.5402002', '#tab-ejecucion');
+  await setSelect(page, '#ejecRbdSelect', '');
+  await page.click('#ejecFuenteChips .of-chip[data-ejec-fuente="consolidado"]');
+  await R.vista('honorarios_fuentes.ejec.consolidado', '#tab-ejecucion');
+  await h.clickTab('Reportes');
+  await page.click('#vzFuentesNinguna');
+  await page.click('#vzFuenteChips [data-vz-fuente="general"]');
+  await page.click('#vzFuenteChips [data-vz-fuente="junji"]');
+  await page.click('#vzExpGas');
+  await R.vista('honorarios_fuentes.rep.vz.general-junji', SEL_VZ);
+  await R.descarga('honorarios_fuentes.exp.vz.general-junji.csv', () => page.click('#vzCsvBtn'));
+  await page.click('#vzAgruparChips [data-vz-agrupar="codigo"]');
+  await page.click('#vzExpGas');
+  await R.vista('honorarios_fuentes.rep.vz.general-junji.por-codigo', SEL_VZ);
+  await page.click('#vzLimpiarBtn');
+  await page.click('#reporteVistaChips [data-reporte-vista="personalizado"]');
+  await h.waitIdle();
+  const f = await configurarPersonalizado(h, R, { entidades: ['1121', 'AC', '5402002'], conceptos: ['of|general|hon', 'of|general|hon_proy', 'of|junji|hon', 'of|junji|hon_proy', 'of|faep|hon', 'of|general|hon_item|410803', 'of|junji|hon_item|Apoyo pedagógico'], meses: ['ENERO', 'MARZO', 'JUNIO', 'AGOSTO', 'DICIEMBRE'] });
+  R.dato('honorarios_fuentes.rep.pers.faltantes', f);
+  await R.vista('honorarios_fuentes.rep.pers', SEL_PERS);
+  await R.descarga('honorarios_fuentes.exp.pers.csv', () => page.click('#reporteCsvBtn'));
+  for (const key of ['general', 'junji', 'faep']) {
+    await h.clickTab('of-' + key);
+    await R.descarga(`honorarios_fuentes.exp.of.${key}.excel-carga`, () => page.click(`#downloadExcelOFBtn-${key}`));
+    await R.descarga(`honorarios_fuentes.exp.of.${key}.json-carga`, () => page.click(`#downloadCargaOFBtn-${key}`));
+  }
+  await h.clickTab('of-general');
+  await R.descarga('honorarios_fuentes.exp.of.general.csv-compras', () => page.click('#downloadComprasOFBtn-general'));
+  await R.descarga('honorarios_fuentes.exp.of.general.fila.1121.xls', () => page.click(fila('general', '1121', 'excel')));
+  await R.descarga('honorarios_fuentes.exp.of.general.fila.1121.csv', () => page.click(fila('general', '1121', 'csv')));
+  await R.imprimir('honorarios_fuentes.print.of.general.fila.1121', () => page.click(fila('general', '1121', 'pdf')));
+  await h.clickTab('of-junji');
+  await R.descarga('honorarios_fuentes.exp.of.junji.fila.5402002.xls', () => page.click(fila('junji', '5402002', 'excel')));
+  await R.descarga('honorarios_fuentes.exp.of.junji.fila.5402002.csv', () => page.click(fila('junji', '5402002', 'csv')));
+  await R.imprimir('honorarios_fuentes.print.of.junji.fila.5402002', () => page.click(fila('junji', '5402002', 'pdf')));
+  await R.imprimir('honorarios_fuentes.print.of.junji.fila.5401005', () => page.click(fila('junji', '5401005', 'pdf')));
+  await R.imprimir('honorarios_fuentes.print.of.junji.general', () => page.click('#exportPdfOFBtn-junji'));
+  await h.clickTab('of-faep');
+  await R.imprimir('honorarios_fuentes.print.of.faep.fila.1121', () => page.click(fila('faep', '1121', 'pdf')));
+  await h.clickTab('Panel principal');
+  await R.imprimir('honorarios_fuentes.print.dashboard', () => page.click('#dashPdfBtn'));
+}
+
 export const SECCIONES = [
   { nombre: 'dashboard', fn: seccionEncabezadoYDashboard },
   { nombre: 'sep', fn: seccionSep },
@@ -756,6 +849,7 @@ export const SECCIONES = [
   { nombre: 'honorarios', fixture: 'honorarios', fn: seccionHonorarios },
   { nombre: 'jardines', fixture: 'jardines', fn: seccionJardines },
   { nombre: 'compras_conceptos', fixture: 'compras_conceptos', fn: seccionComprasConceptos },
+  { nombre: 'honorarios_fuentes', fixture: 'honorarios_fuentes', fn: seccionHonorariosFuentes },
 ];
 
 export async function capturar({ log = () => {}, solo = null, html = undefined } = {}) {

@@ -53,9 +53,10 @@ function igualLibros(a, b) {
 }
 const comprasDe = async (h, rbd, fuente) => ((await h.store())[`sep_carga_rbd/${rbd}`].otras_fuentes[fuente] || {}).compras || {};
 const HOJAS_ESPERADAS = {
-  junji: ['ING_OPERACION', 'ING_HOMOLOGACION', 'ING_CARRERA_DOCENTE', 'ING_BDL', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'META'],
-  faep: ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'META'], figa: ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'META'],
-  aporte_educ: ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'META'], aporte_junji: ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'META'],
+  // Honorarios (PR-3): HONORARIOS y HON_PROYECCION van antes de META.
+  junji: ['ING_OPERACION', 'ING_HOMOLOGACION', 'ING_CARRERA_DOCENTE', 'ING_BDL', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'],
+  faep: ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'], figa: ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'],
+  aporte_educ: ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'], aporte_junji: ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'],
 };
 
 await correrSpec('compras_conceptos_excel', async (t) => {

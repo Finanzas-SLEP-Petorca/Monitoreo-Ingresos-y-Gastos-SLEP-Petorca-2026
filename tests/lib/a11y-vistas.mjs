@@ -192,6 +192,41 @@ export async function recorrerHonorarios(h, visitante) {
 }
 
 /**
+ * Honorarios (Subt. 21) en las 9 fuentes (PR-3), con el fixture `honorarios_fuentes` ya arrancado en `h`: las pestañas con la columna «Gasto Honorarios», el bloque de honorarios del detalle de una fuente con
+ * cuenta (General) y de una por concepto (JUNJI, FAEP), con el formulario en edición y avisos en vivo, la fila AC, % Ejecución (con la serie «Honorarios») y el Panel principal.
+ * `visitante({nombre, scope, tipo})` como en recorrerVistas.
+ */
+export async function recorrerHonorariosFuentes(h, visitante) {
+  const { page } = h;
+  const vista = async (nombre) => { await h.waitIdle(); await visitante({ nombre, scope: '#app', tipo: 'vista' }); };
+  const modal = async (nombre) => { await h.waitIdle(); await visitante({ nombre, scope: '#otrasFuentesModal .modal-panel', tipo: 'modal' }); };
+  await h.clickTab('Panel principal');
+  await abrirDetails(page, '#tab-dashboard');
+  await vista('honfuentes.dashboard.total');
+  for (const k of ['general', 'junji']) { await h.clickTab('of-' + k); await vista(`honfuentes.of.${k}.total`); }
+  for (const [fuente, id] of [['general', '1121'], ['general', 'AC'], ['junji', '5402002'], ['faep', '1121']]) {
+    await h.clickTab('of-' + fuente);
+    await page.click(`#otrasFuentesTbody-${fuente} td[data-abrir-otra-fuente="${id}"]`);
+    await h.waitIdle();
+    await modal(`honfuentes.modal.of.${fuente}.${id}`);
+    if ((fuente === 'general' && id === '1121') || fuente === 'junji') {
+      const boleta = fuente === 'general' ? 'gh1121_1' : 'jh5402002_1';
+      await page.click(`#otrasFuentesModalBody tr[data-hon-id="${boleta}"] .hon-edit-btn`);
+      await page.fill('#otrasFuentesModalBody .hon-form-grid [data-field="fechaDocumento"]', '2025-12-30');
+      await page.fill('#otrasFuentesModalBody .hon-form-grid [data-field="fechaPago"]', '2025-12-01');
+      await page.fill('#otrasFuentesModalBody .hon-form-grid [data-field="montoGasto"]', '900.000');
+      await page.fill('#otrasFuentesModalBody .hon-form-grid [data-field="montoDocumento"]', '100.000');
+      await modal(`honfuentes.modal.of.${fuente}.${id}.edicion-con-avisos`);
+      await page.click('#otrasFuentesModalBody .cancelar-edicion-hon-btn');
+    }
+    await page.keyboard.press('Escape');
+    await h.waitIdle();
+  }
+  await h.clickTab('% Ejecución');
+  for (const k of ['junji', 'consolidado']) { await page.click(`#ejecFuenteChips button[data-ejec-fuente="${k}"]`); await vista(`honfuentes.ejec.${k}`); }
+}
+
+/**
  * «Ajustes de fuentes», con el fixture `jardines` ya arrancado en `h`: FAEP y FIGA con los 13 jardines (69 filas), el detalle de un jardín en FAEP / FIGA con montos, y el detalle de JUNJI con
  * la cuarta línea de ingreso «Ingreso Bono Desempeño Laboral (BDL)» (jardín con BDL alto, jardín con BDL que cubre Remuneraciones y jardín sin JUNJI previo).
  * `visitante({nombre, scope, tipo})` como en recorrerVistas.
