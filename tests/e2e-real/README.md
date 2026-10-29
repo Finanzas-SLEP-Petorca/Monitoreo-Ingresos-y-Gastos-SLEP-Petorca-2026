@@ -112,6 +112,7 @@ Emulador 1.19.8, SDK 10.12.0, Chromium headless. «PASS» = todas las aserciones
 | 10 Mes de cierre global | **PASS** | **FAIL** (no existe el control; verificado contra `@a94c2fb`) | — |
 | 11 Honorarios por boleta (PR-1) | **PASS** | **FAIL** (4: no existe el registro de honorarios; igual contra `@1f0821b`) | — |
 | 12 Jardines en FAEP/FIGA y BDL de JUNJI | **PASS** | **FAIL** (verificado también contra `@ff7a666`: 7 aserciones) | — |
+| 14 Honorarios por boleta en las fuentes (PR-3) | **PASS** | **FAIL** (3 aserciones; verificado contra `@1bb8ccc`: las fuentes no tienen honorarios) | — |
 
 Con las cuatro correcciones propuestas (`parches/TODOS_B1_a_B4.patch`, aplicadas **a una copia**, nunca a `index.html`) los 9 specs quedan en PASS sin BUG.
 `node tests/run.mjs` (mocks) sobre copias parcheadas: con B1+B2+B4 las 20 pruebas siguen en PASS; con los cuatro parches solo falla `claves_invalidas` (espera que 1500 bytes sea válido: hay que actualizar ese límite a 1400).
