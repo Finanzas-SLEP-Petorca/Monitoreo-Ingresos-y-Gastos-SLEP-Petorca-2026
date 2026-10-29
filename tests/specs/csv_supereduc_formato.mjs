@@ -143,7 +143,7 @@ await correrSpec('csv_supereduc_formato', async (t) => {
     await h.close();
   }
 
-  // =============================================================== fuentes (PIE, Mantención, General y AC): misma función de normalización
+  // =============================================================== fuentes (PIE, Mantenimiento, General y AC): misma función de normalización
   {
     const todos = Object.fromEntries(TIPOS_PANEL.map((tp, i) => ['t' + i, compra({ nroDocumento: String(2000 + i), tipoDocumento: tp,
       ...(tp === 'Nota de crédito' || tp === 'Nota de débito' ? { documentoOriginal: '7-FACEL' } : {}) })]));
@@ -165,16 +165,16 @@ await correrSpec('csv_supereduc_formato', async (t) => {
     const pieFila = await capturarDescarga(page, () => page.evaluate(() => document.querySelector('#otrasFuentesTbody-pie .row-action-btn[data-action="csv"][data-rbd="1121"]').click()));
     t.eq(pieFila.buffer.toString('utf8'), pie.buffer.toString('utf8'), 'PIE ⬇ CSV SUPEREDUC de la fila: mismo contenido');
     t.ok(/en 7 de 10 compras/.test(ultimoConfirm(h) || ''), 'PIE de la fila: también avisa antes de descargar');
-    // Mantención: los 18 tipos del panel
-    await clickTab(page, 'Mantención');
+    // Mantenimiento: los 18 tipos del panel
+    await clickTab(page, 'Mantenimiento');
     h.dialogs.length = 0;
     const mant = await capturarDescarga(page, () => page.click('#downloadComprasOFBtn-mantenimiento'));
     const fm = filasCsv(mant.buffer).slice(1);
-    t.eq(fm.map(r => r[C.TIPO]), CODIGOS_ESPERADOS.map(c => c), 'Mantención: los 18 tipos de documento del panel salen con su código oficial (Tabla 02 y Sección 12)');
-    t.ok(fm.every(r => r[C.SUB] === 'MANTENIMIENTO'), 'Mantención: columna Subvención = MANTENIMIENTO');
-    t.ok(fm.filter(r => r[C.TIPO] === 'NOTACRE' || r[C.TIPO] === 'NOTADEB').every(r => r[C.ORIG] === '7-FACEL') && fm.filter(r => r[C.TIPO] !== 'NOTACRE' && r[C.TIPO] !== 'NOTADEB').every(r => r[C.ORIG] === ''), 'Mantención: Documento Original solo en NOTACRE/NOTADEB');
-    t.ok(/honorarios/.test(ultimoConfirm(h) || '') && /en 5 de 18 compras/.test(ultimoConfirm(h) || ''), 'Mantención: el aviso cuenta las 5 boletas de honorarios (en 5 de 18)', (ultimoConfirm(h) || '').split('\n')[0]);
-    t.ok(/5 filas: documento de honorarios[^\n]*muévelo al registro de Honorarios/.test(ultimoConfirm(h) || ''), 'Mantención: y les dice «muévelo al registro de Honorarios»');
+    t.eq(fm.map(r => r[C.TIPO]), CODIGOS_ESPERADOS.map(c => c), 'Mantenimiento: los 18 tipos de documento del panel salen con su código oficial (Tabla 02 y Sección 12)');
+    t.ok(fm.every(r => r[C.SUB] === 'MANTENIMIENTO'), 'Mantenimiento: columna Subvención = MANTENIMIENTO');
+    t.ok(fm.filter(r => r[C.TIPO] === 'NOTACRE' || r[C.TIPO] === 'NOTADEB').every(r => r[C.ORIG] === '7-FACEL') && fm.filter(r => r[C.TIPO] !== 'NOTACRE' && r[C.TIPO] !== 'NOTADEB').every(r => r[C.ORIG] === ''), 'Mantenimiento: Documento Original solo en NOTACRE/NOTADEB');
+    t.ok(/honorarios/.test(ultimoConfirm(h) || '') && /en 5 de 18 compras/.test(ultimoConfirm(h) || ''), 'Mantenimiento: el aviso cuenta las 5 boletas de honorarios (en 5 de 18)', (ultimoConfirm(h) || '').split('\n')[0]);
+    t.ok(/5 filas: documento de honorarios[^\n]*muévelo al registro de Honorarios/.test(ultimoConfirm(h) || ''), 'Mantenimiento: y les dice «muévelo al registro de Honorarios»');
     // General + AC (sin problemas: sin aviso)
     await clickTab(page, 'General');
     h.dialogs.length = 0;

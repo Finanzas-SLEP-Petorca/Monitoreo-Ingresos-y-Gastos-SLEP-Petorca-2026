@@ -2,7 +2,7 @@
 // los documentos del fixture `honorarios_fuentes` (sin pasar por el código del panel; el catálogo de cuentas sale de data/honorarios_cuentas_2026.json) y lectores de las vistas.
 //
 // Reglas (docs/honorarios_spec.md, decisiones del usuario):
-//   · Una boleta entra en los totales si (fuentes con cuenta: General, PIE, Mantención, Pro-Retención) su cuenta está en el catálogo de honorarios o (fuentes por concepto: JUNJI, FAEP, FIGA,
+//   · Una boleta entra en los totales si (fuentes con cuenta: General, PIE, Mantenimiento, Pro-Retención) su cuenta está en el catálogo de honorarios o (fuentes por concepto: JUNJI, FAEP, FIGA,
 //     Aportes) tiene concepto, y en ambos casos su Fecha Documento empieza con aaaa-mm-dd con un mes que existe (cualquier año). Se suma el Monto Gasto (bruto). La Fecha de Pago no mueve el mes.
 //   · Las boletas son SIEMPRE «Real» (sin importar el corte «Real hasta» de la entidad); la proyección (por cuenta o concepto) es SIEMPRE «Proyectada» y se SUMA a las boletas.
 //   · NO hay 70/30 en las fuentes: gasto = remuneraciones + honorarios + B&S; saldo = ingreso − gasto; Déficit ⇔ saldo < 0. JUNJI: además Déficit si Operación − B&S < 0, y los honorarios (gasto de
@@ -226,6 +226,6 @@ export function filasRegistroHon(page) {
     id: tr.dataset.honId, celdas: Array.from(tr.children).slice(0, 11).map(td => td.textContent.replace(/\s+/g, ' ').trim()), html: tr.innerHTML,
   })));
 }
-/** Boleta de ejemplo con cuenta (General, PIE, Mantención, Pro-Retención) o con concepto. */
+/** Boleta de ejemplo con cuenta (General, PIE, Mantenimiento, Pro-Retención) o con concepto. */
 export const boletaCuenta = (extra = {}) => ({ codigo: '410803', tipoDocumento: 'BOLHE', nroDocumento: '54', fechaDocumento: '2026-01-21', fechaPago: '2026-01-28', descripcion: 'Taller de ajedrez enero 2026', rutProveedor: '11111111-1', nombreProveedor: 'Nombre Apellido Apellido', montoGasto: 600000, montoDocumento: 600000, ...extra });
 export const boletaConcepto = (extra = {}) => { const b = boletaCuenta({ concepto: 'Apoyo pedagógico', ...extra }); delete b.codigo; return b; };

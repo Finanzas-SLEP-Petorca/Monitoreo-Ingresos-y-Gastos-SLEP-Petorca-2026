@@ -111,7 +111,7 @@ await correrSpec('honorarios_fuentes_totales', async (t) => {
     t.eq(lee('Gasto Remuneraciones') + lee('Gasto Honorarios (Subt. 21)') + lee('Gasto Bienes y Servicios'), gastoStrip, `Panel principal (${vista}): Remuneraciones + Honorarios + B&S = Gasto Total en la franja`);
     const honEsp = vista === 'total' ? honSep.bol + honSep.proy + honFuentes : (vista === 'real' ? honSep.bol + FUENTES.reduce((x, f) => x + esp[f.key].suma.real.hon, 0) : honSep.proy + FUENTES.reduce((x, f) => x + esp[f.key].suma.proy.hon, 0));
     t.eq(lee('Gasto Honorarios (Subt. 21)'), honEsp, `Panel principal (${vista}): «Gasto Honorarios» de la franja = honorarios de SEP + de las 12 fuentes`);
-    t.ok(/SEP \+ 9 fuentes/.test(await page.evaluate(() => Array.from(document.querySelectorAll('#dashStrip .dash-tile')).find(x => /Honorarios/i.test(x.querySelector('.t-label').textContent)).querySelector('.t-sub').textContent)), `Panel principal (${vista}): la tile de honorarios ya no dice «solo SEP»`);
+    t.ok(/SEP \+ 12 fuentes/.test(await page.evaluate(() => Array.from(document.querySelectorAll('#dashStrip .dash-tile')).find(x => /Honorarios/i.test(x.querySelector('.t-label').textContent)).querySelector('.t-sub').textContent)), `Panel principal (${vista}): la tile de honorarios ya no dice «solo SEP»`);
     t.eq(sumaTarjetas(tj, 'saldo'), lee('Saldo consolidado'), `Panel principal (${vista}): el saldo consolidado es la suma de los saldos de las tarjetas`);
     const m = await filaMensualTotal(page);
     t.eq([leerCLP(m.gas), leerCLP(m.saldo)], [gastoStrip, lee('Saldo consolidado')], `Panel principal (${vista}): la evolución mensual suma el mismo gasto total y saldo que la franja`);
@@ -243,7 +243,7 @@ await correrSpec('honorarios_fuentes_totales', async (t) => {
   const totalDe = (rbd, etiqueta) => { const fl = filasRep.find(r => r[0] === rbd && r[2] === etiqueta); return fl ? leerCLP(fl[fl.length - 1]) : null; };
   const malRep = [];
   casosRep.forEach(([fk, id]) => {
-    const pre = `[${({ general: 'Subv. General', pie: 'PIE', mantenimiento: 'Mantención', prorretencion: 'Pro-Retención', junji: 'JUNJI', faep: 'FAEP', figa: 'FIGA', aporte_educ: 'Aporte Fiscal Educ.', aporte_junji: 'Aporte Fiscal JUNJI' })[fk]}]`;
+    const pre = `[${({ general: 'Subv. General', pie: 'PIE', mantenimiento: 'Mantenimiento', prorretencion: 'Pro-Retención', junji: 'JUNJI', faep: 'FAEP', figa: 'FIGA', aporte_educ: 'Aporte Fiscal Educ.', aporte_junji: 'Aporte Fiscal JUNJI' })[fk]}]`;
     const e = esp[fk].porId[id].hon;
     const a = totalDe(id, `${pre} Honorarios (Subt. 21) — boletas`), b = totalDe(id, `${pre} Honorarios (Proyección) — total`);
     // una entidad aparece una vez por fuente: se busca por etiqueta y fuente

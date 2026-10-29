@@ -10,7 +10,7 @@ import { docsDe } from '../lib/corte.mjs';
 import { leerCLP } from '../lib/honorarios.mjs';
 import { FUENTES, MESES, fuenteEsperada, serieMensual, honFuenteDe, esConcepto, fmt } from '../lib/honorarios_fuentes.mjs';
 
-const CORTO = { general: 'Subv. General', pie: 'PIE', mantenimiento: 'Mantención', prorretencion: 'Pro-Retención', junji: 'JUNJI', faep: 'FAEP', figa: 'FIGA', aporte_educ: 'Aporte Fiscal Educ.', aporte_junji: 'Aporte Fiscal JUNJI' };
+const CORTO = { general: 'Subv. General', pie: 'PIE', mantenimiento: 'Mantenimiento', prorretencion: 'Pro-Retención', junji: 'JUNJI', faep: 'FAEP', figa: 'FIGA', aporte_educ: 'Aporte Fiscal Educ.', aporte_junji: 'Aporte Fiscal JUNJI' };
 const num = (v) => Math.round(v);
 
 await correrSpec('honorarios_series', async (t) => {

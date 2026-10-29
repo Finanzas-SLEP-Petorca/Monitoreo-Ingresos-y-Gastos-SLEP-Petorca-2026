@@ -1,7 +1,7 @@
 // Honorarios (Subt. 21) por boleta en las 9 fuentes (PR-3): MODELO, lectura y guardado. Fixture `honorarios_fuentes`.
 //   · lectura de `otras_fuentes.<fuente>.honorarios` y `.hon_proyeccion_items` SIN escribir; fila de boletas por mes (siempre Real), proyección por cuenta/concepto, registro y avisos
-//     contra un cálculo independiente (tests/lib/honorarios_fuentes.mjs), con cuenta (General, AC, PIE, Mantención, Pro-Retención) y con concepto (JUNJI, FAEP, FIGA, Aportes);
-//   · el selector de cuenta sale de la columna del Plan de Cuentas de la subvención (General 35, Adm. Central General 26, PIE 8, Mantención 13, Pro-Retención 12) y el de tipo solo ofrece
+//     contra un cálculo independiente (tests/lib/honorarios_fuentes.mjs), con cuenta (General, AC, PIE, Mantenimiento, Pro-Retención) y con concepto (JUNJI, FAEP, FIGA, Aportes);
+//   · el selector de cuenta sale de la columna del Plan de Cuentas de la subvención (General 35, Adm. Central General 26, PIE 8, Mantenimiento 13, Pro-Retención 12) y el de tipo solo ofrece
 //     los que esa cuenta acepta; las fuentes por concepto llevan un campo Concepto (con sugerencias) y los 5 tipos;
 //   · alta / edición / duplicado / borrado = un write merge de SOLO `otras_fuentes.<fuente>.honorarios.<id>` (nada de compras, ingreso, remuneraciones ni B&S); validaciones sin write;
 //   · proyección: agregar la cuenta o el concepto, teclear un mes (write parcial de ese mes) y quitarla (deleteField); sin duplicados; clave inválida rechazada;
@@ -83,7 +83,7 @@ await correrSpec('honorarios_fuentes_modelo', async (t) => {
   t.eq(enMeses(await filaBoletasMeses(h.page)), honFuenteDe(docs, 'AC', 'general').porMes, 'boletas de AC por mes = cálculo independiente (la no habilitada suma)');
   await cerrarModal(h);
 
-  // ---- PIE, Mantención y Pro-Retención: columnas propias del Plan de Cuentas
+  // ---- PIE, Mantenimiento y Pro-Retención: columnas propias del Plan de Cuentas
   for (const [fuente, id, nCuentas] of [['pie', '1121', 8], ['mantenimiento', '1121', 13], ['prorretencion', '1121', 12]]) {
     await abrirModal(h, fuente, id);
     const hf = honFuenteDe(docs, id, fuente);
@@ -93,8 +93,8 @@ await correrSpec('honorarios_fuentes_modelo', async (t) => {
     await cerrarModal(h);
   }
   await abrirModal(h, 'mantenimiento', '1121');
-  t.ok((await h.page.evaluate(() => Array.from(document.querySelectorAll('#otrasFuentesModalBody tr[data-hon-id="mh1121_nohab"] [class*="compra-aviso"]')).map(s => s.textContent))).some(m => /cuenta no habilitada para Subv\. Mantención/.test(m)),
-    'Mantención: la cuenta 410304 (personal) no está habilitada y se marca ⚠ (suma igual)');
+  t.ok((await h.page.evaluate(() => Array.from(document.querySelectorAll('#otrasFuentesModalBody tr[data-hon-id="mh1121_nohab"] [class*="compra-aviso"]')).map(s => s.textContent))).some(m => /cuenta no habilitada para Subv\. Mantenimiento/.test(m)),
+    'Mantenimiento: la cuenta 410304 (personal) no está habilitada y se marca ⚠ (suma igual)');
   await cerrarModal(h);
   t.noErrores(h);
   await h.close();

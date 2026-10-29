@@ -75,7 +75,7 @@ await correrSpec('a11y_pestanas', async (t) => {
     const axl = await axDe(page, '[role="tablist"][aria-label="Fuentes de financiamiento"]');
     t.ok(axl && axl.rol === 'tablist' && axl.nombre === 'Fuentes de financiamiento', 'S5) los tablist tienen nombre', axl);
     t.eq(await page.evaluate(() => Array.from(document.querySelectorAll('.tab-btn')).map((b) => b.textContent.replace(/\s+/g, ' ').trim()).join(' | ')),
-      '🏠 Panel principal | 🎓 SEP | 💰 General | 🧩 PIE | 🔧 Mantención | 📌 Pro-Retención | 🧸 JUNJI | 🏗️ FAEP | 🧱 Subt. 31 | 🩺 Recup. LLMM | 👨‍👩‍👧 Asig. Familiar | 💼 Fondos Fijos | 🌐 FIGA | 🏛️ Aporte Educ. | 🍼 Aporte JUNJI | 📉 % Ejecución | 📈 Reportes',
+      '🏠 Panel principal | 🎓 SEP | 💰 General | 🧩 PIE | 🔧 Mantenimiento | 📌 Pro-Retención | 🧸 JUNJI | 🏗️ FAEP | 🧱 Subt. 31 | 🩺 Recup. LLMM | 👨‍👩‍👧 Asig. Familiar | 💼 Fondos Fijos | 🌐 FIGA | 🏛️ Aporte Educ. | 🍼 Aporte JUNJI | 📉 % Ejecución | 📈 Reportes',
       'S6) el texto visible de las 17 pestañas no cambia');
   });
 

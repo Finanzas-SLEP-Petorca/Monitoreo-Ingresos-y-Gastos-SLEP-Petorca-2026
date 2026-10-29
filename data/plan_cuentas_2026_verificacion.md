@@ -46,7 +46,7 @@ Cuentas habilitadas (✓, que incluye las ●) por columna del manual:
 | Refuerzo Educativo | 28 | 29 | 0 |
 
 (106 cuentas de ingreso + 133 de gasto = 239.) En el rango de gastos que sí pasa por el libro de
-compras (410500-411899) quedan habilitadas: General 77, PIE 28 (24 con ●), Mantención 28,
+compras (410500-411899) quedan habilitadas: General 77, PIE 28 (24 con ●), Mantenimiento 28,
 Pro-Retención 23 (6 con ●), SEP 52 (32 con ●).
 
 El ● **siempre va junto a un ✓** (0 celdas con ● sin ✓): significa «habilitada, sujeta a exigencias de
@@ -59,7 +59,7 @@ pertinencia» (leyenda de la pág. 112), no «no habilitada».
 
 - Los **51 códigos del catálogo están habilitados en SEP en la matriz** (0 faltantes).
 - La matriz habilita 52 códigos SEP en el rango 410500-699999: el extra es **410917 DEVOLUCIONES DE
-  FONDOS PÚBLICOS** (✓ en General, Adm. Central General, SEP, PIE, Mantención, Pro-Retención,
+  FONDOS PÚBLICOS** (✓ en General, Adm. Central General, SEP, PIE, Mantenimiento, Pro-Retención,
   Internado y Refuerzo). Se comprobó contra la imagen (pág. 118): el ✓ está. Es una discrepancia del
   catálogo SEP existente, **no se modificó** (queda como hallazgo; el catálogo SEP sigue igual).
 
@@ -99,7 +99,7 @@ pestañas de SEP sigue valiendo ese catálogo.
   Subt. 22. Afecta a 411801, 411803 y 411804 (→ 29) y a las cuentas nuevas de 4108xx-4117xx (→ 22).
 - **Fila «AC» (Administración Central)** de las fuentes con compras: la matriz solo tiene columna
   Adm. Central para Subv. General y SEP. Para **Subv. General** la fila AC usa «Adm. Central Subv.
-  Gral.». Para **PIE, Mantención y Pro-Retención** no existe columna propia de AC en el manual; la
+  Gral.». Para **PIE, Mantenimiento y Pro-Retención** no existe columna propia de AC en el manual; la
   fila AC usa la misma columna de la fuente (PIE, Mantenimiento, Pro-Retención). Es una decisión de
   producto, no del manual.
 - Las columnas **Internado** y **Refuerzo Educativo** quedan extraídas pero el dashboard no tiene
