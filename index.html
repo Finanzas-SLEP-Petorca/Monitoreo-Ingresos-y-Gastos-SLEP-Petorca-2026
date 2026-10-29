@@ -7865,7 +7865,6 @@ function csvDetalleMensualOtraFuenteLines(fuenteKey, rbd) {
     push(fila('Recuperación LLMM SIL', tipoPorCorte, of.ingreso_llmm_sil));
   } else {
     push(fila('Ingreso', tipoPorCorte, of.ingreso));
-    if (fuente.incomeShape === 'carrera2') push(fila('Ingreso Carrera Docente', tipoPorCorte, of.ingreso_carrera_docente)); // General y PIE: su ingreso es Ingreso + Carrera Docente
   }
   if (!fuente.sinGasto) push(fila('Gasto Remuneraciones', tipoPorCorte, of.gasto_rem));
   // Honorarios (Subt. 21): boletas por cuenta/concepto (siempre Real) y proyección (siempre Proyectado); N° DC, RUT y nombre del prestador nunca van en este CSV.

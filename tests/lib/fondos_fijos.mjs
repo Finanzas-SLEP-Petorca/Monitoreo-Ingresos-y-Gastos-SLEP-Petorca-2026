@@ -157,3 +157,19 @@ export async function escribirFF(h, sel, valor) {
   await h.waitIdle();
 }
 export const celdaFF = (id, mes, campo) => (mes ? `#fondosFijosModalBody input.ff-input[data-ff-rbd="${id}"][data-ff-mes="${mes}"][data-ff-campo="${campo}"]` : `#fondosFijosModalBody input.ff-input[data-ff-rbd="${id}"][data-ff-campo="${campo}"]`);
+
+/** Serie mensual esperada del B&S de General (con Fondos Fijos de RBD y GESPARVU, sin los de AC): { bys:{real:[12],proy:[12]} , ing, rem, hon, gas }. `soloId` = una entidad. Los Fondos Fijos son siempre Real. */
+import { serieMensual } from './honorarios_fuentes.mjs';
+export function serieGeneral(docs, soloId = null) {
+  const sm = serieMensual(docs, 'general', soloId);
+  const out = JSON.parse(JSON.stringify(sm));
+  // el oráculo de honorarios_fuentes suma los Fondos Fijos de AC (documento de la fila AC) y no conoce los jardines de General: se corrige
+  const ids = soloId ? [soloId] : null;
+  const fantasma = new Array(12).fill(0);
+  (ids || ['AC']).forEach(id => { if (id === 'AC') MESES.forEach((m, i) => { const v = Number(docs.AC && docs.AC.fondos_fijos && docs.AC.fondos_fijos.meses && docs.AC.fondos_fijos.meses[m] && docs.AC.fondos_fijos.meses[m].registrado_general) || 0; fantasma[i] += v; }); });
+  const jardines = new Array(12).fill(0);
+  GESPARVU_IDS.filter(id => !soloId || id === soloId).forEach(id => registradoGeneral(docs, id).forEach((v, i) => { jardines[i] += v; }));
+  out.bys.real = out.bys.real.map((v, i) => v - fantasma[i] + jardines[i]);
+  out.gas.real = out.gas.real.map((v, i) => v - fantasma[i] + jardines[i]);
+  return out;
+}
