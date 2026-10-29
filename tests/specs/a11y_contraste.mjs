@@ -8,7 +8,7 @@
 // #0f9d58 de las tarjetas y de "▲ Superávit" (3,2:1), el blanco sobre el naranja #eb6834 (3,2:1) y sobre el verde #1e8a4c (4,38:1), el rojo #d03b3b sobre fondos tintados
 // (3,8–4,1:1), el ámbar #a3630a (4,3:1), "Real"/"Proy." de 8,5 px con opacidad .85 (3,4–3,7:1) y el placeholder "0" de las celdas (1,95:1).
 import { boot } from '../lib/boot.mjs';
-import { recorrerVistas, recorrerLogin, recorrerHonorarios, recorrerHonorariosFuentes, recorrerConceptos } from '../lib/a11y-vistas.mjs';
+import { recorrerVistas, recorrerLogin, recorrerHonorarios, recorrerHonorariosFuentes, recorrerConceptos, recorrerFondosFijos } from '../lib/a11y-vistas.mjs';
 import { analizarContraste, formatearFallasContraste } from '../lib/a11y.mjs';
 import { correrSpec } from '../lib/spec.mjs';
 
@@ -84,6 +84,14 @@ await correrSpec('a11y_contraste', async (t) => {
     await recorrerConceptos(hk, async ({ nombre, scope }) => { registrar('conceptos.' + nombre, await analizarContraste(hk.page, { scope })); });
     t.noErrores(hk);
     await hk.close();
+  });
+
+  // Fondos Fijos (PR K) y fuentes nuevas: pestaña con estados (Conciliado, Con observaciones, Pendiente…), modal con las 11 filas del detalle y los detalles con Carrera Docente / Fondos Fijos rendidos en General
+  await escenario(t, 'FF', async () => {
+    const hf2 = await boot({ fixture: 'fondos_fijos', viewport: { width: 1500, height: 1000 } });
+    await recorrerFondosFijos(hf2, async ({ nombre, scope }) => { registrar('fondosfijos.' + nombre, await analizarContraste(hf2.page, { scope })); });
+    t.noErrores(hf2);
+    await hf2.close();
   });
 
   // ======================================================================== estados dinámicos (no están en el recorrido base)

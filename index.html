@@ -267,7 +267,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   input.celda-input::placeholder { color:#75716a; }
 
   .compras-section, .hon-section { margin-top:18px; padding-top:14px; border-top:1px solid var(--border); }
-  .compra-form-grid, .hon-form-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:8px; margin:10px 0; align-items:end; }
+  .compra-form-grid, .hon-form-grid, .ff-cupo-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:8px; margin:10px 0; align-items:end; }
   .compra-field { display:flex; flex-direction:column; gap:3px; }
   .compra-field-label { font-size:10px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.02em; }
   .compra-input, .hon-input { padding:6px 8px; border-radius:5px; border:1px solid var(--baseline); font-size:12px; background:#fff; color:var(--text-primary); width:100%; box-sizing:border-box; }
@@ -2691,7 +2691,7 @@ function renderFondosFijos() {
   const rbdActivo = activo && tbody.contains(activo) && activo.matches('[data-ff-abrir]') ? activo.getAttribute('data-ff-abrir') : null;
   tbody.innerHTML = filasFondosFijos().map(r => {
     const t = resumenFondoFijo(r.rbd);
-    return `<tr class="otras-fuentes-row" data-ff-rbd="${escHtml(r.rbd)}"><td>${escHtml(r.rbd)}</td><td><span class="nombre-txt" title="${escHtml(r.nombre)}">${escHtml(r.nombre)}</span></td><td class="num">${fmtCLP(t.cupo)}</td><td class="num">${fmtCLP(t.aceptado)}</td><td class="num">${fmtCLP(t.registrado)}</td><td class="num" style="color:${t.pendienteGeneral ? 'var(--status-critical)' : 'inherit'}">${fmtCLP(t.pendienteGeneral)}</td><td class="num">${fmtCLP(t.compensado)}</td><td class="num" style="color:${t.pendienteSigfe ? 'var(--status-critical)' : 'inherit'}">${fmtCLP(t.pendienteSigfe)}</td><td>${tagFondoFijo(t)}</td><td class="col-acciones"><button type="button" class="row-action-btn" data-ff-abrir="${escHtml(r.rbd)}">Ver / editar</button></td></tr>`;
+    return `<tr class="otras-fuentes-row" data-ff-rbd="${escHtml(r.rbd)}"><td>${escHtml(r.rbd)}</td><td><span class="nombre-txt" title="${escHtml(r.nombre)}">${escHtml(r.nombre)}</span></td><td class="num">${fmtCLP(t.cupo)}</td><td class="num">${fmtCLP(t.aceptado)}</td><td class="num">${fmtCLP(t.registrado)}</td><td class="num" style="color:${t.pendienteGeneral ? 'var(--status-critical)' : 'inherit'}">${fmtCLP(t.pendienteGeneral)}</td><td class="num">${fmtCLP(t.compensado)}</td><td class="num" style="color:${t.pendienteSigfe ? 'var(--status-critical)' : 'inherit'}">${fmtCLP(t.pendienteSigfe)}</td><td>${tagFondoFijo(t)}</td><td class="col-acciones"><button type="button" class="row-action-btn" data-ff-abrir="${escHtml(r.rbd)}" aria-label="${escHtml('Ver / editar Fondos Fijos de ' + otrasFuentesTituloEntidad(r))}">Ver / editar</button></td></tr>`;
   }).join('');
   if (rbdActivo !== null) { const b = Array.from(tbody.querySelectorAll('[data-ff-abrir]')).find(x => x.getAttribute('data-ff-abrir') === rbdActivo); if (b) b.focus({ preventScroll: true }); }
 }
@@ -2743,7 +2743,7 @@ function renderFondosFijosModalContenido(opts) {
   const ff = ensureFondoFijo(rbd), t = resumenFondoFijo(rbd);
   document.getElementById('fondosFijosModalTitle').textContent = `${otrasFuentesTituloEntidad(r)} — ${r.nombre} · Fondos Fijos`;
   document.getElementById('fondosFijosModalSubtitle').innerHTML = `Gasto aceptado: <strong>${fmtCLP(t.aceptado)}</strong> · Pendiente General: <strong>${fmtCLP(t.pendienteGeneral)}</strong> · Pendiente SIGFE: <strong>${fmtCLP(t.pendienteSigfe)}</strong>`;
-  const html = `<div class="detalle-empty">Registra montos consolidados de la rendición, sin repetir sus comprobantes menores. El <strong>gasto aceptado</strong> es Rendición menos Observado y se debe cargar una sola vez en Subvención General.</div><div class="compra-form-grid" style="margin-top:12px;"><label class="compra-field"><span class="compra-field-label">Cupo vigente (referencial)</span><input type="number" min="0" step="1" class="ff-input" data-ff-rbd="${escHtml(rbd)}" data-ff-campo="cupo" value="${escHtml(String(ff.cupo || ''))}"></label></div>${tablaFondosFijosDetalleHTML(rbd, ff, t)}`;
+  const html = `<div class="detalle-empty">Registra montos consolidados de la rendición, sin repetir sus comprobantes menores. El <strong>gasto aceptado</strong> es Rendición menos Observado y se debe cargar una sola vez en Subvención General.</div><div class="ff-cupo-grid" style="margin-top:12px;"><label class="compra-field"><span class="compra-field-label">Cupo vigente (referencial)</span><input type="number" min="0" step="1" class="ff-input" data-ff-rbd="${escHtml(rbd)}" data-ff-campo="cupo" value="${escHtml(String(ff.cupo || ''))}"></label></div>${tablaFondosFijosDetalleHTML(rbd, ff, t)}`;
   const cuerpo = document.getElementById('fondosFijosModalBody');
   if (cuerpo.dataset.rbd === rbd && cuerpo.firstElementChild) {
     fondosFijosMorphEnCurso = true;
@@ -2841,7 +2841,8 @@ async function importarControlFondosFijos(file) {
       MAPA_COLUMNAS_FONDOS_FIJOS.forEach(([mes, inicio, colFolio]) => {
         const nom = mes.charAt(0) + mes.slice(1).toLowerCase();
         const m = { saldo_inicial: leer(row[inicio], `${nom}: Saldo inicial`), rendido: leer(row[inicio + 2], `${nom}: Rendido`), observado: leer(row[inicio + 3], `${nom}: Observado`) };
-        if (colFolio !== null) { const f = recortarFolioFondoFijo(row[colFolio]); m.folio = f.texto; if (f.recortado) recortadosFila++; }
+        // rowsFromSheet rellena las celdas vacías con 0: un folio vacío NO es el folio «0».
+        if (colFolio !== null) { const f = recortarFolioFondoFijo(row[colFolio] === 0 ? '' : row[colFolio]); m.folio = f.texto; if (f.recortado) recortadosFila++; }
         datos.meses[mes] = m;
       });
       if (errores.length) { rechazadas.push(`${rbd}: ${errores.slice(0, 3).join('; ')}${errores.length > 3 ? `; … (${errores.length} datos inválidos)` : ''}`); continue; }
@@ -6480,6 +6481,8 @@ document.getElementById('fondosFijosTable').addEventListener('click', (e) => {
 document.getElementById('fondosFijosModalCloseBtn').addEventListener('click', cerrarFondosFijosModal);
 document.getElementById('fondosFijosModal').addEventListener('click', (e) => { if (e.target.id === 'fondosFijosModal') cerrarFondosFijosModal(); });
 document.getElementById('fondosFijosModalBody').addEventListener('change', (e) => { if (e.target.classList.contains('ff-input')) guardarCampoFondoFijo(e.target); });
+// Al salir de una celda lo escrito se guarda de inmediato (como en las demás celdas): sin esperar el debounce de 400 ms.
+document.getElementById('fondosFijosModalBody').addEventListener('focusout', (e) => { if (e.target.classList && e.target.classList.contains('ff-input')) flushRbdSaveNow(e.target.dataset.ffRbd); });
 document.getElementById('importFondosFijosBtn').addEventListener('click', () => document.getElementById('importFondosFijosInput').click());
 document.getElementById('importFondosFijosInput').addEventListener('change', async (e) => {
   const file = e.target.files[0];

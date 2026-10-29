@@ -130,6 +130,8 @@ export const leerFilasFF = (page) => page.evaluate(() => {
   });
   return o;
 });
+/** Orden de las filas de una tabla (los objetos de JS reordenan las claves numéricas): ids de `tr[data-rbd]` (fuentes) o `tr[data-ff-rbd]` (Fondos Fijos). */
+export const ordenFilas = (page, selector) => page.evaluate((sel) => Array.from(document.querySelectorAll(sel)).map(tr => tr.getAttribute('data-rbd') || tr.getAttribute('data-ff-rbd')), selector);
 /** Abre el modal de Fondos Fijos de una entidad desde su pestaña. */
 export async function abrirFF(h, id) {
   await h.clickTab('fondos fijos');
