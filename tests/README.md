@@ -21,7 +21,7 @@ node tests/specs/persistencia.mjs        # un spec directamente (sin la tabla)
 ```
 
 Código de salida: `0` si todo es PASS o KNOWN_BUG; `1` si algo FALLA.
-Duración: ≈ 20 min la suite completa (65 pruebas: fixture + 63 specs + golden; golden ≈ 100 s; los specs más largos son `n_dc`, `escritura_modal_tecleo`, `a11y_contraste`, `corte_ingresos`, `modal_equivalencia`, `sync_estado`, `seguridad_xss` y `mes_cierre_global`). `-v` muestra la salida completa de cada prueba; `--jobs N` corre specs en paralelo.
+Duración: ≈ 20 min la suite completa (68 pruebas: fixture + 66 specs + golden; golden ≈ 100 s; los specs más largos son `n_dc`, `escritura_modal_tecleo`, `a11y_contraste`, `corte_ingresos`, `modal_equivalencia`, `sync_estado`, `seguridad_xss` y `mes_cierre_global`). `-v` muestra la salida completa de cada prueba; `--jobs N` corre specs en paralelo.
 
 ### Qué HTML se prueba (`APP_HTML`)
 
@@ -225,6 +225,10 @@ y Aporte Fiscal JUNJI 5401004 con B&S = 90 % de su única línea → Superávit.
 
 **`compras_conceptos.json`** (también de `generate.mjs`) es `jardines.json` + `compras` por documento con CONCEPTO en las 5 fuentes por concepto (FAEP/1121 con 8 compras: NC guardada en positivo, concepto nuevo, fecha de 2025, sin concepto, fecha no válida, texto con `& < > " '`; FAEP/AC y jardín; FIGA; JUNJI/5403002 que pasa a Déficit con el documento; Aportes). Detalle en el bloque «variante compras_conceptos» del generador.
 
+**`junji_rem.json`** (también de `generate.mjs`; `--check` lo verifica; **sin números aleatorios**, `default.json` no cambia) es `jardines.json` con la parte `junji` de 6 jardines reescrita con el Gasto de Remuneraciones en 4 líneas: 5402002 mes a mes sin excesos (Real hasta julio);
+5402004 con exceso de Homologación cubierto por Operación; 5401006 con excesos en Carrera Docente Parvularia y BDL (Déficit por ambas causas); 5401007 Déficit solo por Operación; 5401003 con mezcla de `gasto_rem` (antiguo) y `gasto_rem_operacion` (mes a mes);
+5401005 documento antiguo (solo `gasto_rem`). Detalle de cada caso en el bloque «variante junji_rem» del generador. Los demás jardines conservan la fila única antigua (se lee como Operación).
+
 **`jardines.json`** (también de `generate.mjs`; `--check` lo verifica; «ajustes de fuentes») es `default.json` con montos **agregados** en jardines (GESPARVU), sin consumir números aleatorios: el resto de los documentos queda igual.
 Los jardines son ahora entidades de FAEP y FIGA y JUNJI tiene la línea BDL (`ingreso_bdl`); `default.json` NO trae nada de eso (es el estado anterior: los jardines sin FAEP/FIGA ni BDL parten en $0 y sirven de «documentos antiguos»).
 FAEP: 5402002 (ingreso 400.000/mes, Rem. 250.000/mes, B&S «Alimentación» 60.000/mes y «Mantenimiento menor» desde agosto; Real hasta julio → superávit), 5402004 (déficit; concepto con `& < > " '`; Real hasta mayo), 5401006 (enero-junio; Real hasta diciembre),
@@ -268,6 +272,8 @@ Los casos dañados (valores no numéricos, folio que no es texto, etc.) NO está
 - Sección **`jardines`** (fixture `jardines`, entradas `jardines.*`): Panel principal (3 vistas), pestañas FAEP y JUNJI (Total / Real / Proyectado) y FIGA (Total) con los jardines, modales de jardines en FAEP (5402002, 5402004, AC) y FIGA (5404001, 5401002) y de JUNJI con BDL
   (5402002, 5401002, 5403002, 5403001), % Ejecución (FAEP agregado y de un jardín, JUNJI de un jardín y Consolidado), Visualizador y Reporte personalizado con jardines y RBD, Excel (FAEP, FIGA y JUNJI con `ING_BDL`) y JSON de respaldo de las tres,
   XLS / CSV / PDF de la fila de un jardín en FAEP y JUNJI (y CSV de otros), el PDF de FAEP y el del Panel principal.
+- Sección **`junji_rem`** (fixture `junji_rem`, entradas `junji_rem.*`): Panel principal (3 vistas), pestaña JUNJI (Total / Real / Proyectado), modales de 5402002, 5402004, 5401006, 5401007, 5401003 y 5401005, % Ejecución de un jardín, Visualizador y su CSV,
+  Excel (8 hojas de ingreso y Remuneración) y JSON de respaldo de JUNJI, XLS / CSV / PDF de la fila de 5401006 y CSV de 5402002.
 - Sección **`honorarios`** (fixture `honorarios`, entradas `honorarios.*`): Panel principal (3 vistas), pestaña SEP (tarjetas Real / Proyectado / Total, tabla con «Gasto Hon.» y % de personal, corte a marzo, filtro Déficit), modales de SEP 1121 (todas las marcas ⚠,
   el resumen de avisos, el formulario en edición con los avisos en vivo), 1122, 1123 (solo proyección) y 1120 (sin marco), % Ejecución (SEP agregado, 1121 y Consolidado), Visualizador, Reporte personalizado y las exportaciones de SEP (Excel de carga con `HONORARIOS` y `HON_PROYECCION`,
   resumen, JSON, la fila 1121 en XLS / PDF y el PDF general).
@@ -341,6 +347,9 @@ Cada uno termina con `process.exit(1)` si falla y con una línea final `RESULT: 
 | `compras_conceptos_totales` | INVARIANTE: «Documentado» + «Sin documento» dan las mismas cifras en la pestaña de cada fuente (tarjetas y filas, Total / Real / Proyectado), Panel principal, % Ejecución (fuentes, entidad, Consolidado), Visualizador y Reporte personalizado, contra el oráculo `tests/lib/compras_conceptos.mjs` |
 | `compras_conceptos_excel` | hoja `COMPRAS` con `Concepto`, neutralización de fórmulas, ida y vuelta de las 5 fuentes, importación (ID vacío / 0, NC, rechazos con motivo, `Codigo`, archivo antiguo, sin columna N° DC), XLS / CSV de detalle / PDF por fila y JSON |
 | `compras_conceptos_ui` | formulario (Concepto con sugerencias), avisos en vivo, nombres accesibles únicos, resumen en vivo, reconciliación sin pisar el formulario, tabla sin desborde |
+| `junji_rem_lineas` | JUNJI · Gasto de Remuneraciones en 4 líneas (`gasto_rem_operacion`, `_homologacion`, `_carrera_docente`, `_bdl`): modal, cifras, INVARIANTE entre vistas, guardado por línea, documentos antiguos / mezcla / cliente viejo / dañados, reconciliador (ver «JUNJI · Gasto de Remuneraciones en 4 líneas») |
+| `junji_rem_estado` | JUNJI · saldo propio por línea, exceso cargado a Operación, saldo de Operación para B&S y Estado con la causa por línea (fila, tooltip, «Atención», CSV, PDF), edición en vivo y honorarios |
+| `junji_rem_excel` | JUNJI · hojas `REM_*` e `ING_CARRERA_DOCENTE_PARVULARIA`, ida y vuelta, compatibilidad con el Excel anterior (`REMUNERACIONES` → Operación) |
 | `mock_semantica` | prueba el propio mock (merge profundo, deleteField, timestamps, batch, offline, errores…) sin el panel |
 | `fondos_fijos_modelo` | PR K, fixture `fondos_fijos`: lectura de `fondos_fijos` SIN escribir (68 entidades —55 RBD + 13 GESPARVU, sin AC—, tarjetas, Estado de cada una y modal contra un cálculo independiente: aceptado, pendientes, saldo de caja), lectura TOLERANTE de un documento con valores no numéricos, nulos, negativos, ≥ `MONTO_ABS_MAX`, folio que no es texto o de 60 caracteres / emojis (estado verde, 0 writes), AC ignorado, guardado con merge por mes y campo (un write de solo `fondos_fijos.meses.<MES>.<campo>`, el servidor conserva lo demás, persiste tras recargar), lo registrado en General mueve la fila, el modal y el Panel principal y el jardín entra y sale de General, y cambios remotos con el modal abierto |
 | `fondos_fijos_validacion` | PR K, endurecimiento: montos solo finitos, no negativos y bajo el tope (negativo, 1e13, «1e999» → no se guarda, mensaje claro y la celda vuelve; vacío = 0; 9.999.999.999.999 sí), folio de 40 caracteres (41 se recorta con aviso; emojis cuentan como 1; espacios de los bordes), `data-ff-*` manipulados (campo, mes o entidad inválidos, `__proto__`, AC, id inexistente) no escriben ni crean documentos, error de guardado permanente (rojo con «Reintentar» también dentro del modal) y XSS (folio con marcado literal; copia del HTML con un GESPARVU de id con marcado: `data-ff-rbd` / `data-ff-abrir` escapados) |
@@ -419,6 +428,28 @@ APP_HTML=@ff7a666 node tests/e2e-real/run.mjs 12   # el spec 12 del arnés real 
 (los jardines también son entidades de FAEP y FIGA: «Aplicar a todas» los fija en 69 documentos). Los oráculos (`tests/lib/corte.mjs`, `tests/lib/estado.mjs`) calculan el universo de cada fuente (`idsDeUniverso`) y el rótulo por tipo (`tituloEntidad`)
 sin pasar por el código del panel.
 
+### JUNJI · Gasto de Remuneraciones en 4 líneas: qué falla contra el panel anterior (`APP_HTML=@217e33a`)
+
+`217e33a` es el `index.html` justo antes de esta PR (merge de la PR #68). Specs nuevos (fixture `junji_rem`, oráculo independiente `tests/lib/junji_rem.mjs`; **sin números aleatorios**, `default.json` no cambia):
+
+| Spec | Qué prueba |
+|---|---|
+| `junji_rem_lineas` | las 4 líneas (`gasto_rem_operacion`, `_homologacion`, `_carrera_docente`, `_bdl`) contra el oráculo: modal (8 tablas, nombres accesibles únicos, cuadro «Saldos por línea» en vivo, Real/Proy por el corte), filas y tarjetas (Total / Real / Proyectado), **INVARIANTE** `gasto_rem` = suma de las 4 líneas en pestaña, Panel principal, % Ejecución, Visualizador, Reporte personalizado (total + un concepto por línea), CSV / PDF por fila y respaldo JSON; guardado con merge de SOLO la línea editada (nunca el campo antiguo `gasto_rem`); documento antiguo (la fila única = Operación, 0 writes), mezcla mes a mes de `gasto_rem` y `gasto_rem_operacion`, cliente viejo que sigue escribiendo `gasto_rem`, el 0 de Operación gana al valor antiguo; reconciliador (foco y lo tecleado intactos); documentos dañados; fixture `default` (todo antiguo) con las cifras de siempre |
+| `junji_rem_estado` | saldo propio por línea, exceso de las restringidas cargado a Operación, Saldo de Operación para B&S = Ingreso Operación − Gasto Rem. Operación − exceso − B&S (los honorarios no entran), Estado de las 13 filas, causa con las líneas excedidas en fila / tooltip / «Atención» / CSV / PDF, edición en vivo con bordes (-$1 / $0), exceso cubierto por Operación = Superávit, honorarios que dan Déficit por el saldo total sin tocar Operación |
+| `junji_rem_excel` | hojas `ING_*` (la tercera `ING_CARRERA_DOCENTE_PARVULARIA`) y `REM_OPERACION`, `REM_HOMOLOGACION`, `REM_CARRERA_DOCENTE_PARVULARIA`, `REM_BDL` (ya no `REMUNERACIONES`), exportar → importar → exportar idempotente, un Excel anterior (`REMUNERACIONES` → Operación, `ING_CARRERA_DOCENTE`) se importa sin tocar las otras líneas ni escribir `gasto_rem`, con ambas hojas mandan las nuevas, XLS por fila, General conserva sus hojas |
+
+```bash
+APP_HTML=@217e33a node tests/run.mjs spec junji_rem_lineas junji_rem_estado junji_rem_excel estado_junji junji_bdl   # → 5 FAIL, 0 PASS
+APP_HTML=@217e33a node tests/e2e-real/run.mjs 16 --html @217e33a                                                    # el spec 16 del arnés real también FALLA
+```
+
+Se **extendieron / ajustaron** por la nueva semántica del saldo de Operación (la Remuneración de Operación y el exceso de las líneas restringidas ahora se descuentan) y por el renombre: `estado_junji`, `junji_bdl`,
+`compras_conceptos_modelo` / `_totales` / `_excel`, `honorarios_fuentes_totales` / `_excel`, `honorarios_consistencia` (arranca sin el bloque `junji`: con 4 jardines más en Déficit las 8 de «Atención» ya no traían RBD de SEP),
+`roundtrip_excel` (compara documentos unificando la Remuneración de Operación de JUNJI: `unificarRemJunji`). Los oráculos `estado.mjs`, `honorarios_fuentes.mjs` y `compras_conceptos.mjs` usan `remEfectivoDe` / `saldosJunjiDe`.
+Los fixtures `estado`, `jardines` (y los derivados) reparten ahora la Remuneración de JUNJI en líneas (campos nuevos) para conservar la historia de cada caso (p. ej. 5401002 con BDL alto: Remuneración en la línea BDL); `estado` trae
+honorarios en 5402004 y 5401006 (la única forma de un Déficit «solo por el saldo total»). Golden: sección nueva `junji_rem`; con `default` solo cambian el marcado y los textos (4 tablas de Remuneración, cuadro de saldos,
+rótulo «Carrera Docente Parvularia», ayudas), las hojas del Excel de JUNJI, el CSV (4 líneas + saldos) y el **Estado** de 4 jardines (ver la PR: la fila única antigua pasa a Operación y ahora Operación la paga entera).
+
 ### Bugs conocidos: `known-bug` vs `enforced`
 
 Hoy ningún spec está en `'known-bug'`: `semilla_offline.mjs` (PR A) y `escritura_modal_tecleo.mjs` (F-01) ya están en `'enforced'` porque sus bugs se corrigieron.
@@ -462,7 +493,7 @@ El mock de arriba es rápido y determinista, pero lo escribimos nosotros: no dem
 `setup.sh`; las dependencias, unos 280 MB, se instalan fuera del repositorio en `E2E_HOME`, por defecto `/home/user/.e2e-real`).
 
 ```bash
-bash tests/e2e-real/setup.sh && node tests/e2e-real/run.mjs        # los 15 specs contra el árbol (el 15 es Fondos Fijos —merge por campo, importación en lote y lectura dañada—; el 11 es Honorarios por boleta; el 12, jardines en FAEP/FIGA y BDL de JUNJI; el 13, registro de compras por concepto; el 14, Honorarios por boleta en las fuentes), ≈ 9 min
+bash tests/e2e-real/setup.sh && node tests/e2e-real/run.mjs        # los 16 specs contra el árbol (el 16 es JUNJI con el gasto de Remuneraciones en 4 líneas: merge por línea, documento antiguo, cliente viejo y líneas dañadas; el 15 es Fondos Fijos —merge por campo, importación en lote y lectura dañada—; el 11 es Honorarios por boleta; el 12, jardines en FAEP/FIGA y BDL de JUNJI; el 13, registro de compras por concepto; el 14, Honorarios por boleta en las fuentes), ≈ 9 min
 node tests/e2e-real/run.mjs --matriz                                # además contra @069f9dd y @baseline, ≈ 15 min
 ```
 

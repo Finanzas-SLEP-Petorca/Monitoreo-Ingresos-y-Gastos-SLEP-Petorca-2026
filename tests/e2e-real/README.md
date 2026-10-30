@@ -55,7 +55,7 @@ tests/e2e-real/
   lib/netproxy.mjs    proxy TCP navegador→emulador que se puede CORTAR de verdad (resetea las conexiones) y restablecer
   lib/harness.mjs     boot(): servidor estático + Chromium + page.route + instrumentos (indicador, bitácora de writes/snapshots…)
   lib/spec.mjs        mini-arnés de specs (OK / FALLA por aserción, t.bug(), RESULT:, process.exit(1))
-  specs/01…15         los casos (abajo)
+  specs/01…16         los casos (abajo)
   parches/            parches PROPUESTOS para index.html (no aplicados; ver «Hallazgos»)
 ```
 
@@ -115,6 +115,7 @@ Emulador 1.19.8, SDK 10.12.0, Chromium headless. «PASS» = todas las aserciones
 | 12 Jardines en FAEP/FIGA y BDL de JUNJI | **PASS** | **FAIL** (verificado también contra `@ff7a666`: 7 aserciones) | — |
 | 14 Honorarios por boleta en las fuentes (PR-3) | **PASS** | **FAIL** (3 aserciones; verificado contra `@1bb8ccc`: las fuentes no tienen honorarios) | — |
 | 15 Fondos Fijos (PR K) | **PASS** | **FAIL** (contra `@13653a5`: 11 aserciones) | — |
+| 16 JUNJI · Remuneraciones en 4 líneas | **PASS** | **FAIL** (contra `@217e33a`: 3 aserciones; JUNJI con una sola fila `gasto_rem`) | — |
 
 Con las cuatro correcciones propuestas (`parches/TODOS_B1_a_B4.patch`, aplicadas **a una copia**, nunca a `index.html`) los 9 specs quedan en PASS sin BUG.
 `node tests/run.mjs` (mocks) sobre copias parcheadas: con B1+B2+B4 las 20 pruebas siguen en PASS; con los cuatro parches solo falla `claves_invalidas` (espera que 1500 bytes sea válido: hay que actualizar ese límite a 1400).
