@@ -505,7 +505,7 @@ de Excel ni conceptos de Reporte, y una boleta que un documento traiga se ignora
 **Reglas.**
 - Sin 70/30 en las fuentes: `gasto_total = rem + hon + bys` (Asignación Familiar: `rem + hon`, `bysMode:'none'`); el saldo y el Estado los incluyen. Boletas siempre Real (mes = Fecha Documento), proyección siempre
   Proyectada y se suma a las boletas.
-- JUNJI: los honorarios son gasto de personal y **no** entran en `saldo_operacion_bys = Ingreso Operación − B&S` (verificado: la causa `operacion_bys` de `causasDeficitOtraFuente` solo mira ese saldo).
+- JUNJI: los honorarios son gasto de personal y **no** entran en `saldo_operacion_bys` (verificado: la causa `operacion_bys` de `causasDeficitOtraFuente` solo mira ese saldo). Esa decisión se mantiene tras dividir el gasto de Remuneraciones de JUNJI en 4 líneas: `saldo_operacion_bys = Ingreso Operación − Gasto Rem. Operación − exceso de las líneas restringidas − B&S` (los honorarios siguen fuera; bajan solo el saldo total).
 - Los ingresos de Carrera Docente de General y PIE (`incomeShape:'carrera2'`) y los Fondos Fijos registrados en Subvención General (B&S Real) ya forman parte del ingreso y del gasto de la fuente: los honorarios se suman
   aparte y los totales cuadran con ambos (cubierto por `honorarios_fuentes_totales`).
 - Modelo y lectura tolerantes: merge por boleta (`otras_fuentes.{fuente}.honorarios.{id}`), claves de mapa validadas (`validarClaveMapa`), texto libre escapado (XSS) y neutralizado contra fórmulas en Excel, superposición de

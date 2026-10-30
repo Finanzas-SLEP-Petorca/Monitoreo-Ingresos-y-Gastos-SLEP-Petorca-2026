@@ -20,7 +20,11 @@ await correrSpec('honorarios_consistencia', async (t) => {
   t.eq([oracle.bol, oracle.proy], [13390000, 4450000], 'oráculo: $13.390.000 en boletas y $4.450.000 de proyección entre todos los RBD del fixture');
   const hon = oracle.bol + oracle.proy;
 
-  const h = await boot({ fixture: 'honorarios' });
+  // «Atención» lista solo las 8 entidades con peor saldo de SEP y de las 12 fuentes. Con el gasto de Remuneraciones de JUNJI en 4 líneas, las 13 entidades de JUNJI del fixture (su fila única antigua se lee como
+  // Operación) quedan en Déficit y desplazan a las de SEP de esa lista; esta comprobación es solo de SEP, así que se arranca sin el bloque `junji` de los jardines.
+  const fxSinJunji = JSON.parse(JSON.stringify(fx));
+  Object.values(fxSinJunji).forEach(d => { if (d && d.otras_fuentes) delete d.otras_fuentes.junji; });
+  const h = await boot({ fixture: fxSinJunji });
   const { page } = h;
   await clickTab(page, 'SEP');
   const T = await tarjetas(page, '#kpiRow'), R = await tarjetas(page, '#kpiRowReal'), P = await tarjetas(page, '#kpiRowProy');
