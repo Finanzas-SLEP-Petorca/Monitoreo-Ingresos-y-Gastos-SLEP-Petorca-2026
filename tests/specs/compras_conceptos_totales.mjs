@@ -88,7 +88,9 @@ await correrSpec('compras_conceptos_totales', async (t) => {
       let bien = 0, mal = [];
       for (const a of deConcepto) {
         const e = esp[a.fuente].porId[a.rbd];
-        if (a.saldo.replace(/^▼\s*/, '') === (e.total.saldo < 0 ? '-' : '') + '$' + Math.abs(e.total.saldo).toLocaleString('es-CL') && e.estado === 'deficit') bien++; else mal.push([a, e.total.saldo, e.estado]);
+        // La lista muestra el saldo total, salvo en un Déficit SOLO por el saldo de Operación de JUNJI (total ≥ 0): ahí muestra el saldo de Operación para B&S.
+        const mostrado = (e.estado === 'deficit' && e.total.saldo >= 0 && e.saldoOp !== null) ? e.saldoOp : e.total.saldo;
+        if (a.saldo.replace(/^▼\s*/, '') === (mostrado < 0 ? '-' : '') + '$' + Math.abs(mostrado).toLocaleString('es-CL') && e.estado === 'deficit') bien++; else mal.push([a, mostrado, e.estado]);
       }
       t.ok(deConcepto.length > 0 && bien === deConcepto.length, `«Atención»: ${deConcepto.length} entidades de las fuentes por concepto, todas en Déficit con el saldo del cálculo independiente (documentado incluido)`, mal.slice(0, 3));
     }

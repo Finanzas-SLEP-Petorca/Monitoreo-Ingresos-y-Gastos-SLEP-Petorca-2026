@@ -869,6 +869,55 @@ const docsFF = JSON.parse(JSON.stringify(docsHF));
 }
 
 // ---------- salida ----------
+// ---------- variante "junji_rem": el gasto de Remuneraciones de JUNJI en 4 líneas (Operación, Homologación, Carrera Docente Parvularia, BDL) ----------
+// Parte de `jardines` (que ya trae el BDL y los jardines en FAEP/FIGA) y REESCRIBE solo la parte `junji` de 6 jardines, sin números aleatorios; `default.json` no cambia (sus documentos siguen con la fila
+// única antigua `gasto_rem`, que se lee como Operación). Campos nuevos por línea: `gasto_rem_operacion`, `gasto_rem_homologacion`, `gasto_rem_carrera_docente`, `gasto_rem_bdl` (cada uno {meses,total}).
+//   5402002  (Real hasta julio) mes a mes, sin excesos: ingresos Op 500.000 · Hom 300.000 · CDP 200.000 · BDL 100.000; gastos Rem Op 400.000 · Hom 250.000 · CDP 150.000 · BDL 50.000; B&S «Alimentación» 60.000
+//            → cada línea restringida con saldo propio positivo (50.000, 50.000, 50.000 por mes), Operación para B&S = (500.000 − 400.000 − 60.000) × 12 = +480.000, Superávit
+//   5402004  EXCESO de Homologación (enero): Op 3.000.000 · Hom 1.000.000 · Rem Op 1.000.000 · Rem Hom 1.500.000 · B&S 1.000.000 → Hom con saldo propio -500.000, Operación para B&S = 3 − 1 − 0,5 − 1 = +500.000 → Superávit
+//   5401006  EXCESO en Carrera Docente Parvularia y BDL (enero): Op 1.000.000 · CDP 0 · BDL 100.000 · Rem Op 500.000 · Rem CDP 300.000 · Rem BDL 400.000 · B&S 200.000 → excesos 300.000 y 300.000,
+//            Operación para B&S = 1 − 0,5 − 0,6 − 0,2 = -300.000 y saldo total -300.000 → Déficit por AMBAS, con las dos líneas nombradas
+//   5401007  Déficit SOLO por Operación (enero): Op 1.000.000 · Hom 5.000.000 · Rem Op 200.000 · Rem Hom 4.000.000 · B&S 900.000 → Hom con saldo +1.000.000; Operación para B&S = -100.000; saldo total +900.000
+//   5401003  MEZCLA de lectura: el campo antiguo `gasto_rem` (ENE 100.000, FEB 200.000, MAR 300.000) y `gasto_rem_operacion` solo con FEB 50.000 → Operación efectiva ENE 100.000 · FEB 50.000 · MAR 300.000 (mes a mes)
+//   5401005  documento ANTIGUO (solo `gasto_rem`, sin campos nuevos) con Op 1.000.000 y Hom 3.000.000 en enero: Rem 2.000.000 se lee como Operación (-1.000.000 − B&S 0 = Operación para B&S -1.000.000 → Déficit)
+const docsJR = JSON.parse(JSON.stringify(docsJar));
+{
+  const meses = (f) => linea(f);
+  const enero = (v) => linea(i => (i === 0 ? v : 0));
+  const plano = (v) => linea(() => v);
+  const conceptos = (o) => Object.fromEntries(Object.entries(o).map(([c, l]) => [c, { concepto: c, ...l }]));
+  const cero = () => enero(0);
+  const junjiDe = (id) => (docsJR[id].otras_fuentes = docsJR[id].otras_fuentes || {}, docsJR[id].otras_fuentes.junji);
+  const fijar = (id, o) => { docsJR[id].otras_fuentes.junji = { ...o }; };
+  const base = (id) => ({ ...junjiDe(id) });
+  fijar('5402002', {
+    ingreso_operacion: plano(500000), ingreso_homologacion: plano(300000), ingreso_carrera_docente: plano(200000), ingreso_bdl: plano(100000),
+    gasto_rem_operacion: plano(400000), gasto_rem_homologacion: plano(250000), gasto_rem_carrera_docente: plano(150000), gasto_rem_bdl: plano(50000),
+    bys_items: conceptos({ 'Alimentación': plano(60000) }), real_hasta_mes: 7,
+  });
+  fijar('5402004', {
+    ingreso_operacion: enero(3000000), ingreso_homologacion: enero(1000000), ingreso_carrera_docente: cero(), ingreso_bdl: cero(),
+    gasto_rem_operacion: enero(1000000), gasto_rem_homologacion: enero(1500000), bys_items: conceptos({ 'Alimentación': enero(1000000) }), real_hasta_mes: 7,
+  });
+  fijar('5401006', {
+    ingreso_operacion: enero(1000000), ingreso_homologacion: cero(), ingreso_carrera_docente: cero(), ingreso_bdl: enero(100000),
+    gasto_rem_operacion: enero(500000), gasto_rem_carrera_docente: enero(300000), gasto_rem_bdl: enero(400000), bys_items: conceptos({ 'Alimentación': enero(200000) }), real_hasta_mes: 12,
+  });
+  fijar('5401007', {
+    ingreso_operacion: enero(1000000), ingreso_homologacion: enero(5000000), ingreso_carrera_docente: cero(), ingreso_bdl: cero(),
+    gasto_rem_operacion: enero(200000), gasto_rem_homologacion: enero(4000000), bys_items: conceptos({ 'Alimentación': enero(900000) }), real_hasta_mes: 7,
+  });
+  fijar('5401003', {
+    ingreso_operacion: plano(1000000), ingreso_homologacion: cero(), ingreso_carrera_docente: cero(), ingreso_bdl: cero(),
+    gasto_rem: meses(i => (i < 3 ? (i + 1) * 100000 : 0)), gasto_rem_operacion: { meses: { FEBRERO: 50000 }, total: 50000 }, bys_items: {}, real_hasta_mes: 7,
+  });
+  fijar('5401005', {
+    ingreso_operacion: enero(1000000), ingreso_homologacion: enero(3000000), ingreso_carrera_docente: cero(), ingreso_bdl: cero(),
+    gasto_rem: enero(2000000), bys_items: {}, real_hasta_mes: 7,
+  });
+  void base;
+}
+
 function serializar(docsX, extra = {}) {
   const ids = Object.keys(docsX).sort();
   const lineas = ids.map(id => ` ${JSON.stringify(id)}: ${JSON.stringify(docsX[id])}`);
@@ -887,6 +936,7 @@ const SALIDAS = [
   { archivo: path.join(AQUI, 'estado.json'), ...serializar(docsEstado, { variante: 'estado' }) },
   { archivo: path.join(AQUI, 'honorarios.json'), ...serializar(docsHon, { variante: 'honorarios' }) },
   { archivo: path.join(AQUI, 'jardines.json'), ...serializar(docsJar, { variante: 'jardines' }) },
+  { archivo: path.join(AQUI, 'junji_rem.json'), ...serializar(docsJR, { variante: 'junji_rem' }) },
   { archivo: path.join(AQUI, 'compras_conceptos.json'), ...serializar(docsCC, { variante: 'compras_conceptos' }) },
   { archivo: path.join(AQUI, 'honorarios_fuentes.json'), ...serializar(docsHF, { variante: 'honorarios_fuentes' }) },
   { archivo: path.join(AQUI, 'fondos_fijos.json'), ...serializar(docsFF, { variante: 'fondos_fijos' }) },

@@ -52,3 +52,16 @@ export function saldosJunjiDe(of, bys) {
   const op = lineas[0];
   return { lineas, excesoTotal, saldoOp: op.ingreso - op.gasto - excesoTotal - Math.round(bys) };
 }
+
+/** Copia del documento con la Remuneración de Operación de JUNJI «unificada»: `gasto_rem_operacion` = Operación efectiva y sin el campo antiguo `gasto_rem`. Sirve para comparar documentos antes y después
+ *  de una importación de Excel (que escribe Operación en el campo nuevo) sin que importe en cuál de los dos campos estaba el mismo valor. */
+export function unificarRemJunji(doc) {
+  const d = JSON.parse(JSON.stringify(doc));
+  const j = d && d.otras_fuentes && d.otras_fuentes.junji;
+  if (!j || typeof j !== 'object') return d;
+  const op = remLineasDe(j).operacion;
+  if (!sumaMeses(op) && !j.gasto_rem && !j.gasto_rem_operacion) return d;
+  j.gasto_rem_operacion = { meses: op.meses, total: sumaMeses(op) };
+  delete j.gasto_rem;
+  return d;
+}

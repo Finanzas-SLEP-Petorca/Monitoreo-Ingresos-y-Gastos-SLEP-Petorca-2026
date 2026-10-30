@@ -5,6 +5,7 @@
 import { boot, clickTab, cargarFixture, textoDe } from '../lib/boot.mjs';
 import { capturarDescarga, leerXlsx } from '../lib/capture-utils.mjs';
 import { correrSpec } from '../lib/spec.mjs';
+import { unificarRemJunji } from '../lib/junji_rem.mjs';
 
 // Quita lo que no cambia el significado del documento: auditoría, ceros, cadenas vacías y mapas vacíos.
 function limpiar(v) {
@@ -21,7 +22,7 @@ function limpiar(v) {
   }
   return v;
 }
-const documentos = (store) => { const o = {}; Object.keys(store).forEach(p => { o[p] = limpiar(store[p]); }); return o; };
+const documentos = (store) => { const o = {}; Object.keys(store).forEach(p => { o[p] = limpiar(unificarRemJunji(store[p])); }); return o; };  // la Remuneración de Operación de JUNJI cuenta igual esté en `gasto_rem` (antiguo) o en `gasto_rem_operacion` (la importación escribe este)
 
 function primeraDiferencia(a, b, ruta = '') {
   if (JSON.stringify(a) === JSON.stringify(b)) return null;
@@ -96,12 +97,12 @@ await correrSpec('roundtrip_excel', async (t) => {
   t.eq(primeraDiferencia(storeAntes, relevantes(await h.store())), null, 'SEP: tras el Excel individual los documentos siguen iguales');
 
   // ================================================================ Fuentes (una por "forma": compras, JUNJI de 3 ingresos, concepto libre)
-  for (const [key, etiqueta] of [['general', 'General (compras)'], ['junji', 'JUNJI (GESPARVU, 3 ingresos)'], ['faep', 'FAEP (concepto libre)']]) {
+  for (const [key, etiqueta] of [['general', 'General (compras)'], ['junji', 'JUNJI (GESPARVU, 4 ingresos y 4 gastos de Remuneraciones)'], ['faep', 'FAEP (concepto libre)']]) {
     await clickTab(page, 'of-' + key);
     const tAntes = await textoDe(page, '#tab-of-' + key);
     const sAntes = relevantes(await h.store());
     const e1 = await exportar(h, () => page.click(`#downloadExcelOFBtn-${key}`));
-    t.ok(e1.libro.orden.includes('META') && e1.libro.orden.includes('REMUNERACIONES'), `${etiqueta}: el libro trae META y REMUNERACIONES`, e1.libro.orden);
+    t.ok(e1.libro.orden.includes('META') && e1.libro.orden.includes(key === 'junji' ? 'REM_OPERACION' : 'REMUNERACIONES'), `${etiqueta}: el libro trae META y ${key === 'junji' ? 'las 4 hojas REM_* (Remuneraciones por línea)' : 'REMUNERACIONES'}`, e1.libro.orden);
     const m = await importar(h, `#importExcelOFInput-${key}`, e1);
     t.ok(/^Carga importada correctamente/.test(m[0] || ''), `${etiqueta}: la importación informa éxito`, m);
     t.eq(await textoDe(page, '#tab-of-' + key), tAntes, `${etiqueta}: la pestaña queda idéntica tras reimportar`);
