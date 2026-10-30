@@ -400,12 +400,13 @@ const docsCompras = JSON.parse(JSON.stringify(docs));
 //   Fuentes (Estado de 2 niveles: Déficit ⇔ saldo total < 0), FAEP y Subvención General (1 línea de ingreso):
 //     FAEP 1130 ingreso 5.000.000 · gasto 5.000.000 (saldo 0) → Superávit;  FAEP 1131 gasto 5.000.001 (-$1) → Déficit;  FAEP 1132 gasto 4.999.800 (99,996 %) → Superávit;
 //     FAEP 1133 ingreso 0 · gasto 100.000 → Déficit;  FAEP 1134 ingreso 0 · gasto 0 → Superávit;  General 1130 ingreso 3.000.000 · gasto 3.000.000 → Superávit;  General 1131 gasto 3.000.001 → Déficit.
-//   JUNJI (3 líneas; Déficit ⇔ saldo total < 0 O saldo de Operación para B&S = Operación − B&S < 0), cada una con sus montos en ENERO:
-//     5402002  Op 1.000.000 · Hom 2.000.000 · CD 1.000.000 · Rem 2.000.000 · B&S 1.500.000  (saldo +500.000; Op − B&S = -500.000)   → Déficit SOLO por Operación
-//     5402004  Op 2.000.000 · Rem 2.500.000 · B&S 500.000                                     (saldo -1.000.000; Op − B&S = +1.500.000) → Déficit SOLO por el saldo total
-//     5401006  Op 1.000.000 · Hom 500.000 · Rem 1.500.000 · B&S 1.200.000                      (saldo -1.200.000; Op − B&S = -200.000)   → Déficit por AMBAS
-//     5401007  Op 1.000.000 · Hom 1.000.000 · Rem 1.000.000 · B&S 1.000.000                    (saldo 0; Op − B&S = 0)                   → Superávit
-//     5401005  Op 1.000.000 · Hom 3.000.000 · Rem 2.000.000 · B&S 1.000.001                    (saldo +999.999; Op − B&S = -1)           → Déficit SOLO por Operación (-$1)
+//   JUNJI (4 líneas de ingreso y 4 de gasto de Remuneraciones; Déficit ⇔ saldo total < 0 O saldo de Operación para B&S < 0, con Operación para B&S = Operación − Rem. Operación − exceso de las restringidas − B&S;
+//   los honorarios bajan el saldo total pero NO el de Operación), cada una con sus montos en ENERO (las Remuneraciones van en `gasto_rem_homologacion` / `gasto_rem_operacion`, el campo antiguo `gasto_rem` ya no está):
+//     5402002  Op 1.000.000 · Hom 2.000.000 · CD 1.000.000 · Rem Hom 2.000.000 · B&S 1.500.000  (saldo +500.000; Operación para B&S = -500.000)   → Déficit SOLO por Operación
+//     5402004  Op 2.000.000 · Rem Op 1.000.000 · B&S 500.000 · honorarios 1.500.000             (saldo -1.000.000; Operación para B&S = +500.000)  → Déficit SOLO por el saldo total (por los honorarios)
+//     5401006  Op 1.000.000 · Hom 500.000 · Rem Hom 500.000 · B&S 1.200.000 · honorarios 1.000.000 (saldo -1.200.000; Operación para B&S = -200.000) → Déficit por AMBAS
+//     5401007  Op 1.000.000 · Hom 1.000.000 · Rem Hom 1.000.000 · B&S 1.000.000                 (saldo 0; Operación para B&S = 0)                  → Superávit
+//     5401005  Op 1.000.000 · Hom 3.000.000 · Rem Hom 2.000.000 · B&S 1.000.001                 (saldo +999.999; Operación para B&S = -1)          → Déficit SOLO por Operación (-$1)
 //   Aporte Fiscal JUNJI (1 línea, sin restricción de líneas): 5401004 ingreso 1.000.000 · Rem 0 · B&S 900.000 → Superávit (NO es déficit aunque B&S sea el 90 % del ingreso).
 const docsEstado = JSON.parse(JSON.stringify(docs));
 {
@@ -446,19 +447,23 @@ const docsEstado = JSON.parse(JSON.stringify(docs));
   fuente1('1130', 'general', { ingreso: 3000000, rem: 3000000 });
   fuente1('1131', 'general', { ingreso: 3000000, rem: 3000001 });
   // JUNJI (GESPARVU): 3 líneas de ingreso + remuneraciones + un concepto de B&S.
-  const junji = (id, { op = 0, hom = 0, cd = 0, rem = 0, bys = 0 }) => {
+  // El gasto de Remuneraciones va en 4 líneas (`gasto_rem_operacion`, `_homologacion`, `_carrera_docente`, `_bdl`): remOp / remHom. `hon` = honorarios (proyección de enero por concepto),
+  // que bajan el saldo total pero NO el saldo de Operación (única forma de un Déficit «solo por el saldo total»: total − Operación = Σ max(0, ingreso − gasto) de las líneas restringidas − honorarios).
+  const junji = (id, { op = 0, hom = 0, cd = 0, remOp = 0, remHom = 0, bys = 0, hon = 0 }) => {
     const d = docsEstado[id];
     d.otras_fuentes = d.otras_fuentes || {};
     d.otras_fuentes.junji = {
       ingreso_operacion: lineaEnero(op), ingreso_homologacion: lineaEnero(hom), ingreso_carrera_docente: lineaEnero(cd),
-      gasto_rem: lineaEnero(rem), bys_items: { 'Alimentación': { concepto: 'Alimentación', ...lineaEnero(bys) } }, real_hasta_mes: N_MESES,
+      gasto_rem_operacion: lineaEnero(remOp), gasto_rem_homologacion: lineaEnero(remHom),
+      bys_items: { 'Alimentación': { concepto: 'Alimentación', ...lineaEnero(bys) } }, real_hasta_mes: N_MESES,
+      ...(hon ? { hon_proyeccion_items: { 'Apoyo pedagógico': { meses: { ENERO: hon } } } } : {}),
     };
   };
-  junji('5402002', { op: 1000000, hom: 2000000, cd: 1000000, rem: 2000000, bys: 1500000 });
-  junji('5402004', { op: 2000000, rem: 2500000, bys: 500000 });
-  junji('5401006', { op: 1000000, hom: 500000, rem: 1500000, bys: 1200000 });
-  junji('5401007', { op: 1000000, hom: 1000000, rem: 1000000, bys: 1000000 });
-  junji('5401005', { op: 1000000, hom: 3000000, rem: 2000000, bys: 1000001 });
+  junji('5402002', { op: 1000000, hom: 2000000, cd: 1000000, remHom: 2000000, bys: 1500000 });
+  junji('5402004', { op: 2000000, remOp: 1000000, bys: 500000, hon: 1500000 });
+  junji('5401006', { op: 1000000, hom: 500000, remHom: 500000, bys: 1200000, hon: 1000000 });
+  junji('5401007', { op: 1000000, hom: 1000000, remHom: 1000000, bys: 1000000 });
+  junji('5401005', { op: 1000000, hom: 3000000, remHom: 2000000, bys: 1000001 });
   docsEstado['5401004'].otras_fuentes.aporte_junji = {
     ingreso: lineaEnero(1000000), gasto_rem: lineaEnero(0),
     bys_items: { 'Alimentación': { concepto: 'Alimentación', ...lineaEnero(900000) } }, real_hasta_mes: N_MESES,
@@ -552,11 +557,11 @@ const docsJar = JSON.parse(JSON.stringify(docs));
   ofDe('5403001').junji = { ingreso_bdl: plano(50000), real_hasta_mes: 7 };
   ofDe('5401002').junji = {
     ingreso_operacion: enero(1000000), ingreso_homologacion: enero(0), ingreso_carrera_docente: enero(0), ingreso_bdl: enero(20000000),
-    gasto_rem: enero(3000000), bys_items: conceptos({ 'Alimentación': enero(1500000) }), real_hasta_mes: 7,
+    gasto_rem_operacion: enero(0), gasto_rem_bdl: enero(3000000), bys_items: conceptos({ 'Alimentación': enero(1500000) }), real_hasta_mes: 7,
   };
   ofDe('5403002').junji = {
     ingreso_operacion: enero(2000000), ingreso_homologacion: enero(0), ingreso_carrera_docente: enero(0), ingreso_bdl: enero(3000000),
-    gasto_rem: enero(4000000), bys_items: conceptos({ 'Alimentación': enero(500000) }), real_hasta_mes: 7,
+    gasto_rem_operacion: enero(1000000), gasto_rem_bdl: enero(3000000), bys_items: conceptos({ 'Alimentación': enero(500000) }), real_hasta_mes: 7,
   };
 }
 
@@ -748,7 +753,7 @@ const docsHF = JSON.parse(JSON.stringify(docsCC));
   };
   docsHF['5401005'].otras_fuentes.junji = {
     ingreso_operacion: enero(1000000), ingreso_homologacion: enero(5000000), ingreso_carrera_docente: enero(0), ingreso_bdl: enero(0),
-    gasto_rem: enero(100000), bys_items: conceptos({ 'Alimentación': enero(400000) }), real_hasta_mes: 7,
+    gasto_rem_homologacion: enero(100000), bys_items: conceptos({ 'Alimentación': enero(400000) }), real_hasta_mes: 7,
     honorarios: { jh5401005_1: bolc('Apoyo pedagógico', 'BOLHE', 811, '2026-01-20', '2026-01-27', 'Honorarios financiados por Homologación', 700000) },
   };
   de('5401002', 'junji').honorarios = { jh5401002_1: bolc('Apoyo pedagógico', 'BOLHE', 821, '2026-01-25', '2026-01-30', 'Honorarios con BDL alto', 1000000) };

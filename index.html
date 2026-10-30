@@ -6922,6 +6922,9 @@ function actualizarSaldosJunjiEnModal(rbd, fuenteKey, of) {
     poner(`ofjs-${i}-exc-${sufijo}`, l.restringida ? fmtCLP(l.exceso) : '—');
   });
   poner(`ofjs-op-${sufijo}`, fmtCLP(sa.saldoOperacionBys), sa.saldoOperacionBys < 0);
+  // la misma cifra que muestra el resumen de B&S («Saldo Operación disponible para B&S»)
+  const opBys = document.getElementById(`ofsaldoopbys-${rbd}-${fuenteKey}`);
+  if (opBys) { opBys.textContent = fmtCLP(sa.saldoOperacionBys); opBys.style.color = sa.saldoOperacionBys < 0 ? 'var(--status-critical)' : 'inherit'; }
 }
 
 function buildOtrasFuentesDetalleHTML(rbd, fuenteKey) {

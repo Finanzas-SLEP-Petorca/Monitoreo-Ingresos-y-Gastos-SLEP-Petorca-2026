@@ -6,10 +6,11 @@
 //   · Déficit  ⇔ saldo (recurso − gasto) < 0. Saldo 0 NO es déficit. Recurso 0 con gasto > 0 sí (saldo negativo).
 //   · Riesgo   (solo SEP) ⇔ no es déficit y gasto/recurso ≥ 90 % EXACTO (gasto × 10 ≥ recurso × 9, recurso > 0). Los % que se muestran van redondeados a 1 decimal; no deciden.
 //   · Superávit en cualquier otro caso. Las fuentes distintas de SEP solo tienen Superávit / Déficit.
-//   · JUNJI (4 líneas de ingreso): además es Déficit si Operación − gasto de B&S < 0 (Homologación, Carrera Docente y BDL financian solo Remuneraciones; el BDL suma al saldo total, no al de Operación).
+//   · JUNJI (4 líneas de ingreso): además es Déficit si el saldo de Operación para B&S < 0: Ingreso Operación − Gasto Rem. Operación − exceso de las líneas restringidas (Homologación, Carrera Docente Parvularia, BDL: gasto de su línea > su ingreso) − B&S (ver junji_rem.mjs).
 import fs from 'node:fs';
 import path from 'node:path';
 import { TESTS_DIR } from './config.mjs';
+import { remEfectivoDe, saldosJunjiDe } from './junji_rem.mjs';
 import { MESES, RBD_IDS, GESPARVU_IDS, FUENTES, idsDeUniverso } from './corte.mjs';
 
 // Los RBD de DATA.registros marcados sin marco SEP (se leen de rbds.json, no se repiten aquí).
@@ -56,9 +57,11 @@ export function fuenteDe(docs, id, key) {
   const bys = compras
     ? sumaCompras(of.compras) + Object.values(of.bys_proy_items || {}).reduce((s, it) => s + sumaMeses(it), 0)
     : Object.values(of.bys_items || {}).reduce((s, it) => s + sumaMeses(it), 0);
-  const gasto = Math.round(sumaMeses(of.gasto_rem) + bys);
+  // Honorarios: el fixture `estado` solo trae proyección por concepto (hon_proyeccion_items, en JUNJI); suman al gasto total pero no al saldo de Operación.
+  const hon = Object.values(of.hon_proyeccion_items || {}).reduce((s, it) => s + sumaMeses(it), 0);
+  const gasto = Math.round(sumaMeses(key === 'junji' ? remEfectivoDe(of) : of.gasto_rem) + bys + hon);
   const saldo = ingreso - gasto;
-  const saldoOp = key === 'junji' ? Math.round(sumaMeses(of.ingreso_operacion)) - Math.round(bys) : null;
+  const saldoOp = key === 'junji' ? saldosJunjiDe(of, bys).saldoOp : null;
   const causas = [];
   if (estadoEsperado(ingreso, gasto, false) === 'deficit') causas.push('saldo');
   if (saldoOp !== null && saldoOp < 0) causas.push('operacion_bys');
