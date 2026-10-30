@@ -1422,10 +1422,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <div class="panel">
         <div class="detalle-empty">JUNJI es un proceso independiente de SUPEREDUC: se sigue como Ingreso vs. Gasto,
         sin techo ni meta 70/30 — el Estado es Superávit o Déficit: Déficit si el saldo acumulado es negativo <strong>o</strong> si el saldo de
-        Operación para Bienes y Servicios (ingreso de Operación − gasto de B&S) es negativo, porque Homologación, Carrera Docente y el Bono Desempeño
-        Laboral (BDL) solo pueden pagar Remuneraciones. Las filas son los 13 GESPARVU (jardín infantil / sala cuna) de SLEP Petorca, no los RBD de establecimientos educacionales. Bienes y Servicios se registra <strong>por documento</strong> ("Registro de compras" dentro del detalle de cada entidad, con un <strong>concepto</strong> en vez del código de cuenta: tipo y N° de documento, fechas, proveedor, monto y pago) y/o como montos mensuales por concepto <strong>sin documento</strong>; los dos se suman y se muestran por separado (Documentado / Sin documento).</div>
+        Operación para Bienes y Servicios es negativo (ingreso de Operación − gasto de Remuneraciones Operación − exceso de las líneas restringidas − gasto de B&S), porque Homologación, Carrera Docente Parvularia y el Bono Desempeño
+        Laboral (BDL) solo pueden pagar Remuneraciones. El gasto de Remuneraciones se registra en cuatro líneas, una por cada ingreso (Operación, Homologación, Carrera Docente Parvularia y BDL): cada línea restringida muestra su saldo propio (ingreso − gasto de esa línea) y, si gasta más que su ingreso, el exceso se carga a Operación. Las filas son los 13 GESPARVU (jardín infantil / sala cuna) de SLEP Petorca, no los RBD de establecimientos educacionales. Bienes y Servicios se registra <strong>por documento</strong> ("Registro de compras" dentro del detalle de cada entidad, con un <strong>concepto</strong> en vez del código de cuenta: tipo y N° de documento, fechas, proveedor, monto y pago) y/o como montos mensuales por concepto <strong>sin documento</strong>; los dos se suman y se muestran por separado (Documentado / Sin documento).</div>
         <div class="table-controls">
-          <button id="downloadExcelOFBtn-junji" type="button" style="background:#1b8247; border-color:#1b8247;" title="Descarga la carga completa de JUNJI (4 líneas de Ingreso, Remuneraciones, Bienes y Servicios) en el mismo formato que se puede volver a importar">⬇ Excel</button>
+          <button id="downloadExcelOFBtn-junji" type="button" style="background:#1b8247; border-color:#1b8247;" title="Descarga la carga completa de JUNJI (4 líneas de Ingreso, Remuneraciones por línea, Bienes y Servicios) en el mismo formato que se puede volver a importar">⬇ Excel</button>
           <button id="importExcelOFBtn-junji" type="button" style="background:#6b46c1; border-color:#6b46c1;">⬆ Importar Excel</button>
           <input type="file" id="importExcelOFInput-junji" accept=".xlsx" style="display:none;">
           <button id="exportPdfOFBtn-junji" type="button" style="background:#374151; border-color:#374151;">🖨 Exportar PDF</button>
@@ -1466,7 +1466,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         establecimientos, una fila fija "AC — Administración Central" para gasto del sostenedor que no es de un establecimiento
         puntual, y los 13 GESPARVU (jardín infantil / sala cuna) de SLEP Petorca, que también tienen ingresos y gastos de FAEP. Bienes y Servicios se registra <strong>por documento</strong> ("Registro de compras" dentro del detalle de cada entidad, con un <strong>concepto</strong> en vez del código de cuenta: tipo y N° de documento, fechas, proveedor, monto y pago) y/o como montos mensuales por concepto <strong>sin documento</strong>; los dos se suman y se muestran por separado (Documentado / Sin documento).</div>
         <div class="table-controls">
-          <button id="downloadExcelOFBtn-faep" type="button" style="background:#1b8247; border-color:#1b8247;" title="Descarga la carga completa de FAEP (Ingreso, Remuneraciones, Bienes y Servicios) en el mismo formato que se puede volver a importar">⬇ Excel</button>
+          <button id="downloadExcelOFBtn-faep" type="button" style="background:#1b8247; border-color:#1b8247;" title="Descarga la carga completa de FAEP (Ingreso, Remuneraciones por línea, Bienes y Servicios) en el mismo formato que se puede volver a importar">⬇ Excel</button>
           <button id="importExcelOFBtn-faep" type="button" style="background:#6b46c1; border-color:#6b46c1;">⬆ Importar Excel</button>
           <input type="file" id="importExcelOFInput-faep" accept=".xlsx" style="display:none;">
           <button id="exportPdfOFBtn-faep" type="button" style="background:#374151; border-color:#374151;">🖨 Exportar PDF</button>
@@ -1540,7 +1540,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         Central" para gasto del sostenedor que no es de un establecimiento puntual, y los 13 GESPARVU (jardín infantil / sala
         cuna) de SLEP Petorca, que también tienen ingresos y gastos de FIGA. Bienes y Servicios se registra <strong>por documento</strong> ("Registro de compras" dentro del detalle de cada entidad, con un <strong>concepto</strong> en vez del código de cuenta: tipo y N° de documento, fechas, proveedor, monto y pago) y/o como montos mensuales por concepto <strong>sin documento</strong>; los dos se suman y se muestran por separado (Documentado / Sin documento).</div>
         <div class="table-controls">
-          <button id="downloadExcelOFBtn-figa" type="button" style="background:#1b8247; border-color:#1b8247;" title="Descarga la carga completa de FIGA (Ingreso, Remuneraciones, Bienes y Servicios) en el mismo formato que se puede volver a importar">⬇ Excel</button>
+          <button id="downloadExcelOFBtn-figa" type="button" style="background:#1b8247; border-color:#1b8247;" title="Descarga la carga completa de FIGA (Ingreso, Remuneraciones por línea, Bienes y Servicios) en el mismo formato que se puede volver a importar">⬇ Excel</button>
           <button id="importExcelOFBtn-figa" type="button" style="background:#6b46c1; border-color:#6b46c1;">⬆ Importar Excel</button>
           <input type="file" id="importExcelOFInput-figa" accept=".xlsx" style="display:none;">
           <button id="exportPdfOFBtn-figa" type="button" style="background:#374151; border-color:#374151;">🖨 Exportar PDF</button>
@@ -1580,7 +1580,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         acumulado es Superávit o Déficit. Incluye una fila fija "AC — Administración Central" para gasto del
         sostenedor que no es de un establecimiento puntual. Bienes y Servicios se registra <strong>por documento</strong> ("Registro de compras" dentro del detalle de cada entidad, con un <strong>concepto</strong> en vez del código de cuenta: tipo y N° de documento, fechas, proveedor, monto y pago) y/o como montos mensuales por concepto <strong>sin documento</strong>; los dos se suman y se muestran por separado (Documentado / Sin documento).</div>
         <div class="table-controls">
-          <button id="downloadExcelOFBtn-aporte_educ" type="button" style="background:#1b8247; border-color:#1b8247;" title="Descarga la carga completa de Aporte Fiscal Extraord. Educación (Ingreso, Remuneraciones, Bienes y Servicios) en el mismo formato que se puede volver a importar">⬇ Excel</button>
+          <button id="downloadExcelOFBtn-aporte_educ" type="button" style="background:#1b8247; border-color:#1b8247;" title="Descarga la carga completa de Aporte Fiscal Extraord. Educación (Ingreso, Remuneraciones por línea, Bienes y Servicios) en el mismo formato que se puede volver a importar">⬇ Excel</button>
           <button id="importExcelOFBtn-aporte_educ" type="button" style="background:#6b46c1; border-color:#6b46c1;">⬆ Importar Excel</button>
           <input type="file" id="importExcelOFInput-aporte_educ" accept=".xlsx" style="display:none;">
           <button id="exportPdfOFBtn-aporte_educ" type="button" style="background:#374151; border-color:#374151;">🖨 Exportar PDF</button>
@@ -1620,7 +1620,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         indica si el saldo acumulado es Superávit o Déficit. Las filas son los 13 GESPARVU (jardín infantil / sala
         cuna) de SLEP Petorca, no los RBD de establecimientos educacionales. Bienes y Servicios se registra <strong>por documento</strong> ("Registro de compras" dentro del detalle de cada entidad, con un <strong>concepto</strong> en vez del código de cuenta: tipo y N° de documento, fechas, proveedor, monto y pago) y/o como montos mensuales por concepto <strong>sin documento</strong>; los dos se suman y se muestran por separado (Documentado / Sin documento).</div>
         <div class="table-controls">
-          <button id="downloadExcelOFBtn-aporte_junji" type="button" style="background:#1b8247; border-color:#1b8247;" title="Descarga la carga completa de Aporte Fiscal Extraord. JUNJI (Ingreso, Remuneraciones, Bienes y Servicios) en el mismo formato que se puede volver a importar">⬇ Excel</button>
+          <button id="downloadExcelOFBtn-aporte_junji" type="button" style="background:#1b8247; border-color:#1b8247;" title="Descarga la carga completa de Aporte Fiscal Extraord. JUNJI (Ingreso, Remuneraciones por línea, Bienes y Servicios) en el mismo formato que se puede volver a importar">⬇ Excel</button>
           <button id="importExcelOFBtn-aporte_junji" type="button" style="background:#6b46c1; border-color:#6b46c1;">⬆ Importar Excel</button>
           <input type="file" id="importExcelOFInput-aporte_junji" accept=".xlsx" style="display:none;">
           <button id="exportPdfOFBtn-aporte_junji" type="button" style="background:#374151; border-color:#374151;">🖨 Exportar PDF</button>
@@ -1730,7 +1730,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <p>Cada fuente tiene su propia pestaña, con una fila por entidad (RBD, "AC" para Administración Central, o GESPARVU, los
         jardines infantiles: JUNJI y Aporte Fiscal JUNJI solo los jardines; FAEP, Subtítulo 31, Recuperación LLMM y FIGA, los RBD, AC y los jardines; Asignación Familiar, los RBD y los jardines, sin AC; General, PIE, Mantenimiento, Pro-Retención y Aporte Fiscal Educación, los RBD y AC), las mismas tarjetas Real / Proyectado / Total y el control "Real hasta el mes".
         A diferencia de SEP no tienen meta 70/30: el Estado solo indica Superávit o Déficit (Déficit = saldo negativo; en JUNJI también si el saldo de Operación para B&S es negativo). En JUNJI el ingreso tiene cuatro líneas: Operación (financia Remuneraciones y B&S) y
-        Homologación, Carrera Docente y Bono Desempeño Laboral (BDL), que financian solo Remuneraciones; las cuatro suman al ingreso total, pero el BDL no entra en el saldo de Operación para B&S. Cada fila trae botones
+        Homologación, Carrera Docente Parvularia y Bono Desempeño Laboral (BDL), que financian solo Remuneraciones; las cuatro suman al ingreso total. El gasto de Remuneraciones también tiene cuatro líneas (Gasto Remuneraciones Operación, Homologación, Carrera Docente Parvularia y BDL; lo que había en la antigua fila única quedó en Operación): cada línea restringida muestra su saldo propio y el exceso sobre su ingreso se carga a Operación. El saldo de Operación para B&S es Ingreso Operación − Gasto Rem. Operación − exceso − B&S (los honorarios no entran). Cada fila trae botones
         para descargar su Excel (⬇ XLS), su CSV y su PDF individual (🖨), y arriba hay botones para importar y
         exportar toda la fuente.</p>
         <p><strong>Fuentes agregadas.</strong> <strong>Subtítulo 31 (Proyectos)</strong> se sigue como Ingreso vs. Gasto (Remuneraciones, Honorarios y Bienes y Servicios por concepto), igual que FAEP.
@@ -1793,7 +1793,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         Saldo Final es negativo (gastó más de lo que tiene; un saldo exacto de $0 no es déficit), <strong>Riesgo</strong> si no es
         déficit y el gasto es el 90% o más del ingreso, y <strong>Superávit</strong> en cualquier otro caso. En las demás fuentes el
         Estado es solo Superávit o Déficit (Déficit = saldo negativo); en JUNJI también es Déficit si el saldo de Operación para
-        Bienes y Servicios es negativo (esos gastos no se pueden pagar con Homologación, Carrera Docente ni BDL).</p>
+        Bienes y Servicios es negativo (esos gastos no se pueden pagar con Homologación, Carrera Docente Parvularia ni BDL; el saldo de Operación descuenta además el gasto de Remuneraciones Operación y el exceso de las líneas restringidas).</p>
 
         <h4>8. Pestaña "Reportes"</h4>
         <p>Tiene dos vistas. El <strong>Visualizador</strong> (la que se abre por defecto) consolida todas las fuentes
@@ -2493,6 +2493,39 @@ const FUENTES_OTRAS = [
 ];
 const FUENTES_OTRAS_BY_KEY = {};
 FUENTES_OTRAS.forEach(f => { FUENTES_OTRAS_BY_KEY[f.key] = f; });
+// JUNJI (incomeShape:'junji3'): el gasto de Remuneraciones se divide en 4 líneas, una por cada línea de ingreso (decisión del usuario; mismo orden que los ingresos).
+//   campo        = campo mensual `{meses,total}` guardado en `otras_fuentes.junji.<campo>` (nombres coherentes con `ingreso_*`: `gasto_rem_operacion`, …)
+//   ingreso      = la línea de ingreso que la financia; restringida = solo puede pagar Remuneraciones (Operación también paga B&S)
+// `of.gasto_rem` (en memoria) deja de leerse de Firestore en JUNJI: es la SUMA derivada de las 4 líneas (así todo lo que ya consume `gasto_rem` —KPIs, Panel principal, % Ejecución,
+// Visualizador, Reporte— cuadra solo). El campo antiguo `gasto_rem` de Firestore se conserva solo como RESPALDO DE LECTURA de Operación (ver aplicarSnapshot) y ya no se escribe.
+const JUNJI_REM_LINEAS = [
+  { campo: 'gasto_rem_operacion', ingreso: 'ingreso_operacion', modo: 'of_gasto_rem_operacion', titulo: 'Gasto Remuneraciones Operación', ingTitulo: 'Ingreso Operación', corto: 'Operación', restringida: false, sheet: 'REM_OPERACION', ingSheet: 'ING_OPERACION' },
+  { campo: 'gasto_rem_homologacion', ingreso: 'ingreso_homologacion', modo: 'of_gasto_rem_homologacion', titulo: 'Gasto Remuneraciones Homologación', ingTitulo: 'Ingreso Homologación', corto: 'Homologación', restringida: true, sheet: 'REM_HOMOLOGACION', ingSheet: 'ING_HOMOLOGACION' },
+  { campo: 'gasto_rem_carrera_docente', ingreso: 'ingreso_carrera_docente', modo: 'of_gasto_rem_carrera_docente', titulo: 'Gasto Remuneraciones Carrera Docente Parvularia', ingTitulo: 'Ingreso Carrera Docente Parvularia', corto: 'Carrera Docente Parvularia', restringida: true, sheet: 'REM_CARRERA_DOCENTE_PARVULARIA', ingSheet: 'ING_CARRERA_DOCENTE_PARVULARIA' },
+  { campo: 'gasto_rem_bdl', ingreso: 'ingreso_bdl', modo: 'of_gasto_rem_bdl', titulo: 'Gasto Remuneraciones BDL', ingTitulo: 'Ingreso Bono Desempeño Laboral (BDL)', corto: 'BDL', restringida: true, sheet: 'REM_BDL', ingSheet: 'ING_BDL' },
+];
+// gasto_rem = suma mensual de las 4 líneas (solo JUNJI). Se llama al inicio de computeRealProyOtraFuente.
+function sincronizarRemJunji(of) {
+  const meses = mesesEnCero();
+  JUNJI_REM_LINEAS.forEach(l => { const b = of[l.campo]; MESES_CARGA.forEach(m => { meses[m] += Number(b && b.meses && b.meses[m]) || 0; }); });
+  of.gasto_rem = { meses, total: MESES_CARGA.reduce((s, m) => s + meses[m], 0) };
+}
+// Saldos por línea (sobre el Total Real+Proy): saldo propio = ingreso de la línea − su gasto de remuneraciones. Una línea restringida que gasta MÁS que su ingreso carga el
+// EXCESO al saldo de Operación; Saldo de Operación para B&S = Ingreso Operación − Gasto Rem. Operación − exceso de las restringidas − B&S (sin documento + documentado).
+// Los honorarios NO entran (regla vigente desde la PR #67: son gasto de personal y no se pagan con el saldo de Operación para B&S; sí afectan el saldo total).
+function saldosLineasJunji(of, bysTotal) {
+  const lineas = JUNJI_REM_LINEAS.map(l => {
+    const ingreso = Number(of[l.ingreso] && of[l.ingreso].total) || 0;
+    const gasto = Number(of[l.campo] && of[l.campo].total) || 0;
+    const saldo = ingreso - gasto;
+    const exceso = (l.restringida && saldo < 0) ? -saldo : 0;
+    return { ...l, ingresoTotal: ingreso, gastoTotal: gasto, saldo, exceso };
+  });
+  const excesoTotal = lineas.reduce((s, l) => s + l.exceso, 0);
+  const op = lineas[0];
+  const bys = bysTotal === undefined ? (Number(of.gasto_bys_total) || 0) : bysTotal;
+  return { lineas, excesoTotal, saldoOperacionBys: op.ingresoTotal - op.gastoTotal - excesoTotal - bys };
+}
 function lineasIngresoOtraFuente(fuente, of) {
   if (fuente && fuente.incomeShape === 'junji3') return [of.ingreso_operacion, of.ingreso_homologacion, of.ingreso_carrera_docente, of.ingreso_bdl];
   if (fuente && fuente.incomeShape === 'llmm3') return [of.ingreso_llmm_isapres, of.ingreso_llmm_fonasa, of.ingreso_llmm_sil];
@@ -3982,6 +4015,7 @@ function ensureOtraFuente(rbd, fuenteKey) {
       entry.ingreso_homologacion = { meses: mesesEnCero(), total: 0 };
       entry.ingreso_carrera_docente = { meses: mesesEnCero(), total: 0 };
       entry.ingreso_bdl = { meses: mesesEnCero(), total: 0 };
+      JUNJI_REM_LINEAS.forEach(l => { entry[l.campo] = { meses: mesesEnCero(), total: 0 }; });
       entry.saldo_operacion_bys = 0;
     } else if (fuente.incomeShape === 'llmm3') {
       entry.ingreso_llmm_isapres = { meses: mesesEnCero(), total: 0 };
@@ -4007,6 +4041,7 @@ function ensureOtraFuente(rbd, fuenteKey) {
   const resultado = CARGA_MANUAL.otras_fuentes_por_rbd[rbd][fuenteKey];
   const fuente = FUENTES_OTRAS_BY_KEY[fuenteKey] || {};
   if (fuente.incomeShape === 'carrera2' && !resultado.ingreso_carrera_docente) resultado.ingreso_carrera_docente = { meses: mesesEnCero(), total: 0 };
+  if (fuente.incomeShape === 'junji3') JUNJI_REM_LINEAS.forEach(l => { if (!resultado[l.campo]) resultado[l.campo] = { meses: mesesEnCero(), total: 0 }; });
   if (fuente.incomeShape === 'llmm3') {
     ['ingreso_llmm_isapres', 'ingreso_llmm_fonasa', 'ingreso_llmm_sil'].forEach(campo => {
       if (!resultado[campo]) resultado[campo] = { meses: mesesEnCero(), total: 0 };
@@ -4070,7 +4105,13 @@ function computeRealProyOtraFuente(of, fuenteKey, rbd) {
   const lineasIngreso = lineasIngresoOtraFuente(fuente, of);
   let ingReal = 0, ingProy = 0;
   lineasIngreso.forEach(l => { const s = splitRealProyMeses(l && l.meses, corte); ingReal += s.real; ingProy += s.proy; });
-  const rem = splitRealProyMeses(of.gasto_rem && of.gasto_rem.meses, corte);
+  let rem;
+  if (fuente.incomeShape === 'junji3') {
+    // JUNJI: Real/Proy de cada una de las 4 líneas (redondeada a pesos) y la suma; `gasto_rem` es esa suma derivada.
+    sincronizarRemJunji(of);
+    rem = { real: 0, proy: 0 };
+    JUNJI_REM_LINEAS.forEach(l => { const s = splitRealProyMeses(of[l.campo] && of[l.campo].meses, corte); rem.real += Math.round(s.real); rem.proy += Math.round(s.proy); });
+  } else rem = splitRealProyMeses(of.gasto_rem && of.gasto_rem.meses, corte);
   let bysReal = 0, bysProy = 0, bysDoc = 0;
   const porConcepto = fuente.bysMode === 'concepto';
   if (fuente.bysMode === 'compras') {
@@ -4116,7 +4157,7 @@ function recomputeOtraFuente(rbd, fuenteKey) {
   of.gasto_total = rp.total.gasto;
   of.saldo = rp.total.saldo;
   if (fuente.incomeShape === 'junji3') {
-    of.saldo_operacion_bys = of.ingreso_operacion.total - of.gasto_bys_total;
+    of.saldo_operacion_bys = saldosLineasJunji(of).saldoOperacionBys;
   }
   of.estado = causasDeficitOtraFuente(of, fuente).length ? 'deficit' : 'superavit';
   return of;
@@ -4126,7 +4167,8 @@ function recomputeOtraFuente(rbd, fuenteKey) {
 //   · 'operacion_bys'  (L-08, solo fuentes con líneas de ingreso restringidas: `incomeShape:'junji3'`, hoy JUNJI) Operación puede financiar Bienes y
 //                      Servicios y Remuneraciones; Homologación, Carrera Docente y Bono Desempeño Laboral (BDL) financian SOLO Remuneraciones (decisión de negocio),
 //                      así que B&S no puede pagarse con ellas: si B&S supera a Operación, `saldo_operacion_bys` es negativo y hay Déficit aunque el saldo total sea ≥ 0.
-//                      El BDL entra al ingreso total (y al saldo y al Real/Proyectado) pero NO a `saldo_operacion_bys`, que sigue siendo Ingreso Operación − B&S.
+//                      Las 4 líneas de ingreso entran al ingreso total (y al saldo y al Real/Proyectado); `saldo_operacion_bys` = Ingreso Operación − Gasto Rem. Operación − exceso de las líneas
+//                      restringidas (Homologación, Carrera Docente Parvularia, BDL: gasto de su remuneración > su ingreso) − B&S (ver saldosLineasJunji).
 // No se guarda en `of` (el respaldo JSON vuelca `of` completo y no debe cambiar de forma): se deriva de sus montos.
 function causasDeficitOtraFuente(of, fuente) {
   const causas = [];
@@ -4141,9 +4183,13 @@ function causaEstadoOtraFuente(of, fuenteKey) {
   const saldo = c.includes('saldo'), op = c.includes('operacion_bys');
   if (!saldo && !op) return { corto: '', largo: '' };
   const largoSaldo = `el saldo total es negativo (${fmtCLP(of.saldo)})`;
-  const largoOp = `el saldo de Operación para Bienes y Servicios es negativo (${fmtCLP(of.saldo_operacion_bys)}): B&S no puede pagarse con Homologación, Carrera Docente ni BDL, que financian solo Remuneraciones`;
+  // Líneas restringidas que gastan más que su ingreso: el exceso se carga a Operación (ver saldosLineasJunji).
+  const excesos = op ? saldosLineasJunji(of).lineas.filter(l => l.exceso > 0) : [];
+  const largoExceso = excesos.length ? `; ${excesos.map(l => `${l.corto} gasta ${fmtCLP(l.exceso)} más que su ingreso y ese exceso se carga a Operación`).join('; ')}` : '';
+  const largoOp = `el saldo de Operación para Bienes y Servicios es negativo (${fmtCLP(of.saldo_operacion_bys)}): Ingreso Operación − Gasto Remuneraciones Operación − exceso de las líneas restringidas − B&S; B&S no puede pagarse con Homologación, Carrera Docente Parvularia ni BDL, que financian solo Remuneraciones${largoExceso}`;
+  const cortoExceso = excesos.length ? ` · exceso en ${excesos.map(l => l.corto).join(', ')}` : '';
   return {
-    corto: op ? (saldo ? 'Saldo total y saldo Operación para B&S negativos' : 'Saldo Operación para B&S negativo') : '',
+    corto: op ? (saldo ? 'Saldo total y saldo Operación para B&S negativos' : 'Saldo Operación para B&S negativo') + cortoExceso : '',
     largo: 'Déficit: ' + (saldo && op ? `${largoSaldo}; además ${largoOp}` : (op ? largoOp : largoSaldo)) + '.',
   };
 }
@@ -6850,6 +6896,34 @@ function fondosFijosEnGeneralHTML(rbd) {
   return `<div class="compras-section" style="margin-top:14px;"><div class="detalle-header"><strong>Fondos Fijos rendidos — B&S General</strong> — <span class="detalle-sub">Solo lectura. Montos registrados desde Fondos Fijos para esta entidad; cada columna corresponde al mes de la rendición. Edita el campo “Registrado en General” en Fondos Fijos.</span></div><div class="detalle-scroll"><table class="detalle-table">${DETALLE_COLGROUP}<thead><tr><th>Origen</th>${MESES_CARGA.map((m, i) => `<th class="num">${escHtml(MESES_CARGA_ABREV[i])}</th>`).join('')}<th class="num">Total</th></tr></thead><tbody><tr class="ff-calculada"><td class="item-label">Rendición Fondo Fijo</td>${MESES_CARGA.map(m => `<td class="num">${meses[m] ? fmtCLP(meses[m]) : '—'}</td>`).join('')}<td class="num item-total"><strong>${fmtCLP(total)}</strong></td></tr></tbody></table></div></div>`;
 }
 
+// JUNJI: cuadro de solo lectura «Saldos por línea» (ingreso − gasto de remuneraciones de cada línea, exceso de las restringidas y saldo de Operación para B&S). Las celdas llevan id para
+// refrescarse mientras se teclea (actualizarSaldosJunjiEnModal) sin reconstruir el modal.
+function saldosJunjiHTML(rbd, fuenteKey, of) {
+  const sa = saldosLineasJunji(of);
+  const sufijo = `${rbd}-${fuenteKey}`;
+  const col = v => v < 0 ? ' style="color:var(--status-critical)"' : '';
+  const filas = sa.lineas.map((l, i) => `<tr><td class="item-label">${escHtml(l.corto)}</td><td class="num" id="ofjs-${i}-ing-${sufijo}">${fmtCLP(l.ingresoTotal)}</td><td class="num" id="ofjs-${i}-gas-${sufijo}">${fmtCLP(l.gastoTotal)}</td><td class="num" id="ofjs-${i}-sal-${sufijo}"${col(l.saldo)}>${fmtCLP(l.saldo)}</td><td class="num" id="ofjs-${i}-exc-${sufijo}">${l.restringida ? fmtCLP(l.exceso) : '—'}</td></tr>`).join('');
+  return `<div class="of-saldos-junji" id="ofjsaldos-${sufijo}">
+    <table class="detalle-table" style="margin-top:8px;"><caption class="detalle-sub" style="text-align:left;caption-side:top;">Saldos por línea (Total Real+Proy): ingreso de la línea − gasto de Remuneraciones de esa línea. Si una línea restringida gasta más que su ingreso, el exceso se carga al saldo de Operación.</caption>
+      <thead><tr><th scope="col">Línea</th><th scope="col" class="num">Ingreso</th><th scope="col" class="num">Gasto Remuneraciones</th><th scope="col" class="num">Saldo propio</th><th scope="col" class="num">Exceso cargado a Operación</th></tr></thead>
+      <tbody>${filas}</tbody></table>
+    <div class="plan-nota" id="ofjsnota-${sufijo}">Saldo de Operación para B&S = Ingreso Operación − Gasto Rem. Operación − exceso de líneas restringidas − B&S: <strong id="ofjs-op-${sufijo}"${col(sa.saldoOperacionBys)}>${fmtCLP(sa.saldoOperacionBys)}</strong>.</div>
+  </div>`;
+}
+function actualizarSaldosJunjiEnModal(rbd, fuenteKey, of) {
+  if (!document.getElementById(`ofjsaldos-${rbd}-${fuenteKey}`)) return;
+  const sa = saldosLineasJunji(of);
+  const sufijo = `${rbd}-${fuenteKey}`;
+  const poner = (id, txt, neg) => { const el = document.getElementById(id); if (!el) return; if (el.textContent !== txt) el.textContent = txt; if (neg !== undefined) el.style.color = neg ? 'var(--status-critical)' : ''; };
+  sa.lineas.forEach((l, i) => {
+    poner(`ofjs-${i}-ing-${sufijo}`, fmtCLP(l.ingresoTotal));
+    poner(`ofjs-${i}-gas-${sufijo}`, fmtCLP(l.gastoTotal));
+    poner(`ofjs-${i}-sal-${sufijo}`, fmtCLP(l.saldo), l.saldo < 0);
+    poner(`ofjs-${i}-exc-${sufijo}`, l.restringida ? fmtCLP(l.exceso) : '—');
+  });
+  poner(`ofjs-op-${sufijo}`, fmtCLP(sa.saldoOperacionBys), sa.saldoOperacionBys < 0);
+}
+
 function buildOtrasFuentesDetalleHTML(rbd, fuenteKey) {
   const of = recomputeOtraFuente(rbd, fuenteKey);
   const fuente = FUENTES_OTRAS_BY_KEY[fuenteKey];
@@ -6861,13 +6935,14 @@ function buildOtrasFuentesDetalleHTML(rbd, fuenteKey) {
 
   let headerHTML, tablasMesesHTML;
   if (fuente.incomeShape === 'junji3') {
-    headerHTML = `<strong>Ingresos ${fuenteLabel}</strong> — <span class="detalle-sub">Operación financia Remuneraciones y Bienes y Servicios; Homologación, Carrera Docente y BDL financian solo Remuneraciones. Los honorarios (Subt. 21) son gasto de personal: se financian como las Remuneraciones y no entran en el saldo de Operación para B&S.</span>`;
+    headerHTML = `<strong>Ingresos ${fuenteLabel}</strong> — <span class="detalle-sub">Operación financia Remuneraciones y Bienes y Servicios; Homologación, Carrera Docente Parvularia y BDL financian solo Remuneraciones. El gasto de Remuneraciones se registra por línea (Operación, Homologación, Carrera Docente Parvularia y BDL); si una línea restringida gasta más que su ingreso, el exceso se carga a Operación. Los honorarios (Subt. 21) son gasto de personal: se financian como las Remuneraciones y no entran en el saldo de Operación para B&S.</span>`;
     tablasMesesHTML = `
     ${otrasFuentesTablaMes('Ingreso Operación', rbd, fuenteKey, 'of_ingreso_operacion', of.ingreso_operacion, `oftotal-${rbd}-${fuenteKey}-of_ingreso_operacion`)}
     ${otrasFuentesTablaMes('Ingreso Homologación', rbd, fuenteKey, 'of_ingreso_homologacion', of.ingreso_homologacion, `oftotal-${rbd}-${fuenteKey}-of_ingreso_homologacion`)}
-    ${otrasFuentesTablaMes('Ingreso Carrera Docente', rbd, fuenteKey, 'of_ingreso_carrera_docente', of.ingreso_carrera_docente, `oftotal-${rbd}-${fuenteKey}-of_ingreso_carrera_docente`)}
+    ${otrasFuentesTablaMes('Ingreso Carrera Docente Parvularia', rbd, fuenteKey, 'of_ingreso_carrera_docente', of.ingreso_carrera_docente, `oftotal-${rbd}-${fuenteKey}-of_ingreso_carrera_docente`)}
     ${otrasFuentesTablaMes('Ingreso Bono Desempeño Laboral (BDL)', rbd, fuenteKey, 'of_ingreso_bdl', of.ingreso_bdl, `oftotal-${rbd}-${fuenteKey}-of_ingreso_bdl`)}
-    ${otrasFuentesTablaMes('Gasto Remuneraciones', rbd, fuenteKey, 'of_gasto_rem', of.gasto_rem, `oftotal-${rbd}-${fuenteKey}-of_gasto_rem`)}`;
+    ${JUNJI_REM_LINEAS.map(l => otrasFuentesTablaMes(l.titulo, rbd, fuenteKey, l.modo, of[l.campo], `oftotal-${rbd}-${fuenteKey}-${l.modo}`)).join('')}
+    ${saldosJunjiHTML(rbd, fuenteKey, of)}`;
   } else if (fuente.incomeShape === 'llmm3') {
     headerHTML = `<strong>Detalle por mes — Recuperación de Licencias Médicas</strong> — <span class="detalle-sub">Esta fuente registra exclusivamente ingresos; no tiene gastos asociados.</span>`;
     tablasMesesHTML = `
@@ -6978,6 +7053,10 @@ function renderOtrasFuentesModalContenido(opts) {
 const OTRA_FUENTE_MODO_CAMPO = {
   of_ingreso: 'ingreso',
   of_gasto_rem: 'gasto_rem',
+  of_gasto_rem_operacion: 'gasto_rem_operacion',
+  of_gasto_rem_homologacion: 'gasto_rem_homologacion',
+  of_gasto_rem_carrera_docente: 'gasto_rem_carrera_docente',
+  of_gasto_rem_bdl: 'gasto_rem_bdl',
   of_ingreso_operacion: 'ingreso_operacion',
   of_ingreso_homologacion: 'ingreso_homologacion',
   of_ingreso_carrera_docente: 'ingreso_carrera_docente',
@@ -7038,7 +7117,7 @@ function onOtraFuenteCeldaInput(input) {
     recomputeOtraFuente(rbd, fuenteKey);
     scheduleRbdSave(rbd, { nombre: reg ? reg.nombre : rbd, otras_fuentes: { [fuenteKey]: { [campo]: { meses: { [mes]: val }, total: bucket.total } } } });
   }
-  if (otrasFuentesRbdAbierto === rbd) { actualizarOtrasFuentesModalSubtitle(of, fuenteKey); actualizarBysResumenConceptoEnModal(rbd, fuenteKey, of); }
+  if (otrasFuentesRbdAbierto === rbd) { actualizarOtrasFuentesModalSubtitle(of, fuenteKey); actualizarBysResumenConceptoEnModal(rbd, fuenteKey, of); actualizarSaldosJunjiEnModal(rbd, fuenteKey, of); }
   renderOtrasFuentesTable();
 }
 window.onOtraFuenteCeldaInput = onOtraFuenteCeldaInput;
@@ -7447,8 +7526,9 @@ function buildOtraFuenteCargaWorkbook(fuenteKey, onlyRbd) {
   if (fuente.incomeShape === 'junji3') {
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso_operacion', onlyRbd)), 'ING_OPERACION');
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso_homologacion', onlyRbd)), 'ING_HOMOLOGACION');
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso_carrera_docente', onlyRbd)), 'ING_CARRERA_DOCENTE');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso_carrera_docente', onlyRbd)), 'ING_CARRERA_DOCENTE_PARVULARIA'); // antes ING_CARRERA_DOCENTE: la importación sigue aceptando el nombre anterior
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso_bdl', onlyRbd)), 'ING_BDL');
+    JUNJI_REM_LINEAS.forEach(l => XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, l.campo, onlyRbd)), l.sheet)); // Remuneraciones por línea
   } else if (fuente.incomeShape === 'llmm3') {
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso_llmm_isapres', onlyRbd)), 'ING_LLMM_ISAPRES');
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso_llmm_fonasa', onlyRbd)), 'ING_LLMM_FONASA');
@@ -7457,7 +7537,7 @@ function buildOtraFuenteCargaWorkbook(fuenteKey, onlyRbd) {
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso', onlyRbd)), 'INGRESO');
     if (fuente.incomeShape === 'carrera2') XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'ingreso_carrera_docente', onlyRbd)), 'ING_CARRERA_DOCENTE');
   }
-  if (!fuente.sinGasto) XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'gasto_rem', onlyRbd)), 'REMUNERACIONES');
+  if (!fuente.sinGasto && fuente.incomeShape !== 'junji3') XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOtraFuenteSimpleAOA(fuenteKey, 'gasto_rem', onlyRbd)), 'REMUNERACIONES'); // JUNJI trae las 4 hojas REM_*
   if (fuente.sinGasto || fuente.bysMode === 'none') {
     // Sin B&S: solo las hojas de honorarios (la fuente sin gasto no las lleva).
     if (!fuente.sinGasto) {
@@ -7779,7 +7859,9 @@ function importOtraFuenteWorkbook(wbIn, fuenteKey) {
   if (fuente.incomeShape === 'junji3') {
     if (wbIn.Sheets['ING_OPERACION']) resumen.push('ING_OPERACION: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_OPERACION'], fuenteKey, 'ingreso_operacion') + ' filas');
     if (wbIn.Sheets['ING_HOMOLOGACION']) resumen.push('ING_HOMOLOGACION: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_HOMOLOGACION'], fuenteKey, 'ingreso_homologacion') + ' filas');
-    if (wbIn.Sheets['ING_CARRERA_DOCENTE']) resumen.push('ING_CARRERA_DOCENTE: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_CARRERA_DOCENTE'], fuenteKey, 'ingreso_carrera_docente') + ' filas');
+    // «Carrera Docente Parvularia»: la hoja nueva manda; un Excel anterior trae ING_CARRERA_DOCENTE (se aplica solo si no viene la nueva).
+    const hojaCD = wbIn.Sheets['ING_CARRERA_DOCENTE_PARVULARIA'] ? 'ING_CARRERA_DOCENTE_PARVULARIA' : (wbIn.Sheets['ING_CARRERA_DOCENTE'] ? 'ING_CARRERA_DOCENTE' : null);
+    if (hojaCD) resumen.push(hojaCD + ': ' + importOtraFuenteSimpleSheet(wbIn.Sheets[hojaCD], fuenteKey, 'ingreso_carrera_docente') + ' filas');
     if (wbIn.Sheets['ING_BDL']) resumen.push('ING_BDL: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_BDL'], fuenteKey, 'ingreso_bdl') + ' filas'); // un Excel anterior al BDL no trae la hoja: se importa igual y no toca el BDL guardado
   } else if (fuente.incomeShape === 'llmm3') {
     if (wbIn.Sheets['ING_LLMM_ISAPRES']) resumen.push('ING_LLMM_ISAPRES: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_LLMM_ISAPRES'], fuenteKey, 'ingreso_llmm_isapres') + ' filas');
@@ -7789,7 +7871,11 @@ function importOtraFuenteWorkbook(wbIn, fuenteKey) {
     if (wbIn.Sheets['INGRESO']) resumen.push('INGRESO: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['INGRESO'], fuenteKey, 'ingreso') + ' filas');
     if (fuente.incomeShape === 'carrera2' && wbIn.Sheets['ING_CARRERA_DOCENTE']) resumen.push('ING_CARRERA_DOCENTE: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_CARRERA_DOCENTE'], fuenteKey, 'ingreso_carrera_docente') + ' filas');
   }
-  if (!fuente.sinGasto && wbIn.Sheets['REMUNERACIONES']) resumen.push('REMUNERACIONES: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['REMUNERACIONES'], fuenteKey, 'gasto_rem') + ' filas');
+  if (!fuente.sinGasto && fuente.incomeShape === 'junji3') {
+    // JUNJI: un Excel anterior trae una sola hoja REMUNERACIONES, que pasa a la línea Operación (como lo ya cargado); si además trae hojas REM_*, estas mandan (se aplican después).
+    if (wbIn.Sheets['REMUNERACIONES']) resumen.push('REMUNERACIONES (→ Operación): ' + importOtraFuenteSimpleSheet(wbIn.Sheets['REMUNERACIONES'], fuenteKey, 'gasto_rem_operacion') + ' filas');
+    JUNJI_REM_LINEAS.forEach(l => { if (wbIn.Sheets[l.sheet]) resumen.push(l.sheet + ': ' + importOtraFuenteSimpleSheet(wbIn.Sheets[l.sheet], fuenteKey, l.campo) + ' filas'); });
+  } else if (!fuente.sinGasto && wbIn.Sheets['REMUNERACIONES']) resumen.push('REMUNERACIONES: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['REMUNERACIONES'], fuenteKey, 'gasto_rem') + ' filas');
   if (fuente.sinGasto || fuente.bysMode === 'none') {
     // Sin B&S: solo se leen las hojas de honorarios (la fuente sin gasto no las lleva).
     if (!fuente.sinGasto) {
@@ -7866,7 +7952,7 @@ function csvDetalleMensualOtraFuenteLines(fuenteKey, rbd) {
   if (fuente.incomeShape === 'junji3') {
     push(fila('Ingreso Operación', tipoPorCorte, of.ingreso_operacion));
     push(fila('Ingreso Homologación', tipoPorCorte, of.ingreso_homologacion));
-    push(fila('Ingreso Carrera Docente', tipoPorCorte, of.ingreso_carrera_docente));
+    push(fila('Ingreso Carrera Docente Parvularia', tipoPorCorte, of.ingreso_carrera_docente));
     push(fila('Ingreso Bono Desempeño Laboral (BDL)', tipoPorCorte, of.ingreso_bdl));
   } else if (fuente.incomeShape === 'llmm3') {
     push(fila('Recuperación LLMM Isapres', tipoPorCorte, of.ingreso_llmm_isapres));
@@ -7875,7 +7961,8 @@ function csvDetalleMensualOtraFuenteLines(fuenteKey, rbd) {
   } else {
     push(fila('Ingreso', tipoPorCorte, of.ingreso));
   }
-  if (!fuente.sinGasto) push(fila('Gasto Remuneraciones', tipoPorCorte, of.gasto_rem));
+  if (fuente.incomeShape === 'junji3') JUNJI_REM_LINEAS.forEach(l => push(fila(l.titulo, tipoPorCorte, of[l.campo]))); // 4 líneas (la suma es el «Gasto Remuneraciones» de la entidad)
+  else if (!fuente.sinGasto) push(fila('Gasto Remuneraciones', tipoPorCorte, of.gasto_rem));
   // Honorarios (Subt. 21): boletas por cuenta/concepto (siempre Real) y proyección (siempre Proyectado); N° DC, RUT y nombre del prestador nunca van en este CSV.
   ((of.hon_agregado && of.hon_agregado.items) || []).forEach(it => push(fila(`Honorarios boletas - ${!honPorConcepto(fuente.key) ? `${it.codigo} ${it.item}` : it.concepto}`, 'Real', it)));
   ((of.hon_proy && of.hon_proy.items) || []).forEach(it => push(fila(`Honorarios proyeccion - ${!honPorConcepto(fuente.key) ? (HON_CUENTAS_BY_CODIGO[it.codigo] ? `${it.codigo} ${HON_CUENTAS_BY_CODIGO[it.codigo].nombre}` : it.codigo) : it.concepto}`, 'Proyectado', it)));
@@ -7897,6 +7984,11 @@ function csvDetalleMensualOtraFuenteLines(fuenteKey, rbd) {
     push([`Gasto ${etiqueta}`, etiqueta, ...vacios, b.gasto]);
     push([`Saldo ${etiqueta}`, etiqueta, ...vacios, b.saldo]);
   });
+  if (fuente.incomeShape === 'junji3') {
+    const sa = saldosLineasJunji(of);
+    sa.lineas.filter(l => l.restringida).forEach(l => push([`Saldo propio ${l.corto}`, 'Total (Real+Proyectado)', ...vacios, Math.round(l.saldo)]));
+    push(['Saldo Operación para B&S', 'Total (Real+Proyectado)', ...vacios, Math.round(sa.saldoOperacionBys)]);
+  }
   push(['Estado (Total)', 'Total (Real+Proyectado)', ...vacios, estadoLabel[of.estado]]);
   push(['Real hasta', '', ...vacios, MESES_CARGA_TITLE[corte - 1]]);
   return lines;
@@ -7931,6 +8023,13 @@ function tablaMesesEstaticaHTML(titulo, filas, corte, forzarProy) {
       <thead><tr><th>${escHtml(titulo)}</th>${mesHeaderCellsCorteHTML(corte, forzarProy)}<th class="num">Total</th></tr></thead>
       <tbody>${cuerpo}</tbody></table>`;
 }
+// JUNJI, PDF de la entidad: la misma tabla «Saldos por línea» del modal, sin ids.
+function saldosJunjiPrintHTML(of) {
+  const sa = saldosLineasJunji(of);
+  const filas = sa.lineas.map(l => `<tr><td class="item-label">${escHtml(l.corto)}</td><td class="num">${fmtCLP(l.ingresoTotal)}</td><td class="num">${fmtCLP(l.gastoTotal)}</td><td class="num">${fmtCLP(l.saldo)}</td><td class="num">${l.restringida ? fmtCLP(l.exceso) : '—'}</td></tr>`).join('');
+  return `<table class="detalle-table" style="margin-top:8px;"><thead><tr><th>Saldos por línea (Total)</th><th class="num">Ingreso</th><th class="num">Gasto Remuneraciones</th><th class="num">Saldo propio</th><th class="num">Exceso cargado a Operación</th></tr></thead><tbody>${filas}</tbody></table>
+    <div class="detalle-sub" style="margin-top:6px;">Saldo de Operación para B&S = Ingreso Operación − Gasto Rem. Operación − exceso de líneas restringidas − B&S: <strong>${fmtCLP(sa.saldoOperacionBys)}</strong></div>`;
+}
 function buildOtraFuenteEntidadPrintHTML(rbd, fuenteKey) {
   const fuente = FUENTES_OTRAS_BY_KEY[fuenteKey];
   const r = filasOtrasFuentes(fuenteKey).find(x => x.rbd === rbd);
@@ -7944,7 +8043,7 @@ function buildOtraFuenteEntidadPrintHTML(rbd, fuenteKey) {
     return kpiCardsHTML(cards);
   };
   const tablasIngreso = fuente.incomeShape === 'junji3'
-    ? [['Ingreso Operación', of.ingreso_operacion], ['Ingreso Homologación', of.ingreso_homologacion], ['Ingreso Carrera Docente', of.ingreso_carrera_docente], ['Ingreso Bono Desempeño Laboral (BDL)', of.ingreso_bdl]]
+    ? [['Ingreso Operación', of.ingreso_operacion], ['Ingreso Homologación', of.ingreso_homologacion], ['Ingreso Carrera Docente Parvularia', of.ingreso_carrera_docente], ['Ingreso Bono Desempeño Laboral (BDL)', of.ingreso_bdl]]
     : fuente.incomeShape === 'llmm3'
       ? [['Recuperación LLMM Isapres', of.ingreso_llmm_isapres], ['Recuperación LLMM FONASA', of.ingreso_llmm_fonasa], ['Recuperación LLMM SIL', of.ingreso_llmm_sil]]
       : fuente.incomeShape === 'carrera2'
@@ -7989,7 +8088,9 @@ function buildOtraFuenteEntidadPrintHTML(rbd, fuenteKey) {
     <div class="kpi-section-label">Total (Real + Proyectado)</div>
     <div class="kpi-row of-kpi-row" style="margin-bottom:10px;">${kpis('total')}</div>
     ${tablasIngreso.map(([titulo, obj]) => tablaMesesEstaticaHTML(titulo, [{ label: titulo, obj }], corte, false)).join('')}
-    ${fuente.sinGasto ? '' : tablaMesesEstaticaHTML('Gasto Remuneraciones', [{ label: 'Gasto Remuneraciones', obj: of.gasto_rem }], corte, false)}
+    ${fuente.sinGasto ? '' : fuente.incomeShape === 'junji3'
+      ? JUNJI_REM_LINEAS.map(l => tablaMesesEstaticaHTML(l.titulo, [{ label: l.titulo, obj: of[l.campo] }], corte, false)).join('') + saldosJunjiPrintHTML(of)
+      : tablaMesesEstaticaHTML('Gasto Remuneraciones', [{ label: 'Gasto Remuneraciones', obj: of.gasto_rem }], corte, false)}
     ${fuente.sinGasto ? '' : honSectionHTML(ctxHonOtraFuente(fuenteKey, rbd), true)}
     ${bysHTML}
     ${fuenteKey === 'general' ? fondosFijosEnGeneralHTML(rbd) : ''}`;
@@ -8638,14 +8739,15 @@ function reporteLineasOtraFuente(fuenteKey, sel) {
     const of = recomputeOtraFuente(r.rbd, fuenteKey);
     const corte = realHastaMesOtraFuente(of);
     const lineasIng = f.incomeShape === 'junji3'
-      ? [['Ingreso Operación', of.ingreso_operacion], ['Ingreso Homologación', of.ingreso_homologacion], ['Ingreso Carrera Docente', of.ingreso_carrera_docente], ['Ingreso Bono Desempeño Laboral (BDL)', of.ingreso_bdl]]
+      ? [['Ingreso Operación', of.ingreso_operacion], ['Ingreso Homologación', of.ingreso_homologacion], ['Ingreso Carrera Docente Parvularia', of.ingreso_carrera_docente], ['Ingreso Bono Desempeño Laboral (BDL)', of.ingreso_bdl]]
       : f.incomeShape === 'llmm3'
         ? [['Recuperación LLMM Isapres', of.ingreso_llmm_isapres], ['Recuperación LLMM FONASA', of.ingreso_llmm_fonasa], ['Recuperación LLMM SIL', of.ingreso_llmm_sil]]
         : f.incomeShape === 'carrera2'
           ? [['Ingreso', of.ingreso], ['Ingreso Carrera Docente', of.ingreso_carrera_docente]]
           : [['Ingreso', of.ingreso]];
     lineasIng.forEach(([nombre, l]) => vzSumar(mapa, { fuenteKey, tipo: 'ingreso', grupo: 'ingreso', concepto: nombre }, l && l.meses, corte));
-    vzSumar(mapa, { fuenteKey, tipo: 'gasto', grupo: 'rem', concepto: 'Remuneraciones' }, of.gasto_rem && of.gasto_rem.meses, corte);
+    if (f.incomeShape === 'junji3') JUNJI_REM_LINEAS.forEach(l => vzSumar(mapa, { fuenteKey, tipo: 'gasto', grupo: 'rem', concepto: l.titulo }, of[l.campo] && of[l.campo].meses, corte)); // JUNJI: una línea por cada gasto de Remuneraciones
+    else vzSumar(mapa, { fuenteKey, tipo: 'gasto', grupo: 'rem', concepto: 'Remuneraciones' }, of.gasto_rem && of.gasto_rem.meses, corte);
     // Honorarios (Subt. 21): tercera serie del gasto. Boletas por cuenta (o por concepto; siempre reales) y proyección (siempre proyectada).
     ((of.hon_agregado && of.hon_agregado.items) || []).forEach(it => vzSumar(mapa, { fuenteKey, tipo: 'gasto', grupo: 'hon', subt: '21', codigo: it.codigo || '', concepto: it.item }, it.meses, 'real'));
     ((of.hon_proy && of.hon_proy.items) || []).forEach(it => vzSumar(mapa, { fuenteKey, tipo: 'gasto', grupo: 'hon_proy', subt: '21', codigo: it.codigo || '', concepto: it.concepto !== undefined ? it.concepto : (HON_CUENTAS_BY_CODIGO[it.codigo] || { nombre: it.codigo }).nombre }, it.meses, 'proy'));
@@ -8739,7 +8841,7 @@ function vzArbolPorCodigo(tipo, lineas) {
     const n = vzNodo(id, label, { csv: { fuente: 'CONSOLIDADO', subcat: vzSubcat(grupoLineas[0]), codigo: grupoLineas[0].codigo || '', concepto: grupoLineas[0].concepto } });
     const hijos = porFuente.map(l => {
       const f = VZ_FUENTE_BY_KEY[l.fuenteKey];
-      return vzHoja(`${id}|f:${l.fuenteKey}`, `${f.icono} ${f.label}`, l, { csv: vzCsvInfo(l, f.label), esFuente: true });
+      return vzHoja(`${id}|f:${l.fuenteKey}`, `${f.icono} ${f.label}${l.grupo === 'rem' && l.concepto !== 'Remuneraciones' ? ' — ' + l.concepto : ''}`, l, { csv: vzCsvInfo(l, f.label), esFuente: true });
     });
     return vzPadre(n, hijos);
   };
@@ -9228,7 +9330,7 @@ function reporteConceptosFuente(f) {
   if (f.incomeShape === 'junji3') {
     add('ingreso_operacion', 'Ingreso Operación');
     add('ingreso_homologacion', 'Ingreso Homologación');
-    add('ingreso_carrera_docente', 'Ingreso Carrera Docente');
+    add('ingreso_carrera_docente', 'Ingreso Carrera Docente Parvularia');
     add('ingreso_bdl', 'Ingreso Bono Desempeño Laboral (BDL)');
   } else if (f.incomeShape === 'llmm3') {
     add('ingreso_llmm_isapres', 'Recuperación LLMM Isapres');
@@ -9239,7 +9341,8 @@ function reporteConceptosFuente(f) {
     if (f.incomeShape === 'carrera2') add('ingreso_carrera_docente', 'Ingreso Carrera Docente'); // General y PIE
   }
   if (f.sinGasto) return out; // fuente solo de ingresos: sin remuneraciones, honorarios ni B&S
-  add('rem', 'Remuneraciones');
+  add('rem', f.incomeShape === 'junji3' ? 'Remuneraciones — total (suma de las 4 líneas)' : 'Remuneraciones');
+  if (f.incomeShape === 'junji3') JUNJI_REM_LINEAS.forEach(l => add(l.campo, l.titulo));
   add('hon', 'Honorarios (Subt. 21) — boletas');
   add('hon_proy', 'Honorarios (Proyección) — total');
   if (f.bysMode === 'none') {
@@ -9295,6 +9398,7 @@ function serieConceptoOF(rbd, key) {
     case 'ingreso_llmm_fonasa': return of.ingreso_llmm_fonasa ? of.ingreso_llmm_fonasa.meses : {};
     case 'ingreso_llmm_sil': return of.ingreso_llmm_sil ? of.ingreso_llmm_sil.meses : {};
     case 'rem': return of.gasto_rem ? of.gasto_rem.meses : {};
+    case 'gasto_rem_operacion': case 'gasto_rem_homologacion': case 'gasto_rem_carrera_docente': case 'gasto_rem_bdl': return of[tipo] ? of[tipo].meses : {};
     case 'hon': return sumaItemsMeses(honItems);                          // boletas de honorarios (siempre reales)
     case 'hon_proy': return sumaItemsMeses(honProyItems);                 // proyección de honorarios (siempre proyectada)
     case 'hon_item': { const it = honItems.find(x => claveHon(x) === arg); return it ? it.meses : {}; }
@@ -11278,6 +11382,14 @@ function aplicarSnapshot(snapshot) {
           entry.ingreso_homologacion = { meses: mHomologacion, total: totalDeMeses(mHomologacion) };
           entry.ingreso_carrera_docente = { meses: mCarreraDocente, total: totalDeMeses(mCarreraDocente) };
           entry.ingreso_bdl = { meses: mBdl, total: totalDeMeses(mBdl) };
+          // Gasto de Remuneraciones en 4 líneas. Operación se lee MES A MES: si el mes está en `gasto_rem_operacion` (número válido) manda ese; si no, se usa el mes del campo antiguo
+          // `gasto_rem` (documentos anteriores a la división, o un cliente viejo que sigue escribiéndolo). Nunca se suman ambos (no se dobla el gasto) y leer no escribe nada.
+          // Las otras 3 líneas parten en $0; un valor dañado vale 0 y no tumba el documento.
+          const remOpRaw = objetoPlano(objetoPlano(raw.gasto_rem_operacion).meses), remAntRaw = objetoPlano(objetoPlano(raw.gasto_rem).meses);
+          const mRemOp = {};
+          MESES_CARGA.forEach(k => { mRemOp[k] = (typeof remOpRaw[k] === 'number' && Number.isFinite(remOpRaw[k])) ? remOpRaw[k] : num(remAntRaw[k]); });
+          entry.gasto_rem_operacion = { meses: mRemOp, total: totalDeMeses(mRemOp) };
+          JUNJI_REM_LINEAS.slice(1).forEach(l => { const m = mesesDesde(raw, l.campo); entry[l.campo] = { meses: m, total: totalDeMeses(m) }; });
           entry.saldo_operacion_bys = 0;
         } else if (f.incomeShape === 'llmm3') {
           const mIsapres = mesesDesde(raw, 'ingreso_llmm_isapres');
@@ -11294,8 +11406,8 @@ function aplicarSnapshot(snapshot) {
             entry.ingreso_carrera_docente = { meses: mCarreraDocente, total: totalDeMeses(mCarreraDocente) };
           }
         }
-        const mRem = mesesDesde(raw, 'gasto_rem');
-        entry.gasto_rem = { meses: mRem, total: totalDeMeses(mRem) };
+        if (f.incomeShape === 'junji3') sincronizarRemJunji(entry); // JUNJI: gasto_rem = suma de sus 4 líneas (ver arriba)
+        else { const mRem = mesesDesde(raw, 'gasto_rem'); entry.gasto_rem = { meses: mRem, total: totalDeMeses(mRem) }; }
         const parseItemsConcepto = (rawItems) => Object.values(objetoPlano(rawItems)).filter(it => it && typeof it === 'object').map(it => {
           const meses = mesesNum(it.meses);
           return { concepto: textoSeguro(it.concepto), meses, total: totalDeMeses(meses) };
