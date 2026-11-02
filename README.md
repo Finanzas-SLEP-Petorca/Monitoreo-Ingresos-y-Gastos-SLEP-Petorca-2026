@@ -45,7 +45,7 @@ hacia abajo. A 1440 px o más el diseño es el mismo de siempre.
 La pestaña **% Ejecución** tiene una fila de botones para elegir la fuente: **SEP** (comportamiento de
 siempre, contra la meta 70/30), las fuentes con gasto (11 de las 12: **Recuperación LLMM**, que es solo de ingresos, no tiene serie de ejecución) y **Consolidado** (SEP + las 12). Para las fuentes que no son
 SEP no hay meta ni techo, así que el % de ejecución se define **sobre el Ingreso anual Total (Real+Proy)** de
-la selección (suma de sus líneas de ingreso: 4 en JUNJI —Operación, Homologación, Carrera Docente y BDL—, 2 en General y PIE —Ingreso + Ingreso Carrera Docente—):
+la selección (suma de sus líneas de ingreso: 4 en JUNJI —Operación, Homologación, Carrera Docente Parvularia y BDL—, 2 en General y PIE —Ingreso + Ingreso Carrera Docente—):
 
 - % Ejec. Remuneraciones acumulado = Σ gasto en Remuneraciones hasta el mes / Ingreso anual Total.
 - % Ejec. B&S acumulado = Σ gasto en Bienes y Servicios hasta el mes / Ingreso anual Total.
@@ -414,8 +414,9 @@ El mismo bloque «Honorarios (Subt. 21)» de SEP (fila mensual de boletas siempr
 
 - **No hay 70/30 en las fuentes**: `gasto total = remuneraciones + honorarios + B&S` (Asignación Familiar: remuneraciones + honorarios), y el saldo y el Estado (Déficit ⇔ saldo < 0)
   los incluyen. Las boletas son siempre **Real** (mes = Fecha Documento, sin importar el «Real hasta» de la entidad) y la proyección siempre **Proyectada**, y se SUMA a las boletas.
-- **JUNJI**: los honorarios son gasto de personal; entran en el saldo total y el Estado pero **no** en el saldo de Operación para B&S (`saldo_operacion_bys = ingreso de Operación − B&S`), igual que las
-  Remuneraciones; el BDL, la Homologación y la Carrera Docente tampoco se descuentan ahí.
+- **JUNJI**: los honorarios son gasto de personal; entran en el saldo total y el Estado pero **no** en el saldo de Operación para B&S (`saldo_operacion_bys`, ver «Gasto de Remuneraciones de JUNJI en 4 líneas»), igual que las
+  Remuneraciones; el BDL, la Homologación y la Carrera Docente Parvularia tampoco se descuentan ahí. Desde la división del gasto de Remuneraciones en 4 líneas,
+  `saldo_operacion_bys = ingreso de Operación − Gasto Rem. Operación − exceso de las líneas restringidas − B&S` (los honorarios siguen sin entrar).
 - **Tipos de honorarios en las compras**: ya no son opción del selector de compras de ninguna fuente. Una compra antigua con esos tipos (por cuenta o por concepto) sigue sumando en B&S y
   muestra «⚠ muévelo a Honorarios»; no hay botón de migración.
 - **Vistas**: tarjeta «Gasto Honorarios» (Real / Proyectado / Total) y columna «Gasto Honorarios (Subt. 21)» en la tabla de cada fuente (también Subt. 31 y Asignación Familiar); el Panel principal
@@ -560,7 +561,7 @@ celda, ahora para **SEP y las 12 fuentes de financiamiento**:
   chips de fuente encima del buscador (solo filtran qué grupos se ven, no lo seleccionado). Los de
   SEP conservan sus keys y etiquetas de siempre (3 ingresos SEP, Remuneraciones, cada ítem de
   compras Subt.22/29, la proyección de B&S total y por ítem). Los de las fuentes llevan prefijo
-  `[Fuente]`: Ingreso (o las 4 líneas de JUNJI: Operación, Homologación, Carrera Docente y «Ingreso Bono Desempeño Laboral (BDL)»; «Ingreso Carrera Docente» en General y PIE; las 3 líneas de Recuperación LLMM,
+  `[Fuente]`: Ingreso (o las 4 líneas de JUNJI: Operación, Homologación, Carrera Docente Parvularia y «Ingreso Bono Desempeño Laboral (BDL)», más sus 4 líneas de Remuneración; «Ingreso Carrera Docente» en General y PIE; las 3 líneas de Recuperación LLMM,
   que no ofrece nada más), Remuneraciones, Bienes y Servicios total
   (Real+Proy) y, en las fuentes con compras, Proyección de B&S total; además, **dinámicos** (solo si
   hay datos): B&S por código de cuenta (compras), B&S por concepto libre y proyección de B&S por
@@ -651,10 +652,31 @@ Exportaciones: el Excel trae la hoja `COMPRAS` con la columna `Concepto` en vez 
 (`ctxComprasOtraFuente`) para que Honorarios (PR-3) reutilice el formulario y la tabla en estas fuentes.
 
 **JUNJI** (`incomeShape:'junji3'`, `bysMode:'concepto'`): Operación financia Remuneraciones y
-Bienes y Servicios; Homologación, Carrera Docente y Bono Desempeño Laboral (BDL) financian solo Remuneraciones — el modal
-muestra un "Saldo Operación disponible para B&S" (Operación − gasto de B&S; no bloquea la carga si se excede) y **ese saldo entra al Estado**: una
+Bienes y Servicios; Homologación, Carrera Docente Parvularia y Bono Desempeño Laboral (BDL) financian solo Remuneraciones — el modal
+muestra un "Saldo Operación disponible para B&S" (ver «Gasto de Remuneraciones en 4 líneas»; no bloquea la carga si se excede) y **ese saldo entra al Estado**: una
 entidad de JUNJI está en Déficit si su saldo total es negativo **o** si su saldo de Operación para B&S es negativo (B&S no puede pagarse con
 fondos solo-remuneraciones). La fila, el modal, "Atención" y el tooltip dicen la causa (ver "Estado de una entidad").
+
+**Gasto de Remuneraciones de JUNJI en 4 líneas** (a pedido del usuario, igual que los Ingresos): «Gasto Remuneraciones Operación», «…Homologación», «…Carrera Docente Parvularia» y «…BDL»
+(`JUNJI_REM_LINEAS`). Campos nuevos de `otras_fuentes.junji`, cada uno `{meses, total}`: `gasto_rem_operacion`, `gasto_rem_homologacion`, `gasto_rem_carrera_docente`, `gasto_rem_bdl` (claves de celda
+`of_gasto_rem_*`; los nombres siguen el patrón `ingreso_*`). La línea de ingreso `ingreso_carrera_docente` se **rotula «Ingreso Carrera Docente Parvularia»** solo en JUNJI (la clave interna no cambia; General y PIE
+conservan su «Ingreso Carrera Docente»).
+- **`of.gasto_rem` en memoria de JUNJI es DERIVADO**: la suma mensual de las 4 líneas (`sincronizarRemJunji`, al inicio de `computeRealProyOtraFuente`), así que todo lo que ya consumía `gasto_rem` (tarjetas, tabla,
+  Panel principal, % Ejecución, Visualizador, Reporte, «Atención») cuadra solo; Real/Proy se calcula por línea (redondeada a pesos) con el corte «Real hasta» de la entidad y se suma.
+- **Destino del campo `gasto_rem` antiguo (compatibilidad entre clientes)**: se conserva en Firestore como **respaldo de lectura de Operación, mes a mes**, y **ya no se escribe**. Al leer, cada mes de Operación
+  es el de `gasto_rem_operacion` si es un número válido y, si no, el de `gasto_rem`; **nunca se suman los dos** (no se dobla el gasto) y leer no escribe nada. Las otras 3 líneas parten en $0. Al guardar se
+  escribe solo la celda editada de su línea (`merge`): un 0 escrito en Operación gana al valor antiguo. Un cliente viejo en caché que siga escribiendo `gasto_rem` ve solo ese campo (no ve las líneas
+  nuevas); sus meses aparecen en Operación mientras `gasto_rem_operacion` no los tenga; si el mes ya está en el campo nuevo, manda este (el valor del cliente viejo se ignora). Un valor dañado vale 0 (o cae al mes antiguo en Operación) y no tumba el documento.
+- **Saldos** (`saldosLineasJunji`, sobre el Total Real+Proy): saldo propio de cada línea = ingreso − gasto de Remuneraciones de esa línea. Una línea restringida (Homologación, Carrera Docente Parvularia, BDL) que gasta
+  **más** que su ingreso carga el **exceso** a Operación (cada exceso se suma entero; no se reparte). **Saldo de Operación para B&S = Ingreso Operación − Gasto Rem. Operación − exceso de las restringidas − B&S
+  (sin documento + documentado)**. Los **honorarios no entran** (decisión de la PR #67, sin cambio): son gasto de personal, bajan el saldo total y el Estado, pero no se pagan con el saldo de Operación para B&S.
+  Como (saldo total − saldo de Operación) = Σ max(0, ingreso − gasto) de las restringidas − honorarios, un Déficit «solo por el saldo total» solo ocurre con honorarios.
+- **Estado** (regla única `estadoDeEntidad` + `causasDeficitOtraFuente`): Déficit si saldo total < 0 **o** saldo de Operación < 0. La causa (fila, tooltip, modal, «Atención», CSV de detalle y PDF) nombra las líneas que se
+  exceden («· exceso en Homologación, BDL»). El modal trae el cuadro «Saldos por línea» (ingreso, gasto, saldo propio y exceso cargado a Operación, con refresco en vivo).
+- **Excel de JUNJI**: hojas `ING_OPERACION`, `ING_HOMOLOGACION`, `ING_CARRERA_DOCENTE_PARVULARIA` (antes `ING_CARRERA_DOCENTE`), `ING_BDL`, `REM_OPERACION`, `REM_HOMOLOGACION`, `REM_CARRERA_DOCENTE_PARVULARIA`, `REM_BDL`
+  (ya no hay `REMUNERACIONES`). Importación con compatibilidad hacia atrás: un Excel anterior con `REMUNERACIONES` la lleva a Operación (si trae también `REM_*`, mandan estas) y uno con `ING_CARRERA_DOCENTE` se importa como
+  Carrera Docente Parvularia (si trae la hoja nueva, manda la nueva). CSV de detalle: 4 filas de Remuneración (sin la fila única) y filas «Saldo propio …» y «Saldo Operación para B&S». Reporte personalizado: el concepto
+  `[JUNJI] Remuneraciones — total (suma de las 4 líneas)` (`of|junji|rem`) más un concepto por línea (`of|junji|gasto_rem_*`); Visualizador: una línea de gasto por línea (grupo `rem`).
 
 **Línea «Ingreso Bono Desempeño Laboral (BDL)» de JUNJI** (cuarta línea de ingreso, a pedido del usuario): campo `otras_fuentes.junji.ingreso_bdl` (`{meses, total}`, como las otras
 tres), clave de la celda `of_ingreso_bdl`, hoja `ING_BDL` del Excel, fila «Ingreso Bono Desempeño Laboral (BDL)» del CSV de detalle y del PDF por entidad, y concepto

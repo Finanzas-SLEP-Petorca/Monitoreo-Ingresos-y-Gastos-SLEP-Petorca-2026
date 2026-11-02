@@ -74,7 +74,7 @@ await correrSpec('honorarios_fuentes_totales', async (t) => {
 
   // ================================================================ 2. JUNJI: los honorarios NO entran en el saldo de Operación para B&S
   const op = { '5401003': esp.junji.porId['5401003'], '5401005': esp.junji.porId['5401005'], '5401002': esp.junji.porId['5401002'] };
-  t.eq([op['5401003'].total.saldo, op['5401003'].saldoOp, op['5401003'].estado, op['5401003'].causas], [-600000, 1700000, 'deficit', ['saldo']], '5401003: honorarios 1.800.000 → saldo total -600.000 y Déficit SOLO por el saldo total (Operación − B&S = +1.700.000)');
+  t.eq([op['5401003'].total.saldo, op['5401003'].saldoOp, op['5401003'].estado, op['5401003'].causas], [-600000, 1200000, 'deficit', ['saldo']], '5401003: honorarios 1.800.000 → saldo total -600.000 y Déficit SOLO por el saldo total (Operación − B&S = +1.200.000 (Operación − Rem. Operación − B&S))');
   t.eq([op['5401005'].total.saldo, op['5401005'].saldoOp, op['5401005'].estado], [4800000, 600000, 'superavit'], '5401005: honorarios 700.000 financiados por Homologación: Superávit (si se descontaran de Operación daría -100.000 → Déficit)');
   t.eq([op['5401002'].saldoOp, op['5401002'].estado, op['5401002'].causas], [-500000, 'deficit', ['operacion_bys']], '5401002: los honorarios 1.000.000 no tocan el saldo de Operación (-500.000): Déficit solo por Operación');
   await clickTab(page, 'JUNJI');
@@ -126,7 +126,7 @@ await correrSpec('honorarios_fuentes_totales', async (t) => {
       t.ok(!malasT.length, 'la tabla «por fuente» tiene la columna «Honorarios (Subt. 21)» de cada fuente = cálculo independiente', malasT);
       // «Atención»: entidades en Déficit de cada fuente con su saldo (con los honorarios dentro)
       const at = await page.evaluate(() => Array.from(document.querySelectorAll('#dashAtencion li[data-atencion-rbd]')).map(li => ({ f: li.dataset.atencionFuente, id: li.dataset.atencionRbd, saldo: li.querySelector('.a-saldo').textContent.trim() })));
-      const malasA = at.filter(a => a.f !== 'sep' && (!esp[a.f].porId[a.id] || '▼ ' + clp(a.saldo.replace('▼ ', '')) !== '▼ ' + esp[a.f].porId[a.id].total.saldo || esp[a.f].porId[a.id].estado !== 'deficit')).map(a => `${a.f} ${a.id} ${a.saldo}`);
+      const malasA = at.filter(a => a.f !== 'sep' && (!esp[a.f].porId[a.id] || '▼ ' + clp(a.saldo.replace('▼ ', '')) !== '▼ ' + (esp[a.f].porId[a.id].estado === 'deficit' && esp[a.f].porId[a.id].total.saldo >= 0 && esp[a.f].porId[a.id].saldoOp !== null ? esp[a.f].porId[a.id].saldoOp : esp[a.f].porId[a.id].total.saldo) || esp[a.f].porId[a.id].estado !== 'deficit')).map(a => `${a.f} ${a.id} ${a.saldo}`);
       t.ok(!malasA.length, '«Atención» (Total): toda entidad de una fuente que aparece está en Déficit y con el saldo del cálculo independiente', malasA.slice(0, 4));
       const saldos = at.map(a => leerCLP(a.saldo));
       t.eq(saldos, saldos.slice().sort((x, y) => x - y), '«Atención»: ordenada por saldo, la más negativa primero');

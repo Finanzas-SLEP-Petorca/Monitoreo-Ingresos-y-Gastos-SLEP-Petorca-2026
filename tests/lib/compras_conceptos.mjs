@@ -8,6 +8,7 @@
 //   · lo documentado es SIEMPRE Real; los montos mensuales por concepto (`bys_items`, «sin documento») siguen el corte «Real hasta» de la entidad;
 //   · B&S de la entidad = sin documento + documentado; gasto = remuneraciones + B&S; saldo = ingreso − gasto; Déficit ⇔ saldo < 0 (JUNJI: o Operación − B&S < 0).
 import { MESES, FUENTES, idsDeUniverso, corteFuente, tituloEntidad } from './corte.mjs';
+import { remEfectivoDe, saldosJunjiDe } from './junji_rem.mjs';
 
 export const FUENTES_CONCEPTO = ['junji', 'faep', 'figa', 'aporte_educ', 'aporte_junji'];
 export const esConcepto = (key) => FUENTES_CONCEPTO.includes(key);
@@ -64,7 +65,7 @@ export function entidadDe(docs, id, key) {
   };
   const sum = (arr) => arr.reduce((a, p) => ({ real: a.real + p.real, proy: a.proy + p.proy }), { real: 0, proy: 0 });
   const ing = sum(lineas.map(parte));
-  const rem = parte(of.gasto_rem);
+  const rem = parte(key === 'junji' ? remEfectivoDe(of) : of.gasto_rem);
   const sin = sum(Object.values((of.bys_items && typeof of.bys_items === 'object') ? of.bys_items : {}).filter(it => it && typeof it === 'object').map(parte));
   const doc = documentadoDe(docs, id, key);
   const r = Math.round;
@@ -73,7 +74,7 @@ export function entidadDe(docs, id, key) {
   const proy = { ingreso: r(ing.proy), rem: r(rem.proy), bysDoc: 0, bysSin: bysSinProy, bys: bysSinProy };
   const total = { ingreso: real.ingreso + proy.ingreso, rem: real.rem + proy.rem, bysDoc, bysSin: bysSinReal + bysSinProy, bys: real.bys + proy.bys };
   [real, proy, total].forEach(b => { b.gasto = b.rem + b.bys; b.saldo = b.ingreso - b.gasto; });
-  const saldoOp = key === 'junji' ? r(sumaMeses(of.ingreso_operacion)) - total.bys : null;
+  const saldoOp = key === 'junji' ? saldosJunjiDe(of, total.bys).saldoOp : null;
   const causas = [];
   if (total.saldo < 0) causas.push('saldo');
   if (saldoOp !== null && saldoOp < 0) causas.push('operacion_bys');
@@ -107,7 +108,7 @@ export function serieMensualEsperada(docs, key, soloId = null) {
     const lineas = key === 'junji' ? [of.ingreso_operacion, of.ingreso_homologacion, of.ingreso_carrera_docente, of.ingreso_bdl] : [of.ingreso];
     const poner = (l, dst) => MESES.forEach((m, i) => { const v = num(l && l.meses && l.meses[m]); (i + 1 <= corte ? dst.real : dst.proy)[i] += v; });
     lineas.forEach(l => poner(l, out.ing));
-    poner(of.gasto_rem, out.rem);
+    poner(key === 'junji' ? remEfectivoDe(of) : of.gasto_rem, out.rem);
     Object.values((of.bys_items && typeof of.bys_items === 'object') ? of.bys_items : {}).filter(it => it && typeof it === 'object').forEach(it => poner(it, out.bys));
     documentadoDe(docs, id, key).porMes.forEach((v, i) => { out.bys.real[i] += v; });
   });

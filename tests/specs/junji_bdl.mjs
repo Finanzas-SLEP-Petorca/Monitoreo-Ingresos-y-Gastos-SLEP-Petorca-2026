@@ -1,6 +1,7 @@
 // «Ajustes de fuentes», cambio 2 — JUNJI: nueva línea de ingreso «Ingreso Bono Desempeño Laboral (BDL)» (campo ingreso_bdl, hoja Excel ING_BDL).
-// DECISIÓN DEL USUARIO: el BDL financia SOLO Remuneraciones, igual que Homologación y Carrera Docente: no puede pagar Bienes y Servicios, así que NO entra en el saldo de Operación para B&S
-// (Ingreso Operación − B&S); SÍ entra al ingreso total, a Real / Proyectado según el corte «Real hasta el mes» de la entidad, al Saldo y al Estado (Déficit si el saldo total < 0 o el saldo de
+// DECISIÓN DEL USUARIO: el BDL financia SOLO Remuneraciones, igual que Homologación y Carrera Docente Parvularia: no puede pagar Bienes y Servicios. Desde la división del gasto de Remuneraciones en
+// 4 líneas, el BDL financia SU línea «Gasto Remuneraciones BDL»: si esa línea gasta más que el BDL, el exceso se carga a Operación; el saldo de Operación para B&S es
+// Ingreso Operación − Gasto Rem. Operación − exceso − B&S (el BDL nunca paga B&S); SÍ entra al ingreso total, a Real / Proyectado según el corte «Real hasta el mes» de la entidad, al Saldo y al Estado (Déficit si el saldo total < 0 o el saldo de
 // Operación para B&S < 0, regla de la PR #63). El Aporte Fiscal Extraord. JUNJI (una sola línea) no cambia. Fixture `jardines` (BDL en varios jardines; ver generate.mjs) contra un cálculo INDEPENDIENTE.
 // Cubre: modal (4.ª tabla, ayuda, nombre accesible, Real/Proy), cifras por fila y KPI (Total / Real / Proyectado), el BDL fuera del saldo de Operación, Estado con BDL alto y con BDL que salva el saldo,
 // edición en vivo y guardado (merge de solo ese campo), Panel principal (tarjeta y franja = serie mensual), % Ejecución, Visualizador, Reporte personalizado, Excel exportar / importar (un Excel
@@ -12,6 +13,7 @@ import { capturarDescarga, leerXlsx, parseCsvPuntoYComa } from '../lib/capture-u
 import { MESES, GESPARVU_IDS, corteFuente, parseCLP, kpis, encabezadosMes, clon } from '../lib/corte.mjs';
 import { ETIQUETA, fuenteDe, filasFuente, leerDashboard } from '../lib/estado.mjs';
 import { libroXlsx, importarLibro } from '../lib/compras.mjs';
+import { remEfectivoDe, saldosJunjiDe } from '../lib/junji_rem.mjs';
 
 const RUTA = (id) => `sep_carga_rbd/${id}`;
 const BDL = 'Ingreso Bono Desempeño Laboral (BDL)';
@@ -28,11 +30,11 @@ function junji(docs, id, corteOv) {
   const items = Object.values(of.bys_items || {});
   const bloque = (d, h) => {
     const ing = Object.fromEntries(LINEAS.map(k => [k, sumaMeses(of[k], d, h)]));
-    const ingreso = LINEAS.reduce((s, k) => s + ing[k], 0), rem = sumaMeses(of.gasto_rem, d, h), bys = items.reduce((s, it) => s + sumaMeses(it, d, h), 0);
+    const ingreso = LINEAS.reduce((s, k) => s + ing[k], 0), rem = sumaMeses(remEfectivoDe(of), d, h), bys = items.reduce((s, it) => s + sumaMeses(it, d, h), 0);
     return { ing, ingreso, rem, bys, gasto: rem + bys, saldo: ingreso - rem - bys };
   };
   const total = bloque(1, 12);
-  return { corte, real: bloque(1, corte), proy: bloque(corte + 1, 12), total, saldoOp: total.ing.ingreso_operacion - total.bys, saldoOpConBdl: total.ing.ingreso_operacion + total.ing.ingreso_bdl - total.bys };
+  return { corte, real: bloque(1, corte), proy: bloque(corte + 1, 12), total, saldoOp: saldosJunjiDe(of, total.bys).saldoOp, saldoOpConBdl: saldosJunjiDe(of, total.bys).saldoOp + total.ing.ingreso_bdl };
 }
 const cifrasDe = (b) => [b.ingreso, b.rem, b.bys, b.gasto, b.saldo];
 const leerTabla = (page) => page.evaluate(() => Array.from(document.querySelectorAll('#otrasFuentesTbody-junji tr[data-rbd]')).map(tr => ({
@@ -61,7 +63,7 @@ await correrSpec('junji_bdl', async (t) => {
   const J = Object.fromEntries(GESPARVU_IDS.map(id => [id, junji(docs, id)]));
   t.eq([J['5402002'].total.ing.ingreso_bdl, J['5402002'].real.ing.ingreso_bdl, J['5402002'].proy.ing.ingreso_bdl], [1440000, 840000, 600000], 'oráculo: BDL de 5402002 = 1.440.000 (7 meses Real = 840.000, 5 Proyectados = 600.000)');
   t.eq([J['5401002'].total.saldo > 0, J['5401002'].saldoOp, fuenteDe(docs, '5401002', 'junji').causas], [true, -500000, ['operacion_bys']], 'oráculo: 5401002 (BDL alto) tiene saldo total positivo y saldo de Operación -500.000 → Déficit solo por Operación');
-  t.eq([J['5403002'].total.saldo, J['5403002'].saldoOp, fuenteDe(docs, '5403002', 'junji').estado], [500000, 1500000, 'superavit'], 'oráculo: 5403002 (el BDL cubre Remuneraciones) → saldo +500.000, Operación +1.500.000, Superávit');
+  t.eq([J['5403002'].total.saldo, J['5403002'].saldoOp, fuenteDe(docs, '5403002', 'junji').estado], [500000, 500000, 'superavit'], 'oráculo: 5403002 (el BDL cubre su línea de Remuneraciones) → saldo +500.000, Operación +500.000, Superávit');
   t.eq(J['5403002'].total.saldo - J['5403002'].total.ing.ingreso_bdl, -2500000, 'oráculo: sin el BDL, 5403002 estaría en -2.500.000');
 
   // ---------------------------------------------------------------- 1) tabla de JUNJI y tarjetas: el BDL suma al ingreso (Total / Real / Proyectado)
@@ -80,7 +82,7 @@ await correrSpec('junji_bdl', async (t) => {
   const filasJ = await filasFuente(page, 'junji');
   t.eq(GESPARVU_IDS.filter(id => filasJ[id].estado !== ETIQUETA[fuenteDe(docs, id, 'junji').estado]), [], 'JUNJI: el Estado de las 13 filas coincide con el cálculo independiente (con el BDL en el saldo total)');
   t.eq([filasJ['5401002'].estado, filasJ['5401002'].causa, filasJ['5401002'].saldo], ['Déficit', 'Saldo Operación para B&S negativo', '$16.500.000'], '5401002 (BDL de $20 M): Déficit SOLO por el saldo de Operación (aunque el saldo total es +$16.500.000)');
-  t.ok(/Homologación, Carrera Docente ni BDL/.test(filasJ['5401002'].title) && /\(-\$500\.000\)/.test(filasJ['5401002'].title), 'y su tooltip explica que B&S no puede pagarse con Homologación, Carrera Docente ni BDL, con el monto (-$500.000)');
+  t.ok(/Homologación, Carrera Docente Parvularia ni BDL/.test(filasJ['5401002'].title) && /\(-\$500\.000\)/.test(filasJ['5401002'].title), 'y su tooltip explica que B&S no puede pagarse con Homologación, Carrera Docente Parvularia ni BDL, con el monto (-$500.000)');
   t.eq([filasJ['5403002'].estado, filasJ['5403002'].causa], ['Superávit', ''], '5403002: Superávit (el BDL financia sus Remuneraciones) y sin aviso');
   t.ok(/Bono Desempeño\s+Laboral \(BDL\)/.test(await page.evaluate(() => document.querySelector('#tab-of-junji .detalle-empty').textContent)), 'el texto de ayuda de la pestaña JUNJI nombra al Bono Desempeño Laboral (BDL) entre las líneas que solo pagan Remuneraciones');
   t.ok(/4 líneas de Ingreso/.test(await page.getAttribute('#downloadExcelOFBtn-junji', 'title')), 'y el botón «⬇ Excel» dice «4 líneas de Ingreso»');
@@ -88,15 +90,15 @@ await correrSpec('junji_bdl', async (t) => {
   // ---------------------------------------------------------------- 2) modal: cuarta línea, orden, ayuda, nombre accesible, Real/Proyectado y saldo de Operación sin BDL
   await abrir(h, '5402002');
   const tablas = await page.evaluate(() => Array.from(document.querySelectorAll('#otrasFuentesModalBody table.detalle-table thead th:first-child')).map(x => x.textContent.trim()));
-  t.eq(tablas.slice(0, 5), ['Ingreso Operación', 'Ingreso Homologación', 'Ingreso Carrera Docente', BDL, 'Gasto Remuneraciones'], 'modal de JUNJI: 4 líneas de ingreso (la cuarta es «Ingreso Bono Desempeño Laboral (BDL)») y luego Gasto Remuneraciones');
-  t.ok(/Homologación, Carrera Docente y BDL financian solo Remuneraciones/.test(await page.evaluate(() => document.querySelector('#otrasFuentesModalBody .detalle-header').textContent + document.querySelector('#otrasFuentesModalBody .detalle-wrap').textContent)), 'el encabezado del modal dice «Homologación, Carrera Docente y BDL financian solo Remuneraciones»');
+  t.eq(tablas.slice(0, 8), ['Ingreso Operación', 'Ingreso Homologación', 'Ingreso Carrera Docente Parvularia', BDL, 'Gasto Remuneraciones Operación', 'Gasto Remuneraciones Homologación', 'Gasto Remuneraciones Carrera Docente Parvularia', 'Gasto Remuneraciones BDL'], 'modal de JUNJI: 4 líneas de ingreso (la cuarta es «Ingreso Bono Desempeño Laboral (BDL)») y luego las 4 de Gasto Remuneraciones');
+  t.ok(/Homologación, Carrera Docente Parvularia y BDL financian solo Remuneraciones/.test(await page.evaluate(() => document.querySelector('#otrasFuentesModalBody .detalle-header').textContent + document.querySelector('#otrasFuentesModalBody .detalle-wrap').textContent)), 'el encabezado del modal dice «Homologación, Carrera Docente Parvularia y BDL financian solo Remuneraciones»');
   t.eq(await page.getAttribute(celdaBdl('5402002', 'MARZO'), 'aria-label'), `${BDL}, marzo, GESPARVU 5402002`, 'la celda del BDL tiene el nombre accesible «Ingreso Bono Desempeño Laboral (BDL), marzo, GESPARVU 5402002»');
   t.eq(await page.inputValue(celdaBdl('5402002', 'MARZO')), '120000', 'muestra el BDL de marzo (120000)');
   t.eq(await page.evaluate(() => document.getElementById('oftotal-5402002-junji-of_ingreso_bdl').textContent.trim()), '$1.440.000', 'y el total de la línea ($1.440.000)');
   const enc = await encabezadosMes(page, 3, MOD);
   t.eq([enc.filter(e => e.real).length, enc.filter(e => e.proy).length], [7, 5], 'la tabla del BDL marca 7 meses Real y 5 Proyectados según el «Real hasta» de la entidad (Julio)');
   const opTxt = await page.evaluate(() => document.querySelector('#otrasFuentesModalBody [id^="ofsaldoopbys-"]').textContent.trim());
-  t.eq(parseCLP(opTxt), J['5402002'].saldoOp, 'el «Saldo Operación disponible para B&S» es Ingreso Operación − B&S (el BDL NO suma) = ' + opTxt);
+  t.eq(parseCLP(opTxt), J['5402002'].saldoOp, 'el «Saldo Operación disponible para B&S» es Ingreso Operación − Gasto Rem. Operación − exceso − B&S (el BDL NO suma) = ' + opTxt);
   t.ok(J['5402002'].saldoOp !== J['5402002'].saldoOpConBdl, 'oráculo: con el BDL sumado sería otro valor (la prueba distingue)');
   const s0 = await sub(page);
   t.ok(s0.includes('Ingreso Total: $' + J['5402002'].total.ingreso.toLocaleString('es-CL')), 'el subtítulo del modal suma el BDL al Ingreso Total ($' + J['5402002'].total.ingreso.toLocaleString('es-CL') + ') → ' + s0.slice(0, 120));
@@ -121,7 +123,7 @@ await correrSpec('junji_bdl', async (t) => {
   // ---------------------------------------------------------------- 3) edición en vivo y guardado: el BDL cubre Remuneraciones (5403002) pero no mueve el saldo de Operación
   await abrir(h, '5403002');
   const opAntes = await page.evaluate(() => document.querySelector('#otrasFuentesModalBody [id^="ofsaldoopbys-"]').textContent.trim());
-  t.eq(parseCLP(opAntes), 1500000, '5403002: saldo de Operación para B&S +$1.500.000');
+  t.eq(parseCLP(opAntes), 500000, '5403002: saldo de Operación para B&S +$500.000 (Operación 2 M − Rem. Operación 1 M − B&S 0,5 M)');
   const estadoSub = async () => (/DÉFICIT/i.test(await sub(page)) ? 'Déficit' : (/SUPERÁVIT/i.test(await sub(page)) ? 'Superávit' : '?'));
   await h.clearWrites();
   for (const [valor, esperado, saldo] of [['0', 'Déficit', '-$2.500.000'], ['2499999', 'Déficit', '-$1'], ['2500000', 'Superávit', '$0'], ['3000000', 'Superávit', '$500.000'], ['0', 'Déficit', '-$2.500.000']]) {
@@ -130,9 +132,10 @@ await correrSpec('junji_bdl', async (t) => {
     const s = await sub(page);
     t.eq([await estadoSub(), (/Saldo: (-?\$[\d.]+)/.exec(s) || [])[1]], [esperado, saldo], `BDL de enero = ${valor}: ${esperado} con saldo ${saldo} (el BDL entra al saldo total y al Estado)`);
     const op = await page.evaluate(() => document.querySelector('#otrasFuentesModalBody [id^="ofsaldoopbys-"]').textContent.trim());
-    t.eq(op, opAntes, '…y el saldo de Operación para B&S sigue en ' + opAntes + ' (el BDL no lo toca)');
+    // El BDL cubre SU línea de Remuneraciones (3 M): si queda corto, el exceso se carga a Operación (Operación = BDL − 2,5 M); con BDL ≥ 3 M Operación queda en +500.000 (el BDL nunca paga B&S).
+    t.eq(parseCLP(op), Math.min(Number(valor) - 2500000, 500000), '…y el saldo de Operación para B&S baja con el exceso de la línea BDL (nunca sube de +$500.000: el BDL no paga B&S) → ' + op);
     const f = (await filasFuente(page, 'junji'))['5403002'];
-    t.eq([f.estado, f.causa], [esperado, ''], '…la fila de la tabla también (sin aviso de Operación: no hay causa de Operación)');
+    t.eq([f.estado, f.causa], [esperado, esperado === 'Déficit' ? 'Saldo total y saldo Operación para B&S negativos · exceso en BDL' : ''], '…la fila de la tabla también (con la causa y la línea que se excede si es Déficit)');
   }
   await page.fill(celdaBdl('5403002', 'ENERO'), '3000000');
   await h.flushWrites();
@@ -143,7 +146,7 @@ await correrSpec('junji_bdl', async (t) => {
   t.eq(ultimo && ultimo.payload.otras_fuentes, { junji: { ingreso_bdl: { meses: { ENERO: 3000000 }, total: 3000000 } } }, '…y SOLO otras_fuentes.junji.ingreso_bdl del mes editado (ninguna otra línea ni fuente)');
   t.ok(w.every(x => !/estado|causa|saldo_operacion|\brp\b/i.test(JSON.stringify(x.payload))), 'lo derivado (Estado, causa, saldo de Operación) nunca se guarda');
   const stj = (await h.store())[RUTA('5403002')].otras_fuentes.junji;
-  t.eq([stj.ingreso_bdl.meses.ENERO, stj.ingreso_operacion.meses.ENERO, stj.gasto_rem.meses.ENERO], [3000000, 2000000, 4000000], 'en el servidor las demás líneas de JUNJI siguen intactas');
+  t.eq([stj.ingreso_bdl.meses.ENERO, stj.ingreso_operacion.meses.ENERO, stj.gasto_rem_operacion.meses.ENERO, stj.gasto_rem_bdl.meses.ENERO], [3000000, 2000000, 1000000, 3000000], 'en el servidor las demás líneas de JUNJI siguen intactas');
   await cerrar(h);
 
   // 5401002: BDL aún más alto no lo saca del Déficit por Operación; subir Operación sí
@@ -227,7 +230,7 @@ await correrSpec('junji_bdl', async (t) => {
   // ---------------------------------------------------------------- 7) Excel: hoja ING_BDL (exportar, reimportar, archivo anterior sin la hoja, archivo con cambios)
   await clickTab(page, 'junji');
   const x1 = await exportar(page, () => page.click('#downloadExcelOFBtn-junji'));
-  t.eq(x1.libro.orden, ['ING_OPERACION', 'ING_HOMOLOGACION', 'ING_CARRERA_DOCENTE', 'ING_BDL', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'], 'Excel de JUNJI: hojas ING_OPERACION, ING_HOMOLOGACION, ING_CARRERA_DOCENTE, ING_BDL, REMUNERACIONES, BYS_ITEMS, META');
+  t.eq(x1.libro.orden, ['ING_OPERACION', 'ING_HOMOLOGACION', 'ING_CARRERA_DOCENTE_PARVULARIA', 'ING_BDL', 'REM_OPERACION', 'REM_HOMOLOGACION', 'REM_CARRERA_DOCENTE_PARVULARIA', 'REM_BDL', 'COMPRAS', 'BYS_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'], 'Excel de JUNJI: hojas ING_* (4), REM_* (4), COMPRAS, BYS_ITEMS, HONORARIOS, HON_PROYECCION, META');
   t.eq(x1.libro.hojas.ING_BDL[0].slice(0, 3), ['RBD', 'Nombre', 'Enero'], 'ING_BDL tiene las mismas columnas que las otras hojas de ingreso');
   t.eq(x1.libro.hojas.ING_BDL.slice(1).map(r => String(r[0])), GESPARVU_IDS, 'ING_BDL: una fila por jardín (13), en el orden de JUNJI');
   const fb = x1.libro.hojas.ING_BDL.find(r => String(r[0]) === '5402002');
@@ -264,7 +267,7 @@ await correrSpec('junji_bdl', async (t) => {
   const dlCsv = await capturarDescarga(page, () => page.click('#otrasFuentesTbody-junji button.row-action-btn[data-action="csv"][data-rbd="5402002"]'));
   const csv = parseCsvPuntoYComa(dlCsv.buffer.toString('utf8'));
   const lineasCsv = csv.map(f => f[0]);
-  t.eq(lineasCsv.slice(1, 6), ['Ingreso Operación', 'Ingreso Homologación', 'Ingreso Carrera Docente', BDL, 'Gasto Remuneraciones'], 'CSV de detalle de 5402002: la fila «' + BDL + '» va después de Carrera Docente');
+  t.eq(lineasCsv.slice(1, 9), ['Ingreso Operación', 'Ingreso Homologación', 'Ingreso Carrera Docente Parvularia', BDL, 'Gasto Remuneraciones Operación', 'Gasto Remuneraciones Homologación', 'Gasto Remuneraciones Carrera Docente Parvularia', 'Gasto Remuneraciones BDL'], 'CSV de detalle de 5402002: la fila «' + BDL + '» va después de Carrera Docente Parvularia y luego las 4 de Gasto Remuneraciones');
   const filaCsv = csv.find(f => f[0] === BDL);
   t.eq([filaCsv[1], filaCsv.length, parseCLP(filaCsv[filaCsv.length - 1])], ['Mixto (Real hasta Jul)', 15, 1440000], '…con su Tipo (Mixto según el corte), 12 meses y el total 1.440.000');
   const jNow = junji(docsNow, '5402002');
@@ -276,7 +279,7 @@ await correrSpec('junji_bdl', async (t) => {
   const dlJson = await capturarDescarga(page, () => page.click('#downloadCargaOFBtn-junji'));
   const js = JSON.parse(dlJson.buffer.toString('utf8')).otras_fuentes_por_rbd;
   t.eq([js['5402002'].ingreso_bdl.total, js['5402002'].rp.total.ingreso, Object.keys(js).length], [1440000, jNow.total.ingreso, 13], 'respaldo JSON de JUNJI: cada entidad trae ingreso_bdl y su ingreso total lo incluye');
-  t.ok(js['5402002'].saldo_operacion_bys === jNow.saldoOp, 'y saldo_operacion_bys = Operación − B&S (sin BDL)');
+  t.ok(js['5402002'].saldo_operacion_bys === jNow.saldoOp, 'y saldo_operacion_bys = Operación − Rem. Operación − exceso − B&S (sin BDL)');
   await clickTab(page, 'aporte_junji');
   await page.click('#otrasFuentesTbody-aporte_junji td[data-abrir-otra-fuente="5402002"]');
   await h.waitIdle();
@@ -288,7 +291,7 @@ await correrSpec('junji_bdl', async (t) => {
   // «Cómo usar»
   await page.click('#helpBtn');
   const ayuda = await page.evaluate(() => document.getElementById('helpModal').textContent);
-  t.ok(/Homologación, Carrera Docente ni BDL/.test(ayuda), '«Cómo usar» menciona que B&S no se paga con Homologación, Carrera Docente ni BDL');
+  t.ok(/Homologación, Carrera Docente Parvularia ni BDL/.test(ayuda), '«Cómo usar» menciona que B&S no se paga con Homologación, Carrera Docente Parvularia ni BDL');
   await page.click('#helpModalCloseBtn');
   await h.close();
 

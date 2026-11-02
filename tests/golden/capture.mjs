@@ -835,6 +835,52 @@ async function seccionHonorariosFuentes(h, R) {
   await R.imprimir('honorarios_fuentes.print.dashboard', () => page.click('#dashPdfBtn'));
 }
 
+// Con el fixture "junji_rem" (el Gasto de Remuneraciones de JUNJI en 4 líneas — ver generate.mjs): el Panel principal (3 vistas, «Atención» con las líneas que se exceden), la pestaña JUNJI (Total / Real / Proyectado),
+// los modales de 5402002 (sin excesos), 5402004 (exceso de Homologación cubierto por Operación), 5401006 (excesos en Carrera Docente Parvularia y BDL: Déficit por ambas), 5401007 (solo Operación), 5401003 (mezcla de
+// `gasto_rem` y `gasto_rem_operacion`) y 5401005 (documento antiguo), % Ejecución de un jardín, el Visualizador y el Reporte personalizado con las líneas, el Excel de JUNJI (8 hojas de ingreso y Remuneración), el JSON de
+// respaldo, y el CSV / XLS / PDF de la fila de 5401006 y 5402002.
+async function seccionJunjiRem(h, R) {
+  const { page } = h;
+  const fila = (key, rbd, accion) => `#otrasFuentesTbody-${key} button.row-action-btn[data-action="${accion}"][data-rbd="${rbd}"]`;
+  await abrirDetails(page, '#tab-dashboard');
+  for (const v of ['total', 'real', 'proy']) {
+    await page.click(`.dash-chips button[data-dash-vista="${v}"]`);
+    await R.vista(`junji_rem.dashboard.${v}`, '#tab-dashboard');
+  }
+  await page.click('.dash-chips button[data-dash-vista="total"]');
+  await h.clickTab('of-junji');
+  await R.vista('junji_rem.of.junji.total', '#tab-of-junji');
+  for (const v of ['real', 'proy']) {
+    await page.click(`#tab-of-junji .of-chip[data-of-vista="${v}"]`);
+    await R.vista(`junji_rem.of.junji.${v}`, '#tab-of-junji');
+  }
+  await page.click('#tab-of-junji .of-chip[data-of-vista="total"]');
+  await h.waitIdle();
+  for (const id of ['5402002', '5402004', '5401006', '5401007', '5401003', '5401005']) {
+    await abrirModalOtraFuente(h, R, 'junji', id, `junji_rem.modal.of.junji.${id}`);
+  }
+  await h.clickTab('% Ejecución');
+  await page.click('#ejecFuenteChips .of-chip[data-ejec-fuente="junji"]');
+  await setSelect(page, '#ejecRbdSelect', '5402002');
+  await R.vista('junji_rem.ejec.junji.5402002', '#tab-ejecucion');
+  await h.clickTab('Reportes');
+  await page.click('#vzFuentesNinguna');
+  await page.click('#vzFuenteChips [data-vz-fuente="junji"]');
+  await page.evaluate(() => { document.getElementById('vzEntidadesDet').open = true; });
+  await page.click('#vzEntNinguno');
+  for (const id of ['5402002', '5401006']) await setCheck(page, `#vzEntList input[data-vz-ent="${id}"]`, true);
+  await page.evaluate(() => document.querySelector('#vzEntList input[data-vz-ent="5401006"]').dispatchEvent(new Event('change', { bubbles: true })));
+  await R.vista('junji_rem.rep.vz.junji', SEL_VZ);
+  await R.descarga('junji_rem.exp.vz.junji.csv', () => page.click('#vzCsvBtn'));
+  await h.clickTab('of-junji');
+  await R.descarga('junji_rem.exp.of.junji.excel', () => page.click('#downloadExcelOFBtn-junji'));
+  await R.descarga('junji_rem.exp.of.junji.json-carga', () => page.click('#downloadCargaOFBtn-junji'));
+  await R.descarga('junji_rem.exp.of.junji.fila.5401006.xls', () => page.click(fila('junji', '5401006', 'excel')));
+  await R.descarga('junji_rem.exp.of.junji.fila.5401006.csv-detalle', () => page.click(fila('junji', '5401006', 'csv')));
+  await R.descarga('junji_rem.exp.of.junji.fila.5402002.csv-detalle', () => page.click(fila('junji', '5402002', 'csv')));
+  await R.imprimir('junji_rem.print.of.junji.fila.5401006', () => page.click(fila('junji', '5401006', 'pdf')));
+}
+
 export const SECCIONES = [
   { nombre: 'dashboard', fn: seccionEncabezadoYDashboard },
   { nombre: 'sep', fn: seccionSep },
@@ -850,6 +896,7 @@ export const SECCIONES = [
   { nombre: 'jardines', fixture: 'jardines', fn: seccionJardines },
   { nombre: 'compras_conceptos', fixture: 'compras_conceptos', fn: seccionComprasConceptos },
   { nombre: 'honorarios_fuentes', fixture: 'honorarios_fuentes', fn: seccionHonorariosFuentes },
+  { nombre: 'junji_rem', fixture: 'junji_rem', fn: seccionJunjiRem },
 ];
 
 export async function capturar({ log = () => {}, solo = null, html = undefined } = {}) {

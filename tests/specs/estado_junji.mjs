@@ -33,7 +33,7 @@ await correrSpec('estado_junji', async (t) => {
   t.eq(filas['5402002'].saldo, '$500.000', '…con saldo total $500.000');
   t.eq(filas['5402002'].causa, CORTO_OP, '…y la fila dice la causa: saldo de Operación para B&S negativo');
   t.ok(/saldo de Operación para Bienes y Servicios es negativo \(-\$500\.000\)/.test(filas['5402002'].title) && !/saldo total es negativo/.test(filas['5402002'].title), 'tooltip de 5402002: solo la causa de Operación, con su monto (-$500.000)');
-  t.ok(/Homologación, Carrera Docente ni BDL/.test(filas['5402002'].title), 'y explica por qué: B&S no puede pagarse con Homologación, Carrera Docente ni BDL');
+  t.ok(/Homologación, Carrera Docente Parvularia ni BDL/.test(filas['5402002'].title), 'y explica por qué: B&S no puede pagarse con Homologación, Carrera Docente Parvularia ni BDL');
   t.eq([filas['5402004'].estado, filas['5402004'].causa], ['Déficit', ''], '5402004 (saldo total -$1.000.000): Déficit sin aviso aparte');
   t.ok(/el saldo total es negativo \(-\$1\.000\.000\)/.test(filas['5402004'].title) && !/Operación/.test(filas['5402004'].title), 'tooltip de 5402004: solo el saldo total negativo');
   t.eq([filas['5401006'].estado, filas['5401006'].causa], ['Déficit', CORTO_AMBAS], '5401006: Déficit por ambas causas, lo dice la fila');

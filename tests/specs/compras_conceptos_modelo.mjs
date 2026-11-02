@@ -247,19 +247,19 @@ await correrSpec('compras_conceptos_modelo', async (t) => {
   // ============================== 6. JUNJI: lo documentado entra en el saldo de Operación para B&S ==============================
   h = await boot({ fixture: 'compras_conceptos' });
   const e5403002 = entidadDe(docsBase, '5403002', 'junji');
-  t.eq([e5403002.total.bys, e5403002.total.saldo, e5403002.saldoOp, e5403002.estado, e5403002.causas], [2100000, -1100000, -100000, 'deficit', ['saldo', 'operacion_bys']], 'cálculo independiente: 500.000 sin documento + 1.600.000 documentado → saldo -1.100.000 y Operación − B&S = -100.000 → Déficit (antes Superávit)');
+  t.eq([e5403002.total.bys, e5403002.total.saldo, e5403002.saldoOp, e5403002.estado, e5403002.causas], [2100000, -1100000, -1100000, 'deficit', ['saldo', 'operacion_bys']], 'cálculo independiente: 500.000 sin documento + 1.600.000 documentado → saldo -1.100.000 y Operación para B&S (Op 2 M − Rem. Op 1 M − exceso 0 − B&S 2,1 M) = -1.100.000 → Déficit (antes Superávit)');
   await abrirModalConcepto(h, 'junji', '5403002');
   const sub = await h.page.evaluate(() => ({
     saldoOp: document.getElementById('ofsaldoopbys-5403002-junji').textContent.trim(),
     cabecera: document.getElementById('otrasFuentesModalSubtitle').textContent.replace(/\s+/g, ' ').trim(),
   }));
-  t.eq(clp(sub.saldoOp), -100000, 'el saldo de Operación del modal incluye lo documentado');
+  t.eq(clp(sub.saldoOp), -1100000, 'el saldo de Operación del modal incluye lo documentado');
   t.ok(/DÉFICIT/i.test(sub.cabecera), 'el Estado de la entidad es Déficit por el saldo de Operación', sub.cabecera);
   // Borrar el documento devuelve el Superávit.
   await h.page.click('#otrasFuentesModalBody button.of-compra-del-btn[data-compra-id="jn5403002_1"]');
   await h.flushWrites(); await h.waitIdle();
   const sub2 = await h.page.evaluate(() => ({ saldoOp: document.getElementById('ofsaldoopbys-5403002-junji').textContent.trim(), cabecera: document.getElementById('otrasFuentesModalSubtitle').textContent.replace(/\s+/g, ' ').trim() }));
-  t.eq(clp(sub2.saldoOp), 1500000, 'sin el documento el saldo de Operación vuelve a +1.500.000');
+  t.eq(clp(sub2.saldoOp), 500000, 'sin el documento el saldo de Operación vuelve a +500.000');
   t.ok(/SUPERÁVIT/i.test(sub2.cabecera), 'y la entidad vuelve a Superávit', sub2.cabecera);
   t.noErrores(h);
   await h.close();

@@ -9,6 +9,7 @@
 //     personal) NO entran en ese saldo de Operación (se financian como las Remuneraciones, con cualquiera de sus ingresos).
 import { MESES, FUENTES, idsDeUniverso, corteFuente } from './corte.mjs';
 import { documentadoDe } from './compras_conceptos.mjs';
+import { remEfectivoDe, saldosJunjiDe } from './junji_rem.mjs';
 import { CATALOGO, CUENTAS_HON, mesDeFecha } from './honorarios.mjs';
 
 export { MESES, FUENTES };
@@ -69,7 +70,7 @@ export function entidadDe(docs, id, key) {
   const corte = corteFuente(docs, id, key);
   const parte = (l) => { let a = 0, b = 0; MESES.forEach((m, i) => { const v = num(l && l.meses && l.meses[m]); if (i + 1 <= corte) a += v; else b += v; }); return { real: a, proy: b }; };
   const ing = lineasIngreso(key, of).map(parte).reduce((a, p) => ({ real: a.real + p.real, proy: a.proy + p.proy }), { real: 0, proy: 0 });
-  const rem = SIN_GASTO.includes(key) ? { real: 0, proy: 0 } : parte(of.gasto_rem);
+  const rem = SIN_GASTO.includes(key) ? { real: 0, proy: 0 } : parte(key === 'junji' ? remEfectivoDe(of) : of.gasto_rem);
   if (esConcepto(key)) {
     // por concepto: «sin documento» (montos mensuales, Real hasta el corte y Proyectado después) + «documentado» (compras, siempre Real); ni una ni otra en las fuentes sin B&S
     const sin = SIN_BYS.includes(key) ? { real: 0, proy: 0 } : Object.values(plano(of.bys_items)).filter(it => it && typeof it === 'object').map(parte).reduce((a, p) => ({ real: a.real + p.real, proy: a.proy + p.proy }), { real: 0, proy: 0 });
@@ -78,7 +79,7 @@ export function entidadDe(docs, id, key) {
     real = { ingreso: r(ing.real), rem: r(rem.real), bys: bysSinReal + bysDoc };
     proy = { ingreso: r(ing.proy), rem: r(rem.proy), bys: bysSinProy };
     total = { ingreso: real.ingreso + proy.ingreso, rem: real.rem + proy.rem, bys: real.bys + proy.bys };
-    if (key === 'junji') saldoOp = r(sumaMeses(of.ingreso_operacion)) - total.bys;
+    if (key === 'junji') saldoOp = saldosJunjiDe(of, total.bys).saldoOp;
   } else {
     const compras = Object.values(plano(of.compras)).filter(c => c && typeof c === 'object').reduce((s, c) => s + (/^nota de cr[eé]dito/i.test(texto(c.tipoDocumento)) ? -Math.abs(num(c.montoGasto)) : (/^nota de d[eé]bito/i.test(texto(c.tipoDocumento)) ? Math.abs(num(c.montoGasto)) : num(c.montoGasto))), 0);
     const fondos = key === 'general' ? fondosGeneral(docs, id).reduce((a, b) => a + b, 0) : 0; // Fondos Fijos registrados en General: B&S Real
@@ -120,7 +121,7 @@ export function serieMensual(docs, key, soloId = null) {
     const corte = corteFuente(docs, id, key);
     const poner = (l, dst) => MESES.forEach((m, i) => { const v = num(l && l.meses && l.meses[m]); (i + 1 <= corte ? dst.real : dst.proy)[i] += v; });
     lineasIngreso(key, of).forEach(l => poner(l, out.ing));
-    if (!SIN_GASTO.includes(key)) poner(of.gasto_rem, out.rem);
+    if (!SIN_GASTO.includes(key)) poner(key === 'junji' ? remEfectivoDe(of) : of.gasto_rem, out.rem);
     if (esConcepto(key)) {
       if (!SIN_BYS.includes(key)) {
         Object.values(plano(of.bys_items)).filter(it => it && typeof it === 'object').forEach(it => poner(it, out.bys));

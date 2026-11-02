@@ -9,6 +9,7 @@
 import { boot, clickTab } from '../lib/boot.mjs';
 import { capturarDescarga, leerXlsx, parseCsvPuntoYComa } from '../lib/capture-utils.mjs';
 import { correrSpec } from '../lib/spec.mjs';
+import { unificarRemJunji } from '../lib/junji_rem.mjs';
 import { docsDe, clon } from '../lib/corte.mjs';
 import { libroXlsx } from '../lib/compras.mjs';
 import { FUENTES, FUENTES_CUENTA, FUENTES_CONCEPTO, esConcepto, honFuenteDe, entidadDe, boletaCuenta, boletaConcepto } from '../lib/honorarios_fuentes.mjs';
@@ -24,7 +25,7 @@ const HOJAS = {
   subt31_proyectos: ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'], asignacion_familiar: ['INGRESO', 'REMUNERACIONES', 'HONORARIOS', 'HON_PROYECCION', 'META'],
   recuperacion_llmm: ['ING_LLMM_ISAPRES', 'ING_LLMM_FONASA', 'ING_LLMM_SIL', 'META'], // fuente solo de ingresos: sin hojas de honorarios
   mantenimiento: ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_PROY_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'], prorretencion: ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_PROY_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'],
-  junji: ['ING_OPERACION', 'ING_HOMOLOGACION', 'ING_CARRERA_DOCENTE', 'ING_BDL', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'],
+  junji: ['ING_OPERACION', 'ING_HOMOLOGACION', 'ING_CARRERA_DOCENTE_PARVULARIA', 'ING_BDL', 'REM_OPERACION', 'REM_HOMOLOGACION', 'REM_CARRERA_DOCENTE_PARVULARIA', 'REM_BDL', 'COMPRAS', 'BYS_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'],
   faep: ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'], figa: ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'],
   aporte_educ: ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'], aporte_junji: ['INGRESO', 'REMUNERACIONES', 'COMPRAS', 'BYS_ITEMS', 'HONORARIOS', 'HON_PROYECCION', 'META'],
 };
@@ -52,7 +53,7 @@ function limpiar(v) {
   }
   return v;
 }
-const documentos = (store) => { const o = {}; Object.keys(store).forEach(p => { o[p] = limpiar(store[p]); }); return o; };
+const documentos = (store) => { const o = {}; Object.keys(store).forEach(p => { o[p] = limpiar(unificarRemJunji(store[p])); }); return o; };  // la Remuneración de Operación de JUNJI cuenta igual esté en `gasto_rem` (antiguo) o en `gasto_rem_operacion` (la importación escribe este)
 function primeraDiferencia(a, b, ruta = '') {
   if (JSON.stringify(a) === JSON.stringify(b)) return null;
   if (a && b && typeof a === 'object' && typeof b === 'object') for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) { const d = primeraDiferencia(a[k], b[k], ruta + '/' + k); if (d) return d; }
