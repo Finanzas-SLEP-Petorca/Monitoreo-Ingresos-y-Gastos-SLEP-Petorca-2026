@@ -8219,7 +8219,7 @@ async function aplicarPlanCarga(plan) {
     aplicarCambiosEnMemoriaCarga(plan);
     if (plan.modo === 'deshacer') delete respaldoCargaOF[fk]; else respaldoCargaOF[fk] = previo;
     repintarTrasCargaOF();
-    if (typeof window.__cargaTestHook === 'function') window.__cargaTestHook('memoria', fk);
+    if (typeof window.__cargaTestHook === 'function') window.__cargaTestHook('memoria', fk, CARGA_MANUAL); // gancho solo para las pruebas (inyectar un desajuste y ver que la cuadratura lo detecta)
     let filas = verificarCarga(plan);
     mostrarResultadoCarga({ plan, filas, guardando: true, respaldoArchivo, errRespaldo });
     escriturasEnVuelo += promesas.length; actualizarIndicadorSync();
@@ -8235,7 +8235,7 @@ async function aplicarPlanCarga(plan) {
       actualizarBotonesCargaOF();
     }
     actualizarIndicadorSync();
-    if (typeof window.__cargaTestHook === 'function') window.__cargaTestHook('guardado', fk);
+    if (typeof window.__cargaTestHook === 'function') window.__cargaTestHook('guardado', fk, CARGA_MANUAL);
     filas = verificarCarga(plan); // ahora sobre lo reconstruido desde Firestore
     mostrarResultadoCarga({ plan, filas, fallo, respaldoArchivo, errRespaldo });
   } finally { cargaEnCurso = false; }
@@ -8354,7 +8354,7 @@ function mostrarResultadoCarga(r) {
     html += `<div class="table-scroll"><table class="data-table carga-tabla"><thead><tr><th scope="col">Hoja</th><th scope="col" class="num">Esperado: filas</th><th scope="col" class="num">Esperado: total</th><th scope="col" class="num">Panel ahora: filas</th><th scope="col" class="num">Panel ahora: total</th><th scope="col">Cuadra</th></tr></thead><tbody>${r.filas.map(f => `<tr class="${f.ok ? '' : 'carga-fila-err'}"><th scope="row">${escHtml(f.hoja)}</th><td class="num">${f.esperado.filas}</td><td class="num">${escHtml(pesosCarga(f.esperado.total))}</td><td class="num">${f.obtenido.filas}</td><td class="num">${escHtml(pesosCarga(f.obtenido.total))}</td><td>${f.ok ? '✓ sí' : '✗ NO'}</td></tr>`).join('')}</tbody></table></div>`;
     if (plan.modo !== 'deshacer') html += r.respaldoArchivo ? `<p class="carga-ayuda">Respaldo del estado anterior descargado: <strong>${escHtml(r.respaldoArchivo)}</strong> (se puede volver a importar). También puedes usar «↩ Deshacer última carga» en la pestaña mientras no recargues la página.</p>` : (r.errRespaldo ? `<div class="carga-nota warn">⚠ No se pudo descargar el archivo de respaldo (${escHtml(r.errRespaldo)}); queda la copia en memoria para «↩ Deshacer última carga».</div>` : '');
     if (plan.modo === 'excel') { const rech = plan.hojas.reduce((n, h) => n + (h.presente && !h.omitida ? h.rechazadas : 0), 0); if (rech) html += `<div class="carga-nota warn">⚠ ${rech} ${rech === 1 ? 'fila del archivo NO se cargó' : 'filas del archivo NO se cargaron'} (el detalle estaba en el resumen anterior).</div>`; }
-    if (!cuadra || r.fallo) mostrarBannerErrorCarga(r.fallo ? `<strong>${label}:</strong> la carga no se guardó en el servidor.` : `<strong>${label}:</strong> el panel NO cuadra con el Excel en ${r.filas.filter(f => !f.ok).map(f => escHtml(f.hoja) + ' (esperado ' + f.esperado.filas + ' filas / ' + escHtml(pesosCarga(f.esperado.total)) + ', obtenido ' + f.obtenido.filas + ' filas / ' + escHtml(pesosCarga(f.obtenido.total)) + ')').join('; ')}.`);
+    if ((!cuadra || r.fallo) && !r.guardando) mostrarBannerErrorCarga(r.fallo ? `<strong>${label}:</strong> la carga no se guardó en el servidor.` : `<strong>${label}:</strong> el panel NO cuadra con el Excel en ${r.filas.filter(f => !f.ok).map(f => escHtml(f.hoja) + ' (esperado ' + f.esperado.filas + ' filas / ' + escHtml(pesosCarga(f.esperado.total)) + ', obtenido ' + f.obtenido.filas + ' filas / ' + escHtml(pesosCarga(f.obtenido.total)) + ')').join('; ')}.`);
   }
   cargaBodyEl.innerHTML = html;
   cargaFooterEl.innerHTML = r.enCurso ? '' : '<button type="button" id="cargaCerrarBtn" class="carga-btn-cancel">Cerrar</button>';
