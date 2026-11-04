@@ -11,6 +11,7 @@
 //   - setDoc(..., {merge:true}): fusión PROFUNDA de mapas anidados; deleteField() borra la clave;
 //     serverTimestamp() se resuelve a un Timestamp; un mapa vacío `{}` bajo merge REEMPLAZA el mapa
 //     existente (igual que el SDK real, que lo trata como "hoja"); los arreglos reemplazan.
+//   - setDoc(..., {mergeFields:[rutas]}): escribe SOLO esas rutas y cada una REEMPLAZA el valor completo (no fusiona); deleteField() borra el campo; una ruta ausente de los datos es invalid-argument.
 //   - setDoc sin merge reemplaza el documento; deleteField() fuera de merge/update es un error.
 //   - `undefined` en un valor es un error (invalid-argument) como en el SDK real.
 //   - un nombre de campo (clave de mapa) vacío, "__algo__" o de más de 1500 bytes UTF-8 es invalid-argument y el write ENTERO
@@ -208,6 +209,38 @@
     });
     return doc;
   }
+  // setDoc(..., {mergeFields:[...]}): SOLO esas rutas de campo se escriben y cada una REEMPLAZA el valor completo (a diferencia de merge:true, que fusiona
+  // los mapas): es lo que usa la carga por fuente («reemplazo total»). deleteField() borra el campo. Una ruta que no está en los datos es invalid-argument.
+  function valorEnRuta(data, path) {
+    let src = data;
+    for (const seg of path.split('.')) {
+      if (!isPlainObject(src) || !(seg in src)) throw new FirebaseError('invalid-argument', `Field '${path}' is specified in your field mask but missing from your input data.`);
+      src = src[seg];
+    }
+    return src;
+  }
+  function applyMergeFields(existing, op, tsValue) {
+    const doc = existing === undefined ? {} : cloneData(existing);
+    op.mergeFields.forEach(path => {
+      const segs = path.split('.');
+      const src = valorEnRuta(op.data, path);
+      let cur = doc;
+      for (let i = 0; i < segs.length - 1; i++) { if (!isPlainObject(cur[segs[i]])) cur[segs[i]] = {}; cur = cur[segs[i]]; }
+      const last = segs[segs.length - 1];
+      if (src instanceof FieldValue) { if (src._kind === 'delete') delete cur[last]; else cur[last] = resolveSentinel(src, cur[last], tsValue); }
+      else if (isPlainObject(src)) cur[last] = resolveFull(src, tsValue);
+      else cur[last] = cloneData(src);
+    });
+    return doc;
+  }
+  function validarMergeFields(data, options) {
+    const mf = options && options.mergeFields;
+    if (!mf) return null;
+    if (options.merge) throw new FirebaseError('invalid-argument', 'Invalid options passed to function setDoc(): You cannot specify both "merge" and "mergeFields".');
+    if (!Array.isArray(mf) || !mf.length || mf.some(f => typeof f !== 'string' || !f)) throw new FirebaseError('invalid-argument', 'mergeFields debe ser una lista de rutas de campo (texto).');
+    mf.forEach(path => valorEnRuta(data, path));
+    return mf.slice();
+  }
   function applyOp(existing, op, tsValue) {
     // existing: dato actual (o undefined si no existe). Devuelve el nuevo dato o undefined (borrado).
     if (op.kind === 'delete') return undefined;
@@ -215,6 +248,7 @@
       if (existing === undefined) throw new FirebaseError('not-found', `No document to update: ${op.path}`);
       return applyUpdate(existing, op.data, tsValue);
     }
+    if (op.mergeFields) return applyMergeFields(existing, op, tsValue);
     if (op.merge) return mergeInto(existing === undefined ? {} : cloneData(existing), op.data, tsValue);
     return resolveFull(op.data, tsValue);
   }
@@ -494,7 +528,7 @@
       collection: segs.slice(0, -1).join('/'),
       id: segs[segs.length - 1],
       payload: op.data === undefined ? null : toLoggable(op.data),
-      options: op.kind === 'set' ? { merge: !!op.merge } : null,
+      options: op.kind === 'set' ? { merge: !!op.merge, ...(op.mergeFields ? { mergeFields: op.mergeFields } : {}) } : null,
       status: 'pending',
       ...extra,
     };
@@ -580,11 +614,11 @@
 
   function setDoc(ref, data, options) {
     if (!ref || ref.type !== 'document') throw new FirebaseError('invalid-argument', 'setDoc(): se esperaba una DocumentReference.');
-    if (options && (options.mergeFields)) throw new MockFirebaseUnsupportedError('setDoc({mergeFields})');
     validateData(data, 'setDoc');
+    const mergeFields = validarMergeFields(data, options);
     const merge = !!(options && options.merge);
-    if (!merge) resolveFull(data, new PendingServerTimestamp(0)); // valida deleteField fuera de merge
-    return enqueueWrite('setDoc', [{ kind: 'set', path: ref.path, data: cloneForOp(data), merge }]);
+    if (!merge && !mergeFields) resolveFull(data, new PendingServerTimestamp(0)); // valida deleteField fuera de merge
+    return enqueueWrite('setDoc', [{ kind: 'set', path: ref.path, data: cloneForOp(data), merge, ...(mergeFields ? { mergeFields } : {}) }]);
   }
   function normalizeUpdateArgs(args) {
     if (args.length === 1 && isPlainObject(args[0])) return args[0];
@@ -620,11 +654,11 @@
       set(ref, data, options) {
         guard();
         if (!ref || ref.type !== 'document') throw new FirebaseError('invalid-argument', 'WriteBatch.set(): se esperaba una DocumentReference.');
-        if (options && options.mergeFields) throw new MockFirebaseUnsupportedError('WriteBatch.set({mergeFields})');
         validateData(data, 'WriteBatch.set');
+        const mergeFields = validarMergeFields(data, options);
         const merge = !!(options && options.merge);
-        if (!merge) resolveFull(data, new PendingServerTimestamp(0));
-        state.ops.push({ kind: 'set', path: ref.path, data: cloneForOp(data), merge });
+        if (!merge && !mergeFields) resolveFull(data, new PendingServerTimestamp(0));
+        state.ops.push({ kind: 'set', path: ref.path, data: cloneForOp(data), merge, ...(mergeFields ? { mergeFields } : {}) });
         return batch;
       },
       update(ref, ...args) {
