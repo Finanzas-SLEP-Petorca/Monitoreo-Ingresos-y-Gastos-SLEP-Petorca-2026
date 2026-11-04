@@ -54,7 +54,7 @@ await correrSpec('carga_reemplazo_total', async (t) => {
       FILA('', '1121', compra({ nroDocumento: '100', montoGasto: 100000, montoDocumento: 119000 })),
       FILA('', '1121', compra({ nroDocumento: '101', montoGasto: 250000, montoDocumento: 297500, codigo: '410605' })),
       FILA('', '1122', compra({ nroDocumento: '200', montoGasto: 75500, montoDocumento: 89845 })),
-      FILA('', '1122', compra({ nroDocumento: '201', tipoDocumento: 'Nota de crédito electrónica', montoGasto: 20000, montoDocumento: 23800, documentoOriginal: '100-FAC' })), // NC: entra en NEGATIVO
+      FILA('', '1122', compra({ nroDocumento: '201', tipoDocumento: 'Nota de crédito', montoGasto: 20000, montoDocumento: 23800, documentoOriginal: '100-FAC' })), // NC: entra en NEGATIVO
       FILA('', 'AC', compra({ nroDocumento: '300', montoGasto: 1000000, montoDocumento: 1190000, codigo: '410606' })),
     ];
     const esperadoGasto = 100000 + 250000 + 75500 - 20000 + 1000000;
@@ -88,7 +88,7 @@ await correrSpec('carga_reemplazo_total', async (t) => {
     t.eq(suma(comprasExport(x).map(c => c.g)), esperadoGasto, 'el Excel exportado justo después: misma suma de MontoGasto');
     t.eq(filasHoja(x, 'INGRESO').filter(f => f[0] === 1121)[0][14], total12(1000000), 'el Excel exportado trae el mismo Total Año de INGRESO');
     const filaUI = await h.page.evaluate(() => { const tr = document.querySelector('#otrasFuentesTbody-general td[data-abrir-otra-fuente="1121"]'); return tr ? tr.closest('tr').innerText.replace(/\s+/g, ' ') : null; });
-    t.ok(filaUI && filaUI.includes('12.000.000'), 'la tabla de la pestaña ya muestra el ingreso nuevo (12.000.000) sin recargar', filaUI);
+    t.ok(filaUI && filaUI.includes('12.360.000'), 'la tabla de la pestaña ya muestra el ingreso nuevo (12.000.000 + carrera docente 360.000) sin recargar', filaUI);
     t.noErrores(h);
   });
 
