@@ -714,14 +714,16 @@ await correrSpec('n_dc', async (t) => {
       }, [x1.buffer.toString('base64')]);
       await importar(`#importExcelOFInput-${fuente}`, { filename: x1.filename, buffer: Buffer.from(antiguo, 'base64') });
       const st = await h.store();
-      t.eq(sinAudit(st[RUTA('1121')].otras_fuentes[fuente].compras), sinAudit(storeAntes[RUTA('1121')].otras_fuentes[fuente].compras), `${fuente}: un Excel antiguo (sin N° DC) se importa y conserva los N° DC existentes`);
-      t.eq(sinAudit(st[RUTA('AC')].otras_fuentes[fuente].compras), sinAudit(storeAntes[RUTA('AC')].otras_fuentes[fuente].compras), `${fuente}: también en AC`);
+      // Reemplazo total (fuentes): el N° DC sale SOLO de la columna del archivo; un Excel antiguo sin la columna deja las compras sin N° DC (no hereda el anterior). Todo lo demás queda igual.
+      const sinDc = (m) => { const o = JSON.parse(JSON.stringify(sinAudit(m))); Object.values(o).forEach(c => { delete c.documentoContable; }); return o; };
+      t.eq(sinAudit(st[RUTA('1121')].otras_fuentes[fuente].compras), sinDc(storeAntes[RUTA('1121')].otras_fuentes[fuente].compras), `${fuente}: un Excel antiguo (sin N° DC) se importa y las compras quedan idénticas salvo que ya no tienen N° DC (espejo exacto)`);
+      t.eq(sinAudit(st[RUTA('AC')].otras_fuentes[fuente].compras), sinDc(storeAntes[RUTA('AC')].otras_fuentes[fuente].compras), `${fuente}: también en AC`);
     }
     // XLS por entidad
     await clickTab(page, 'of-general');
     const xe = await exportar(() => page.click('#otrasFuentesTbody-general button.row-action-btn[data-action="excel"][data-rbd="AC"]'));
     t.eq(xe.libro.hojas.COMPRAS[0].slice(-1), ['N° DC'], 'General XLS por entidad (AC): la hoja COMPRAS trae N° DC');
-    t.ok(xe.libro.hojas.COMPRAS.some(r => r[0] === 'oge_AC_1' && r[14] === 'DC_900'), 'General XLS por entidad (AC): con el valor de la compra');
+    t.ok(xe.libro.hojas.COMPRAS.some(r => r[0] === 'oge_AC_1' && r[14] === ''), 'General XLS por entidad (AC): la compra sin N° DC (el Excel antiguo anterior, sin la columna, lo quitó: reemplazo total)');
     t.noErrores(h);
     await h.close();
   });

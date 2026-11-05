@@ -328,10 +328,12 @@ await correrSpec('faep_figa_jardines', async (t) => {
   await h2.clearWrites();
   const msgA = await importarLibro(h2, '#importExcelOFInput-faep', bufAntiguo, 'faep_antiguo.xlsx');
   t.ok(/^Carga importada correctamente/.test(msgA[0] || '') && /INGRESO: 56 filas/.test(msgA[0] || ''), 'archivo ANTIGUO de FAEP (solo RBD y AC): se importa sin error («INGRESO: 56 filas»)', msgA);
-  const wA = (await h2.writes()).filter(x => x.collection === 'sep_carga_rbd').map(x => x.path);
-  t.ok(!wA.some(pth => GESPARVU_IDS.some(id => pth === RUTA(id))), 'y no escribe nada en los documentos de los jardines');
+  // Reemplazo total: un archivo SIN filas de jardines vacía a los jardines en las hojas que trae (entidad ausente = vacía); lo que no es FAEP (JUNJI, Aporte JUNJI) no se toca.
   const storeA2 = await h2.store();
-  t.eq(GESPARVU_IDS.filter(id => JSON.stringify(storeA2[RUTA(id)]) !== JSON.stringify(storeA[RUTA(id)])), [], 'los 13 jardines quedan exactamente igual en el servidor');
+  const conFaepAntes = GESPARVU_IDS.filter(id => storeA[RUTA(id)].otras_fuentes && storeA[RUTA(id)].otras_fuentes.faep && storeA[RUTA(id)].otras_fuentes.faep.ingreso);
+  t.ok(conFaepAntes.length > 0, 'partida: hay jardines con FAEP cargado');
+  t.eq(conFaepAntes.filter(id => storeA2[RUTA(id)].otras_fuentes.faep.ingreso.total !== 0), [], 'archivo ANTIGUO: los jardines que tenían FAEP quedan en $0 en las hojas que el archivo trae (reemplazo total: entidad ausente = vacía)');
+  t.eq(GESPARVU_IDS.filter(id => JSON.stringify((storeA2[RUTA(id)].otras_fuentes || {}).junji) !== JSON.stringify((storeA[RUTA(id)].otras_fuentes || {}).junji) || JSON.stringify((storeA2[RUTA(id)].otras_fuentes || {}).aporte_junji) !== JSON.stringify((storeA[RUTA(id)].otras_fuentes || {}).aporte_junji)), [], 'y JUNJI / Aporte JUNJI de los 13 jardines quedan exactamente iguales');
   t.eq((await h2.store())[RUTA('1121')].otras_fuentes.faep.ingreso.meses.ENERO, 123456, 'mientras que el cambio en un RBD sí se aplica');
   // archivo con filas de jardines (uno sin FAEP previo)
   const nuevo = {};

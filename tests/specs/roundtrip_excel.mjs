@@ -62,6 +62,8 @@ await correrSpec('roundtrip_excel', async (t) => {
   const h = await boot({ fixture: 'default' });
   const { page } = h;
   const relevantes = (store) => documentos(store);
+  // Reemplazo total: el Excel de UNA entidad trae las hojas solo con esa entidad, así que las demás quedan vacías en esas hojas (el resumen lo advierte): se compara solo la entidad exportada.
+  const solo = (o, id) => ({ ['sep_carga_rbd/' + id]: o['sep_carga_rbd/' + id] });
 
   // ================================================================ SEP (hojas INGRESO, REMUNERACIONES, COMPRAS, BYS_PROYECCION)
   await clickTab(page, 'SEP');
@@ -118,7 +120,7 @@ await correrSpec('roundtrip_excel', async (t) => {
   const mAc = await importar(h, '#importExcelOFInput-general', ac1);
   t.ok(/^Carga importada correctamente/.test(mAc[0] || ''), 'General › AC: el Excel individual se reimporta', mAc);
   t.ok(/cuenta no habilitada/.test(mAc[0] || ''), 'General › AC: el resumen de importación advierte de las compras con cuenta no habilitada', mAc[0]);
-  t.eq(primeraDiferencia(sAc, relevantes(await h.store())), null, 'General › AC: los documentos quedan iguales tras reimportar');
+  t.eq(primeraDiferencia(solo(sAc, 'AC'), solo(relevantes(await h.store()), 'AC')), null, 'General › AC: el documento de AC queda igual tras reimportar (las demás entidades quedan vacías en las hojas del archivo)');
 
   t.noErrores(h);
   await h.close();
@@ -178,7 +180,7 @@ await correrSpec('roundtrip_excel', async (t) => {
       t.ok(/^Carga importada correctamente/.test(mf[0] || ''), `${key.toUpperCase()} › jardín ${id}: el Excel individual se reimporta`, mf);
       const f2 = await exportar(hj, () => hj.page.click(`#otrasFuentesTbody-${key} button.row-action-btn[data-action="excel"][data-rbd="${id}"]`));
       t.eq(igualLibros(f1.libro, f2.libro), null, `${key.toUpperCase()} › jardín ${id}: el Excel individual no cambia tras reimportarlo`);
-      t.eq(primeraDiferencia(sAntes, documentos(await hj.store())), null, `${key.toUpperCase()} › jardín ${id}: los documentos siguen iguales`);
+      t.eq(primeraDiferencia(solo(sAntes, id), solo(documentos(await hj.store()), id)), null, `${key.toUpperCase()} › jardín ${id}: el documento del jardín queda igual (las demás entidades quedan vacías en las hojas del archivo)`);
     }
     t.noErrores(hj);
     await hj.close();

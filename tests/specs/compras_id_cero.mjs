@@ -24,6 +24,7 @@ const sinImp = (ids) => ids.filter(id => !id.startsWith('imp-'));
 await correrSpec('compras_id_cero', async (t) => {
   for (const o of ORIGENES) {
     const E = o.etiqueta;
+    const reemplazo = E !== 'SEP'; // las fuentes cargan con REEMPLAZO TOTAL (sin dedupe ni unión con lo existente); SEP conserva la importación anterior
     const c = (extra) => compraBase({ codigo: o.codigo, ...extra });
     const fila = (id, extra) => filaCompra(id, 1121, NOMBRE, c(extra));
     const libroDe = (page, filas) => libroXlsx(page, { COMPRAS: [o.enc, ...filas] });
@@ -76,8 +77,12 @@ await correrSpec('compras_id_cero', async (t) => {
       const libro = await libroDe(page, [fila('0', A), fila('cReal1', A), fila('cReal2', B)]); // lo que exporta el panel: el "0" también sale
       await importarLibro(h, o.input, libro);
       const despues = o.compras(await h.store());
-      t.eq(Object.keys(despues).sort(), Object.keys(antes).sort(), `${E}: reimportar un Excel con la fila "0" no crea compras nuevas (la fila "0" se une a su copia con ID real)`);
-      t.eq(despues['0'], antes['0'], `${E}: la entrada "0" de Firestore no se toca (la limpia la herramienta admin "Revisar duplicados")`);
+      if (reemplazo) {
+        t.eq([Object.keys(despues).length, '0' in despues, Object.values(despues).filter(x => x.nroDocumento === '1').length], [3, false, 2], `${E}: reemplazo total: las 3 filas del archivo son 3 compras; la entrada corrupta "0" de Firestore desaparece y la fila "0" del archivo entra con clave imp-… (sin unirse a su copia)`);
+      } else {
+        t.eq(Object.keys(despues).sort(), Object.keys(antes).sort(), `${E}: reimportar un Excel con la fila "0" no crea compras nuevas (la fila "0" se une a su copia con ID real)`);
+        t.eq(despues['0'], antes['0'], `${E}: la entrada "0" de Firestore no se toca (la limpia la herramienta admin "Revisar duplicados")`);
+      }
       t.eq(await page.evaluate(() => document.getElementById('limpiarDuplicadosBtn') ? true : false), true, `${E}: la herramienta "Revisar duplicados (ID "0")" sigue presente`);
       t.noErrores(h);
       await h.close();
@@ -92,8 +97,13 @@ await correrSpec('compras_id_cero', async (t) => {
       const m = await importarLibro(h, o.input, libro);
       t.ok(/COMPRAS: 5 filas/.test(m[0] || ''), `${E}: el resumen cuenta las 5 filas leídas`, m);
       const ids = Object.keys(o.compras(await h.store()));
+      if (reemplazo) {
+        t.eq(ids.length, 5, `${E}: reemplazo total, sin dedupe: 5 filas del Excel = 5 compras (las idénticas quedan como filas separadas)`);
+        t.eq(Object.values(o.compras(await h.store())).map(x => x.descripcion).sort(), ['Resmas de papel', 'Resmas de papel', 'Resmas de papel', 'Resmas de papel', 'Resmas de papel carta'], `${E}: cada fila del archivo existe`);
+      } else {
       t.eq(ids.length, 3, `${E}: filas con contenido idéntico y sin ID se tratan como UNA sola compra (5 filas → 3 compras: A, A con otra descripción, A sin N° de documento)`);
       t.eq(Object.values(o.compras(await h.store())).map(x => x.descripcion).sort(), ['Resmas de papel', 'Resmas de papel', 'Resmas de papel carta'], `${E}: la que difiere solo en la descripción es otra compra`);
+      }
       await h.close();
     }
 
@@ -109,14 +119,27 @@ await correrSpec('compras_id_cero', async (t) => {
       const libro = await libroDe(page, [a, fila('0', C), fila('', { ...B, montoGasto: 251000, montoDocumento: 298690 })]);
       await importarLibro(h, o.input, libro);
       const g = o.compras(await h.store());
+      if (reemplazo) {
+        t.eq([Object.keys(g).length, 'cViejo' in g, 'cOtro' in g], [3, false, false], `${E}: reemplazo total: el panel queda con las 3 filas del archivo; las compras existentes que no están en el archivo (cViejo, cOtro) desaparecen`);
+        t.eq(sinImp(Object.keys(g)), [], `${E}: las 3 llevan clave "imp-…"`);
+        t.eq(Object.values(g).filter(x => x.documentoContable === 'DC_77').length, 1, `${E}: el N° DC sale de la columna del archivo`);
+      } else {
       t.eq(Object.keys(g).length, 4, `${E}: compra idéntica a una existente (otro ID) = la misma; la nueva y la "parecida" se agregan (2 + 2 = 4)`);
       t.eq(g.cViejo.documentoContable, 'DC_77', `${E}: la compra existente idéntica se actualiza en su sitio (recibe el N° DC del archivo)`);
       t.eq([g.cOtro.montoGasto, g.cOtro.nroDocumento], [250000, '2'], `${E}: una compra existente DISTINTA (otro monto en el archivo) no se pisa`);
       t.eq(sinImp(Object.keys(g)).sort(), ['cOtro', 'cViejo'], `${E}: las dos compras nuevas llevan clave "imp-…"`);
+      }
 
       // e) una compra importada sin ID y EDITADA después: reimportar el archivo original no pisa la edición
       const claveC = Object.keys(g).find(id => id.startsWith('imp-') && g[id].nroDocumento === '3');
-      if (!claveC) t.ok(false, `${E}: no hay una compra "imp-…" con el N° de documento 3 para editar (el importador antiguo no genera claves deterministas)`);
+      if (reemplazo) {
+        t.ok(!!claveC, `${E}: reemplazo total: la compra C tiene clave imp-…`);
+        await h.remoto('1121', `d.otras_fuentes.general.compras["${claveC}"].descripcion = "Cuadernos (corregido)"; return 1;`);
+        await h.waitIdle();
+        await importarLibro(h, o.input, libro);
+        const g2 = o.compras(await h.store());
+        t.eq([g2[claveC].descripcion, Object.keys(g2).length], ['Cuadernos', 3], `${E}: reemplazo total: reimportar el archivo vuelve a dejar EXACTAMENTE lo que dice el Excel (la edición posterior se reemplaza, sin compras extra)`);
+      } else if (!claveC) t.ok(false, `${E}: no hay una compra "imp-…" con el N° de documento 3 para editar (el importador antiguo no genera claves deterministas)`);
       else {
         await h.remoto('1121', o.etiqueta === 'SEP' ? `d.compras["${claveC}"].descripcion = "Cuadernos (corregido)"; return 1;` : `d.otras_fuentes.general.compras["${claveC}"].descripcion = "Cuadernos (corregido)"; return 1;`);
         await h.waitIdle();
@@ -157,7 +180,8 @@ await correrSpec('compras_id_cero', async (t) => {
     const antes = await claves();
     await importarLibro(hc, '#importExcelOFInput-aporte_educ', libro);
     const tras = await claves();
-    t.eq(tras.length, antes.length + 4, 'concepto: 4 compras distintas (nada colapsa en la clave "0")');
+    t.ok(antes.length >= 0, 'concepto: estado previo leído');
+    t.eq(tras.length, 4, 'concepto: reemplazo total: las 4 filas distintas del archivo son 4 compras (nada colapsa en la clave "0"; ya no se suman a las anteriores)');
     t.ok(!tras.includes('0') && tras.filter(k => /^imp-/.test(k)).length === 3 && tras.includes('real-1'), 'concepto: 3 claves imp-… y el ID real se respeta');
     await importarLibro(hc, '#importExcelOFInput-aporte_educ', libro);
     t.eq(await claves(), tras, 'concepto: reimportar el mismo archivo no duplica y deja las mismas claves');

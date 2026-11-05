@@ -768,6 +768,30 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .table-empty-row td { text-align:center; color:var(--text-muted); font-size:13px; padding:28px !important; }
 
   /* ---- MODAL: detalle editable por RBD ---- */
+  /* Carga por fuente = reemplazo total: modal de control, resultado y banner de error persistente */
+  .carga-footer { display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap; padding:12px 22px; border-top:1px solid var(--border); flex-shrink:0; }
+  .carga-footer:empty { display:none; }
+  .carga-btn-ok, .carga-btn-cancel { padding:7px 16px; border-radius:6px; border:1px solid var(--series-1); font-size:13px; font-weight:600; cursor:pointer; }
+  .carga-btn-ok { background:var(--series-1); color:#fff; }
+  .carga-btn-ok:disabled { background:var(--gridline); border-color:var(--baseline); color:var(--text-secondary); cursor:not-allowed; }
+  .carga-btn-cancel { background:#fff; color:var(--series-1); }
+  .carga-nota { margin:8px 0; padding:8px 12px; border-radius:6px; font-size:13px; line-height:1.45; border:1px solid var(--tone-gray-border); background:var(--tone-gray-bg); color:var(--text-primary); }
+  .carga-nota.ok { background:var(--tone-green-bg); border-color:var(--tone-green-border); }
+  .carga-nota.info { background:var(--tone-blue-bg); border-color:var(--tone-blue-border); }
+  .carga-nota.warn { background:var(--tone-amber-bg); border-color:var(--tone-amber-border); }
+  .carga-nota.err { background:var(--tone-red-bg); border-color:var(--status-critical); border-width:2px; font-weight:600; }
+  .carga-h { margin:16px 0 6px; font-size:14px; } .carga-h5 { margin:12px 0 6px; font-size:13px; }
+  .carga-rojo { color:var(--status-critical); font-weight:700; }
+  .carga-tabla th, .carga-tabla td { font-size:12.5px; }
+  .carga-tabla tbody th { text-align:left; font-weight:600; white-space:nowrap; }
+  .carga-tabla tr.carga-ausente td, .carga-tabla tr.carga-omitida td { color:var(--text-secondary); font-style:italic; }
+  .carga-tabla tr.carga-fila-err td, .carga-tabla tr.carga-fila-err th { background:var(--tone-red-bg); color:var(--status-critical); font-weight:700; }
+  .carga-ayuda { margin:6px 0; font-size:12px; color:var(--text-secondary); }
+  .carga-lista { margin:6px 0; padding-left:20px; font-size:12.5px; line-height:1.5; } .carga-mas { font-size:12.5px; color:var(--text-secondary); margin:2px 0 6px 20px; }
+  .carga-confirma { display:block; margin:14px 0 6px; font-size:13px; } .carga-input { width:100%; max-width:420px; padding:7px 10px; border:1px solid var(--baseline); border-radius:6px; font-size:14px; }
+  .carga-banner { position:fixed; top:0; left:0; right:0; z-index:90; display:flex; gap:14px; align-items:center; justify-content:space-between; padding:10px 18px; background:var(--status-critical); color:#fff; font-size:14px; font-weight:600; box-shadow:0 2px 10px rgba(0,0,0,.35); }
+  .carga-banner.hidden { display:none !important; }
+  @media print { .carga-banner { display:none !important; } }
   .modal-overlay { position:fixed; inset:0; background:rgba(11,11,11,0.55); z-index:60; display:flex; align-items:flex-start; justify-content:center; padding:32px 16px; overflow-y:auto; }
   .modal-overlay.hidden { display:none !important; }
   .modal-panel { background:#fff; border-radius:12px; width:100%; max-width:1120px; box-shadow:0 16px 48px rgba(0,0,0,0.28); display:flex; flex-direction:column; max-height:calc(100vh - 64px); }
@@ -1669,6 +1693,21 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     <div class="modal-body" id="otrasFuentesModalBody"></div>
   </div>
 </div>
+
+<div id="cargaControlModal" class="modal-overlay hidden">
+  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="cargaControlTitle" tabindex="-1">
+    <div class="modal-header">
+      <div>
+        <h3 id="cargaControlTitle"></h3>
+        <div class="modal-subtitle" id="cargaControlSubtitle"></div>
+      </div>
+      <button id="cargaControlCloseBtn" type="button" class="modal-close" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="modal-body" id="cargaControlBody"></div>
+    <div class="carga-footer" id="cargaControlFooter"></div>
+  </div>
+</div>
+<div id="cargaErrorBanner" class="carga-banner hidden" role="alert"></div>
 
 <div id="rbdModal" class="modal-overlay hidden">
   <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1">
@@ -7570,346 +7609,785 @@ function exportOtraFuenteExcel(fuenteKey) {
   XLSX.writeFile(wb, `OtrasFuentes_${fuenteKey}_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
-// --- Excel (import): mismo contrato round-trip que el export de arriba — releer exactamente
-// lo que generan sheetOtraFuenteSimpleAOA/sheetOtraFuenteComprasAOA/sheetJunjiBysItemsAOA. La
-// columna RBD admite tanto número (RBD/GESPARVU) como texto ("AC"). ---
-function importOtraFuenteSimpleSheet(ws, fuenteKey, campo) {
-  const rows = rowsFromSheet(ws);
-  const universo = new Set(filasOtrasFuentes(fuenteKey).map(r => r.rbd)); // una fila de una entidad que no es de esta fuente (AC en Asignación Familiar, un id mal escrito) no crea datos ni documentos
-  const label = FUENTES_OTRAS_BY_KEY[fuenteKey].label;
-  let n = 0;
-  for (let i = 1; i < rows.length; i++) {
-    const row = rows[i];
-    if (row[0] === undefined || row[0] === null || String(row[0]).trim() === '') continue;
-    const rbd = String(row[0]).trim();
-    const errRbd = validarIdDocumento(rbd, 'El RBD');
-    if (errRbd) { rechazarFilaImportacion(campo, i + 1, errRbd); continue; }
-    if (!universo.has(rbd)) { rechazarFilaImportacion(campo, i + 1, `la entidad "${rbd}" no es parte de ${label}`); continue; }
-    const nombre = row[1] || rbd;
-    const meses = {};
-    let total = 0;
-    MESES_CARGA.forEach((m, mi) => { const v = Number(row[2 + mi]) || 0; meses[m] = v; total += v; });
-    const of = ensureOtraFuente(rbd, fuenteKey);
-    of[campo] = { meses, total: Math.round(total) };
-    recomputeOtraFuente(rbd, fuenteKey);
-    scheduleRbdSave(rbd, { nombre, otras_fuentes: { [fuenteKey]: { [campo]: { meses, total: Math.round(total) } } } });
-    n++;
+// ============================================================================
+// ===== CARGA POR FUENTE = REEMPLAZO TOTAL: el panel es un ESPEJO EXACTO del Excel =====
+// Causa raíz del problema original («el Excel exportado mezcla la versión anterior y la nueva»): cada hoja solo ESCRIBÍA las filas que traía el
+// archivo (`of.compras[id] = campos` + setDoc con merge:true, que fusiona mapas y nunca borra una clave), de modo que una fila que ya no estaba en el
+// Excel se conservaba; y como una fila sin ID (o con el ID borrado) recibía una clave «imp-<hash del contenido>», una fila MODIFICADA (otro código, otra
+// fecha de pago, otro N° de documento) generaba una clave distinta y la antigua quedaba al lado de la nueva. Además `indiceComprasPorFirma` fusionaba en
+// una sola las filas idénticas (dedupe) y varias filas se descartaban en silencio (cuenta fuera del catálogo, fecha o monto vacío, monto escrito como
+// texto con puntos de miles).
+//
+// Ahora cada carga de una fuente REEMPLAZA por completo, hoja por hoja, lo que el archivo trae (el Excel es la única verdad):
+//   · Para cada hoja que el archivo SÍ trae, el estado de esa hoja en TODAS las entidades de la fuente pasa a ser exactamente el del archivo; una
+//     entidad que no aparece en la hoja queda vacía (en $0 / sin filas) en esa hoja. Una hoja que el archivo NO trae no se toca (un Excel antiguo sin
+//     HONORARIOS no borra boletas) y el resumen lo dice. Solo se toca la fuente cargada: ni SEP ni las otras fuentes.
+//   · Sin clave de negocio, sin upsert ni deduplicación: el ID del Excel se respeta; si un mismo ID viene dos veces en el archivo, la segunda fila recibe
+//     el sufijo «-dup2» (y el resumen lo avisa); las filas sin ID reciben una clave determinista «imp-<hash>» con sufijo «-2», «-3»… cuando el contenido
+//     es idéntico (dos filas idénticas del Excel = dos filas en el panel). El N° DC sale SOLO de la columna del archivo (nunca se hereda el anterior).
+//   · Nada se descarta en silencio: cada fila que no se puede cargar sale en el resumen con su motivo y filas leídas = cargadas + rechazadas.
+//   · Antes de escribir se muestra un resumen de control por hoja (panel hoy vs. archivo) y se pide confirmación; el estado nuevo se calcula en una
+//     estructura aparte (no toca `CARGA_MANUAL` hasta confirmar, así un snapshot que llegue mientras se mira el resumen no lo pisa).
+//   · Se guarda un respaldo del estado anterior (descarga automática del Excel reimportable + copia en memoria para «↩ Deshacer última carga») y, al
+//     terminar, se re-lee lo que quedó en memoria y se compara con el archivo (filas y sumas por hoja): si no cuadra, error visible y persistente.
+//   · La escritura usa setDoc/batch con `mergeFields` (reemplaza el campo COMPLETO, a diferencia de merge:true, que fusiona) y `deleteField()` para
+//     la hoja META; no pasa por scheduleRbdSave (su copia JSON rompería el sentinel de deleteField).
+// Alcance: solo las pestañas de «otras fuentes». La importación de SEP y la de Fondos Fijos siguen con su comportamiento anterior (ver README).
+// ============================================================================
+const CARGA_ELIMINAR = '__ELIMINAR__';          // valor «sin corte propio» de la hoja META: se borra el campo (queda el corte por defecto)
+const CARGA_FILAS_VISIBLES = 15;                // filas de detalle visibles en el resumen (después «…y N más»)
+const CARGA_MAX_BYTES_DOC = 1000000;            // Firestore rechaza documentos de ≥ 1 MiB (1.048.576 bytes): se estima con margen
+const CARGA_LOTE_MAX = 400;                     // documentos por batch (Firestore admite 500 operaciones)
+const respaldoCargaOF = {};                     // fuenteKey → { fecha, motivo, archivo, estado } (solo en memoria: se pierde al recargar; por eso también se descarga el Excel)
+let cargaPlanActivo = null;                     // el plan que muestra el modal de control (null si no hay uno abierto)
+let cargaEnCurso = false;
+
+// Las hojas que una fuente puede traer, en el orden del Excel exportado. `campo` = campo guardado en `otras_fuentes.<fuente>`.
+function hojasCargaOtraFuente(fuenteKey) {
+  const f = FUENTES_OTRAS_BY_KEY[fuenteKey];
+  const h = [];
+  const mensual = (hoja, campo, o) => h.push({ hoja, campo, tipo: 'mensual', ...(o || {}) });
+  if (f.incomeShape === 'junji3') {
+    mensual('ING_OPERACION', 'ingreso_operacion');
+    mensual('ING_HOMOLOGACION', 'ingreso_homologacion');
+    mensual('ING_CARRERA_DOCENTE_PARVULARIA', 'ingreso_carrera_docente', { alias: ['ING_CARRERA_DOCENTE'] }); // el nombre anterior de la hoja sigue valiendo
+    mensual('ING_BDL', 'ingreso_bdl');
+  } else if (f.incomeShape === 'llmm3') {
+    mensual('ING_LLMM_ISAPRES', 'ingreso_llmm_isapres'); mensual('ING_LLMM_FONASA', 'ingreso_llmm_fonasa'); mensual('ING_LLMM_SIL', 'ingreso_llmm_sil');
+  } else {
+    mensual('INGRESO', 'ingreso');
+    if (f.incomeShape === 'carrera2') mensual('ING_CARRERA_DOCENTE', 'ingreso_carrera_docente');
   }
-  return n;
-}
-// Las filas con una cuenta que existe en el catálogo pero no está habilitada para la subvención se
-// importan igual (no se pierde el dato) y quedan marcadas con ⚠ en el registro; el resumen las cuenta.
-// Devuelve { n, noHabilitadas }.
-function importOtraFuenteComprasSheet(ws, fuenteKey) {
-  const porConcepto = comprasPorConcepto(fuenteKey); // fuentes por concepto: la columna 4 es «Concepto» (texto libre) y no un código de cuenta
-  const rows = rowsFromSheet(ws);
-  // La hoja COMPRAS de una fuente con código de cuenta (Subv. General, PIE…) trae «Codigo» en esa columna: importarla aquí crearía conceptos con el número de cuenta. Se rechaza entera, con aviso.
-  if (porConcepto && /^c[oó]digo/i.test(String((rows[0] || [])[3] == null ? '' : (rows[0] || [])[3]).trim())) {
-    rechazarFilaImportacion('COMPRAS', 1, `la columna 4 se llama «${String(rows[0][3]).trim()}» (código de cuenta SUPEREDUC) y ${FUENTES_OTRAS_BY_KEY[fuenteKey].label} lleva «Concepto»: la hoja COMPRAS no se importó`);
-    return { n: 0, noHabilitadas: 0 };
-  }
-  const idxDc = indiceColumnaDc(rows[0]); // N° DC: -1 en un Excel antiguo (sin la columna) → no se toca el N° DC que ya tenga la compra
-  const universo = new Set(filasOtrasFuentes(fuenteKey).map(r => r.rbd));
-  const porRbd = {};
-  const indicesPorRbd = {}; // entidad → índice firma→ID de sus compras (ver idCompraParaImportar)
-  let n = 0, noHabilitadas = 0;
-  for (let i = 1; i < rows.length; i++) {
-    const row = rows[i];
-    if (row[1] === undefined || row[1] === null || String(row[1]).trim() === '') continue;
-    const rbd = String(row[1]).trim();
-    const errRbd = validarIdDocumento(rbd, 'El RBD');
-    if (errRbd) { rechazarFilaImportacion('COMPRAS', i + 1, errRbd); continue; }
-    if (!universo.has(rbd)) { rechazarFilaImportacion('COMPRAS', i + 1, `la entidad "${rbd}" no es parte de ${FUENTES_OTRAS_BY_KEY[fuenteKey].label}`); continue; }
-    const codigoRaw = row[3];
-    const codigo = (typeof codigoRaw === 'number') ? String(Math.trunc(codigoRaw)) : String(codigoRaw || '').trim();
-    if (!porConcepto && !CUENTAS_COMPRAS_BY_CODIGO[codigo]) continue;
-    const campos = {
-      ...(porConcepto ? { concepto: String(codigoRaw === 0 ? '' : (codigoRaw ?? '')).trim() } : { codigo }), // una celda vacía llega como el número 0 (rowsFromSheet usa defval:0): no es un concepto
-      tipoDocumento: String(row[4] || '').trim(),
-      nroDocumento: String(row[5] || '').trim(),
-      fechaDocumento: excelDateToISO(row[6]),
-      fechaPago: excelDateToISO(row[7]),
-      descripcion: String(row[8] || '').trim(),
-      rutProveedor: String(row[9] || '').trim(),
-      nombreProveedor: String(row[10] || '').trim(),
-      montoGasto: Number(row[11]) || 0,
-      montoDocumento: Number(row[12]) || 0,
-      documentoOriginal: String(row[13] || '').trim(),
-    };
-    if (!campos.fechaDocumento || !campos.montoGasto) continue;
-    // Fuentes por concepto: el concepto es una clave en potencia (catálogo de conceptos de la entidad, Reporte personalizado): se valida igual que al agregarlo a mano (vacío, «__x__», demasiado largo).
-    if (porConcepto) {
-      const errConcepto = validarClaveMapa(campos.concepto, 'El concepto');
-      if (errConcepto) { rechazarFilaImportacion('COMPRAS', i + 1, errConcepto); continue; }
+  if (!f.sinGasto) {
+    // JUNJI: un Excel anterior traía una sola hoja REMUNERACIONES, que pasa a la línea Operación; si el archivo trae REM_OPERACION esa hoja manda y REMUNERACIONES se ignora.
+    if (f.incomeShape === 'junji3') { mensual('REMUNERACIONES', 'gasto_rem_operacion', { cedeA: 'REM_OPERACION' }); JUNJI_REM_LINEAS.forEach(l => mensual(l.sheet, l.campo)); }
+    else mensual('REMUNERACIONES', 'gasto_rem');
+    if (f.bysMode !== 'none') {
+      h.push({ hoja: 'COMPRAS', campo: 'compras', tipo: 'compras' });
+      h.push(f.bysMode === 'compras' ? { hoja: 'BYS_PROY_ITEMS', campo: 'bys_proy_items', tipo: 'items' } : { hoja: 'BYS_ITEMS', campo: 'bys_items', tipo: 'items' });
     }
-    // L-03: nota de crédito siempre en negativo, nota de débito en positivo, el resto como viene en el archivo.
-    campos.montoGasto = montoGastoCompra(campos);
-    campos.montoDocumento = montoDocumentoCompra(campos);
-    const idExplicito = idCompraImportadoUsable(row[0]); // '' si la celda ID está vacía / es 0 / "0"…
-    const errId = idExplicito ? validarClaveMapa(idExplicito, 'El ID de la compra') : null; // la clave generada ("imp-…") siempre es válida
-    if (errId) { rechazarFilaImportacion('COMPRAS', i + 1, errId); continue; }
-    // L-14: un ID no usable (vacío, 0, "0"…) cuenta como SIN ID → clave determinista según el contenido (ver idCompraParaImportar).
-    const of = ensureOtraFuente(rbd, fuenteKey);
-    const indice = indicesPorRbd[rbd] || (indicesPorRbd[rbd] = indiceComprasPorFirma(of.compras));
-    const id = idCompraParaImportar(row[0], campos, of.compras, indice);
-    const previa = of.compras[id];
-    aplicarDcImportado(campos, row, idxDc, previa);
-    of.compras[id] = (idxDc < 0 && previa && previa.documentoContable) ? { ...campos, documentoContable: previa.documentoContable } : campos;
-    registrarCompraEnIndice(indice, id, campos);
-    if (!porRbd[rbd]) porRbd[rbd] = {};
-    porRbd[rbd][id] = campos;
-    n++;
-    if (!porConcepto && nivelCuentaOtraFuente(fuenteKey, rbd, codigo) === 0) noHabilitadas++;
+    h.push({ hoja: 'HONORARIOS', campo: 'honorarios', tipo: 'honorarios' });
+    h.push({ hoja: 'HON_PROYECCION', campo: 'hon_proyeccion_items', tipo: 'honproy' });
   }
-  Object.keys(porRbd).forEach(rbd => {
-    recomputeItemsOtraFuenteDesdeCompras(rbd, fuenteKey);
-    recomputeOtraFuente(rbd, fuenteKey);
-    const reg = filasOtrasFuentes(fuenteKey).find(x => x.rbd === rbd);
-    scheduleRbdSave(rbd, { nombre: reg ? reg.nombre : rbd, otras_fuentes: { [fuenteKey]: { compras: porRbd[rbd] } } });
-  });
-  if (otrasFuentesRbdAbierto && porRbd[otrasFuentesRbdAbierto]) renderOtrasFuentesModalContenido();
-  return { n, noHabilitadas };
+  h.push({ hoja: 'META', campo: 'real_hasta_mes', tipo: 'meta' });
+  return h;
 }
-// Importar la hoja HONORARIOS de una fuente (PR-3). Mismo contrato que la de SEP: cada fila que no se puede importar se informa con su motivo y no se pierde en silencio; una boleta ya cargada que no viene
-// en el archivo no se toca; el N° DC solo se escribe si el archivo trae la columna. La hoja de una fuente con cuenta trae «Codigo» y la de una fuente por concepto «Concepto»: la que no corresponde se rechaza entera.
-// Devuelve { n, noHabilitadas } (cuenta del catálogo pero no habilitada para esa subvención: se importa igual y queda marcada ⚠).
-function importOtraFuenteHonorariosSheet(ws, fuenteKey) {
-  const porConcepto = honPorConcepto(fuenteKey);
-  const label = FUENTES_OTRAS_BY_KEY[fuenteKey].label;
-  const rows = rowsFromSheet(ws);
-  const encabezado = String((rows[0] || [])[3] == null ? '' : (rows[0] || [])[3]).trim();
-  if (porConcepto && /^c[oó]digo/i.test(encabezado)) { rechazarFilaImportacion('HONORARIOS', 1, `la columna 4 se llama «${encabezado}» (cuenta de honorarios) y ${label} lleva «Concepto»: la hoja HONORARIOS no se importó`); return { n: 0, noHabilitadas: 0 }; }
-  if (!porConcepto && /^concepto/i.test(encabezado)) { rechazarFilaImportacion('HONORARIOS', 1, `la columna 4 se llama «${encabezado}» y ${label} lleva «Codigo» (cuenta de honorarios): la hoja HONORARIOS no se importó`); return { n: 0, noHabilitadas: 0 }; }
-  const idxDc = indiceColumnaDc(rows[0]);
-  const universo = new Set(filasOtrasFuentes(fuenteKey).map(r => r.rbd));
-  const indicesPorRbd = {};
-  const porRbd = {};
-  let n = 0, noHabilitadas = 0;
-  for (let i = 1; i < rows.length; i++) {
-    const row = rows[i];
-    if (row[1] === undefined || row[1] === null || String(row[1]).trim() === '') continue;
-    const fila = i + 1;
-    const rbd = String(row[1]).trim();
-    const errRbd = validarIdDocumento(rbd, 'El RBD');
-    if (errRbd) { rechazarFilaImportacion('HONORARIOS', fila, errRbd); continue; }
-    if (!universo.has(rbd)) { rechazarFilaImportacion('HONORARIOS', fila, `la entidad "${rbd}" no es parte de ${label}`); continue; }
-    const codigoRaw = row[3];
-    let concepto = '', codigo = '';
-    if (porConcepto) {
-      concepto = String(codigoRaw === 0 ? '' : (codigoRaw ?? '')).trim(); // una celda vacía llega como el número 0 (rowsFromSheet usa defval:0)
-      if (!concepto) { rechazarFilaImportacion('HONORARIOS', fila, 'falta el concepto'); continue; }
-      const errConcepto = validarClaveMapa(concepto, 'El concepto');
-      if (errConcepto) { rechazarFilaImportacion('HONORARIOS', fila, errConcepto); continue; }
-    } else {
-      codigo = (typeof codigoRaw === 'number') ? String(Math.trunc(codigoRaw)) : String(codigoRaw || '').trim();
-      if (!HON_CUENTAS_BY_CODIGO[codigo]) { rechazarFilaImportacion('HONORARIOS', fila, `la cuenta "${codigo}" no acepta honorarios (no está en el catálogo de honorarios del Plan de Cuentas 2026)`); continue; }
-    }
-    const tipoRaw = String(row[4] || '').trim();
-    const tipo = honCodigoTipo(tipoRaw);
-    if (!tipo) { rechazarFilaImportacion('HONORARIOS', fila, `el tipo de documento "${tipoRaw}" no es de honorarios (BOLH, BHE, BOLHE, BPST, BPSTE)`); continue; }
-    if (!porConcepto && !honTipoPermitido(codigo, tipo)) { rechazarFilaImportacion('HONORARIOS', fila, `la cuenta ${codigo} no acepta el tipo ${tipo}`); continue; }
-    const campos = {
-      ...(porConcepto ? { concepto } : { codigo }),
-      tipoDocumento: tipo,
-      nroDocumento: String(row[5] || '').trim(),
-      fechaDocumento: excelDateToISO(row[6]),
-      fechaPago: excelDateToISO(row[7]),
-      descripcion: String(row[8] || '').trim(),
-      rutProveedor: String(row[9] || '').trim(),
-      nombreProveedor: String(row[10] || '').trim(),
-      montoGasto: Number(row[11]) || 0,
-      montoDocumento: Number(row[12]) || 0,
-    };
-    if (!campos.fechaDocumento) { rechazarFilaImportacion('HONORARIOS', fila, 'falta la fecha del documento'); continue; }
-    if (!(campos.montoGasto > 0)) { rechazarFilaImportacion('HONORARIOS', fila, 'el monto gasto debe ser mayor que 0 (las boletas son gasto positivo)'); continue; }
-    if (!(campos.montoDocumento > 0)) campos.montoDocumento = campos.montoGasto;
-    const idExplicito = idCompraImportadoUsable(row[0]);
-    const errId = idExplicito ? validarClaveMapa(idExplicito, 'El ID de la boleta') : null;
-    if (errId) { rechazarFilaImportacion('HONORARIOS', fila, errId); continue; }
-    const of = ensureOtraFuente(rbd, fuenteKey);
-    if (!of.honorarios) of.honorarios = {};
-    const indice = indicesPorRbd[rbd] || (indicesPorRbd[rbd] = indiceComprasPorFirma(of.honorarios));
-    const id = idCompraParaImportar(row[0], campos, of.honorarios, indice);
-    const previa = of.honorarios[id];
-    aplicarDcImportado(campos, row, idxDc, previa);
-    of.honorarios[id] = (idxDc < 0 && previa && previa.documentoContable) ? { ...campos, documentoContable: previa.documentoContable } : campos;
-    registrarCompraEnIndice(indice, id, campos);
-    if (!porRbd[rbd]) porRbd[rbd] = {};
-    porRbd[rbd][id] = campos;
-    n++;
-    if (!porConcepto && honNivelCuenta(ctxHonOtraFuente(fuenteKey, rbd), codigo) === 0) noHabilitadas++;
+function nombreHojaEnLibro(wb, desc) {
+  return [desc.hoja, ...(desc.alias || [])].find(n => wb.Sheets && wb.Sheets[n]) || null;
+}
+
+// Filas de una hoja con su número REAL de fila en Excel (las totalmente vacías no cuentan como dato). `enc` = fila de encabezados.
+function leerFilasHojaCarga(ws) {
+  if (!ws || !ws['!ref']) return { enc: [], filas: [] };
+  const r0 = XLSX.utils.decode_range(ws['!ref']).s.r;
+  const todas = XLSX.utils.sheet_to_json(ws, { header: 1, defval: 0, blankrows: true }).map(f => f.map(quitaApostrofoFormula));
+  const vacia = (f) => f.every(v => v === 0 || v === '' || v === null || v === undefined || (typeof v === 'string' && v.trim() === ''));
+  const filas = [];
+  for (let i = 1; i < todas.length; i++) if (!vacia(todas[i])) filas.push({ n: r0 + i + 1, c: todas[i] });
+  return { enc: todas[0] || [], filas };
+}
+const txtCelda = (v) => (v === undefined || v === null || v === 0) ? '' : String(v).trim();
+function montoCeldaCarga(v) {
+  if (v === undefined || v === null) return { ok: true, valor: 0 };
+  if (typeof v === 'number') return (Number.isFinite(v) && Math.abs(v) < MONTO_ABS_MAX) ? { ok: true, valor: v } : { ok: false };
+  const p = parseMontoCL(v);
+  return p.ok ? { ok: true, valor: p.valor } : { ok: false };
+}
+// RBD / código de la entidad de una fila, o null (con el rechazo registrado).
+function rbdFilaCarga(raw, ctx, n, rechazar) {
+  const s = (raw === undefined || raw === null) ? '' : String(raw).trim();
+  if (s === '' || s === '0') { rechazar(n, 'falta el RBD o código de la entidad'); return null; }
+  const e = validarIdDocumento(s, 'El RBD');
+  if (e) { rechazar(n, e); return null; }
+  if (!ctx.universo.has(s)) { rechazar(n, `la entidad "${s}" no es parte de ${ctx.label}`); return null; }
+  return s;
+}
+function mesesFilaCarga(c, desde, n, rechazar) {
+  const meses = {};
+  let total = 0;
+  for (let mi = 0; mi < MESES_CARGA.length; mi++) {
+    const p = montoCeldaCarga(c[desde + mi]);
+    if (!p.ok) { rechazar(n, `el monto de ${MESES_CARGA_TITLE[mi]} no es un número ("${txtCelda(c[desde + mi]).slice(0, 30)}")`); return null; }
+    meses[MESES_CARGA[mi]] = p.valor; total += p.valor;
   }
-  Object.keys(porRbd).forEach(rbd => {
-    recomputeHonOtraFuente(ensureOtraFuente(rbd, fuenteKey), fuenteKey);
-    recomputeOtraFuente(rbd, fuenteKey);
-    const reg = filasOtrasFuentes(fuenteKey).find(x => x.rbd === rbd);
-    scheduleRbdSave(rbd, { nombre: reg ? reg.nombre : rbd, otras_fuentes: { [fuenteKey]: { honorarios: porRbd[rbd] } } });
-  });
-  if (otrasFuentesRbdAbierto && porRbd[otrasFuentesRbdAbierto]) renderOtrasFuentesModalContenido();
-  return { n, noHabilitadas };
+  return { meses, total: Math.round(total) };
 }
-// Importar la hoja HON_PROYECCION de una fuente: por cuenta (Codigo, Item, 12 meses) o por concepto (Concepto, 12 meses). Una cuenta fuera del catálogo de honorarios, un concepto vacío o inválido
-// o una entidad que no es de la fuente se informan y se omiten.
-function importOtraFuenteHonProyeccionSheet(ws, fuenteKey) {
-  const porConcepto = honPorConcepto(fuenteKey);
-  const label = FUENTES_OTRAS_BY_KEY[fuenteKey].label;
-  const rows = rowsFromSheet(ws);
-  const encabezado = String((rows[0] || [])[2] == null ? '' : (rows[0] || [])[2]).trim();
-  if (porConcepto && /^c[oó]digo/i.test(encabezado)) { rechazarFilaImportacion('HON_PROYECCION', 1, `la columna 3 se llama «${encabezado}» (cuenta de honorarios) y ${label} lleva «Concepto»: la hoja HON_PROYECCION no se importó`); return 0; }
-  if (!porConcepto && /^concepto/i.test(encabezado)) { rechazarFilaImportacion('HON_PROYECCION', 1, `la columna 3 se llama «${encabezado}» y ${label} lleva «Codigo» (cuenta de honorarios): la hoja HON_PROYECCION no se importó`); return 0; }
+// Dos filas con la misma clave (entidad, o entidad + concepto) en una hoja de una sola fila por clave: la última manda y la anterior se informa como rechazada.
+function registrarClaveUnica(visto, clave, n, rechazar) {
+  if (visto.has(clave)) rechazar(visto.get(clave), `se repite más abajo (fila ${n}): se usa la última`);
+  visto.set(clave, n);
+}
+
+// ---- Un parser por tipo de hoja. Cada uno llena `r.nuevo` (Map entidad → valor ya en la forma que se guarda) y registra sus rechazos con `rechazar(fila, motivo)`.
+function parsearMensualCarga(filas, enc, desc, ctx, r, rechazar) {
+  const visto = new Map();
+  filas.forEach(({ n, c }) => {
+    const rbd = rbdFilaCarga(c[0], ctx, n, rechazar); if (rbd === null) return;
+    const m = mesesFilaCarga(c, 2, n, rechazar); if (!m) return;
+    registrarClaveUnica(visto, rbd, n, rechazar);
+    r.nuevo.set(rbd, m);
+  });
+}
+function parsearMetaCarga(filas, enc, desc, ctx, r, rechazar) {
+  const visto = new Map();
+  filas.forEach(({ n, c }) => {
+    const rbd = rbdFilaCarga(c[0], ctx, n, rechazar); if (rbd === null) return;
+    registrarClaveUnica(visto, rbd, n, rechazar);
+    const mes = normalizarRealHastaMes(c[2]);
+    r.nuevo.set(rbd, mes === DATA.n_meses ? CARGA_ELIMINAR : mes); // el corte por defecto no se guarda (queda sin el campo): leído o ausente da lo mismo
+  });
+}
+function parsearItemsCarga(filas, enc, desc, ctx, r, rechazar) {
+  const visto = new Map();
+  filas.forEach(({ n, c }) => {
+    const rbd = rbdFilaCarga(c[0], ctx, n, rechazar); if (rbd === null) return;
+    const concepto = txtCelda(c[2]);
+    if (!concepto) { rechazar(n, 'falta el concepto'); return; }
+    const errConcepto = validarClaveMapa(concepto, 'El concepto');
+    if (errConcepto) { rechazar(n, errConcepto); return; }
+    const m = mesesFilaCarga(c, 3, n, rechazar); if (!m) return;
+    registrarClaveUnica(visto, rbd + '\u0000' + concepto, n, rechazar);
+    if (!r.nuevo.has(rbd)) r.nuevo.set(rbd, {});
+    r.nuevo.get(rbd)[concepto] = { concepto, meses: m.meses, total: m.total };
+  });
+}
+function parsearHonProyCarga(filas, enc, desc, ctx, r, rechazar) {
+  const porConcepto = ctx.honConcepto;
+  const label = ctx.label;
+  const encabezado = txtCelda(enc[2]);
+  if (porConcepto && /^c[oó]digo/i.test(encabezado)) { r.omitida = `la columna 3 se llama «${encabezado}» (cuenta de honorarios) y ${label} lleva «Concepto»`; return; }
+  if (!porConcepto && /^concepto/i.test(encabezado)) { r.omitida = `la columna 3 se llama «${encabezado}» y ${label} lleva «Codigo» (cuenta de honorarios)`; return; }
   const campo = porConcepto ? 'concepto' : 'codigo';
-  const universo = new Set(filasOtrasFuentes(fuenteKey).map(r => r.rbd));
-  const porRbd = new Set();
-  let n = 0;
-  for (let i = 1; i < rows.length; i++) {
-    const row = rows[i];
-    if (row[0] === undefined || row[0] === null || String(row[0]).trim() === '') continue;
-    const fila = i + 1;
-    const rbd = String(row[0]).trim();
-    const errRbd = validarIdDocumento(rbd, 'El RBD');
-    if (errRbd) { rechazarFilaImportacion('HON_PROYECCION', fila, errRbd); continue; }
-    if (!universo.has(rbd)) { rechazarFilaImportacion('HON_PROYECCION', fila, `la entidad "${rbd}" no es parte de ${label}`); continue; }
-    const claveRaw = row[2];
+  const visto = new Map();
+  filas.forEach(({ n, c }) => {
+    const rbd = rbdFilaCarga(c[0], ctx, n, rechazar); if (rbd === null) return;
+    const claveRaw = c[2];
     let clave;
     if (porConcepto) {
-      clave = String(claveRaw === 0 ? '' : (claveRaw ?? '')).trim();
-      if (!clave) continue;
+      clave = txtCelda(claveRaw);
+      if (!clave) { rechazar(n, 'falta el concepto'); return; }
       const errConcepto = validarClaveMapa(clave, 'El concepto');
-      if (errConcepto) { rechazarFilaImportacion('HON_PROYECCION', fila, errConcepto); continue; }
+      if (errConcepto) { rechazar(n, errConcepto); return; }
     } else {
       clave = (typeof claveRaw === 'number') ? String(Math.trunc(claveRaw)) : String(claveRaw || '').trim();
-      if (!HON_CUENTAS_BY_CODIGO[clave]) { rechazarFilaImportacion('HON_PROYECCION', fila, `la cuenta "${clave}" no acepta honorarios (no está en el catálogo de honorarios del Plan de Cuentas 2026)`); continue; }
+      if (!HON_CUENTAS_BY_CODIGO[clave]) { rechazar(n, `la cuenta "${clave}" no acepta honorarios (no está en el catálogo de honorarios del Plan de Cuentas 2026)`); return; }
     }
-    const desde = porConcepto ? 3 : 4;
-    const meses = {};
-    let total = 0;
-    MESES_CARGA.forEach((m, mi) => { const v = Number(row[desde + mi]) || 0; meses[m] = v; total += v; });
-    const ctx = ctxHonOtraFuente(fuenteKey, rbd);
-    const hp = ctx.asegurarProyeccion();
-    const it = ensureHonProyItemOtraFuente(hp, campo, clave);
-    it.meses = meses;
-    it.total = Math.round(total);
-    recomputeBysProyeccionAgregado(hp);
-    recomputeOtraFuente(rbd, fuenteKey);
-    scheduleRbdSave(rbd, { nombre: ctx.nombre(), ...ctx.payloadProy(clave, { [campo]: clave, meses, total: it.total }) });
-    porRbd.add(rbd);
-    n++;
-  }
-  if (otrasFuentesRbdAbierto && porRbd.has(otrasFuentesRbdAbierto)) renderOtrasFuentesModalContenido();
-  return n;
+    const m = mesesFilaCarga(c, porConcepto ? 3 : 4, n, rechazar); if (!m) return;
+    registrarClaveUnica(visto, rbd + '\u0000' + clave, n, rechazar);
+    if (!r.nuevo.has(rbd)) r.nuevo.set(rbd, {});
+    r.nuevo.get(rbd)[clave] = { [campo]: clave, meses: m.meses, total: m.total };
+  });
 }
-function importBysItemsSheet(ws, fuenteKey, lista = 'bys_items') {
-  const rows = rowsFromSheet(ws);
-  const universoItems = new Set(filasOtrasFuentes(fuenteKey).map(r => r.rbd));
-  const porRbd = new Set();
-  let n = 0;
-  for (let i = 1; i < rows.length; i++) {
-    const row = rows[i];
-    if (row[0] === undefined || row[0] === null || String(row[0]).trim() === '') continue;
-    const rbd = String(row[0]).trim();
-    const errRbd = validarIdDocumento(rbd, 'El RBD');
-    if (errRbd) { rechazarFilaImportacion(lista.toUpperCase(), i + 1, errRbd); continue; }
-    if (!universoItems.has(rbd)) { rechazarFilaImportacion(lista.toUpperCase(), i + 1, `la entidad "${rbd}" no es parte de ${FUENTES_OTRAS_BY_KEY[fuenteKey].label}`); continue; }
-    const nombre = row[1] || rbd;
-    const concepto = String(row[2] || '').trim();
-    if (!concepto) continue;
-    const errConcepto = validarClaveMapa(concepto, 'El concepto');
-    if (errConcepto) { rechazarFilaImportacion(lista.toUpperCase(), i + 1, errConcepto); continue; }
-    const meses = {};
-    let total = 0;
-    MESES_CARGA.forEach((m, mi) => { const v = Number(row[3 + mi]) || 0; meses[m] = v; total += v; });
-    const of = ensureOtraFuente(rbd, fuenteKey);
-    const it = ensureOtraFuenteBysItem(of, concepto, lista);
-    it.meses = meses;
-    it.total = Math.round(total);
-    recomputeOtraFuenteBysItemsAgregado(of);
-    recomputeOtraFuente(rbd, fuenteKey);
-    scheduleRbdSave(rbd, { nombre, otras_fuentes: { [fuenteKey]: { [lista]: { [concepto]: { concepto, meses, total: it.total } } } } });
-    porRbd.add(rbd);
-    n++;
-  }
-  if (otrasFuentesRbdAbierto && porRbd.has(otrasFuentesRbdAbierto)) renderOtrasFuentesModalContenido();
-  return n;
-}
-// Hoja META: aplica el corte "Real hasta el mes" por entidad. Solo escribe lo que cambia (no
-// crea documentos de entidades que ya tienen ese mismo corte).
-function importOtraFuenteMetaSheet(ws, fuenteKey) {
-  const rows = rowsFromSheet(ws);
-  const universoMeta = new Set(filasOtrasFuentes(fuenteKey).map(r => r.rbd));
-  let n = 0;
-  for (let i = 1; i < rows.length; i++) {
-    const row = rows[i];
-    if (row[0] === undefined || row[0] === null || String(row[0]).trim() === '') continue;
-    const rbd = String(row[0]).trim();
-    const errRbd = validarIdDocumento(rbd, 'El RBD');
-    if (errRbd) { rechazarFilaImportacion('META', i + 1, errRbd); continue; }
-    if (!universoMeta.has(rbd)) { rechazarFilaImportacion('META', i + 1, `la entidad "${rbd}" no es parte de ${FUENTES_OTRAS_BY_KEY[fuenteKey].label}`); continue; }
-    const mes = normalizarRealHastaMes(row[2]);
-    const of = ensureOtraFuente(rbd, fuenteKey);
-    if (realHastaMesOtraFuente(of) === mes) continue;
-    of.real_hasta_mes = mes;
-    recomputeOtraFuente(rbd, fuenteKey);
-    scheduleRbdSave(rbd, { nombre: row[1] || rbd, otras_fuentes: { [fuenteKey]: { real_hasta_mes: mes } } });
-    n++;
-  }
-  return n;
-}
-function importOtraFuenteWorkbook(wbIn, fuenteKey) {
-  const fuente = FUENTES_OTRAS_BY_KEY[fuenteKey];
-  let resumen = [];
-  importRechazos.length = 0;
-  if (wbIn.Sheets['META']) resumen.push('META (corte Real/Proy): ' + importOtraFuenteMetaSheet(wbIn.Sheets['META'], fuenteKey) + ' cambios');
-  if (fuente.incomeShape === 'junji3') {
-    if (wbIn.Sheets['ING_OPERACION']) resumen.push('ING_OPERACION: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_OPERACION'], fuenteKey, 'ingreso_operacion') + ' filas');
-    if (wbIn.Sheets['ING_HOMOLOGACION']) resumen.push('ING_HOMOLOGACION: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_HOMOLOGACION'], fuenteKey, 'ingreso_homologacion') + ' filas');
-    // «Carrera Docente Parvularia»: la hoja nueva manda; un Excel anterior trae ING_CARRERA_DOCENTE (se aplica solo si no viene la nueva).
-    const hojaCD = wbIn.Sheets['ING_CARRERA_DOCENTE_PARVULARIA'] ? 'ING_CARRERA_DOCENTE_PARVULARIA' : (wbIn.Sheets['ING_CARRERA_DOCENTE'] ? 'ING_CARRERA_DOCENTE' : null);
-    if (hojaCD) resumen.push(hojaCD + ': ' + importOtraFuenteSimpleSheet(wbIn.Sheets[hojaCD], fuenteKey, 'ingreso_carrera_docente') + ' filas');
-    if (wbIn.Sheets['ING_BDL']) resumen.push('ING_BDL: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_BDL'], fuenteKey, 'ingreso_bdl') + ' filas'); // un Excel anterior al BDL no trae la hoja: se importa igual y no toca el BDL guardado
-  } else if (fuente.incomeShape === 'llmm3') {
-    if (wbIn.Sheets['ING_LLMM_ISAPRES']) resumen.push('ING_LLMM_ISAPRES: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_LLMM_ISAPRES'], fuenteKey, 'ingreso_llmm_isapres') + ' filas');
-    if (wbIn.Sheets['ING_LLMM_FONASA']) resumen.push('ING_LLMM_FONASA: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_LLMM_FONASA'], fuenteKey, 'ingreso_llmm_fonasa') + ' filas');
-    if (wbIn.Sheets['ING_LLMM_SIL']) resumen.push('ING_LLMM_SIL: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_LLMM_SIL'], fuenteKey, 'ingreso_llmm_sil') + ' filas');
-  } else {
-    if (wbIn.Sheets['INGRESO']) resumen.push('INGRESO: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['INGRESO'], fuenteKey, 'ingreso') + ' filas');
-    if (fuente.incomeShape === 'carrera2' && wbIn.Sheets['ING_CARRERA_DOCENTE']) resumen.push('ING_CARRERA_DOCENTE: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['ING_CARRERA_DOCENTE'], fuenteKey, 'ingreso_carrera_docente') + ' filas');
-  }
-  if (!fuente.sinGasto && fuente.incomeShape === 'junji3') {
-    // JUNJI: un Excel anterior trae una sola hoja REMUNERACIONES, que pasa a la línea Operación (como lo ya cargado); si además trae hojas REM_*, estas mandan (se aplican después).
-    if (wbIn.Sheets['REMUNERACIONES']) resumen.push('REMUNERACIONES (→ Operación): ' + importOtraFuenteSimpleSheet(wbIn.Sheets['REMUNERACIONES'], fuenteKey, 'gasto_rem_operacion') + ' filas');
-    JUNJI_REM_LINEAS.forEach(l => { if (wbIn.Sheets[l.sheet]) resumen.push(l.sheet + ': ' + importOtraFuenteSimpleSheet(wbIn.Sheets[l.sheet], fuenteKey, l.campo) + ' filas'); });
-  } else if (!fuente.sinGasto && wbIn.Sheets['REMUNERACIONES']) resumen.push('REMUNERACIONES: ' + importOtraFuenteSimpleSheet(wbIn.Sheets['REMUNERACIONES'], fuenteKey, 'gasto_rem') + ' filas');
-  if (fuente.sinGasto || fuente.bysMode === 'none') {
-    // Sin B&S: solo se leen las hojas de honorarios (la fuente sin gasto no las lleva).
-    if (!fuente.sinGasto) {
-      if (wbIn.Sheets['HONORARIOS']) {
-        const rh = importOtraFuenteHonorariosSheet(wbIn.Sheets['HONORARIOS'], fuenteKey);
-        resumen.push('HONORARIOS: ' + rh.n + ' filas');
+// IDs de las filas de COMPRAS / HONORARIOS (ver el comentario de arriba): el del Excel tal cual; repetido en el archivo → «-dupN»; sin ID → «imp-<hash>» (+ «-2», «-3»… si hay filas idénticas).
+function asignarIdsCarga(items, r) {
+  const reservados = {}; // entidad → IDs explícitos de TODO el archivo (un ID generado nunca debe pisar uno que el archivo trae más abajo)
+  items.forEach(it => { if (it.idExp) (reservados[it.rbd] = reservados[it.rbd] || new Set()).add(it.idExp); });
+  const usados = {};
+  items.forEach(it => {
+    const U = usados[it.rbd] = usados[it.rbd] || new Set();
+    const R = reservados[it.rbd] || new Set();
+    let id;
+    if (it.idExp) {
+      id = it.idExp;
+      if (U.has(id)) {
+        let k = 2;
+        while (U.has(it.idExp + '-dup' + k) || R.has(it.idExp + '-dup' + k)) k++;
+        id = it.idExp + '-dup' + k;
+        r.idsRepetidos.push({ fila: it.n, original: it.idExp, nuevo: id });
       }
-      if (wbIn.Sheets['HON_PROYECCION']) resumen.push('HON_PROYECCION: ' + importOtraFuenteHonProyeccionSheet(wbIn.Sheets['HON_PROYECCION'], fuenteKey) + ' filas');
+    } else {
+      const base = PREFIJO_ID_COMPRA_IMPORTADA + hashTexto53(firmaContenidoCompra(it.campos));
+      id = base;
+      let k = 1;
+      while (U.has(id) || R.has(id)) { k++; id = base + '-' + k; }
     }
-    renderOtrasFuentesTable(fuenteKey); return resumen.concat(resumenRechazosImportacion());
-  }
-  if (fuente.bysMode === 'compras') {
-    if (wbIn.Sheets['COMPRAS']) {
-      const rc = importOtraFuenteComprasSheet(wbIn.Sheets['COMPRAS'], fuenteKey);
-      resumen.push('COMPRAS: ' + rc.n + ' filas' + (rc.noHabilitadas ? ` (⚠ ${rc.noHabilitadas} con cuenta no habilitada para ${fuente.label} en el Plan de Cuentas 2026: quedan marcadas en el registro)` : ''));
-    }
-    if (wbIn.Sheets['BYS_PROY_ITEMS']) resumen.push('BYS_PROY_ITEMS: ' + importBysItemsSheet(wbIn.Sheets['BYS_PROY_ITEMS'], fuenteKey, 'bys_proy_items') + ' filas');
-  } else {
-    // Fuentes por concepto: un Excel anterior al registro de compras no trae la hoja COMPRAS: se importa igual y no toca las compras guardadas (no borra nada).
-    if (wbIn.Sheets['COMPRAS']) resumen.push('COMPRAS: ' + importOtraFuenteComprasSheet(wbIn.Sheets['COMPRAS'], fuenteKey).n + ' filas');
-    if (wbIn.Sheets['BYS_ITEMS']) resumen.push('BYS_ITEMS: ' + importBysItemsSheet(wbIn.Sheets['BYS_ITEMS'], fuenteKey) + ' filas');
-  }
-  // Honorarios (hojas nuevas): un archivo anterior que no las trae simplemente no las toca (no borra ninguna boleta ni proyección).
-  if (wbIn.Sheets['HONORARIOS']) {
-    const rh = importOtraFuenteHonorariosSheet(wbIn.Sheets['HONORARIOS'], fuenteKey);
-    resumen.push('HONORARIOS: ' + rh.n + ' filas' + (rh.noHabilitadas ? ` (⚠ ${rh.noHabilitadas} con cuenta no habilitada para ${fuente.label} en el Plan de Cuentas 2026: quedan marcadas en el registro)` : ''));
-  }
-  if (wbIn.Sheets['HON_PROYECCION']) resumen.push('HON_PROYECCION: ' + importOtraFuenteHonProyeccionSheet(wbIn.Sheets['HON_PROYECCION'], fuenteKey) + ' filas');
-  renderOtrasFuentesTable(fuenteKey);
-  return resumen.concat(resumenRechazosImportacion());
+    U.add(id);
+    if (!r.nuevo.has(it.rbd)) r.nuevo.set(it.rbd, {});
+    r.nuevo.get(it.rbd)[id] = it.campos;
+  });
 }
+function parsearComprasCarga(filas, enc, desc, ctx, r, rechazar) {
+  const porConcepto = ctx.comprasConcepto;
+  const encabezado = txtCelda(enc[3]);
+  // La hoja COMPRAS de una fuente con código de cuenta trae «Codigo» y la de una fuente por concepto «Concepto»: la que no corresponde se omite ENTERA (y se avisa), no se carga a medias.
+  if (porConcepto && /^c[oó]digo/i.test(encabezado)) { r.omitida = `la columna 4 se llama «${encabezado}» (código de cuenta SUPEREDUC) y ${ctx.label} lleva «Concepto»`; return; }
+  if (!porConcepto && /^concepto/i.test(encabezado)) { r.omitida = `la columna 4 se llama «${encabezado}» y ${ctx.label} lleva «Codigo» (cuenta del Plan de Cuentas)`; return; }
+  const idxDc = indiceColumnaDc(enc); // -1 = el archivo no trae la columna N° DC: las compras quedan sin N° DC (el Excel es la única verdad)
+  const items = [];
+  filas.forEach(({ n, c }) => {
+    const rbd = rbdFilaCarga(c[1], ctx, n, rechazar); if (rbd === null) return;
+    const codigoRaw = c[3];
+    const codigo = (typeof codigoRaw === 'number') ? String(Math.trunc(codigoRaw)) : String(codigoRaw || '').trim();
+    if (!porConcepto && !CUENTAS_COMPRAS_BY_CODIGO[codigo]) { rechazar(n, codigo ? `la cuenta "${codigo}" no está en el catálogo de cuentas de compras` : 'falta el código de la cuenta'); return; }
+    const gasto = montoCeldaCarga(c[11]), docto = montoCeldaCarga(c[12]);
+    if (!gasto.ok) { rechazar(n, `el monto gasto no es un número ("${txtCelda(c[11]).slice(0, 30)}")`); return; }
+    if (!docto.ok) { rechazar(n, `el monto del documento no es un número ("${txtCelda(c[12]).slice(0, 30)}")`); return; }
+    const campos = {
+      ...(porConcepto ? { concepto: txtCelda(codigoRaw) } : { codigo }), // una celda vacía llega como el número 0 (defval:0): no es un concepto
+      tipoDocumento: txtCelda(c[4]), nroDocumento: txtCelda(c[5]),
+      fechaDocumento: excelDateToISO(c[6]), fechaPago: excelDateToISO(c[7]),
+      descripcion: txtCelda(c[8]), rutProveedor: txtCelda(c[9]), nombreProveedor: txtCelda(c[10]),
+      montoGasto: gasto.valor, montoDocumento: docto.valor,
+      documentoOriginal: txtCelda(c[13]),
+    };
+    if (!campos.fechaDocumento) { rechazar(n, 'falta la fecha del documento'); return; }
+    if (!campos.montoGasto) { rechazar(n, 'el monto gasto está vacío o es 0'); return; }
+    if (porConcepto) {
+      const errConcepto = validarClaveMapa(campos.concepto, 'El concepto');
+      if (errConcepto) { rechazar(n, errConcepto); return; }
+    }
+    campos.montoGasto = montoGastoCompra(campos);       // L-03: nota de crédito siempre en negativo, nota de débito en positivo
+    campos.montoDocumento = montoDocumentoCompra(campos);
+    const idExp = idCompraImportadoUsable(c[0]);
+    const errId = idExp ? validarClaveMapa(idExp, 'El ID de la compra') : null;
+    if (errId) { rechazar(n, errId); return; }
+    if (idxDc >= 0) { const dc = txtCelda(c[idxDc]); if (dc) campos.documentoContable = dc; }
+    items.push({ n, rbd, idExp, campos });
+    if (!porConcepto && nivelCuentaOtraFuente(ctx.fk, rbd, codigo) === 0) r.noHabilitadas++;
+  });
+  asignarIdsCarga(items, r);
+}
+function parsearHonorariosCarga(filas, enc, desc, ctx, r, rechazar) {
+  const porConcepto = ctx.honConcepto;
+  const encabezado = txtCelda(enc[3]);
+  if (porConcepto && /^c[oó]digo/i.test(encabezado)) { r.omitida = `la columna 4 se llama «${encabezado}» (cuenta de honorarios) y ${ctx.label} lleva «Concepto»`; return; }
+  if (!porConcepto && /^concepto/i.test(encabezado)) { r.omitida = `la columna 4 se llama «${encabezado}» y ${ctx.label} lleva «Codigo» (cuenta de honorarios)`; return; }
+  const idxDc = indiceColumnaDc(enc);
+  const items = [];
+  filas.forEach(({ n, c }) => {
+    const rbd = rbdFilaCarga(c[1], ctx, n, rechazar); if (rbd === null) return;
+    const codigoRaw = c[3];
+    let concepto = '', codigo = '';
+    if (porConcepto) {
+      concepto = txtCelda(codigoRaw);
+      if (!concepto) { rechazar(n, 'falta el concepto'); return; }
+      const errConcepto = validarClaveMapa(concepto, 'El concepto');
+      if (errConcepto) { rechazar(n, errConcepto); return; }
+    } else {
+      codigo = (typeof codigoRaw === 'number') ? String(Math.trunc(codigoRaw)) : String(codigoRaw || '').trim();
+      if (!HON_CUENTAS_BY_CODIGO[codigo]) { rechazar(n, `la cuenta "${codigo}" no acepta honorarios (no está en el catálogo de honorarios del Plan de Cuentas 2026)`); return; }
+    }
+    const tipoRaw = txtCelda(c[4]);
+    const tipo = honCodigoTipo(tipoRaw);
+    if (!tipo) { rechazar(n, `el tipo de documento "${tipoRaw}" no es de honorarios (BOLH, BHE, BOLHE, BPST, BPSTE)`); return; }
+    if (!porConcepto && !honTipoPermitido(codigo, tipo)) { rechazar(n, `la cuenta ${codigo} no acepta el tipo ${tipo}`); return; }
+    const gasto = montoCeldaCarga(c[11]), docto = montoCeldaCarga(c[12]);
+    if (!gasto.ok) { rechazar(n, `el monto gasto no es un número ("${txtCelda(c[11]).slice(0, 30)}")`); return; }
+    if (!docto.ok) { rechazar(n, `el monto del documento no es un número ("${txtCelda(c[12]).slice(0, 30)}")`); return; }
+    const campos = {
+      ...(porConcepto ? { concepto } : { codigo }),
+      tipoDocumento: tipo, nroDocumento: txtCelda(c[5]),
+      fechaDocumento: excelDateToISO(c[6]), fechaPago: excelDateToISO(c[7]),
+      descripcion: txtCelda(c[8]), rutProveedor: txtCelda(c[9]), nombreProveedor: txtCelda(c[10]),
+      montoGasto: gasto.valor, montoDocumento: docto.valor,
+    };
+    if (!campos.fechaDocumento) { rechazar(n, 'falta la fecha del documento'); return; }
+    if (!(campos.montoGasto > 0)) { rechazar(n, 'el monto gasto debe ser mayor que 0 (las boletas son gasto positivo)'); return; }
+    if (!(campos.montoDocumento > 0)) campos.montoDocumento = campos.montoGasto;
+    const idExp = idCompraImportadoUsable(c[0]);
+    const errId = idExp ? validarClaveMapa(idExp, 'El ID de la boleta') : null;
+    if (errId) { rechazar(n, errId); return; }
+    if (idxDc >= 0) { const dc = txtCelda(c[idxDc]); if (dc) campos.documentoContable = dc; }
+    items.push({ n, rbd, idExp, campos });
+    if (!porConcepto && honNivelCuenta(ctxHonOtraFuente(ctx.fk, rbd), codigo) === 0) r.noHabilitadas++;
+  });
+  asignarIdsCarga(items, r);
+}
+const PARSERS_CARGA = { mensual: parsearMensualCarga, meta: parsearMetaCarga, items: parsearItemsCarga, honproy: parsearHonProyCarga, compras: parsearComprasCarga, honorarios: parsearHonorariosCarga };
+
+function ctxCargaOtraFuente(fuenteKey) {
+  const f = FUENTES_OTRAS_BY_KEY[fuenteKey];
+  return { fk: fuenteKey, f, label: f.label, universo: new Set(filasOtrasFuentes(fuenteKey).map(r => r.rbd)), comprasConcepto: comprasPorConcepto(fuenteKey), honConcepto: honPorConcepto(fuenteKey) };
+}
+function parsearHojaCarga(ws, desc, ctx) {
+  const { enc, filas } = leerFilasHojaCarga(ws);
+  const r = { leidas: filas.length, rechazos: [], nuevo: new Map(), omitida: '', idsRepetidos: [], noHabilitadas: 0 };
+  PARSERS_CARGA[desc.tipo](filas, enc, desc, ctx, r, (fila, motivo) => r.rechazos.push({ fila, motivo }));
+  r.rechazos.sort((a, b) => a.fila - b.fila);
+  if (r.omitida) { r.nuevo = new Map(); r.rechazos = []; }
+  r.rechazadas = r.omitida ? r.leidas : r.rechazos.length;
+  r.aceptadas = r.leidas - r.rechazadas;
+  return r;
+}
+
+// ---- Valores «vacíos», lectura del estado actual (memoria) en la MISMA forma que lo que se guarda, normalización y comparación.
+function vacioCarga(desc) {
+  if (desc.tipo === 'mensual') return { meses: mesesEnCero(), total: 0 };
+  return desc.tipo === 'meta' ? CARGA_ELIMINAR : {};
+}
+function ofDeMemoria(rbd, fuenteKey) { return ((CARGA_MANUAL.otras_fuentes_por_rbd || {})[rbd] || {})[fuenteKey] || null; }
+// El estado actual de una hoja en una entidad, con la forma del archivo (mapa por ID, mapa por concepto/cuenta, {meses,total}…).
+function rawDesdeMemoria(desc, of, ctx) {
+  if (!of) return vacioCarga(desc);
+  switch (desc.tipo) {
+    case 'mensual': return of[desc.campo] ? { meses: { ...of[desc.campo].meses }, total: of[desc.campo].total || 0 } : vacioCarga(desc);
+    case 'compras': return of.compras || {};
+    case 'honorarios': return of.honorarios || {};
+    case 'items': { const o = {}; (of[desc.campo] || []).forEach(it => { o[it.concepto] = it; }); return o; }
+    case 'honproy': { const o = {}; const k = ctx.honConcepto ? 'concepto' : 'codigo'; ((of.hon_proy && of.hon_proy.items) || []).forEach(it => { o[it[k]] = it; }); return o; }
+    case 'meta': { const mes = realHastaMesOtraFuente(of); return mes === DATA.n_meses ? CARGA_ELIMINAR : mes; }
+  }
+  return vacioCarga(desc);
+}
+function canonCarga(v) {
+  if (Array.isArray(v)) return '[' + v.map(canonCarga).join(',') + ']';
+  if (v && typeof v === 'object') return '{' + Object.keys(v).sort().map(k => JSON.stringify(k) + ':' + canonCarga(v[k])).join(',') + '}';
+  return JSON.stringify(v === undefined ? null : v);
+}
+// Forma normalizada para COMPARAR (lo guardado en Firestore ya pasó por sanitiza*; lo del archivo se pasa por las mismas funciones).
+function normalizaCarga(desc, v, ctx) {
+  const mesesDe = (x) => MESES_CARGA.map(m => Number(x && x.meses && x.meses[m]) || 0);
+  switch (desc.tipo) {
+    case 'mensual': return mesesDe(v);
+    case 'meta': return v === CARGA_ELIMINAR ? CARGA_ELIMINAR : Number(v);
+    case 'compras': case 'honorarios': {
+      const o = {};
+      Object.entries(v || {}).forEach(([id, c]) => {
+        const s = desc.tipo === 'honorarios' ? sanitizaHonorario(c, ctx.honConcepto) : (ctx.comprasConcepto ? sanitizaCompraConcepto(c) : sanitizaCompra(c));
+        if (s.documentoContable === '') delete s.documentoContable; // «sin N° DC» se guarda sin el campo
+        o[id] = s;
+      });
+      return o;
+    }
+    case 'items': { const o = {}; Object.entries(v || {}).forEach(([k, it]) => { o[k] = { concepto: it.concepto, meses: mesesDe(it) }; }); return o; }
+    case 'honproy': { const o = {}; Object.entries(v || {}).forEach(([k, it]) => { o[k] = { meses: mesesDe(it) }; }); return o; }
+  }
+  return v;
+}
+function igualCarga(desc, a, b, ctx) { return canonCarga(normalizaCarga(desc, a, ctx)) === canonCarga(normalizaCarga(desc, b, ctx)); }
+
+// ---- Estadísticas por hoja (filas y totales) sobre un objeto { entidad: valor }: las mismas para «panel hoy», «archivo» y la verificación posterior.
+function estadisticaCarga(desc, porRbd, ctx) {
+  const e = { filas: 0, total: 0, entidades: 0 };
+  const rbds = Object.keys(porRbd);
+  if (desc.tipo === 'mensual') {
+    rbds.forEach(rbd => { const v = porRbd[rbd]; const t = Math.round(MESES_CARGA.reduce((s, m) => s + (Number(v && v.meses && v.meses[m]) || 0), 0)); if (MESES_CARGA.some(m => Number(v && v.meses && v.meses[m]))) { e.filas++; e.total += t; } });
+  } else if (desc.tipo === 'meta') {
+    rbds.forEach(rbd => { if (porRbd[rbd] !== CARGA_ELIMINAR) e.filas++; });
+    e.total = null;
+  } else if (desc.tipo === 'compras' || desc.tipo === 'honorarios') {
+    e.dcs = new Map();
+    rbds.forEach(rbd => {
+      const mapa = normalizaCarga(desc, porRbd[rbd], ctx);
+      const n = Object.keys(mapa).length;
+      if (n) e.entidades++;
+      Object.values(mapa).forEach(c => {
+        e.filas++; e.total += Number(c.montoGasto) || 0;
+        const dc = dcDeCompra(c).texto || '';
+        const d = e.dcs.get(dc) || { filas: 0, suma: 0 };
+        d.filas++; d.suma += Number(c.montoGasto) || 0; e.dcs.set(dc, d);
+      });
+    });
+    e.nDc = [...e.dcs.keys()].filter(k => k !== '').length;
+    e.total = Math.round(e.total * 100) / 100;
+  } else { // items / honproy
+    rbds.forEach(rbd => { const o = porRbd[rbd] || {}; const k = Object.keys(o).length; if (k) e.entidades++; Object.values(o).forEach(it => { e.filas++; e.total += MESES_CARGA.reduce((s, m) => s + (Number(it.meses && it.meses[m]) || 0), 0); }); });
+    e.total = Math.round(e.total);
+  }
+  return e;
+}
+// Estado actual de TODAS las entidades de la fuente para una hoja: { entidad: valor } leído de la memoria.
+function rawsActualesCarga(desc, ctx) {
+  const o = {};
+  ctx.universo.forEach(rbd => { o[rbd] = rawDesdeMemoria(desc, ofDeMemoria(rbd, ctx.fk), ctx); });
+  return o;
+}
+function rawsDeArchivoCarga(h) { const o = {}; h.nuevo.forEach((v, rbd) => { o[rbd] = v; }); return o; }
+const mismaEstadistica = (a, b) => a.filas === b.filas && (a.total === null || Math.abs(a.total - b.total) < 0.5) && (a.nDc === undefined || a.nDc === b.nDc);
+
+// ---- El plan de carga: qué trae el archivo, qué hay hoy y qué cambiaría. Se arma SIN tocar la memoria viva.
+function construirPlanCarga(fuenteKey, wb, archivo) {
+  const ctx = ctxCargaOtraFuente(fuenteKey);
+  const descs = hojasCargaOtraFuente(fuenteKey);
+  const usadas = new Set();
+  const hojas = descs.map(desc => {
+    const nombre = nombreHojaEnLibro(wb, desc);
+    const h = { desc, nombre, presente: !!nombre, omitida: '', notas: [] };
+    if (nombre && desc.cedeA && wb.Sheets[desc.cedeA]) { h.presente = false; h.cedida = `se ignora porque el archivo trae ${desc.cedeA}, que manda`; usadas.add(nombre); return h; }
+    if (!nombre) return h;
+    usadas.add(nombre);
+    Object.assign(h, parsearHojaCarga(wb.Sheets[nombre], desc, ctx));
+    h.estNuevo = estadisticaCarga(desc, rawsDeArchivoCarga(h), ctx);
+    return h;
+  });
+  const noUsadas = (wb.SheetNames || []).filter(n => !usadas.has(n));
+  const plan = { modo: 'excel', fuenteKey, ctx, archivo, hojas, noUsadas, advertencias: [] };
+  completarPlanCarga(plan);
+  return plan;
+}
+// Estado actual, avisos y cambios del plan (se vuelve a llamar al confirmar, por si la memoria cambió mientras se miraba el resumen).
+function completarPlanCarga(plan) {
+  const ctx = plan.ctx;
+  plan.advertencias = [];
+  plan.hojas.forEach(h => {
+    const actuales = rawsActualesCarga(h.desc, ctx);
+    h.estActual = estadisticaCarga(h.desc, actuales, ctx);
+    h.notas = [];
+    if (!h.presente) return;
+    if (h.omitida) { plan.advertencias.push(`La hoja ${h.nombre} NO se carga: ${h.omitida}. Lo que hay en el panel para esa hoja se conserva.`); return; }
+    if (plan.modo === 'excel') {
+      const faltan = ctx.universo.size - h.nuevo.size;
+      if (h.desc.tipo === 'mensual' || h.desc.tipo === 'meta') {
+        if (faltan > 0) h.notas.push(`${faltan} de ${ctx.universo.size} entidades de ${ctx.label} no aparecen en esta hoja: quedarán ${h.desc.tipo === 'meta' ? 'con el corte por defecto' : 'en $0'}.`);
+      } else {
+        const conFilas = Object.keys(actuales).filter(rbd => Object.keys(actuales[rbd] || {}).length && !h.nuevo.has(rbd)).length;
+        if (conFilas) h.notas.push(`${conFilas} ${conFilas === 1 ? 'entidad tiene' : 'entidades tienen'} filas en el panel y ninguna en el archivo: se eliminarán todas sus filas de esta hoja.`);
+      }
+      if (h.aceptadas === 0 && h.estActual.filas > 0) h.notas.push('El archivo trae esta hoja SIN filas válidas: se eliminarán todas las filas que hay hoy en el panel.');
+    }
+    if (h.idsRepetidos && h.idsRepetidos.length) h.notas.push(`${h.idsRepetidos.length} ${h.idsRepetidos.length === 1 ? 'fila traía un ID repetido' : 'filas traían un ID repetido'} dentro del archivo: se conservan todas, con un ID nuevo (ej. ${h.idsRepetidos[0].original} → ${h.idsRepetidos[0].nuevo}).`);
+    if (h.noHabilitadas) h.notas.push(`⚠ ${h.noHabilitadas} con cuenta no habilitada para ${ctx.label} en el Plan de Cuentas 2026: quedan marcadas en el registro.`);
+  });
+  plan.cambios = calcularCambiosCarga(plan);
+  plan.nCambios = Object.keys(plan.cambios).length;
+  plan.errores = erroresTamanoCarga(plan);
+  return plan;
+}
+// { entidad: { campo: valor|CARGA_ELIMINAR } } — SOLO lo que realmente cambia respecto de la memoria.
+function calcularCambiosCarga(plan) {
+  const ctx = plan.ctx, cambios = {};
+  ctx.universo.forEach(rbd => {
+    const of = ofDeMemoria(rbd, ctx.fk);
+    plan.hojas.forEach(h => {
+      if (!h.presente || h.omitida) return;
+      const nuevo = h.nuevo.has(rbd) ? h.nuevo.get(rbd) : vacioCarga(h.desc);
+      if (!igualCarga(h.desc, rawDesdeMemoria(h.desc, of, ctx), nuevo, ctx)) (cambios[rbd] = cambios[rbd] || {})[h.desc.campo] = nuevo;
+    });
+  });
+  return cambios;
+}
+const bytesCarga = (v) => new TextEncoder().encode(JSON.stringify(v === undefined ? null : v)).length;
+// Estimación del tamaño que tendría el documento de cada entidad tras la carga (Firestore rechaza ≥ 1 MiB): se bloquea ANTES de escribir.
+function erroresTamanoCarga(plan) {
+  const errores = [];
+  const docs = {};
+  if (ultimoSnapshotAplicado && ultimoSnapshotAplicado.docs) ultimoSnapshotAplicado.docs.forEach(d => { docs[d.id] = d; });
+  Object.entries(plan.cambios).forEach(([rbd, campos]) => {
+    const d = docs[rbd];
+    if (!d) return;
+    let raw; try { raw = objetoPlano(d.data()); } catch (e) { return; }
+    const actual = objetoPlano(objetoPlano(raw.otras_fuentes)[plan.fuenteKey]);
+    let bytes = bytesCarga(raw);
+    Object.entries(campos).forEach(([campo, valor]) => { bytes += bytesCarga(valor === CARGA_ELIMINAR ? null : valorFirestoreCarga(plan.hojas.find(h => h.desc.campo === campo).desc, valor)) - bytesCarga(actual[campo] === undefined ? null : actual[campo]); });
+    if (plan.modo === 'vaciar') bytes = bytesCarga(raw) - bytesCarga(actual);
+    if (bytes > CARGA_MAX_BYTES_DOC) errores.push(`La entidad ${rbd} quedaría con un documento de ≈ ${Math.round(bytes / 1024)} KB: supera el límite de Firestore (1 MiB). Divide la carga o elimina filas.`);
+  });
+  return errores;
+}
+// Lo que se guarda en Firestore para el valor de una hoja.
+function valorFirestoreCarga(desc, v) {
+  if (desc.tipo === 'mensual') return { meses: { ...v.meses }, total: Math.round(v.total || 0) };
+  return v;
+}
+
+// ---- Respaldo (copia en memoria del estado anterior, en la misma forma que se guarda; el Excel reimportable se descarga aparte)
+function esVacioCarga(desc, v) {
+  if (desc.tipo === 'meta') return v === CARGA_ELIMINAR;
+  if (desc.tipo === 'mensual') return !MESES_CARGA.some(m => Number(v && v.meses && v.meses[m]));
+  return !Object.keys(v || {}).length;
+}
+function capturarRespaldoCarga(plan) {
+  const ctx = plan.ctx, estado = {};
+  hojasCargaOtraFuente(plan.fuenteKey).filter(d => !d.cedeA).forEach(desc => {
+    const o = {};
+    ctx.universo.forEach(rbd => { const v = rawDesdeMemoria(desc, ofDeMemoria(rbd, plan.fuenteKey), ctx); if (!esVacioCarga(desc, v)) o[rbd] = JSON.parse(JSON.stringify(v)); });
+    estado[desc.campo] = o;
+  });
+  return { fecha: new Date(), motivo: plan.modo === 'vaciar' ? 'vaciar la fuente' : 'cargar ' + (plan.archivo || 'un Excel'), archivo: plan.archivo || '', estado };
+}
+function descargarRespaldoExcelCarga(fuenteKey) {
+  if (typeof XLSX === 'undefined') throw new Error('no se pudo cargar la librería de Excel');
+  const nombre = `respaldo_${fuenteKey}_${new Date().toISOString().replace(/[-:]/g, '').slice(0, 15)}.xlsx`;
+  XLSX.writeFile(buildOtraFuenteCargaWorkbook(fuenteKey), nombre);
+  return nombre;
+}
+function construirPlanDesdeValores(fuenteKey, modo, archivo, valoresPorCampo) {
+  const ctx = ctxCargaOtraFuente(fuenteKey);
+  const hojas = hojasCargaOtraFuente(fuenteKey).filter(d => !d.cedeA).map(desc => {
+    const nuevo = new Map();
+    Object.entries(valoresPorCampo[desc.campo] || {}).forEach(([rbd, v]) => { if (ctx.universo.has(rbd)) nuevo.set(rbd, v); });
+    const h = { desc, nombre: desc.hoja, presente: true, omitida: '', notas: [], nuevo, rechazos: [], idsRepetidos: [], noHabilitadas: 0 };
+    h.estNuevo = estadisticaCarga(desc, rawsDeArchivoCarga(h), ctx);
+    h.leidas = h.aceptadas = h.estNuevo.filas; h.rechazadas = 0;
+    return h;
+  });
+  const plan = { modo, fuenteKey, ctx, archivo, hojas, noUsadas: [], advertencias: [] };
+  completarPlanCarga(plan);
+  return plan;
+}
+function planDeshacerCarga(fuenteKey) { const r = respaldoCargaOF[fuenteKey]; return r ? construirPlanDesdeValores(fuenteKey, 'deshacer', r.archivo, r.estado) : null; }
+function planVaciarCarga(fuenteKey) { return construirPlanDesdeValores(fuenteKey, 'vaciar', '', {}); }
+
+// ---- Aplicar a la memoria (lo mismo que reconstruiría aplicarSnapshot desde Firestore) y escribir a Firestore.
+function aplicarCambiosEnMemoriaCarga(plan) {
+  const fk = plan.fuenteKey, ctx = plan.ctx;
+  const descPorCampo = {};
+  hojasCargaOtraFuente(fk).forEach(d => { descPorCampo[d.campo] = d; });
+  const mesesNum12 = (x) => { const m = {}; MESES_CARGA.forEach(k => { m[k] = Number(x && x.meses && x.meses[k]) || 0; }); return m; };
+  const suma = (m) => MESES_CARGA.reduce((s, k) => s + m[k], 0);
+  Object.entries(plan.cambios).forEach(([rbd, campos]) => {
+    if (plan.modo === 'vaciar') {
+      if (CARGA_MANUAL.otras_fuentes_por_rbd && CARGA_MANUAL.otras_fuentes_por_rbd[rbd]) delete CARGA_MANUAL.otras_fuentes_por_rbd[rbd][fk];
+      ensureOtraFuente(rbd, fk); recomputeOtraFuente(rbd, fk);
+      return;
+    }
+    const of = ensureOtraFuente(rbd, fk);
+    let compras = false, bysItems = false;
+    Object.entries(campos).forEach(([campo, valor]) => {
+      const desc = descPorCampo[campo];
+      switch (desc.tipo) {
+        case 'mensual': { const m = mesesNum12(valor); of[campo] = { meses: m, total: suma(m) }; break; }
+        case 'compras': { const o = {}; Object.entries(valor).forEach(([id, c]) => { o[id] = ctx.comprasConcepto ? sanitizaCompraConcepto(c) : sanitizaCompra(c); }); of.compras = o; compras = true; break; }
+        case 'honorarios': { const o = {}; Object.entries(valor).forEach(([id, h]) => { o[id] = sanitizaHonorario(h, ctx.honConcepto); }); of.honorarios = o; break; }
+        case 'items': { of[campo] = Object.values(valor).map(it => { const m = mesesNum12(it); return { concepto: it.concepto, meses: m, total: suma(m) }; }); if (campo === 'bys_items') bysItems = true; break; }
+        case 'honproy': { const k = ctx.honConcepto ? 'concepto' : 'codigo'; of.hon_proy = { items: Object.entries(valor).map(([clave, it]) => { const m = mesesNum12(it); return { [k]: clave, meses: m, total: suma(m) }; }), meses: {}, total: 0 }; break; }
+        case 'meta': of.real_hasta_mes = valor === CARGA_ELIMINAR ? DATA.n_meses : normalizarRealHastaMes(valor); break;
+      }
+    });
+    if (compras) recomputeItemsOtraFuenteDesdeCompras(rbd, fk);
+    if (bysItems && !compras) recomputeOtraFuenteBysItemsAgregado(of);
+    recomputeHonOtraFuente(of, fk);
+    recomputeOtraFuente(rbd, fk);
+  });
+}
+// Lo que aún no confirmó el servidor (ediciones tecleadas sin enviar, rechazadas o en vuelo) NO debe resucitar lo que se reemplaza.
+function descartarSuperposicionFuenteCarga(rbd, fk) {
+  [pendingWrites[rbd], escrituraRetenida[rbd], ...(enVuelo[rbd] || [])].forEach(p => { if (p && p.otras_fuentes) delete p.otras_fuentes[fk]; });
+}
+function enviarCambiosCarga(plan) {
+  const fk = plan.fuenteKey;
+  const existentes = new Set(ultimoSnapshotAplicado && ultimoSnapshotAplicado.docs ? ultimoSnapshotAplicado.docs.map(d => d.id) : []);
+  const ops = Object.entries(plan.cambios).map(([rbd, campos]) => {
+    const mergeFields = ['lastModifiedBy', 'lastModifiedAt'];
+    const data = { lastModifiedBy: currentUser.email, lastModifiedAt: serverTimestamp() };
+    if (!existentes.has(rbd)) { const reg = filasOtrasFuentes(fk).find(x => x.rbd === rbd); data.nombre = reg ? reg.nombre : rbd; mergeFields.push('nombre'); }
+    if (plan.modo === 'vaciar') {
+      data.otras_fuentes = { [fk]: deleteField() }; mergeFields.push('otras_fuentes.' + fk);
+    } else {
+      data.otras_fuentes = { [fk]: {} };
+      Object.entries(campos).forEach(([campo, valor]) => {
+        const desc = plan.hojas.find(h => h.desc.campo === campo).desc;
+        data.otras_fuentes[fk][campo] = valor === CARGA_ELIMINAR ? deleteField() : valorFirestoreCarga(desc, valor);
+        mergeFields.push(`otras_fuentes.${fk}.${campo}`);
+      });
+    }
+    return { rbd, data, mergeFields };
+  });
+  const promesas = [];
+  for (let i = 0; i < ops.length; i += CARGA_LOTE_MAX) {
+    const batch = writeBatch(db);
+    ops.slice(i, i + CARGA_LOTE_MAX).forEach(op => batch.set(doc(db, CARGA_COLLECTION, op.rbd), op.data, { mergeFields: op.mergeFields }));
+    promesas.push(batch.commit());
+  }
+  return promesas;
+}
+// Cuadratura: re-lee lo que quedó en memoria y lo compara con lo esperado (filas y sumas por hoja). Devuelve una fila por hoja.
+function verificarCarga(plan) {
+  return plan.hojas.filter(h => h.presente && !h.omitida).map(h => {
+    const obtenido = estadisticaCarga(h.desc, rawsActualesCarga(h.desc, plan.ctx), plan.ctx);
+    return { hoja: h.desc.hoja, esperado: h.estNuevo, obtenido, ok: mismaEstadistica(h.estNuevo, obtenido) };
+  });
+}
+function repintarTrasCargaOF() {
+  renderKpis();
+  renderTable(); // también repinta el Reporte personalizado, % Ejecución y el modal de SEP abierto
+  renderOtrasFuentesTable();
+  if (otrasFuentesRbdAbierto) renderOtrasFuentesModalContenido();
+  renderDashboard();
+  if (!document.getElementById('tab-reportes').classList.contains('hidden')) renderVisualizador();
+  renderControlCierre();
+  actualizarBotonesCargaOF();
+}
+async function aplicarPlanCarga(plan) {
+  if (cargaEnCurso) return;
+  cargaEnCurso = true;
+  const fk = plan.fuenteKey;
+  const anterior = respaldoCargaOF[fk];
+  try {
+    if (!currentUser) { mostrarResultadoCarga({ plan, error: 'No hay una sesión activa: vuelve a ingresar.' }); return; }
+    completarPlanCarga(plan); // la memoria pudo cambiar mientras se miraba el resumen
+    if (plan.errores.length) { mostrarResultadoCarga({ plan, error: plan.errores.join(' ') }); return; }
+    if (!plan.nCambios) { mostrarResultadoCarga({ plan, sinCambios: true }); return; }
+    mostrarResultadoCarga({ plan, enCurso: true });
+    const previo = capturarRespaldoCarga(plan);
+    let respaldoArchivo = '', errRespaldo = '';
+    if (plan.modo !== 'deshacer') { try { respaldoArchivo = descargarRespaldoExcelCarga(fk); } catch (err) { errRespaldo = err.message; } }
+    Object.keys(plan.cambios).forEach(rbd => { if (pendingWrites[rbd] || pendingTimers[rbd]) flushRbdSave(rbd); descartarSuperposicionFuenteCarga(rbd, fk); }); // lo ya tecleado sale ANTES que el reemplazo
+    let promesas;
+    try { promesas = enviarCambiosCarga(plan); }
+    catch (err) { mostrarResultadoCarga({ plan, error: 'No se pudo preparar el guardado: ' + err.message }); return; }
+    aplicarCambiosEnMemoriaCarga(plan);
+    if (plan.modo === 'deshacer') delete respaldoCargaOF[fk]; else respaldoCargaOF[fk] = previo;
+    repintarTrasCargaOF();
+    if (typeof window.__cargaTestHook === 'function') window.__cargaTestHook('memoria', fk, CARGA_MANUAL); // gancho solo para las pruebas (inyectar un desajuste y ver que la cuadratura lo detecta)
+    let filas = verificarCarga(plan);
+    mostrarResultadoCarga({ plan, filas, guardando: true, respaldoArchivo, errRespaldo });
+    escriturasEnVuelo += promesas.length; actualizarIndicadorSync();
+    let fallo = '';
+    const res = await Promise.allSettled(promesas);
+    escriturasEnVuelo -= promesas.length;
+    const rechazada = res.find(x => x.status === 'rejected');
+    if (rechazada) {
+      fallo = codigoDeError(rechazada.reason);
+      console.error('Error guardando la carga de', fk, rechazada.reason);
+      if (anterior) respaldoCargaOF[fk] = anterior; else delete respaldoCargaOF[fk];
+      reaplicarUltimoSnapshot(); // el SDK ya revirtió lo rechazado: se repinta con lo que realmente hay
+      actualizarBotonesCargaOF();
+    }
+    actualizarIndicadorSync();
+    if (typeof window.__cargaTestHook === 'function') window.__cargaTestHook('guardado', fk, CARGA_MANUAL);
+    filas = verificarCarga(plan); // ahora sobre lo reconstruido desde Firestore
+    mostrarResultadoCarga({ plan, filas, fallo, respaldoArchivo, errRespaldo });
+  } finally { cargaEnCurso = false; }
+}
+
+// ---- Interfaz: modal de control (resumen antes de reemplazar, resultado después) y banner de error persistente.
+const cargaModalEl = document.getElementById('cargaControlModal');
+const cargaBodyEl = document.getElementById('cargaControlBody');
+const cargaFooterEl = document.getElementById('cargaControlFooter');
+const pesosCarga = (v) => (v === null || v === undefined) ? '—' : fmtCLP(v);
+const difCarga = (nuevo, viejo) => (nuevo === null || viejo === null) ? '—' : (Math.abs(nuevo - viejo) < 0.5 ? '0' : (nuevo > viejo ? '+' : '') + fmtCLP(nuevo - viejo));
+const difNum = (n) => (n > 0 ? '+' : '') + n;
+function abrirModalCarga(titulo, subtitulo) {
+  document.getElementById('cargaControlTitle').textContent = titulo;
+  document.getElementById('cargaControlSubtitle').textContent = subtitulo || '';
+  if (cargaModalEl.classList.contains('hidden')) {
+    const origen = a11yOrigenFoco(() => document.querySelector('.tab-btn.active'));
+    cargaModalEl.classList.remove('hidden');
+    a11yModalAbierto(cargaModalEl, origen);
+  }
+}
+function cerrarModalCarga() {
+  if (cargaModalEl.classList.contains('hidden')) return;
+  cargaModalEl.classList.add('hidden');
+  cargaBodyEl.innerHTML = ''; cargaFooterEl.innerHTML = '';
+  cargaPlanActivo = null;
+  a11yModalCerrado(cargaModalEl);
+}
+function listaLimitadaHTML(items, tope) {
+  return `<ul class="carga-lista">${items.slice(0, tope).map(t => `<li>${escHtml(t)}</li>`).join('')}</ul>${items.length > tope ? `<div class="carga-mas">…y ${items.length - tope} más</div>` : ''}`;
+}
+function tablaHojasCargaHTML(plan) {
+  const filas = plan.hojas.map(h => {
+    const nombre = escHtml(h.nombre || h.desc.hoja);
+    const hoy = `${h.estActual.filas} ${h.estActual.filas === 1 ? 'fila' : 'filas'}${h.estActual.total === null ? '' : ', ' + pesosCarga(h.estActual.total)}`;
+    if (!h.presente) return `<tr class="carga-ausente"><th scope="row">${escHtml(h.desc.hoja)}</th><td colspan="7">${h.cedida ? escHtml(h.cedida) : 'No viene en el archivo: se conserva sin cambios'} (hoy en el panel: ${escHtml(hoy)}).</td></tr>`;
+    if (h.omitida) return `<tr class="carga-omitida"><th scope="row">${nombre}</th><td colspan="7">NO se carga: ${escHtml(h.omitida)}. Se conserva lo que hay en el panel (${escHtml(hoy)}).</td></tr>`;
+    return `<tr><th scope="row">${nombre}</th><td class="num">${h.estActual.filas}</td><td class="num">${escHtml(pesosCarga(h.estActual.total))}</td><td class="num">${h.leidas}</td><td class="num${h.rechazadas ? ' carga-rojo' : ''}">${h.rechazadas}</td><td class="num">${h.estNuevo.filas}</td><td class="num">${escHtml(pesosCarga(h.estNuevo.total))}</td><td class="num">${escHtml(difCarga(h.estNuevo.total, h.estActual.total))}</td></tr>`;
+  }).join('');
+  return `<div class="table-scroll"><table class="data-table carga-tabla"><thead><tr><th scope="col">Hoja</th><th scope="col" class="num">Panel hoy: filas</th><th scope="col" class="num">Panel hoy: total</th><th scope="col" class="num">Archivo: filas leídas</th><th scope="col" class="num">Archivo: rechazadas</th><th scope="col" class="num">Archivo: filas que se cargan</th><th scope="col" class="num">Archivo: total</th><th scope="col" class="num">Diferencia</th></tr></thead><tbody>${filas}</tbody></table></div>
+    <p class="carga-ayuda">En las hojas mensuales «filas» son las entidades con algún monto y «total» la suma de «Total Año»; en META, las entidades con un corte Real/Proyectado propio; en COMPRAS y HONORARIOS, las filas y la suma de MontoGasto. Filas leídas = filas que se cargan + rechazadas.</p>`;
+}
+function detalleComprasCargaHTML(plan) {
+  const h = plan.hojas.find(x => x.desc.tipo === 'compras' && x.presente && !x.omitida);
+  if (!h) return '';
+  const a = h.estActual, n = h.estNuevo;
+  const dcs = [...new Set([...a.dcs.keys(), ...n.dcs.keys()])].map(dc => {
+    const x = a.dcs.get(dc) || { filas: 0, suma: 0 }, y = n.dcs.get(dc) || { filas: 0, suma: 0 };
+    return { dc, x, y, dif: y.suma - x.suma };
+  }).filter(d => d.x.filas !== d.y.filas || Math.abs(d.dif) >= 0.5).sort((p, q) => Math.abs(q.dif) - Math.abs(p.dif) || p.dc.localeCompare(q.dc));
+  const fila = (d) => `<tr><th scope="row">${d.dc === '' ? '(sin N° DC)' : escHtml(d.dc)}</th><td class="num">${d.x.filas}</td><td class="num">${d.y.filas}</td><td class="num">${escHtml(fmtCLP(d.x.suma))}</td><td class="num">${escHtml(fmtCLP(d.y.suma))}</td><td class="num">${escHtml(difCarga(d.y.suma, d.x.suma))}</td></tr>`;
+  return `<h4 class="carga-h">COMPRAS en detalle</h4>
+    <div class="table-scroll"><table class="data-table carga-tabla"><thead><tr><th scope="col">Dato</th><th scope="col" class="num">Panel hoy</th><th scope="col" class="num">Archivo</th><th scope="col" class="num">Diferencia</th></tr></thead><tbody>
+      <tr><th scope="row">Suma de MontoGasto</th><td class="num">${escHtml(fmtCLP(a.total))}</td><td class="num">${escHtml(fmtCLP(n.total))}</td><td class="num">${escHtml(difCarga(n.total, a.total))}</td></tr>
+      <tr><th scope="row">N° de DC distintos</th><td class="num">${a.nDc}</td><td class="num">${n.nDc}</td><td class="num">${difNum(n.nDc - a.nDc)}</td></tr>
+      <tr><th scope="row">Filas de compras</th><td class="num">${a.filas}</td><td class="num">${n.filas}</td><td class="num">${difNum(n.filas - a.filas)}</td></tr></tbody></table></div>
+    <h5 class="carga-h5">Diferencia por N° DC (solo los que cambian: ${dcs.length})</h5>
+    ${dcs.length ? `<div class="table-scroll"><table class="data-table carga-tabla"><thead><tr><th scope="col">N° DC</th><th scope="col" class="num">Filas hoy</th><th scope="col" class="num">Filas archivo</th><th scope="col" class="num">Suma hoy</th><th scope="col" class="num">Suma archivo</th><th scope="col" class="num">Diferencia</th></tr></thead><tbody>${dcs.slice(0, CARGA_FILAS_VISIBLES).map(fila).join('')}</tbody></table></div>${dcs.length > CARGA_FILAS_VISIBLES ? `<div class="carga-mas">…y ${dcs.length - CARGA_FILAS_VISIBLES} más</div>` : ''}` : '<p class="carga-ayuda">Ningún N° DC cambia de filas ni de monto.</p>'}`;
+}
+function controlCargaHTML(plan) {
+  const label = escHtml(plan.ctx.label);
+  const partes = [];
+  if (plan.modo === 'excel') partes.push(`<p>Al confirmar, los datos de <strong>${label}</strong> se <strong>reemplazan por completo</strong> con lo que trae el archivo, hoja por hoja: lo que ya no está en el archivo desaparece del panel y una fila modificada queda solo con su valor nuevo. Las hojas que el archivo no trae se conservan. No se toca ninguna otra fuente ni SEP. Antes de reemplazar se descarga un respaldo del estado actual.</p>`);
+  else if (plan.modo === 'deshacer') { const r = respaldoCargaOF[plan.fuenteKey]; partes.push(`<p>Se volverá al estado que tenía <strong>${label}</strong> antes de ${escHtml(r ? r.motivo : 'la última carga')} (${escHtml(r ? r.fecha.toLocaleString('es-CL') : '')}). Esto reemplaza por completo, hoja por hoja, lo que hay hoy.</p>`); }
+  else partes.push(`<p><strong>Esto deja ${label} completamente vacía</strong> (ingresos, remuneraciones, compras, honorarios, conceptos y cortes de todas sus entidades). No toca SEP ni las otras fuentes. Antes se descarga un respaldo y queda disponible «↩ Deshacer última carga» mientras no recargues la página.</p>`);
+  if (plan.errores.length) partes.push(`<div class="carga-nota err" role="alert">${plan.errores.map(escHtml).join('<br>')}</div>`);
+  plan.advertencias.forEach(t => partes.push(`<div class="carga-nota warn">⚠ ${escHtml(t)}</div>`));
+  partes.push(`<div class="carga-nota ${plan.nCambios ? 'info' : 'ok'}">${plan.nCambios ? `Se modificarían los datos de <strong>${plan.nCambios}</strong> ${plan.nCambios === 1 ? 'entidad' : 'entidades'}.` : 'El archivo es idéntico a lo que ya hay en el panel: no se cambiaría nada.'}</div>`);
+  if (plan.hojas.some(h => h.presente) || plan.modo !== 'excel') partes.push(`<h4 class="carga-h">Resumen por hoja</h4>${tablaHojasCargaHTML(plan)}`);
+  const notas = plan.hojas.filter(h => h.notas && h.notas.length);
+  if (notas.length) partes.push(`<ul class="carga-lista">${notas.map(h => h.notas.map(t => `<li><strong>${escHtml(h.desc.hoja)}:</strong> ${escHtml(t)}</li>`).join('')).join('')}</ul>`);
+  partes.push(detalleComprasCargaHTML(plan));
+  const rechazos = [];
+  plan.hojas.forEach(h => { if (h.presente && !h.omitida) h.rechazos.forEach(r => rechazos.push(`Hoja ${h.nombre}, fila ${r.fila}: ${r.motivo}`)); });
+  if (rechazos.length) partes.push(`<h4 class="carga-h carga-rojo">Filas que NO se cargarán (${rechazos.length})</h4>${listaLimitadaHTML(rechazos, CARGA_FILAS_VISIBLES)}`);
+  if (plan.noUsadas && plan.noUsadas.length) partes.push(`<p class="carga-ayuda">Hojas del archivo que ${label} no usa (se ignoran): ${plan.noUsadas.map(escHtml).join(', ')}.</p>`);
+  if (plan.modo === 'vaciar') partes.push(`<label class="carga-confirma" for="cargaConfirmaNombre">Para confirmar escribe el nombre de la fuente: <strong>${label}</strong></label><input type="text" id="cargaConfirmaNombre" autocomplete="off" class="carga-input">`);
+  return partes.join('');
+}
+function mostrarControlCarga(plan) {
+  cargaPlanActivo = plan;
+  const titulos = { excel: 'Revisar carga', deshacer: 'Deshacer última carga', vaciar: 'Vaciar fuente' };
+  abrirModalCarga(`${titulos[plan.modo]} · ${plan.ctx.label}`, plan.modo === 'excel' ? `Archivo: ${plan.archivo}` : '');
+  cargaBodyEl.innerHTML = controlCargaHTML(plan);
+  const hayHoja = plan.hojas.some(h => h.presente && !h.omitida) || plan.modo !== 'excel';
+  const etiqueta = { excel: `Reemplazar los datos de ${plan.ctx.label}`, deshacer: 'Volver al estado anterior', vaciar: `Vaciar ${plan.ctx.label}` }[plan.modo];
+  cargaFooterEl.innerHTML = `<button type="button" id="cargaOkBtn" class="carga-btn-ok"${(!hayHoja || plan.errores.length || plan.modo === 'vaciar') ? ' disabled' : ''}>${escHtml(etiqueta)}</button><button type="button" id="cargaCancelarBtn" class="carga-btn-cancel">Cancelar</button>`;
+  (document.getElementById('cargaConfirmaNombre') || document.getElementById('cargaCancelarBtn')).focus({ preventScroll: true });
+}
+function mostrarAvisoCarga(titulo, mensaje) {
+  cargaPlanActivo = null;
+  abrirModalCarga(titulo, '');
+  cargaBodyEl.innerHTML = `<div class="carga-nota err" role="alert">${escHtml(mensaje)}</div>`;
+  cargaFooterEl.innerHTML = '<button type="button" id="cargaCerrarBtn" class="carga-btn-cancel">Cerrar</button>';
+  document.getElementById('cargaCerrarBtn').focus({ preventScroll: true });
+}
+function mostrarBannerErrorCarga(html) {
+  const b = document.getElementById('cargaErrorBanner');
+  b.innerHTML = `<div class="carga-banner-texto">${html}</div><button type="button" id="cargaBannerCerrar" class="carga-btn-cancel">Entendido</button>`;
+  b.classList.remove('hidden');
+}
+function mostrarResultadoCarga(r) {
+  const plan = r.plan, label = escHtml(plan.ctx.label);
+  const verbo = { excel: 'Carga', deshacer: 'Deshacer', vaciar: 'Vaciado' }[plan.modo];
+  cargaPlanActivo = null;
+  abrirModalCarga(`${verbo} · ${plan.ctx.label}`, plan.modo === 'excel' ? `Archivo: ${plan.archivo}` : '');
+  let html = '';
+  if (r.error) html = `<div class="carga-nota err" role="alert"><strong>No se pudo completar.</strong> ${escHtml(r.error)} No se cambió nada.</div>`;
+  else if (r.sinCambios) html = `<div class="carga-nota ok" role="status">Sin cambios: el panel ya era igual al archivo. No se escribió nada.</div>`;
+  else if (r.enCurso) html = `<div class="carga-nota info" role="status">Aplicando…</div>`;
+  else {
+    const cuadra = r.filas.every(f => f.ok);
+    if (r.fallo) html += `<div class="carga-nota err" role="alert"><strong>El servidor NO guardó la carga</strong> (${escHtml(MOTIVO_ERROR_PERMANENTE[r.fallo] || r.fallo)}). El panel volvió a mostrar lo que hay guardado; vuelve a intentarlo.</div>`;
+    else if (!cuadra) html += `<div class="carga-nota err" role="alert"><strong>¡Atención! El panel NO cuadra con el Excel.</strong> Revisa las hojas marcadas con ✗ antes de seguir usando estos datos${respaldoCargaOF[plan.fuenteKey] ? '; puedes volver atrás con «↩ Deshacer última carga»' : ''}.</div>`;
+    else html += `<div class="carga-nota ok" role="status"><strong>${verbo} aplicado y verificado:</strong> las filas y los totales de cada hoja del panel coinciden con ${plan.modo === 'excel' ? 'el Excel' : 'lo esperado'}.${r.guardando ? ' Guardando para el resto del equipo…' : ''}</div>`;
+    html += `<div class="table-scroll"><table class="data-table carga-tabla"><thead><tr><th scope="col">Hoja</th><th scope="col" class="num">Esperado: filas</th><th scope="col" class="num">Esperado: total</th><th scope="col" class="num">Panel ahora: filas</th><th scope="col" class="num">Panel ahora: total</th><th scope="col">Cuadra</th></tr></thead><tbody>${r.filas.map(f => `<tr class="${f.ok ? '' : 'carga-fila-err'}"><th scope="row">${escHtml(f.hoja)}</th><td class="num">${f.esperado.filas}</td><td class="num">${escHtml(pesosCarga(f.esperado.total))}</td><td class="num">${f.obtenido.filas}</td><td class="num">${escHtml(pesosCarga(f.obtenido.total))}</td><td>${f.ok ? '✓ sí' : '✗ NO'}</td></tr>`).join('')}</tbody></table></div>`;
+    if (plan.modo !== 'deshacer') html += r.respaldoArchivo ? `<p class="carga-ayuda">Respaldo del estado anterior descargado: <strong>${escHtml(r.respaldoArchivo)}</strong> (se puede volver a importar). También puedes usar «↩ Deshacer última carga» en la pestaña mientras no recargues la página.</p>` : (r.errRespaldo ? `<div class="carga-nota warn">⚠ No se pudo descargar el archivo de respaldo (${escHtml(r.errRespaldo)}); queda la copia en memoria para «↩ Deshacer última carga».</div>` : '');
+    if (plan.modo === 'excel') { const rech = plan.hojas.reduce((n, h) => n + (h.presente && !h.omitida ? h.rechazadas : 0), 0); if (rech) html += `<div class="carga-nota warn">⚠ ${rech} ${rech === 1 ? 'fila del archivo NO se cargó' : 'filas del archivo NO se cargaron'} (el detalle estaba en el resumen anterior).</div>`; }
+    if ((!cuadra || r.fallo) && !r.guardando) mostrarBannerErrorCarga(r.fallo ? `<strong>${label}:</strong> la carga no se guardó en el servidor.` : `<strong>${label}:</strong> el panel NO cuadra con el Excel en ${r.filas.filter(f => !f.ok).map(f => escHtml(f.hoja) + ' (esperado ' + f.esperado.filas + ' filas / ' + escHtml(pesosCarga(f.esperado.total)) + ', obtenido ' + f.obtenido.filas + ' filas / ' + escHtml(pesosCarga(f.obtenido.total)) + ')').join('; ')}.`);
+  }
+  cargaBodyEl.innerHTML = html;
+  cargaFooterEl.innerHTML = r.enCurso ? '' : '<button type="button" id="cargaCerrarBtn" class="carga-btn-cancel">Cerrar</button>';
+  const c = document.getElementById('cargaCerrarBtn'); if (c) c.focus({ preventScroll: true });
+}
+function iniciarCargaOtraFuente(fuenteKey, wb, archivo) {
+  const plan = construirPlanCarga(fuenteKey, wb, archivo);
+  if (!plan.hojas.some(h => h.presente)) { mostrarAvisoCarga('Revisar carga · ' + plan.ctx.label, `El archivo no tiene ninguna hoja con los nombres esperados para ${plan.ctx.label}. No se importó nada.`); return; }
+  mostrarControlCarga(plan);
+}
+cargaModalEl.addEventListener('click', (e) => {
+  if (e.target === cargaModalEl) { if (!cargaEnCurso) cerrarModalCarga(); return; }
+  if (e.target.closest('#cargaControlCloseBtn') || e.target.closest('#cargaCancelarBtn') || e.target.closest('#cargaCerrarBtn')) { if (!cargaEnCurso) cerrarModalCarga(); return; }
+  if (e.target.closest('#cargaOkBtn') && cargaPlanActivo && !cargaEnCurso) aplicarPlanCarga(cargaPlanActivo);
+});
+cargaModalEl.addEventListener('input', (e) => {
+  if (e.target.id !== 'cargaConfirmaNombre' || !cargaPlanActivo) return;
+  const ok = e.target.value.trim().toLowerCase() === cargaPlanActivo.ctx.label.toLowerCase();
+  const btn = document.getElementById('cargaOkBtn');
+  if (btn) btn.disabled = !(ok && !cargaPlanActivo.errores.length);
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !cargaModalEl.classList.contains('hidden') && !cargaEnCurso) { e.stopPropagation(); cerrarModalCarga(); } }, true);
+document.getElementById('cargaErrorBanner').addEventListener('click', (e) => { if (e.target.closest('#cargaBannerCerrar')) document.getElementById('cargaErrorBanner').classList.add('hidden'); });
+
+// Botones por pestaña: «↩ Deshacer última carga» (solo mientras exista el respaldo en memoria) y «🗑 Vaciar fuente» (solo administración).
+function actualizarBotonesCargaOF() {
+  FUENTES_OTRAS.forEach(f => {
+    const u = document.getElementById('undoCargaOFBtn-' + f.key), v = document.getElementById('vaciarOFBtn-' + f.key);
+    if (u) u.classList.toggle('hidden', !respaldoCargaOF[f.key]);
+    if (v) v.classList.toggle('hidden', !esAdminActual());
+  });
+}
+
 
 // PDF: el mismo mecanismo que exportPdfBtn (window.print() + .hidden ya oculta las otras 7
 // pestañas) — no hace falta nada específico por fuente, lo que se ve es lo que se imprime.
@@ -8121,6 +8599,25 @@ FUENTES_OTRAS.forEach(f => {
   const importInput = document.getElementById('importExcelOFInput-' + key);
   if (importBtn && importInput) {
     importBtn.addEventListener('click', () => importInput.click());
+    importBtn.title = 'Reemplaza por completo los datos de esta fuente con los del Excel (antes muestra un resumen de control y pide confirmación)';
+    // «↩ Deshacer última carga» (solo mientras haya respaldo en memoria) y «🗑 Vaciar fuente» (solo administración): se agregan junto a «Importar Excel».
+    const undoBtn = document.createElement('button');
+    undoBtn.type = 'button'; undoBtn.id = 'undoCargaOFBtn-' + key; undoBtn.className = 'hidden';
+    undoBtn.style.cssText = 'background:#374151; border-color:#374151;';
+    undoBtn.textContent = '↩ Deshacer última carga';
+    undoBtn.title = 'Vuelve al estado que tenía esta fuente antes de la última carga o vaciado. Solo está disponible mientras no recargues la página; el Excel de respaldo que se descargó sirve siempre.';
+    undoBtn.addEventListener('click', () => { const plan = planDeshacerCarga(key); if (plan) mostrarControlCarga(plan); });
+    const vaciarBtn = document.createElement('button');
+    vaciarBtn.type = 'button'; vaciarBtn.id = 'vaciarOFBtn-' + key; vaciarBtn.className = 'hidden';
+    vaciarBtn.style.cssText = 'background:var(--status-critical); border-color:var(--status-critical);';
+    vaciarBtn.textContent = '🗑 Vaciar fuente';
+    vaciarBtn.title = 'Solo administración: deja esta fuente completamente vacía (con respaldo y doble confirmación). Sirve para limpiar datos mezclados antes de subir el Excel correcto.';
+    vaciarBtn.addEventListener('click', () => {
+      if (!esAdminActual()) { mostrarAvisoCarga('Vaciar fuente', 'Esta herramienta está restringida a quienes administran el panel.'); return; }
+      mostrarControlCarga(planVaciarCarga(key));
+    });
+    importInput.insertAdjacentElement('afterend', undoBtn);
+    undoBtn.insertAdjacentElement('afterend', vaciarBtn);
     importInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -8129,14 +8626,9 @@ FUENTES_OTRAS.forEach(f => {
       reader.onload = (evt) => {
         try {
           const wbIn = XLSX.read(evt.target.result, { type: 'array' });
-          const resumen = importOtraFuenteWorkbook(wbIn, key);
-          if (resumen.length === 0) {
-            alert('El archivo no tiene ninguna hoja con los nombres esperados para ' + FUENTES_OTRAS_BY_KEY[key].label + '. No se importó nada.');
-          } else {
-            alert('Carga importada correctamente:\n' + resumen.join('\n') + '\n\nLa pestaña ya se actualizó con estos montos.');
-          }
+          iniciarCargaOtraFuente(key, wbIn, file.name);
         } catch (err) {
-          alert('No se pudo leer el archivo. Verifica que sea un Excel exportado desde esta misma pestaña ("⬇ Excel"). Detalle: ' + err.message);
+          mostrarAvisoCarga('Revisar carga · ' + FUENTES_OTRAS_BY_KEY[key].label, 'No se pudo leer el archivo. Verifica que sea un Excel exportado desde esta misma pestaña ("⬇ Excel"). Detalle: ' + err.message);
         }
         e.target.value = '';
       };
@@ -11495,6 +11987,7 @@ function aplicarSnapshot(snapshot) {
   renderDashboard();
   if (!document.getElementById('tab-reportes').classList.contains('hidden')) renderVisualizador();
   actualizarBotonMigrarDc(); // el contador "(n)" sigue a los datos (cambios propios y de otras personas)
+  actualizarBotonesCargaOF(); // «Vaciar fuente» (solo administración) y «Deshacer última carga» (solo con respaldo)
   renderControlCierre();     // mes de cierre + aviso de entidades con corte distinto (también sigue a los cambios remotos)
 
   syncEstado.docsInvalidos = docsInvalidos;

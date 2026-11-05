@@ -75,7 +75,9 @@ await correrSpec('fuentes_nuevas_excel', async (t) => {
     t.ok(alertas.length === 1 && rechazos(alertas[0]).length === 0, `2) ${key}: reimportar su propio Excel termina bien (ninguna fila rechazada, salvo las boletas inválidas a propósito del fixture de honorarios)`, rechazos(alertas[0]));
     const dos = await exportar(h, key);
     t.eq(JSON.stringify(sinHonorarios(dos.libro.hojas)), JSON.stringify(sinHonorarios(X[key].libro.hojas)), `2) ${key}: exportar → importar → exportar da hojas idénticas`);
-    t.eq(await otrasFuentesServidor(h, key), antes, `2) ${key}: ningún dato cambió en el servidor`);
+    // Reemplazo total: las boletas inválidas a propósito del fixture (cuenta/tipo no permitidos) NO se pueden cargar, así que desaparecen al reimportar el Excel completo (el resumen las lista); todo lo demás queda igual.
+    const sinBol = (o) => { const x = typeof o === 'string' ? JSON.parse(o) : o; return JSON.stringify(Object.fromEntries(Object.entries(x).filter(([k]) => !k.includes('/honorarios/')))); };
+    t.eq(sinBol(await otrasFuentesServidor(h, key)), sinBol(antes), `2) ${key}: ningún dato (salvo las boletas inválidas del fixture) cambió en el servidor`);
   }
 
   // ================================================================ 3. editar el libro y reimportar
@@ -110,6 +112,7 @@ await correrSpec('fuentes_nuevas_excel', async (t) => {
   // ================================================================ 4. compatibilidad hacia atrás
   const docs4 = (await h.store());
   const cdAntes = JSON.stringify(docs4[RUTA('1121')].otras_fuentes.general.ingreso_carrera_docente);
+  const honAntes4 = Object.keys(docs4[RUTA('1121')].otras_fuentes.general.honorarios).length;
   const viejoG = clon(X.general.libro.hojas); delete viejoG.ING_CARRERA_DOCENTE; delete viejoG.HONORARIOS; delete viejoG.HON_PROYECCION;
   filaHoja(viejoG.INGRESO, '1123')[2] = 3030;
   const msgs4 = await importar(h, 'general', viejoG);
@@ -117,7 +120,7 @@ await correrSpec('fuentes_nuevas_excel', async (t) => {
   st = await h.store();
   t.eq(JSON.stringify(st[RUTA('1121')].otras_fuentes.general.ingreso_carrera_docente), cdAntes, '4) el Ingreso Carrera Docente guardado NO se borra ni se pone en 0');
   t.eq(st[RUTA('1123')].otras_fuentes.general.ingreso.meses.ENERO, 3030, '4) y lo que sí trae el archivo se importa (ingreso de 1123)');
-  t.eq(Object.keys(st[RUTA('1121')].otras_fuentes.general.honorarios).length, 9, '4) y las boletas de honorarios guardadas siguen (un Excel sin la hoja HONORARIOS no borra nada)');
+  t.eq(Object.keys(st[RUTA('1121')].otras_fuentes.general.honorarios).length, honAntes4, '4) y las boletas de honorarios guardadas siguen (un Excel sin la hoja HONORARIOS no borra nada)');
   // Recuperación LLMM: hojas que la fuente no lleva se ignoran
   const conBasura = clon((await exportar(h, 'recuperacion_llmm')).libro.hojas); // el libro actual (con lo editado en el punto 3)
   conBasura.REMUNERACIONES = [['RBD', 'Nombre', 'Enero'], [1121, 'X', 999999]];

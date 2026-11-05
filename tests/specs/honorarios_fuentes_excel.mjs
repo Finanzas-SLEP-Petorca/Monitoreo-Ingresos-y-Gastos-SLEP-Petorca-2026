@@ -170,9 +170,13 @@ await correrSpec('honorarios_fuentes_excel', async (t) => {
   t.eq(f1.libro.hojas.HON_PROYECCION.slice(1).map(r => r[2]).sort(), ['410304', '410803'], 'XLS por fila: HON_PROYECCION trae solo las cuentas de esa entidad');
   const mf = await importar(h, '#importExcelOFInput-general', f1);
   t.ok(/^Carga importada correctamente/.test(mf[0] || ''), 'XLS por fila: se reimporta', mf);
-  t.eq(primeraDiferencia(sFila, documentos(await h.store())), null, 'XLS por fila: los documentos siguen iguales');
+  // Reemplazo total: el Excel de UNA entidad trae HONORARIOS / HON_PROYECCION solo con esa entidad; las demás quedan vacías en esas hojas (el resumen lo advierte).
+  const dFila = documentos(await h.store());
+  const k1121 = Object.keys(dFila).find(k => k.endsWith('/1121'));
+  t.eq(primeraDiferencia(sFila[k1121], dFila[k1121]), null, 'XLS por fila: la entidad exportada queda igual (reemplazo total de las hojas del archivo)');
+  t.eq(Object.keys(await honDeStore(h, 'AC', 'general')).length, 0, 'XLS por fila: las demás entidades (AC) quedan sin boletas (las reemplaza la hoja del archivo)');
   const fAC = await exportar(h, () => h.page.click('#otrasFuentesTbody-general button.row-action-btn[data-action="excel"][data-rbd="AC"]'));
-  t.eq([...new Set(fAC.libro.hojas.HONORARIOS.slice(1).map(r => r[1]))], ['AC'], 'XLS por fila (AC): sus boletas llevan «AC»');
+  t.eq([...new Set(fAC.libro.hojas.HONORARIOS.slice(1).map(r => r[1]))], [], 'XLS por fila (AC): ya no tiene boletas (las reemplazó el Excel de otra entidad)');
   await clickTab(h.page, 'FAEP');
   const fJar = await exportar(h, () => h.page.click('#otrasFuentesTbody-faep button.row-action-btn[data-action="excel"][data-rbd="5402002"]'));
   t.eq(fJar.libro.hojas.HONORARIOS.length - 1, 1, 'XLS por fila (jardín 5402002 en FAEP): su boleta');
@@ -207,9 +211,9 @@ await correrSpec('honorarios_fuentes_excel', async (t) => {
   const libro42b = await libroXlsx(h.page, { HONORARIOS: [ENC_C.slice(0, 13), fc('hon-id', 1122, 'x', { ...e42, montoGasto: 46000 }).slice(0, 13)] });
   await importar(h, '#importExcelOFInput-general', { buffer: libro42b });
   e42 = (await honDeStore(h, '1122', 'general'))['hon-id'];
-  t.eq([e42.montoGasto, e42.documentoContable], [46000, 'DC_800'], 'un archivo SIN la columna N° DC no borra el N° DC que ya tiene la boleta');
+  t.eq([e42.montoGasto, e42.documentoContable], [46000, undefined], 'un archivo SIN la columna N° DC deja la boleta sin N° DC (espejo exacto)');
   await importar(h, '#importExcelOFInput-general', { buffer: await libroXlsx(h.page, { HONORARIOS: [ENC_C, fc('hon-id', 1122, 'x', { ...e42, documentoContable: '' })] }) });
-  t.eq((await honDeStore(h, '1122', 'general'))['hon-id'].documentoContable, '', 'con la columna N° DC y la celda vacía, el N° DC se limpia');
+  t.eq((await honDeStore(h, '1122', 'general'))['hon-id'].documentoContable, undefined, 'con la columna N° DC y la celda vacía, la boleta queda sin N° DC');
   // rechazos con motivo
   const nBase = Object.keys(await honDeStore(h, '1122', 'general')).length;
   const libro43 = await libroXlsx(h.page, { HONORARIOS: [ENC_C,
@@ -234,7 +238,7 @@ await correrSpec('honorarios_fuentes_excel', async (t) => {
   t.ok(/HONORARIOS, fila 9: El RBD "a\/b" no es válido/.test(msg43), 'rechazo de RBD inválido', msg43);
   t.ok(/HONORARIOS, fila 10: la entidad "5402002" no es parte de Subvención General/.test(msg43), 'rechazo de entidad que no es de la fuente (un jardín en General)', msg43);
   const b43 = await honDeStore(h, '1122', 'general');
-  t.eq(Object.keys(b43).length, nBase + 1, 'rechazos: solo la fila buena quedó guardada');
+  t.eq(Object.keys(b43).length, 1, 'rechazos: reemplazo total: solo la fila buena quedó guardada (1122 queda con esa única boleta)');
   t.ok(!(await h.store())['sep_carga_rbd/5402002'].otras_fuentes.general, 'rechazos: no se creó nada en una entidad que no es de la fuente');
   // cuenta no habilitada para la subvención: se importa igual y se avisa
   const libroNH = await libroXlsx(h.page, { HONORARIOS: [ENC_C, fc('nh-1', 'AC', 'Administración Central', base({ codigo: '410608', tipoDocumento: 'BPST', nroDocumento: '80' }))] });
@@ -249,7 +253,7 @@ await correrSpec('honorarios_fuentes_excel', async (t) => {
   // hoja con la columna equivocada: se rechaza entera
   const libroConc = await libroXlsx(h.page, { HONORARIOS: [ENC_K, fc('c-1', 1122, 'x', { ...base({ nroDocumento: '90' }), codigo: 'Apoyo' })] });
   const msgConc = (await importar(h, '#importExcelOFInput-general', { buffer: libroConc })).join('\n');
-  t.ok(/lleva «Codigo»/.test(msgConc) && /HONORARIOS: 0 filas/.test(msgConc), 'una hoja HONORARIOS con «Concepto» en una fuente con cuenta se rechaza entera con aviso', msgConc);
+  t.ok(/lleva «Codigo»/.test(msgConc) && /NO se carga/.test(msgConc), 'una hoja HONORARIOS con «Concepto» en una fuente con cuenta se rechaza entera con aviso', msgConc);
   t.ok(!('c-1' in await honDeStore(h, '1122', 'general')), 'y no crea boletas');
   // HON_PROYECCION
   const mesesV = (v) => Array(12).fill(v);
@@ -258,7 +262,7 @@ await correrSpec('honorarios_fuentes_excel', async (t) => {
   const msgP = (await importar(h, '#importExcelOFInput-general', { buffer: libroP })).join('\n');
   t.ok(/HON_PROYECCION: 2 filas/.test(msgP) && /HON_PROYECCION, fila 3: la cuenta "999999" no acepta honorarios/.test(msgP) && /HON_PROYECCION, fila 5: El RBD "a\/b" no es válido/.test(msgP) && /HON_PROYECCION, fila 6: la entidad "5402002" no es parte de Subvención General/.test(msgP), 'HON_PROYECCION: 2 filas buenas y rechazos con motivo (cuenta, RBD, entidad)', msgP);
   const p1122 = await proyDeStore(h, '1122', 'general');
-  t.eq([Object.keys(p1122).sort(), p1122['410803'].codigo, p1122['410803'].total, p1122['410910'].meses.DICIEMBRE], [['410304', '410803', '410910'], '410803', 12000, 5000], 'HON_PROYECCION: guarda codigo, meses y total por cuenta (sin tocar la proyección de 410304 que ya tenía)');
+  t.eq([Object.keys(p1122).sort(), p1122['410803'].codigo, p1122['410803'].total, p1122['410910'].meses.DICIEMBRE], [['410803', '410910'], '410803', 12000, 5000], 'HON_PROYECCION: guarda codigo, meses y total por cuenta (reemplazo total: la 410304 que no viene en la hoja desaparece)');
   t.noErrores(h);
   await h.close();
 
@@ -279,7 +283,7 @@ await correrSpec('honorarios_fuentes_excel', async (t) => {
   t.eq(Object.keys(b51).length, 2, 'JUNJI: solo 2 boletas guardadas');
   t.ok(Object.values(b51).every(b => typeof b.concepto === 'string' && !('codigo' in b)), 'JUNJI: las boletas guardadas llevan `concepto` y no `codigo`');
   const msgCod = (await importar(h, '#importExcelOFInput-junji', { buffer: await libroXlsx(h.page, { HONORARIOS: [ENC_C, fk('cod-1', 5404003, 'x', bc({ nroDocumento: '9' }))] }) })).join('\n');
-  t.ok(/lleva «Concepto»/.test(msgCod) && /HONORARIOS: 0 filas/.test(msgCod), 'una hoja HONORARIOS con «Codigo» en una fuente por concepto se rechaza entera con aviso', msgCod);
+  t.ok(/lleva «Concepto»/.test(msgCod) && /NO se carga/.test(msgCod), 'una hoja HONORARIOS con «Codigo» en una fuente por concepto se rechaza entera con aviso', msgCod);
   t.ok(!('cod-1' in await honDeStore(h, '5404003', 'junji')), 'y no crea boletas con el número de cuenta como concepto');
   const libroPK = await libroXlsx(h.page, { HON_PROYECCION: [ENC_PK, [5404003, 'x', 'Monitor', ...Array(12).fill(2000), 24000], [5404003, 'x', '__x__', ...Array(12).fill(1), 12], [1121, 'x', 'Monitor', ...Array(12).fill(1), 12], [5404003, 'x', '', ...Array(12).fill(1), 12]] });
   const msgPK = (await importar(h, '#importExcelOFInput-junji', { buffer: libroPK })).join('\n');

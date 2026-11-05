@@ -141,9 +141,13 @@ await correrSpec('compras_conceptos_excel', async (t) => {
   t.eq(f1.libro.hojas.COMPRAS.length - 1, 6, 'XLS por fila (FAEP 1121): 6 compras (las 8 del fixture menos las 2 que se quitaron)');
   const mf = await importar(h, '#importExcelOFInput-faep', f1);
   t.ok(/^Carga importada correctamente/.test(mf[0] || ''), 'XLS por fila: se reimporta', mf);
-  t.eq(primeraDiferencia(sFila, documentos(await h.store())), null, 'XLS por fila: los documentos siguen iguales');
+  // Reemplazo total: el Excel de UNA entidad trae la hoja COMPRAS solo con esa entidad, así que las demás entidades quedan sin compras en esa hoja (el resumen lo advierte).
+  // La entidad exportada queda exactamente igual.
+  const dFila = documentos(await h.store());
+  t.eq(primeraDiferencia(sFila['/sep_carga_rbd/1121'] || sFila['sep_carga_rbd/1121'], dFila['/sep_carga_rbd/1121'] || dFila['sep_carga_rbd/1121']), null, 'XLS por fila: la entidad exportada queda igual (reemplazo total de la hoja COMPRAS)');
+  t.eq(Object.keys(await comprasDe(h, '5402002', 'faep')).length, 0, 'XLS por fila: las demás entidades quedan sin compras (la hoja del archivo las reemplaza; el resumen lo avisa)');
   const fJ = await exportar(h, () => h.page.click('#otrasFuentesTbody-faep button.row-action-btn[data-action="excel"][data-rbd="5402002"]'));
-  t.eq(fJ.libro.hojas.COMPRAS.length - 1, 2, 'XLS por fila (jardín 5402002): sus 2 compras de FAEP');
+  t.eq(fJ.libro.hojas.COMPRAS.length - 1, 0, 'XLS por fila (jardín 5402002): sus compras de FAEP ya no existen (las reemplazó el Excel de otra entidad)');
   t.noErrores(h);
   await h.close();
 
@@ -178,7 +182,7 @@ await correrSpec('compras_conceptos_excel', async (t) => {
   const clavesImp = nuevas.map(([id]) => id).sort();
   await importarLibro(h, '#importExcelOFInput-figa', libro41);
   t.eq(Object.keys(await comprasDe(h, '1121', 'figa')).sort(), Object.keys(c41).sort(), 'reimportar el mismo archivo NO duplica ni cambia las claves (idempotente)');
-  t.eq(Object.keys(await comprasDe(h, '1121', 'figa')).length, antes1121 + 6, 'total de compras = antes + 6');
+  t.eq(Object.keys(await comprasDe(h, '1121', 'figa')).length, 6, 'reemplazo total: las compras de 1121 son exactamente las 6 del archivo (no antes + 6)');
   // 4.2 ID real: actualiza esa compra (edición desde Excel); el N° DC se limpia con la celda vacía y se conserva si el archivo no trae la columna.
   const libro42 = await libroXlsx(h.page, { COMPRAS: [ENC, fila('fg1121_1', 1121, nombre1121, { ...c41['nc-pos'], concepto: 'Material didáctico', tipoDocumento: 'Factura', nroDocumento: '530', fechaDocumento: '2026-02-05', fechaPago: '2026-02-12', descripcion: 'Material didáctico del liceo (editado)', montoGasto: 260000, montoDocumento: 309400, documentoOriginal: '', documentoContable: 'DC_800' })] });
   await importarLibro(h, '#importExcelOFInput-figa', libro42);
@@ -188,10 +192,10 @@ await correrSpec('compras_conceptos_excel', async (t) => {
   const libro42b = await libroXlsx(h.page, { COMPRAS: [sin14, fila('fg1121_1', 1121, nombre1121, { ...e42, montoGasto: 270000 }).slice(0, 14)] });
   await importarLibro(h, '#importExcelOFInput-figa', libro42b);
   const e42b = (await comprasDe(h, '1121', 'figa')).fg1121_1;
-  t.eq([e42b.montoGasto, e42b.documentoContable], [270000, 'DC_800'], 'un archivo SIN la columna N° DC no borra el N° DC que ya tiene la compra');
+  t.eq([e42b.montoGasto, e42b.documentoContable], [270000, undefined], 'un archivo SIN la columna N° DC deja la compra sin N° DC (espejo exacto: no hereda el anterior)');
   const libro42c = await libroXlsx(h.page, { COMPRAS: [ENC, fila('fg1121_1', 1121, nombre1121, { ...e42b, documentoContable: '' })] });
   await importarLibro(h, '#importExcelOFInput-figa', libro42c);
-  t.eq((await comprasDe(h, '1121', 'figa')).fg1121_1.documentoContable, '', 'con la columna N° DC y la celda vacía, el N° DC se limpia');
+  t.eq((await comprasDe(h, '1121', 'figa')).fg1121_1.documentoContable, undefined, 'con la columna N° DC y la celda vacía, la compra queda sin N° DC');
   // 4.3 filas rechazadas con motivo (y las buenas se importan).
   const libro43 = await libroXlsx(h.page, { COMPRAS: [
     ENC,
@@ -206,7 +210,8 @@ await correrSpec('compras_conceptos_excel', async (t) => {
   ] });
   const msg43 = (await importarLibro(h, '#importExcelOFInput-figa', libro43)).join('\n');
   t.ok(/COMPRAS: 1 filas/.test(msg43), 'rechazos: solo la fila buena se importa (las filas sin fecha o sin monto se omiten sin aviso, como en las demás fuentes)', msg43);
-  t.ok(/4 filas NO se importaron/.test(msg43) || /5 filas NO se importaron/.test(msg43), 'rechazos: el resumen cuenta las filas rechazadas', msg43);
+  t.ok(/7 filas NO se importaron/.test(msg43), 'rechazos: el resumen cuenta las 7 filas rechazadas (incluidas sin fecha y sin monto: ya no se omiten sin aviso)', msg43);
+  t.ok(/COMPRAS, fila 8: falta la fecha del documento/.test(msg43) && /COMPRAS, fila 9: el monto gasto está vacío o es 0/.test(msg43), 'rechazo explícito de la fila sin fecha y de la sin monto', msg43);
   t.ok(/COMPRAS, fila 3: El concepto "__oculto__" no es válido/.test(msg43), 'rechazo de «__x__» con su motivo y su fila', msg43);
   t.ok(/COMPRAS, fila 4: El concepto no puede estar vacío/.test(msg43), 'rechazo de concepto vacío con motivo', msg43);
   t.ok(/COMPRAS, fila 5: El concepto es demasiado largo/.test(msg43), 'rechazo de concepto demasiado largo', msg43);
@@ -228,7 +233,7 @@ await correrSpec('compras_conceptos_excel', async (t) => {
   // 4.6 hoja COMPRAS de una fuente CON código de cuenta (columna «Codigo»): se rechaza entera.
   const libroCodigo = await libroXlsx(h.page, { COMPRAS: [ENC.map((e, i) => (i === 3 ? 'Codigo' : e)), fila('cod-1', 1121, nombre1121, base({ concepto: '410606', nroDocumento: '91' }))] });
   const msgCod = (await importarLibro(h, '#importExcelOFInput-figa', libroCodigo)).join('\n');
-  t.ok(/código de cuenta SUPEREDUC/.test(msgCod) && /COMPRAS: 0 filas/.test(msgCod), 'una hoja COMPRAS con «Codigo» (de una fuente con cuenta) se rechaza entera con aviso', msgCod);
+  t.ok(/código de cuenta SUPEREDUC/.test(msgCod) && /NO se carga/.test(msgCod), 'una hoja COMPRAS con «Codigo» (de una fuente con cuenta) se rechaza entera con aviso', msgCod);
   t.ok(!('cod-1' in await comprasDe(h, '1121', 'figa')), 'y no crea conceptos con el número de cuenta');
   t.noErrores(h);
   await h.close();

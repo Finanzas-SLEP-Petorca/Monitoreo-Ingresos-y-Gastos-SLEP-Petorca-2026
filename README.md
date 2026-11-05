@@ -424,9 +424,56 @@ El mismo bloque «Honorarios (Subt. 21)» de SEP (fila mensual de boletas siempr
   Consolidado; Subt. 31 y Asignación Familiar tienen su chip), Visualizador (serie «Honorarios») y Reporte personalizado (`Honorarios — boletas`, `Honorarios — proyección` y una línea por cuenta o concepto).
   **Son los mismos números en todas las vistas.** Sin honorarios cargados las cifras no cambian.
 - **Excel y PDF**: las hojas `HONORARIOS` y `HON_PROYECCION` (por cuenta con `Codigo` + `Item` en General/PIE/Mantenimiento/Pro-Retención; por concepto con `Concepto` en las demás) van antes de `META`; el
-  Excel individual (XLS por fila) y el PDF de la entidad las traen; Recuperación LLMM no las exporta. Un Excel anterior sin estas hojas se importa igual y no toca ninguna boleta.
+  Excel individual (XLS por fila) y el PDF de la entidad las traen; Recuperación LLMM no las exporta. Un Excel anterior sin estas hojas se importa igual y no toca ninguna boleta; si el Excel trae la hoja `HONORARIOS`, **reemplaza todas las boletas de la fuente** (reemplazo total).
 - **Datos**: `otras_fuentes.{fuente}.honorarios.{id}` (boleta; con `codigo` o `concepto`) y `otras_fuentes.{fuente}.hon_proyeccion_items.{cuenta|concepto}` (`{ meses, total }`). Se escriben por boleta
   o por mes con `merge`; la lectura es tolerante (entradas que no son objetos, montos de texto o mapas de otro tipo se ignoran sin escribir) y valida las claves de mapa.
+
+### Cargar un Excel en una fuente = REEMPLAZO TOTAL (el panel es un espejo exacto del Excel)
+
+**Alcance:** las pestañas de las 12 fuentes de financiamiento (Subv. General, PIE, Mantenimiento, Pro-Retención, JUNJI, FAEP, Subt. 31, Recuperación LLMM,
+Asignación Familiar, FIGA y los dos Aportes Fiscales). **La importación de SEP y la de Fondos Fijos NO cambian** (siguen fila por fila, con ID = actualiza, como se
+describe arriba): pendiente de decidir si también pasan a reemplazo total.
+
+**Qué hace «⬆ Importar Excel» ahora.** Cada carga de una fuente **reemplaza por completo, hoja por hoja, lo que el archivo trae**; el Excel es la única verdad:
+
+- Para cada hoja que el archivo **sí** trae, el estado de esa hoja en **todas** las entidades de la fuente pasa a ser exactamente el del archivo: una fila que ya no
+  está **desaparece** del panel y de Firestore; una fila modificada (otro código de cuenta, otra fecha de pago, otro N° de documento…) queda **una sola vez, con su valor
+  nuevo**; una entidad que no aparece en la hoja queda **vacía (en $0 / sin filas) en esa hoja**. En `META`, una entidad ausente vuelve al corte «Real hasta» por defecto.
+- Una hoja que el archivo **no** trae **se conserva** (un Excel antiguo sin `HONORARIOS` no borra boletas) y el resumen lo dice. Una hoja con el encabezado de otra
+  fuente (`Codigo` en una fuente por concepto, o `Concepto` en una con cuenta) se **omite entera** y se avisa. En JUNJI la hoja antigua `REMUNERACIONES` pasa a Operación
+  salvo que el archivo traiga `REM_OPERACION` (esa manda).
+- **No se toca nada más**: ni SEP ni las demás fuentes ni campos de otra hoja que el archivo no trae.
+- **Sin deduplicar ni «upsert»**: el ID del Excel se respeta tal cual; el mismo ID repetido dentro del archivo conserva ambas filas (la segunda recibe el sufijo `-dup2`;
+  el resumen lo avisa); las filas sin ID reciben una clave determinista `imp-<hash>` (con sufijo `-2`, `-3`… si hay filas idénticas: **dos filas idénticas del Excel son
+  dos filas en el panel**). El **N° DC** sale solo de la columna del archivo (un Excel sin esa columna deja las compras sin N° DC: no se hereda el anterior).
+- **Nada se descarta en silencio.** Antes se omitían sin aviso las filas con una cuenta fuera del catálogo, sin fecha o con monto 0, y un monto escrito como texto
+  («1.500.000») valía 0. Ahora esos montos se leen (miles con punto, coma decimal) y toda fila rechazada sale en el resumen con **hoja, número de fila de Excel y motivo**;
+  siempre **filas leídas = filas que se cargan + rechazadas**. Si la fila rechazada ya estaba en el panel, **desaparece** (el panel refleja solo lo que el archivo puede cargar).
+
+**Resumen de control antes de escribir.** Al elegir el archivo se abre un cuadro (no escribe nada todavía) con, por hoja, **filas y total del panel hoy vs. del archivo**, las
+filas rechazadas, las entidades que quedarían en cero y las hojas del archivo que no se usan. Para `COMPRAS` además: **suma de MontoGasto**, **N° de DC distintos** y la
+**diferencia por N° DC** (solo los que cambian; con tope visible y «…y N más»). Botones **Reemplazar** (confirma) y **Cancelar** / `Esc` (no cambia nada ni escribe a Firestore).
+Si el archivo es idéntico a lo que ya hay, lo dice y confirmar no escribe nada (cargar dos veces el mismo Excel no cambia nada).
+
+**Cuadratura posterior.** Tras escribir se vuelve a leer lo que quedó en el panel y se compara con el archivo (filas y suma por hoja). Si algo no cuadra aparece un **mensaje
+rojo persistente** (cuadro y banner superior que solo se cierra con «Entendido») indicando hoja, esperado y obtenido. Si el servidor rechaza la escritura (sin permisos, sin
+red) se avisa igual y el panel vuelve a mostrar lo que hay guardado.
+
+**Respaldo y «↩ Deshacer última carga».** Antes de reemplazar se **descarga automáticamente** `respaldo_<fuente>_<fecha>.xlsx` (el estado anterior, en el mismo formato de
+«⬇ Excel»: se puede volver a importar con el mismo botón) y se guarda una copia en la memoria de la sesión: el botón **↩ Deshacer última carga** (aparece en la pestaña solo
+mientras exista) vuelve al estado anterior con su propio resumen y confirmación. *La copia en memoria se pierde al recargar la página; el archivo descargado, no.* El respaldo
+no se guarda en Firestore porque `firestore.rules` solo permite la colección `sep_carga_rbd` (un documento por RBD) y guardarlo ahí lo mezclaría con los documentos de las entidades.
+
+**🗑 Vaciar fuente** (solo administración: los correos de `ADMIN_EMAILS`): deja la fuente completamente vacía (ingresos, remuneraciones, compras, honorarios, conceptos y cortes de
+todas sus entidades), con respaldo previo y doble confirmación (hay que escribir el nombre de la fuente). No toca SEP ni otras fuentes.
+
+**Cómo limpiar datos que ya quedaron mezclados** (versión anterior + versión nueva): lo más simple es **volver a subir el Excel correcto** a la pestaña con este reemplazo total (la
+versión mezclada queda reemplazada por completo, no hace falta borrar nada antes). Si no hay un Excel confiable, usa **🗑 Vaciar fuente** y luego sube el Excel correcto.
+
+**Detalles técnicos.** La escritura usa `writeBatch` (≤ 400 documentos por lote; solo se escriben las entidades cuyo contenido cambia) con `setDoc/batch.set(..., { mergeFields })`,
+que **reemplaza el campo completo** (a diferencia de `merge:true`, que fusiona mapas y nunca borra una clave), y `deleteField()` para `real_hasta_mes`. Una carga que dejaría el documento de
+una entidad por sobre 1 MiB se bloquea antes de escribir. Las cifras en pantalla se actualizan al instante (Panel principal, Visualizador, % Ejecución, Reportes, modal abierto).
+El resumen y los datos nuevos se calculan aparte, sin tocar los datos vivos hasta confirmar.
 
 ### Real vs. proyectado
 
@@ -786,11 +833,11 @@ criterio que la pestaña SEP pero leyendo/escribiendo `otras_fuentes` en vez de 
   (tipo por código, fechas dd-mm-aaaa, descripción ≤ 100, RUT con guion, Documento Original solo en
   NC/ND, aviso previo de filas que se rechazarían) que el de SEP, con el código de Subvención
   oficial de cada una en la columna "Subvencion" (`GENERAL`, `PIE`, `MANTENIMIENTO`, `PRORETENCION`).
-- **⬇ Excel / ⬆ Importar Excel** — carga completa de la fuente en hojas (Ingreso, Remuneraciones,
+- **⬇ Excel / ⬆ Importar Excel** — (⬆ = **reemplazo total**, ver «Cargar un Excel en una fuente = REEMPLAZO TOTAL») carga completa de la fuente en hojas (Ingreso, Remuneraciones,
   Compras + `BYS_PROY_ITEMS` para las `bysMode:'compras'`; hojas de Ingreso + Remuneraciones +
   `COMPRAS` (con `Concepto`) + `BYS_ITEMS` —lo «sin documento»— para las `bysMode:'concepto'`; `ING_CARRERA_DOCENTE` en General y PIE; `ING_LLMM_*` en Recuperación LLMM; sin B&S en Asignación Familiar) y una hoja `META` con el corte "Real hasta
   el mes" de cada entidad, reimportable tal cual se exporta (el corte y la proyección de B&S
-  sobreviven al round-trip; si una hoja falta en el archivo, el import no toca esos datos).
+  sobreviven al round-trip; si una hoja falta en el archivo, el import no toca esos datos; si la hoja viene, reemplaza por completo lo que había).
 - **🖨 Exportar PDF** — mismo mecanismo de impresión del navegador que ya usa la pestaña SEP;
   imprime la pestaña de fuente actualmente activa.
 - **⬇ Descargar carga (JSON)** — respaldo manual, igual criterio que el de la pestaña SEP.
