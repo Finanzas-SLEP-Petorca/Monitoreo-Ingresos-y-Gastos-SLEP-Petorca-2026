@@ -7895,7 +7895,7 @@ function estadisticaCarga(desc, porRbd, ctx) {
     e.nDc = [...e.dcs.keys()].filter(k => k !== '').length;
     e.total = Math.round(e.total * 100) / 100;
   } else if (desc.tipo === 'ff') {
-    rbds.forEach(rbd => { const v = porRbd[rbd]; if (ffEsVacio(v)) return; const c = canonFondoFijo(v); e.filas++; e.entidades++; e.total += c.cupo + MESES_CARGA.reduce((s, m) => s + FF_CAMPOS_MES.reduce((t, k) => t + c.meses[m][k], 0), 0); });
+    rbds.forEach(rbd => { const v = porRbd[rbd]; if (ffEsVacio(v)) return; const c = canonFondoFijo(v); e.filas++; e.entidades++; e.total += c.cupo + FF_MESES.reduce((s, m) => s + FF_CAMPOS_MES.reduce((t, k) => t + c.meses[m][k], 0), 0); });
     e.total = Math.round(e.total * 100) / 100;
   } else { // items / honproy / proycuenta
     rbds.forEach(rbd => {
@@ -8435,6 +8435,7 @@ function ctxCargaSep() {
 // ---- Fondos Fijos
 // Columnas de la hoja «FONDOS FIJOS P02» (A = id): G = cupo; por mes [inicio, +2 rendido, +3 observado] y, en marzo–septiembre, una columna de folio.
 const FF_CAMPOS_MES = ['saldo_inicial', 'rendido', 'observado'];
+const FF_MESES = MAPA_COLUMNAS_FONDOS_FIJOS.map(x => x[0]); // marzo–diciembre: enero y febrero NO existen en la hoja (no se leen ni se tocan)
 const FF_FOLIO_MESES = new Set(MAPA_COLUMNAS_FONDOS_FIJOS.filter(x => x[2] !== null).map(x => x[0]));
 const FF_HOJA = 'FONDOS FIJOS P02';
 function parsearFondosFijosCarga(filas, enc, desc, ctx, r, rechazar) {
@@ -8473,7 +8474,7 @@ function parsearFondosFijosCarga(filas, enc, desc, ctx, r, rechazar) {
 function canonFondoFijo(v) {
   const m = (x) => montoFondoFijoLeido(x);
   const o = { cupo: m(v && v.cupo), meses: {} };
-  MESES_CARGA.forEach(mes => {
+  FF_MESES.forEach(mes => {
     const x = (v && v.meses && v.meses[mes]) || {};
     const e = {}; FF_CAMPOS_MES.forEach(k => { e[k] = m(x[k]); });
     if (FF_FOLIO_MESES.has(mes)) e.folio = recortarFolioFondoFijo(x.folio).texto;
@@ -8489,7 +8490,7 @@ function ctxCargaFF() {
   ctx.leer = (desc, rbd) => ((CARGA_MANUAL.fondos_fijos_por_rbd || {})[rbd]) || {};
   ctx.rutas = (desc, valor) => {
     const c = canonFondoFijo(valor), r = [['fondos_fijos.cupo', c.cupo]];
-    MESES_CARGA.forEach(mes => Object.entries(c.meses[mes]).forEach(([k, v]) => r.push([`fondos_fijos.meses.${mes}.${k}`, v])));
+    FF_MESES.forEach(mes => Object.entries(c.meses[mes]).forEach(([k, v]) => r.push([`fondos_fijos.meses.${mes}.${k}`, v])));
     return r;
   };
   ctx.vaciarTodo = false; // «Vaciar» pone en blanco lo que gestiona la hoja (cupo, saldo inicial, rendido, observado, folio); Registrado en General / Compensado SIGFE / Reposición se conservan
@@ -8499,7 +8500,7 @@ function ctxCargaFF() {
       const c = canonFondoFijo(campos.fondos_fijos);
       const ff = ensureFondoFijo(rbd);
       ff.cupo = c.cupo;
-      MESES_CARGA.forEach(mes => Object.assign(ff.meses[mes], c.meses[mes]));
+      FF_MESES.forEach(mes => Object.assign(ff.meses[mes], c.meses[mes]));
       recomputeOtraFuente(rbd, 'general');
     });
   };

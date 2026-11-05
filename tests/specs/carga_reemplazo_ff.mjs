@@ -22,7 +22,11 @@ function filaP02(id, nombre, cupo, meses = {}) {
 }
 const ENC1 = ['CONTROL FONDOS FIJOS P02', ...new Array(75).fill('')], ENC2 = ['RBD', 'Establecimiento', ...new Array(74).fill('')];
 const libro = (h, filas, nombreHoja = 'FONDOS FIJOS P02') => libroXlsx(h.page, { [nombreHoja]: [ENC1, ENC2, ...filas] });
+const MESES12 = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
+const rellena = (f) => { if (!f) return f; const o = { cupo: f.cupo || 0, meses: {} }; MESES12.forEach(mes => { const m = (f.meses || {})[mes] || {}; o.meses[mes] = { saldo_inicial: m.saldo_inicial || 0, rendido: m.rendido || 0, observado: m.observado || 0, registrado_general: m.registrado_general || 0, compensado_sigfe: m.compensado_sigfe || 0, reposicion: m.reposicion || 0, folio: m.folio || '' }; }); return o; };
 const docs = async (h) => sinAud(clon(await h.store()));
+// Igual que docs() pero con Fondos Fijos con los ceros explícitos (un mes sin datos es lo mismo que un mes con todo en 0)
+const docsN = async (h) => { const d = await docs(h); Object.values(d).forEach(x => { if (x.fondos_fijos) x.fondos_fijos = rellena(x.fondos_fijos); }); return d; };
 const ff = async (h, rbd) => ((await h.store())['sep_carga_rbd/' + rbd] || {}).fondos_fijos;
 const escribio = (ws) => ws.filter(w => w.path.startsWith('sep_carga_rbd/'));
 async function escenario(t, nombre, fn) { try { await fn(); } catch (e) { t.ok(false, `${nombre}: excepción`, String(e.stack || e.message).split('\n').slice(0, 6).join(' | ')); } }
@@ -34,7 +38,7 @@ await correrSpec('carga_reemplazo_ff', async (t) => {
   const nombres = Object.fromEntries(Object.entries(await h.store()).map(([p, d]) => [p.split('/')[1], d.nombre]));
   const conFF = Object.entries(await h.store()).filter(([p, d]) => d.fondos_fijos).map(([p]) => p.split('/')[1]).filter(id => /^\d+$/.test(id)); // AC trae fondos_fijos en el fixture pero NO es entidad de Fondos Fijos
   await clickTab(h.page, 'of-fondos_fijos');
-  const A = conFF[1], B = conFF[2]; // (conFF[0] es 1121, que algunos escenarios usan aparte)
+  const A = '1121', B = '1122', C = '1125'; // con datos de Fondos Fijos en el fixture (1121 trae además lo manual de marzo)
 
   await escenario(t, 'carga completa', async () => {
     const antes = await docs(h);
@@ -42,7 +46,7 @@ await correrSpec('carga_reemplazo_ff', async (t) => {
     await h.clearWrites();
     const r = await subirYConfirmar(h, 'fondos_fijos', await libro(h, [
       filaP02(Number(A), nombres[A], 750000, { MARZO: { s: 750000, r: 200000, o: 50000, f: 'FF-9/2026' }, JUNIO: { s: 10, r: 20, o: 30 }, DICIEMBRE: { s: 1, r: 2, o: 3 } }),
-      filaP02('1121', nombres['1121'], 400000, { ABRIL: { s: 400000, r: 123456, o: 0, f: 'FF-1' } }),
+      filaP02(C, nombres[C], 400000, { ABRIL: { s: 400000, r: 123456, o: 0, f: 'FF-1' } }),
     ]));
     t.ok(r.control.abierto && /Revisar carga · Fondos Fijos/.test(r.control.titulo), 'aparece el resumen de control (no un confirm/alert)', r.control.titulo);
     t.ok(/FONDOS FIJOS P02/.test(r.control.texto) && /Panel hoy: filas/.test(r.control.texto), 'el resumen trae la hoja con panel hoy vs. archivo', r.control.texto.slice(0, 500));
@@ -67,7 +71,7 @@ await correrSpec('carga_reemplazo_ff', async (t) => {
   await escenario(t, 'mismo libro dos veces y entidad ausente', async () => {
     const mismo = await libro(h, [
       filaP02(Number(A), nombres[A], 750000, { MARZO: { s: 750000, r: 200000, o: 50000, f: 'FF-9/2026' }, JUNIO: { s: 10, r: 20, o: 30 }, DICIEMBRE: { s: 1, r: 2, o: 3 } }),
-      filaP02('1121', nombres['1121'], 400000, { ABRIL: { s: 400000, r: 123456, o: 0, f: 'FF-1' } }),
+      filaP02(C, nombres[C], 400000, { ABRIL: { s: 400000, r: 123456, o: 0, f: 'FF-1' } }),
     ]);
     await h.clearWrites();
     const antes = await docs(h);
@@ -78,12 +82,12 @@ await correrSpec('carga_reemplazo_ff', async (t) => {
     const manualB = clon((await ff(h, B)).meses);
     const r2 = await subirYConfirmar(h, 'fondos_fijos', await libro(h, [filaP02(Number(B), nombres[B], 5, { MAYO: { s: 5, r: 6, o: 7, f: 'x' } })]));
     t.ok(/quedarán en blanco/.test(r2.control.texto), 'el resumen avisa de las entidades que quedarán en blanco', r2.control.texto.slice(0, 700));
-    const a = await ff(h, A), u = await ff(h, '1121');
+    const a = await ff(h, A), u = await ff(h, C);
     t.eq([a.cupo, a.meses.MARZO.rendido, a.meses.MARZO.folio, a.meses.JUNIO.observado], [0, 0, '', 0], 'la entidad ausente quedó en blanco en lo que la hoja gestiona (cupo, rendido, folio, observado)');
     t.ok(a.meses.MARZO.registrado_general !== undefined && a.meses.MARZO.compensado_sigfe !== undefined, 'pero conserva lo manual (Registrado en General / Compensado SIGFE)');
-    t.eq(u.cupo, 0, '1121 (con cupo antes) también quedó en blanco');
+    t.eq(u.cupo, 0, 'C (con cupo antes) también quedó en blanco');
     t.eq((await ff(h, B)).meses.MAYO.rendido, 6, 'B con su valor nuevo');
-    t.eq((await ff(h, B)).meses.MARZO.registrado_general, manualB.MARZO.registrado_general, 'y lo manual de B se conserva');
+    t.eq((await ff(h, B)).meses.MARZO.registrado_general, (manualB.MARZO || {}).registrado_general, 'y lo manual de B se conserva');
   });
 
   await escenario(t, 'rechazos', async () => {
@@ -142,7 +146,7 @@ await correrSpec('carga_reemplazo_ff', async (t) => {
   await escenario(t, 'cuadratura, Deshacer y Vaciar', async () => {
     const h4 = await boot({ autoCarga: false, fixture: 'fondos_fijos' });
     await clickTab(h4.page, 'of-fondos_fijos');
-    const previo = await docs(h4);
+    const previo = await docsN(h4);
     await h4.page.evaluate(() => { window.__cargaTestHook = (fase, fk, cm) => { if (fase === 'memoria' || fase === 'guardado') cm.fondos_fijos_por_rbd['1121'].cupo += 1; }; });
     const rc = await subirYConfirmar(h4, 'fondos_fijos', await libro(h4, [filaP02(1121, nombres['1121'], 1000, {})]), { cerrar: false });
     t.ok(/NO cuadra con el Excel/.test(rc.resultado.texto), 'la cuadratura detecta el desajuste inyectado', rc.resultado.texto.slice(0, 400));
@@ -152,14 +156,14 @@ await correrSpec('carga_reemplazo_ff', async (t) => {
     // Deshacer
     await h4.page.click('#undoCargaOFBtn-fondos_fijos'); await h4.page.waitForSelector('#cargaOkBtn'); await h4.page.click('#cargaOkBtn');
     await h4.page.waitForSelector('#cargaCerrarBtn'); await h4.page.click('#cargaCerrarBtn'); await h4.flushWrites(); await h4.waitIdle();
-    t.eq(await docs(h4), previo, 'Deshacer devuelve los documentos EXACTAMENTE como estaban (incluido lo manual)');
+    t.eq(await docsN(h4), previo, 'Deshacer devuelve los documentos como estaban (incluido lo manual; un mes sin datos = un mes en ceros)');
     // Vaciar
     t.eq(await h4.page.evaluate(() => !document.getElementById('vaciarOFBtn-fondos_fijos').classList.contains('hidden')), true, '«Vaciar Fondos Fijos» se ve para administración');
     await h4.page.click('#vaciarOFBtn-fondos_fijos'); await h4.page.waitForSelector('#cargaConfirmaNombre');
     t.eq(await h4.page.evaluate(() => document.getElementById('cargaOkBtn').disabled), true, 'sin escribir el nombre está deshabilitado');
     await h4.page.fill('#cargaConfirmaNombre', 'fondos fijos');
     await h4.page.click('#cargaOkBtn'); await h4.page.waitForSelector('#cargaCerrarBtn'); await h4.page.click('#cargaCerrarBtn'); await h4.flushWrites(); await h4.waitIdle();
-    const st = await docs(h4);
+    const st = await docsN(h4);
     const MESES_FOLIO = ['MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE']; // los únicos meses con columna de folio en la hoja (el folio de otros meses no se gestiona)
     const noVacios = Object.keys(st).filter(p => p !== 'sep_carga_rbd/AC' && p !== 'sep_carga_rbd/_meta').filter(p => { const f = st[p].fondos_fijos; if (!f) return false; if (f.cupo) return true; return Object.entries(f.meses || {}).some(([mes, m]) => m.saldo_inicial || m.rendido || m.observado || (MESES_FOLIO.includes(mes) && m.folio)); });
     t.eq(noVacios, [], 'Vaciar: cupo, saldo inicial, rendido, observado y folio en blanco en todas las entidades');
