@@ -134,7 +134,7 @@ await correrSpec('compras_id_cero', async (t) => {
       const claveC = Object.keys(g).find(id => id.startsWith('imp-') && g[id].nroDocumento === '3');
       if (reemplazo) {
         t.ok(!!claveC, `${E}: reemplazo total: la compra C tiene clave imp-…`);
-        await h.remoto('1121', `d.otras_fuentes.general.compras["${claveC}"].descripcion = "Cuadernos (corregido)"; return 1;`);
+        await h.remoto('1121', o.etiqueta === 'SEP' ? `d.compras["${claveC}"].descripcion = "Cuadernos (corregido)"; return 1;` : `d.otras_fuentes.general.compras["${claveC}"].descripcion = "Cuadernos (corregido)"; return 1;`);
         await h.waitIdle();
         await importarLibro(h, o.input, libro);
         const g2 = o.compras(await h.store());

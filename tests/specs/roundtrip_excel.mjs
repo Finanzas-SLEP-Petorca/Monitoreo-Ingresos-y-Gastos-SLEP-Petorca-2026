@@ -96,7 +96,8 @@ await correrSpec('roundtrip_excel', async (t) => {
   t.ok(/^Carga importada correctamente/.test(msgs1[0] || ''), 'SEP: el Excel individual de un RBD se puede reimportar', msgs1);
   const f2 = await exportar(h, () => page.click('#tableBody button.row-action-btn[data-action="excel"][data-rbd="1121"]'));
   t.eq(igualLibros(f1.libro, f2.libro), null, 'SEP: el Excel individual (RBD 1121) no cambia tras reimportarlo');
-  t.eq(primeraDiferencia(storeAntes, relevantes(await h.store())), null, 'SEP: tras el Excel individual los documentos siguen iguales');
+  t.eq(primeraDiferencia(solo(storeAntes, '1121'), solo(relevantes(await h.store()), '1121')), null, 'SEP: tras el Excel individual la entidad exportada (1121) sigue igual (las demás quedan vacías en esas hojas: reemplazo total)');
+  await importar(h, '#importExcelInput', x1); // se restablece con el libro completo para los casos siguientes
 
   // ================================================================ Fuentes (una por "forma": compras, JUNJI de 3 ingresos, concepto libre)
   for (const [key, etiqueta] of [['general', 'General (compras)'], ['junji', 'JUNJI (GESPARVU, 4 ingresos y 4 gastos de Remuneraciones)'], ['faep', 'FAEP (concepto libre)']]) {
@@ -150,7 +151,7 @@ await correrSpec('roundtrip_excel', async (t) => {
     t.ok(/^Carga importada correctamente/.test(mf[0] || ''), 'SEP + honorarios: el Excel individual de un RBD se reimporta', mf);
     const f2 = await exportar(hh, () => hh.page.click('#tableBody button.row-action-btn[data-action="excel"][data-rbd="1122"]'));
     t.eq(igualLibros(f1.libro, f2.libro), null, 'SEP + honorarios: el Excel individual (RBD 1122) no cambia tras reimportarlo');
-    t.eq(primeraDiferencia(sAntes, documentos(await hh.store())), null, 'SEP + honorarios: tras el Excel individual los documentos siguen iguales');
+    t.eq(primeraDiferencia(solo(sAntes, '1122'), solo(documentos(await hh.store()), '1122')), null, 'SEP + honorarios: tras el Excel individual la entidad exportada (1122) sigue igual (reemplazo total)');
     t.noErrores(hh);
     await hh.close();
   }

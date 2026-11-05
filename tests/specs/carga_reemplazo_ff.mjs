@@ -165,9 +165,10 @@ await correrSpec('carga_reemplazo_ff', async (t) => {
     await h4.page.click('#cargaOkBtn'); await h4.page.waitForSelector('#cargaCerrarBtn'); await h4.page.click('#cargaCerrarBtn'); await h4.flushWrites(); await h4.waitIdle();
     const st = await docsN(h4);
     const MESES_FOLIO = ['MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE']; // los únicos meses con columna de folio en la hoja (el folio de otros meses no se gestiona)
-    const noVacios = Object.keys(st).filter(p => p !== 'sep_carga_rbd/AC' && p !== 'sep_carga_rbd/_meta').filter(p => { const f = st[p].fondos_fijos; if (!f) return false; if (f.cupo) return true; return Object.entries(f.meses || {}).some(([mes, m]) => m.saldo_inicial || m.rendido || m.observado || (MESES_FOLIO.includes(mes) && m.folio)); });
+    const noVacios = Object.keys(st).filter(p => p !== 'sep_carga_rbd/AC' && p !== 'sep_carga_rbd/_meta').filter(p => { const f = st[p].fondos_fijos; if (!f) return false; if (f.cupo) return true; return Object.entries(f.meses || {}).filter(([mes]) => mes !== 'ENERO' && mes !== 'FEBRERO').some(([mes, m]) => m.saldo_inicial || m.rendido || m.observado || (MESES_FOLIO.includes(mes) && m.folio)); });
     t.eq(noVacios, [], 'Vaciar: cupo, saldo inicial, rendido, observado y folio en blanco en todas las entidades');
     t.ok(Object.values(st).some(d => d.fondos_fijos && Object.values(d.fondos_fijos.meses || {}).some(m => m.registrado_general)), 'lo manual (Registrado en General) se conserva');
+    t.eq(st['sep_carga_rbd/1128'].fondos_fijos.meses.FEBRERO.rendido, 20000, 'enero y febrero (la hoja no los trae) no se tocan');
     t.eq(st['sep_carga_rbd/AC'].fondos_fijos, previo['sep_carga_rbd/AC'].fondos_fijos, 'AC (no es entidad de Fondos Fijos) no se toca');
     t.eq(sinFF(st), sinFF(previo), 'SEP y otras fuentes intactos');
     await h4.close();

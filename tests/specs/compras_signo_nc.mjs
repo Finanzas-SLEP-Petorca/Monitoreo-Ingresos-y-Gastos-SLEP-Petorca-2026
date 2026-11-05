@@ -138,14 +138,14 @@ await correrSpec('compras_signo_nc', async (t) => {
     // la próxima vez que esa compra cambie en un archivo (o se edite). Antes la reimportación reescribía todas las compras.
     t.eq(((await h.writes()).filter(w => w.path === 'sep_carga_rbd/1121')).length, 0, 'SEP (reemplazo total): reimportar el Excel idéntico al panel no escribe nada');
     t.eq([st2.ncPos.montoGasto, st2.ncPos.montoDocumento, st2.ndNeg.montoGasto], [100000, 119000, -20000], 'SEP: lo guardado con el signo antiguo sigue igual hasta que la compra cambie (el panel ya lo ve corregido)');
-    const editado = await libroXlsx(page, { COMPRAS: l1.hojas.COMPRAS.map((r, i) => (i > 0 && r[0] === 'ncPos') ? r.map((v, j) => j === 8 ? v + ' (editada)' : v) : r) });
-    await importarLibro(h, '#importExcelInput', editado, 'editado.xlsx');
-    const st3 = (await h.store())['sep_carga_rbd/1121'].compras;
-    t.eq([st3.ncPos.montoGasto, st3.ncPos.montoDocumento, st3.ndNeg.montoGasto, st3.ndNeg.montoDocumento, st3.facNeg.montoGasto], [-100000, -119000, 20000, 23800, -30000], 'SEP: al cambiar el archivo, Firestore ya guarda los signos correctos (NC negativa, ND positiva, factura tal cual)');
     const x2 = await capturarDescarga(page, () => page.click('#downloadExcelBtn'));
     const l2 = await leerXlsx(page, x2.buffer);
     t.eq(l2.hojas.COMPRAS, l1.hojas.COMPRAS, 'SEP: exportar → importar → exportar da la misma hoja COMPRAS');
     t.eq((await textoDe(page, '#kpiRow')).includes(clp(TOTAL_MARZO)), true, 'SEP: el KPI sigue igual tras reimportar');
+    const editado = await libroXlsx(page, { COMPRAS: l1.hojas.COMPRAS.map((r, i) => (i > 0 && r[0] === 'ncPos') ? r.map((v, j) => j === 8 ? v + ' (editada)' : v) : r) });
+    await importarLibro(h, '#importExcelInput', editado, 'editado.xlsx');
+    const st3 = (await h.store())['sep_carga_rbd/1121'].compras;
+    t.eq([st3.ncPos.montoGasto, st3.ncPos.montoDocumento, st3.ndNeg.montoGasto, st3.ndNeg.montoDocumento, st3.facNeg.montoGasto], [-100000, -119000, 20000, 23800, -30000], 'SEP: al cambiar el archivo, Firestore ya guarda los signos correctos (NC negativa, ND positiva, factura tal cual)');
     t.noErrores(h);
     await h.close();
   }

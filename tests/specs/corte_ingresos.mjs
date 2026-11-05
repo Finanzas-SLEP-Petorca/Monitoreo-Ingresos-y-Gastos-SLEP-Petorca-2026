@@ -335,8 +335,9 @@ await correrSpec('corte_ingresos', async (t) => {
     const filasIng = libro.hojas.INGRESO.map((r, i) => (i > 0 && r[0] === 1121 && r[2] === 'Ingreso SEP Preferente') ? r.map((v, j) => (j === 3 ? 7777 : v)) : r);
     const bytes = await page.evaluate((hoja) => { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(hoja), 'INGRESO'); return Array.from(new Uint8Array(XLSX.write(wb, { bookType: 'xlsx', type: 'array' }))); }, filasIng);
     await h.clearWrites();
+    h.dialogs.length = 0;
     await page.setInputFiles('#importExcelInput', { name: 'cambio.xlsx', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', buffer: Buffer.from(bytes) });
-    await page.waitForSelector('#cargaOkBtn'); await page.click('#cargaOkBtn'); await page.waitForSelector('#cargaCerrarBtn'); await page.click('#cargaCerrarBtn');
+    for (let i = 0; i < 200 && !h.dialogs.length; i++) await page.waitForTimeout(50);   // el adaptador de arnés confirma el resumen y emite el alert
     await h.flushWrites(); await h.waitIdle();
     const ws2 = (await h.writes()).filter(w => w.collection === 'sep_carga_rbd');
     t.ok(ws2.length > 0, 'con un cambio real sí se escribe', ws2.length);

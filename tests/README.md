@@ -470,6 +470,30 @@ Specs nuevos: `carga_reemplazo_total`, `carga_reemplazo_hojas` y, contra el SDK 
 - `fuentes_nuevas_excel`, `formulas_csv_excel`, `n_dc`, `junji_bdl`, `junji_rem_excel`: las boletas inválidas a propósito del fixture desaparecen al reimportar el Excel completo; `mergeFields` además de `merge:true`; si el archivo es igual no se escribe.
 - Golden: ver la nota de la PR (solo aparecen los botones «↩ Deshacer última carga» —oculto— y «🗑 Vaciar fuente» —solo admin— en las 12 pestañas; ninguna cifra cambia).
 
+### Importadores de SEP y de Fondos Fijos = reemplazo total: qué cambió en los specs y por qué
+
+Specs nuevos: `carga_reemplazo_sep` (round-trip exportar → reimportar idempotente en 10 fixtures, carga exacta de las 6 hojas, campos no gestionados intactos —`rem.real_hasta_mes`, `ingreso_real_hasta_mes`, `_meta`,
+`fondos_fijos`, `otras_fuentes`—, mismo Excel dos veces sin escrituras, modificada = una, eliminada/ausente desaparecen, hoja ausente se conserva, idénticas = 2, ID repetido, DC_247 53 + 66 = 66 y N° DC no heredado,
+rechazos con hoja/fila/motivo, Cancelar/Esc, cuadratura con desajuste inyectado, Vaciar solo admin, Deshacer, respaldo reimportable, honorarios/70-30 intactos con COMPRAS sola, 3.200 compras),
+`carga_reemplazo_ff` (mapa de la hoja, lo manual y enero/febrero intactos, entidad ausente en blanco, mismo libro sin escrituras, rechazos, hoja ausente, respaldo en el mismo formato reimportable, cuadratura, Deshacer, Vaciar)
+y, contra el SDK real, `tests/e2e-real/specs/18_carga_sep_ff.mjs`. `tests/lib/carga.mjs` (`subirYConfirmar`, `inputFuente`) acepta `'sep'` (`#importExcelInput`) y `'fondos_fijos'` (`#importFondosFijosInput`).
+Los fixtures `honorarios`, `fondos_fijos`, `compras` y `honorarios_fuentes` traen filas inválidas A PROPÓSITO (cuenta fuera del catálogo, tipo que no es de honorarios…): la primera ida y vuelta las limpia **y las avisa**;
+la segunda ya es idempotente (así lo prueba `carga_reemplazo_sep`).
+
+**Specs existentes cambiados (cada cambio sigue de la nueva semántica):**
+- `n_dc`: una celda N° DC vacía, o un Excel sin la columna, deja la compra SIN N° DC (ya no se hereda el anterior).
+- `compras_signo_nc`: reimportar el Excel idéntico al panel no escribe nada (lo guardado con signo antiguo se corrige cuando la compra cambia en un archivo); se agrega un cambio real para comprobar el signo guardado.
+- `honorarios_excel`: el Excel individual de un RBD vacía los demás (se restablece con el libro completo); HONORARIOS reemplaza (1122 queda con las 3 boletas del archivo); las 3 boletas inválidas del fixture desaparecen al reimportar;
+  motivo nuevo «la entidad "9999" no es parte de SEP».
+- `claves_invalidas`: el ítem de ingreso vacío ahora dice «falta el ítem de ingreso» y uno desconocido «no es uno de los ítems de ingreso de SEP».
+- `corte_ingresos`: reimportar el Excel idéntico no escribe; con un cambio real el write no lleva ningún corte (ni en `mergeFields`).
+- `formulas_csv_excel`: reimportar idéntico no escribe; el servidor conserva el texto original (sin apóstrofo).
+- `compras_id_cero`: SEP pasa a la rama de reemplazo total (5 filas = 5 compras; la clave corrupta «0» desaparece).
+- `fondos_fijos_importador`: reescrito para el flujo nuevo. Se conservan el mapa de columnas, la basura en columnas no leídas, los textos es-CL, el folio recortado y las filas rechazadas; desaparecen el `confirm()`, el
+  guardado entidad por entidad («N de M guardadas», «Reintentar», plazo de 20 s sin conexión): ahora es un batch con resumen y cuadratura (un servidor que rechaza se prueba en la sección 5 y en 18).
+- `roundtrip_excel`: igual que en las fuentes, el Excel de una entidad vacía las demás en las hojas que trae; se verifica la entidad exportada.
+- Golden: solo aparecen los botones «↩ Deshacer última carga» (oculto) y «🗑 Vaciar SEP» / «🗑 Vaciar Fondos Fijos» (solo admin) y el texto de ayuda del botón de importar; ninguna cifra cambia.
+
 ### Bugs conocidos: `known-bug` vs `enforced`
 
 Hoy ningún spec está en `'known-bug'`: `semilla_offline.mjs` (PR A) y `escritura_modal_tecleo.mjs` (F-01) ya están en `'enforced'` porque sus bugs se corrigieron.
