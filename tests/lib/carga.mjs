@@ -7,7 +7,7 @@
 import { libroXlsx } from './compras.mjs';
 export { libroXlsx };
 
-export const inputFuente = (fuente) => `#importExcelOFInput-${fuente}`;
+export const inputFuente = (fuente) => fuente === 'sep' ? '#importExcelInput' : fuente === 'fondos_fijos' ? '#importFondosFijosInput' : `#importExcelOFInput-${fuente}`;
 const MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
 export async function leerModalCarga(page) {
