@@ -33,6 +33,7 @@ async function subir(h, buffer, { confirmar = true } = {}) {
   const control = await page.evaluate(() => document.getElementById('cargaControlBody').innerText.replace(/\s+/g, ' '));
   if (!confirmar) { await page.click('#cargaCancelarBtn'); return { control }; }
   if (!await page.$('#cargaOkBtn')) { await page.click('#cargaCerrarBtn'); return { control }; }
+  if (await page.$('#cargaConfirmaMasivo')) await page.check('#cargaConfirmaMasivo'); // vaciado masivo: casilla
   if (await page.evaluate(() => document.getElementById('cargaOkBtn').disabled)) { await page.click('#cargaCancelarBtn'); return { control, bloqueado: true }; } // el resumen bloquea la carga (p. ej. documento de más de 1 MiB)
   await page.click('#cargaOkBtn');
   await page.waitForFunction(() => !!document.getElementById('cargaCerrarBtn') && !document.getElementById('cargaOkBtn') && !/Guardando para el resto/.test(document.getElementById('cargaControlBody').innerText), null, { timeout: 120000 });

@@ -11,7 +11,7 @@ import { boot, clickTab } from '../lib/boot.mjs';
 import { correrSpec } from '../lib/spec.mjs';
 import { capturarDescarga, leerXlsx } from '../lib/capture-utils.mjs';
 import { ENC_COMPRAS_SEP, filaCompra, compraBase, libroXlsx } from '../lib/compras.mjs';
-import { subirYConfirmar, leerModalCarga } from '../lib/carga.mjs';
+import { subirYConfirmar, leerModalCarga, marcarCasillaMasiva } from '../lib/carga.mjs';
 
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 const ENC_ING = ['RBD', 'Establecimiento', 'Item', ...MESES, 'Total Año'];
@@ -54,6 +54,7 @@ async function confirmarCapturando(h, buffer, nombre = 'carga.xlsx') {
   const { page } = h;
   await page.setInputFiles('#importExcelInput', { name: nombre, mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', buffer });
   await page.waitForFunction(() => !!document.getElementById('cargaOkBtn'), null, { timeout: 60000 });
+  await marcarCasillaMasiva(page); // si el archivo deja vacías a muchas entidades, el resumen pide la casilla antes de poder reemplazar
   const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 20000 }), page.click('#cargaOkBtn')]);
   const { readFileSync } = await import('node:fs');
   const respaldo = { filename: dl.suggestedFilename(), buffer: readFileSync(await dl.path()) };

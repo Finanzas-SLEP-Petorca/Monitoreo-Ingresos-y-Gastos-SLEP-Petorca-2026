@@ -33,6 +33,7 @@ async function subir(h, sel, buffer, { confirmar = true } = {}) {
   const control = await page.evaluate(() => document.getElementById('cargaControlBody').innerText.replace(/\s+/g, ' '));
   if (!confirmar) { await page.click('#cargaCancelarBtn'); return { control }; }
   if (!await page.$('#cargaOkBtn')) { await page.click('#cargaCerrarBtn'); return { control }; }
+  if (await page.$('#cargaConfirmaMasivo')) await page.check('#cargaConfirmaMasivo'); // aviso de vaciado masivo: hay que marcar la casilla para poder reemplazar
   await page.click('#cargaOkBtn');
   await page.waitForFunction(() => !!document.getElementById('cargaCerrarBtn') && !document.getElementById('cargaOkBtn') && !/Guardando para el resto/.test(document.getElementById('cargaControlBody').innerText), null, { timeout: 120000 });
   const resultado = await page.evaluate(() => document.getElementById('cargaControlBody').innerText.replace(/\s+/g, ' '));
@@ -45,6 +46,7 @@ async function clic(h, id, nombre) { // botones Deshacer / Vaciar
   await page.click(id);
   await page.waitForSelector('#cargaOkBtn');
   if (nombre) await page.fill('#cargaConfirmaNombre', nombre);
+  if (await page.$('#cargaConfirmaMasivo')) await page.check('#cargaConfirmaMasivo');
   await page.click('#cargaOkBtn');
   await page.waitForFunction(() => !!document.getElementById('cargaCerrarBtn') && !document.getElementById('cargaOkBtn') && !/Guardando para el resto/.test(document.getElementById('cargaControlBody').innerText), null, { timeout: 120000 });
   const resultado = await page.evaluate(() => document.getElementById('cargaControlBody').innerText.replace(/\s+/g, ' '));
@@ -140,7 +142,26 @@ await correrSpec('18_carga_sep_ff', async (t) => {
       const back = await emu.instantanea();
       t.eq(Object.values(back).reduce((n, d) => n + Object.keys(d.data.compras || {}).length, 0), 3200, 'S5) Deshacer devuelve las 3.200 compras al servidor');
     });
-    t.eq(await h.inesperados(), [], 'S1-S5) sin errores inesperados');
+    // S6) Vaciado masivo: tras S5 hay compras en 50 RBD; un Excel con las de UNA sola entidad deja vacías a las otras 49 → aviso rojo, «Reemplazar» deshabilitado hasta marcar la casilla.
+    await t.escenario('S6', async () => {
+      const antes = await emu.instantanea();
+      const nConCompras = (snap) => Object.keys(snap).filter(id => Object.keys((snap[id].data || {}).compras || {}).length).length;
+      t.eq(nConCompras(antes), 50, 'S6) partida: 50 RBD con compras');
+      const libro1 = await libroXlsx(page, { COMPRAS: [ENC_COMPRAS_SEP, fila('', 1121, compra({ nroDocumento: 'SOLO-1', montoGasto: 5000, montoDocumento: 5950 }))] });
+      await h.clearLog();
+      await page.setInputFiles('#importExcelInput', { name: 'una_entidad.xlsx', mimeType: MIME, buffer: libro1 });
+      await page.waitForSelector('#cargaOkBtn', { timeout: 90000 });
+      const ui = await page.evaluate(() => ({ aviso: (document.getElementById('cargaAvisoMasivo') || {}).innerText || '', role: (document.getElementById('cargaAvisoMasivo') || { getAttribute() {} }).getAttribute('role'), deshabilitado: document.getElementById('cargaOkBtn').disabled, foco: document.activeElement.id }));
+      t.ok(/trae solo 1 de 55 entidades.*49 entidades quedarán en \$0 \/ sin datos en: COMPRAS/.test(ui.aviso.replace(/\s+/g, ' ')), 'S6) aviso rojo: 1 de 55 entidades, 49 quedarían vacías en COMPRAS', ui.aviso);
+      t.eq([ui.role, ui.deshabilitado, ui.foco], ['alert', true, 'cargaCancelarBtn'], 'S6) role=alert, «Reemplazar» deshabilitado y foco en «Cancelar»');
+      await page.keyboard.press('Escape');
+      t.eq([(await h.writes()).length, nConCompras(await emu.instantanea())], [0, 50], 'S6) Esc: sin escrituras y el servidor intacto (50 RBD con compras)');
+      const r = await subir(h, '#importExcelInput', libro1);
+      t.ok(/aplicado y verificado/.test(r.resultado), 'S6) con la casilla marcada reemplaza y cuadra', r.resultado && r.resultado.slice(0, 200));
+      const despues = await emu.instantanea();
+      t.eq([nConCompras(despues), Object.values(despues['1121'].data.compras).map(c => c.nroDocumento)], [1, ['SOLO-1']], 'S6) servidor: solo 1121 conserva compras (las otras 49 se borraron de verdad)');
+    });
+    t.eq(await h.inesperados(), [], 'S1-S6) sin errores inesperados');
     await h.close();
   }
 
