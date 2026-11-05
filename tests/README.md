@@ -21,7 +21,7 @@ node tests/specs/persistencia.mjs        # un spec directamente (sin la tabla)
 ```
 
 Código de salida: `0` si todo es PASS o KNOWN_BUG; `1` si algo FALLA.
-Duración: ≈ 20 min la suite completa (68 pruebas: fixture + 66 specs + golden; golden ≈ 100 s; los specs más largos son `n_dc`, `escritura_modal_tecleo`, `a11y_contraste`, `corte_ingresos`, `modal_equivalencia`, `sync_estado`, `seguridad_xss` y `mes_cierre_global`). `-v` muestra la salida completa de cada prueba; `--jobs N` corre specs en paralelo.
+Duración: ≈ 20 min la suite completa (70 pruebas: fixture + 68 specs + golden; golden ≈ 100 s; los specs más largos son `n_dc`, `escritura_modal_tecleo`, `a11y_contraste`, `corte_ingresos`, `modal_equivalencia`, `sync_estado`, `seguridad_xss` y `mes_cierre_global`). `-v` muestra la salida completa de cada prueba; `--jobs N` corre specs en paralelo.
 
 ### Qué HTML se prueba (`APP_HTML`)
 
@@ -350,6 +350,8 @@ Cada uno termina con `process.exit(1)` si falla y con una línea final `RESULT: 
 | `junji_rem_lineas` | JUNJI · Gasto de Remuneraciones en 4 líneas (`gasto_rem_operacion`, `_homologacion`, `_carrera_docente`, `_bdl`): modal, cifras, INVARIANTE entre vistas, guardado por línea, documentos antiguos / mezcla / cliente viejo / dañados, reconciliador (ver «JUNJI · Gasto de Remuneraciones en 4 líneas») |
 | `junji_rem_estado` | JUNJI · saldo propio por línea, exceso cargado a Operación, saldo de Operación para B&S y Estado con la causa por línea (fila, tooltip, «Atención», CSV, PDF), edición en vivo y honorarios |
 | `junji_rem_excel` | JUNJI · hojas `REM_*` e `ING_CARRERA_DOCENTE_PARVULARIA`, ida y vuelta, compatibilidad con el Excel anterior (`REMUNERACIONES` → Operación) |
+| `carga_reemplazo_total` | Carga por fuente = REEMPLAZO TOTAL (General): resumen de control antes de escribir, filas y sumas exactas (NC negativas), mismo Excel dos veces sin escrituras, fila modificada = una fila, eliminadas desaparecen, entidad ausente vacía, hoja ausente se conserva, filas idénticas y ID repetido, otras fuentes y SEP intactos, DC_247 (53 + 66 = 66), rechazos con motivo (leídas = cargadas + rechazadas), Cancelar/Esc, accesibilidad del modal, cuadratura con desajuste inyectado (banner rojo), Deshacer, Vaciar fuente (solo admin, escribiendo el nombre), Excel de 3.200 compras |
+| `carga_reemplazo_hojas` | Semántica por tipo de hoja en fuentes por concepto (FAEP), JUNJI (REM_*, REMUNERACIONES antigua, META espejo) y Recuperación LLMM; hoja con encabezado de otra fuente se omite entera; exportar → subir en las 12 fuentes × 4 fixtures no cambia nada |
 | `mock_semantica` | prueba el propio mock (merge profundo, deleteField, timestamps, batch, offline, errores…) sin el panel |
 | `fondos_fijos_modelo` | PR K, fixture `fondos_fijos`: lectura de `fondos_fijos` SIN escribir (68 entidades —55 RBD + 13 GESPARVU, sin AC—, tarjetas, Estado de cada una y modal contra un cálculo independiente: aceptado, pendientes, saldo de caja), lectura TOLERANTE de un documento con valores no numéricos, nulos, negativos, ≥ `MONTO_ABS_MAX`, folio que no es texto o de 60 caracteres / emojis (estado verde, 0 writes), AC ignorado, guardado con merge por mes y campo (un write de solo `fondos_fijos.meses.<MES>.<campo>`, el servidor conserva lo demás, persiste tras recargar), lo registrado en General mueve la fila, el modal y el Panel principal y el jardín entra y sale de General, y cambios remotos con el modal abierto |
 | `fondos_fijos_validacion` | PR K, endurecimiento: montos solo finitos, no negativos y bajo el tope (negativo, 1e13, «1e999» → no se guarda, mensaje claro y la celda vuelve; vacío = 0; 9.999.999.999.999 sí), folio de 40 caracteres (41 se recorta con aviso; emojis cuentan como 1; espacios de los bordes), `data-ff-*` manipulados (campo, mes o entidad inválidos, `__proto__`, AC, id inexistente) no escriben ni crean documentos, error de guardado permanente (rojo con «Reintentar» también dentro del modal) y XSS (folio con marcado literal; copia del HTML con un GESPARVU de id con marcado: `data-ff-rbd` / `data-ff-abrir` escapados) |
@@ -449,6 +451,24 @@ Se **extendieron / ajustaron** por la nueva semántica del saldo de Operación (
 Los fixtures `estado`, `jardines` (y los derivados) reparten ahora la Remuneración de JUNJI en líneas (campos nuevos) para conservar la historia de cada caso (p. ej. 5401002 con BDL alto: Remuneración en la línea BDL); `estado` trae
 honorarios en 5402004 y 5401006 (la única forma de un Déficit «solo por el saldo total»). Golden: sección nueva `junji_rem`; con `default` solo cambian el marcado y los textos (4 tablas de Remuneración, cuadro de saldos,
 rótulo «Carrera Docente Parvularia», ayudas), las hojas del Excel de JUNJI, el CSV (4 líneas + saldos) y el **Estado** de 4 jardines (ver la PR: la fila única antigua pasa a Operación y ahora Operación la paga entera).
+
+### Carga por fuente = reemplazo total: qué cambió en los specs y por qué
+
+Specs nuevos: `carga_reemplazo_total`, `carga_reemplazo_hojas` y, contra el SDK real, `tests/e2e-real/specs/17_carga_reemplazo_total.mjs`. El mock ahora soporta `setDoc/batch.set(..., { mergeFields })`
+(reemplaza el campo completo; `tests/mockfb/core.js`). `tests/lib/carga.mjs` trae `subirYConfirmar` (sube el Excel, lee el resumen, pulsa «Reemplazar» y lee el resultado).
+
+**Adaptador de arnés.** Los specs anteriores importan Excel y esperaban el `alert` de resumen. `boot()` instala por defecto un adaptador (`autoCarga`, en `tests/lib/boot.mjs`) que hace lo que haría la persona
+(pulsa «Reemplazar», espera el resultado, cierra el modal) y emite el `alert` con el formato antiguo, así esos specs siguen verificando los DATOS importados. Los specs `carga_reemplazo_*` arrancan con `autoCarga:false`.
+
+**Specs existentes cambiados (cada cambio sigue de la nueva semántica; las hojas ausentes siguen sin borrar nada):**
+- `a11y_modales`: 5 diálogos propios (se suma `#cargaControlModal`).
+- `compras_conceptos_excel`, `honorarios_fuentes_excel`, `roundtrip_excel`: el Excel de UNA entidad («⬇ XLS» de la fila) trae las hojas solo con esa entidad, así que al reimportarlo las demás quedan vacías en esas hojas;
+  se verifica que la entidad exportada queda igual. Un Excel sin la columna N° DC o con la celda vacía deja la compra/boleta SIN N° DC (antes se heredaba). Las filas sin fecha o sin monto ahora se rechazan con aviso.
+  Una hoja con el encabezado de la otra clase se omite entera («NO se carga»). `HON_PROYECCION`/COMPRAS reemplazan (la cuenta que no viene desaparece; el total es el del archivo, no «antes + n»).
+- `compras_id_cero`: en las fuentes (no en SEP) ya no se deduplica ni se une con lo existente: 5 filas del Excel = 5 compras; la clave corrupta «0» de Firestore desaparece; lo que no está en el archivo desaparece.
+- `faep_figa_jardines`: un archivo antiguo de FAEP sin jardines vacía los jardines en las hojas que trae (JUNJI y Aporte JUNJI quedan intactos).
+- `fuentes_nuevas_excel`, `formulas_csv_excel`, `n_dc`, `junji_bdl`, `junji_rem_excel`: las boletas inválidas a propósito del fixture desaparecen al reimportar el Excel completo; `mergeFields` además de `merge:true`; si el archivo es igual no se escribe.
+- Golden: ver la nota de la PR (solo aparecen los botones «↩ Deshacer última carga» —oculto— y «🗑 Vaciar fuente» —solo admin— en las 12 pestañas; ninguna cifra cambia).
 
 ### Bugs conocidos: `known-bug` vs `enforced`
 

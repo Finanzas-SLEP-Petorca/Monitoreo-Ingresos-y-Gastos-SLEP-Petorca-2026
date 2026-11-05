@@ -115,6 +115,7 @@ Emulador 1.19.8, SDK 10.12.0, Chromium headless. «PASS» = todas las aserciones
 | 12 Jardines en FAEP/FIGA y BDL de JUNJI | **PASS** | **FAIL** (verificado también contra `@ff7a666`: 7 aserciones) | — |
 | 14 Honorarios por boleta en las fuentes (PR-3) | **PASS** | **FAIL** (3 aserciones; verificado contra `@1bb8ccc`: las fuentes no tienen honorarios) | — |
 | 15 Fondos Fijos (PR K) | **PASS** | **FAIL** (contra `@13653a5`: 11 aserciones) | — |
+| 17 Carga por fuente = reemplazo total (mergeFields + deleteField reales, lotes, 1 MiB, rechazo del servidor, deshacer/vaciar, reglas reales) | **PASS** | **FAIL** (contra `@069f9dd` no existe el resumen de control) | — |
 | 16 JUNJI · Remuneraciones en 4 líneas | **PASS** | **FAIL** (contra `@217e33a`: 3 aserciones; JUNJI con una sola fila `gasto_rem`) | — |
 
 Con las cuatro correcciones propuestas (`parches/TODOS_B1_a_B4.patch`, aplicadas **a una copia**, nunca a `index.html`) los 9 specs quedan en PASS sin BUG.

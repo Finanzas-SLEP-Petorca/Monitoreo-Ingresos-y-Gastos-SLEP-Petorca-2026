@@ -151,8 +151,8 @@ await correrSpec('formulas_csv_excel', async (t) => {
   await page.setInputFiles('#importExcelOFInput-faep', { name: 'faep.xlsx', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', buffer: xlFaep.buffer });
   await h.waitIdle();
   await guardarTodo(h);
-  const wf = (await h.writes()).filter(w => w.path === RUTA('1121') && w.payload.otras_fuentes && w.payload.otras_fuentes.faep && w.payload.otras_fuentes.faep.bys_items);
-  const claves = [...new Set(wf.flatMap(w => Object.keys(w.payload.otras_fuentes.faep.bys_items)))];
+  // Reemplazo total: si el archivo es igual a lo guardado no se escribe nada; se verifica lo guardado en el servidor.
+  const claves = Object.keys((await h.store())[RUTA('1121')].otras_fuentes.faep.bys_items);
   t.eq(claves.sort(), [F1, F4, 'Aseo'].sort(), 'reimportar FAEP: los conceptos se guardan con su clave original (sin apóstrofo, sin ítems duplicados)');
   const xl3 = await capturarDescarga(page, () => page.click('#downloadExcelOFBtn-faep'));
   t.eq((await leerXlsx(page, xl3.buffer)).hojas.BYS_ITEMS, libroFaep.hojas.BYS_ITEMS, 'FAEP: exportar → reimportar → exportar deja BYS_ITEMS idéntica');

@@ -76,7 +76,7 @@ await correrSpec('fuentes_nuevas_excel', async (t) => {
     const dos = await exportar(h, key);
     t.eq(JSON.stringify(sinHonorarios(dos.libro.hojas)), JSON.stringify(sinHonorarios(X[key].libro.hojas)), `2) ${key}: exportar → importar → exportar da hojas idénticas`);
     // Reemplazo total: las boletas inválidas a propósito del fixture (cuenta/tipo no permitidos) NO se pueden cargar, así que desaparecen al reimportar el Excel completo (el resumen las lista); todo lo demás queda igual.
-    const sinBol = (o) => Object.fromEntries(Object.entries(o).filter(([k]) => !k.includes('/honorarios/')));
+    const sinBol = (o) => { const x = typeof o === 'string' ? JSON.parse(o) : o; return JSON.stringify(Object.fromEntries(Object.entries(x).filter(([k]) => !k.includes('/honorarios/')))); };
     t.eq(sinBol(await otrasFuentesServidor(h, key)), sinBol(antes), `2) ${key}: ningún dato (salvo las boletas inválidas del fixture) cambió en el servidor`);
   }
 
