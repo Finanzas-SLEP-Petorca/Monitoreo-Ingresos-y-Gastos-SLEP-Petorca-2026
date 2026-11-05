@@ -330,8 +330,19 @@ await correrSpec('corte_ingresos', async (t) => {
     await h.flushWrites();
     await h.waitIdle();
     const ws = (await h.writes()).filter(w => w.collection === 'sep_carga_rbd');
-    t.ok(ws.length > 0, 'reimportar el Excel escribe los documentos como siempre', ws.length);
-    t.ok(ws.every(w => !('ingreso_real_hasta_mes' in w.payload) && !(w.payload.rem && 'real_hasta_mes' in w.payload.rem)), 'pero ningún write lleva ingreso_real_hasta_mes ni rem.real_hasta_mes: el corte no se pisa ni se borra');
+    t.eq(ws.length, 0, 'reemplazo total: reimportar el Excel idéntico al panel no escribe nada (antes reescribía todos los documentos)');
+    // Con un cambio real (otro monto de ingreso en 1121) SÍ se escribe, y el write no lleva ni toca ningún corte
+    const filasIng = libro.hojas.INGRESO.map((r, i) => (i > 0 && r[0] === 1121 && r[2] === 'Ingreso SEP Preferente') ? r.map((v, j) => (j === 3 ? 7777 : v)) : r);
+    const bytes = await page.evaluate((hoja) => { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(hoja), 'INGRESO'); return Array.from(new Uint8Array(XLSX.write(wb, { bookType: 'xlsx', type: 'array' }))); }, filasIng);
+    await h.clearWrites();
+    h.dialogs.length = 0;
+    await page.setInputFiles('#importExcelInput', { name: 'cambio.xlsx', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', buffer: Buffer.from(bytes) });
+    for (let i = 0; i < 200 && !h.dialogs.length; i++) await page.waitForTimeout(50);   // el adaptador de arnés confirma el resumen y emite el alert
+    await h.flushWrites(); await h.waitIdle();
+    const ws2 = (await h.writes()).filter(w => w.collection === 'sep_carga_rbd');
+    t.ok(ws2.length > 0, 'con un cambio real sí se escribe', ws2.length);
+    ws.push(...ws2);
+    t.ok(ws.every(w => !('ingreso_real_hasta_mes' in w.payload) && !(w.payload.rem && 'real_hasta_mes' in w.payload.rem) && !(w.options.mergeFields || []).some(f => /real_hasta_mes/.test(f))), 'pero ningún write lleva ingreso_real_hasta_mes ni rem.real_hasta_mes: el corte no se pisa ni se borra');
     t.eq((await h.store())[RUTA('1121')].ingreso_real_hasta_mes, 8, 'servidor: el corte propio de 1121 sigue en Agosto');
     await abrirModal(h);
     t.eq(mesesRealesDe(await encabezadosMes(page, 0)), 8, 'y el modal sigue con las columnas Real hasta Agosto');

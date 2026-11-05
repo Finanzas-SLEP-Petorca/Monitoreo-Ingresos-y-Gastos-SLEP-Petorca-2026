@@ -150,7 +150,7 @@ await correrSpec('claves_invalidas', async (t) => {
     });
     const msg = await importar(h, '#importExcelInput', buf);
     t.ok(/INGRESO: 1 filas/.test(msg) && /COMPRAS: 2 filas/.test(msg), 'C) SEP: se importan las filas válidas (1 de INGRESO, 2 de COMPRAS)', msg);
-    t.ok(/3 filas NO se importaron/.test(msg) && /__ingreso__/.test(msg) && /__reservado__/.test(msg) && /no puede estar vacío/.test(msg), 'C) SEP: se informan las 3 rechazadas (ítem "__ingreso__", ítem vacío e ID "__reservado__")', msg);
+    t.ok(/3 filas NO se importaron/.test(msg) && /__ingreso__/.test(msg) && /__reservado__/.test(msg) && /falta el ítem de ingreso/.test(msg), 'C) SEP: se informan las 3 rechazadas (ítem "__ingreso__" que no es uno de los ítems de ingreso de SEP, ítem vacío e ID "__reservado__")', msg);
     const doc = await docRbd(h, '1122');
     t.ok(!Object.keys(doc.ingreso_items).some(k => k === '' || /^__.*__$/.test(k)), 'C) SEP: ningún ítem de ingreso con clave inválida en el servidor', Object.keys(doc.ingreso_items));
     t.eq(doc.ingreso_items['Carrera Docente'].meses.ENERO, 1000, 'C) SEP: el ítem válido quedó guardado');

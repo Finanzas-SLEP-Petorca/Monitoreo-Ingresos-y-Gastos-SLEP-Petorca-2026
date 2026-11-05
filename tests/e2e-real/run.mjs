@@ -36,6 +36,7 @@ const SPECS = [
   { id: '15', archivo: '15_fondos_fijos.mjs', titulo: 'Fondos Fijos: merge por campo, importación en lote y lectura dañada (PR K)', esperado: { tree: 'PASS', '@069f9dd': 'FAIL' } },
   { id: '16', archivo: '16_junji_rem_lineas.mjs', titulo: 'JUNJI: gasto de Remuneraciones en 4 líneas (merge por línea, documento antiguo, cliente viejo y líneas dañadas)', esperado: { tree: 'PASS', '@069f9dd': 'FAIL' } },
   { id: '17', archivo: '17_carga_reemplazo_total.mjs', titulo: 'Carga por fuente = reemplazo total (mergeFields + deleteField reales, lotes, límite de 1 MiB, rechazo del servidor, deshacer/vaciar)', esperado: { tree: 'PASS', '@069f9dd': 'FAIL' } },
+  { id: '18', archivo: '18_carga_sep_ff.mjs', titulo: 'Carga reemplazo total de SEP y de Fondos Fijos (mergeFields anidados + deleteField reales, lo no gestionado intacto, Deshacer/Vaciar, 3.200 compras)', esperado: { tree: 'PASS', '@069f9dd': 'FAIL' } },
 ];
 
 const args = process.argv.slice(2);

@@ -129,8 +129,10 @@ await correrSpec('formulas_csv_excel', async (t) => {
   await h.waitIdle();
   await guardarTodo(h);
   const w1121 = (await h.writes()).filter(w => w.path === RUTA('1121') && w.payload.compras);
-  const comprasEscritas = Object.assign({}, ...w1121.map(w => w.payload.compras));
-  t.ok(Object.keys(comprasEscritas).length >= 5, 'reimportar SEP: se vuelven a guardar las compras del Excel', Object.keys(comprasEscritas));
+  // Reemplazo total: el Excel exportado es igual al panel (el apóstrofo de neutralización se deshace al leer), así que NO se escribe nada; lo guardado queda con el texto original.
+  t.eq(w1121.length, 0, 'reimportar SEP (idéntico al panel): no se reescribe nada', JSON.stringify(h.dialogs.slice(-1)).slice(0, 1500) + ' KEYS ' + Object.keys(((await h.store())[RUTA('1121')] || {}).compras || {}));
+  const comprasEscritas = (await h.store())[RUTA('1121')].compras;
+  t.ok(Object.keys(comprasEscritas).length >= 5, 'reimportar SEP: las compras del Excel siguen en el servidor', Object.keys(comprasEscritas));
   t.eq([comprasEscritas.f1.descripcion, comprasEscritas.f1.nombreProveedor], [F1, F2], 'reimportar SEP: la descripción y el proveedor vuelven SIN el apóstrofo (=HYPERLINK…, +cmd…)');
   t.eq([comprasEscritas.f2.descripcion, comprasEscritas.f2.nombreProveedor, comprasEscritas.f3.descripcion], [F3, F4, F6], 'reimportar SEP: @SUM, -2+3 y =2+2 también vuelven idénticos');
   t.eq([comprasEscritas.f4.descripcion, comprasEscritas.f5.descripcion], ['-1500', 'Compra normal'], 'reimportar SEP: textos que no se tocaron siguen iguales');
@@ -139,8 +141,7 @@ await correrSpec('formulas_csv_excel', async (t) => {
   const xl2 = await capturarDescarga(page, () => page.click('#downloadExcelBtn'));
   const hoja2 = (await leerXlsx(page, xl2.buffer)).hojas.COMPRAS;
   t.eq(hoja2, hoja, 'exportar → reimportar → exportar: la hoja COMPRAS queda IDÉNTICA');
-  const wHon = (await h.writes()).filter(w => w.path === RUTA('1121') && w.payload.honorarios);
-  const honEscritas = Object.assign({}, ...wHon.map(w => w.payload.honorarios));
+  const honEscritas = (await h.store())[RUTA('1121')].honorarios; // (reemplazo total: idéntico al panel = sin escrituras; se lee lo guardado)
   t.eq([honEscritas.h1.descripcion, honEscritas.h1.nombreProveedor, honEscritas.h1.documentoContable], [F1, F2, F3], 'reimportar SEP (honorarios): descripción, prestador y N° DC vuelven SIN el apóstrofo');
   t.eq([honEscritas.h1.nroDocumento, honEscritas.h1.rutProveedor, honEscritas.h1.montoGasto, honEscritas.h2.descripcion], ['-91', '-1234567-8', 1500, '-1500'], 'reimportar SEP (honorarios): N° de boleta, RUT, monto y el texto numérico idénticos');
   t.ok(Object.values(honEscritas).every(b => !String(b.descripcion).startsWith("'") && !String(b.nombreProveedor).startsWith("'") && !String(b.documentoContable || '').startsWith("'")), 'reimportar SEP (honorarios): ninguna boleta queda con apóstrofo inicial');

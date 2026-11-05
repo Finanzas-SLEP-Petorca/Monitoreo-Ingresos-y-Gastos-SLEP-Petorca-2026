@@ -24,7 +24,7 @@ const sinImp = (ids) => ids.filter(id => !id.startsWith('imp-'));
 await correrSpec('compras_id_cero', async (t) => {
   for (const o of ORIGENES) {
     const E = o.etiqueta;
-    const reemplazo = E !== 'SEP'; // las fuentes cargan con REEMPLAZO TOTAL (sin dedupe ni unión con lo existente); SEP conserva la importación anterior
+    const reemplazo = true; // TODAS las cargas (las 12 fuentes y SEP) son REEMPLAZO TOTAL: sin dedupe ni unión con lo existente (las ramas «else» describen la importación anterior de SEP y ya no se ejecutan)
     const c = (extra) => compraBase({ codigo: o.codigo, ...extra });
     const fila = (id, extra) => filaCompra(id, 1121, NOMBRE, c(extra));
     const libroDe = (page, filas) => libroXlsx(page, { COMPRAS: [o.enc, ...filas] });
@@ -134,7 +134,7 @@ await correrSpec('compras_id_cero', async (t) => {
       const claveC = Object.keys(g).find(id => id.startsWith('imp-') && g[id].nroDocumento === '3');
       if (reemplazo) {
         t.ok(!!claveC, `${E}: reemplazo total: la compra C tiene clave imp-…`);
-        await h.remoto('1121', `d.otras_fuentes.general.compras["${claveC}"].descripcion = "Cuadernos (corregido)"; return 1;`);
+        await h.remoto('1121', o.etiqueta === 'SEP' ? `d.compras["${claveC}"].descripcion = "Cuadernos (corregido)"; return 1;` : `d.otras_fuentes.general.compras["${claveC}"].descripcion = "Cuadernos (corregido)"; return 1;`);
         await h.waitIdle();
         await importarLibro(h, o.input, libro);
         const g2 = o.compras(await h.store());

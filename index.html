@@ -2015,17 +2015,6 @@ function validarIdDocumento(id, etiqueta = 'El RBD') {
   if (id.includes('/') || id === '.' || id === '..') return `${etiqueta} "${id}" no es válido: no puede llevar "/" ni ser "." o "..".`;
   return null;
 }
-// Para las importaciones: acumula las filas rechazadas y las informa al final junto al resumen.
-const importRechazos = [];
-function rechazarFilaImportacion(hoja, fila, motivo) { importRechazos.push(`${hoja}, fila ${fila}: ${motivo}`); }
-function resumenRechazosImportacion() {
-  if (!importRechazos.length) return [];
-  const n = importRechazos.length;
-  const lineas = importRechazos.slice(0, 8);
-  const extra = n > 8 ? [`… y ${n - 8} más`] : [];
-  importRechazos.length = 0;
-  return [`⚠ ${n === 1 ? '1 fila NO se importó' : `${n} filas NO se importaron`} por tener un dato inválido:`, ...lineas.map(l => '   · ' + l), ...extra];
-}
 
 const DATA = {"meses": ["202601", "202602", "202603", "202604", "202605", "202606", "202607"], "n_meses": 7, "ultimo_mes": "202607", "registros": [{"rbd": "1121", "nombre": "LICEO PULMAHUE DE LA LIGUA", "marco_anual_proy": 270239850, "gasto_rem_ytd": 86672138, "gasto_rem_anual_proy": 148580808, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 189167895, "meta_bys_30": 81071955, "saldo_rem": 40587087, "saldo_bys": 81071955, "saldo_total": 121659042, "pct_ejec_rem": 55.0, "pct_ejec_bys": 0.0, "pct_ejec_total": 55.0, "anomalia": false, "estado": "superavit"}, {"rbd": "1122", "nombre": "ESCUELA REPUBLICA DE VENEZUELA", "marco_anual_proy": 212215845, "gasto_rem_ytd": 75940645, "gasto_rem_anual_proy": 130183965, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 148551092, "meta_bys_30": 63664754, "saldo_rem": 18367126, "saldo_bys": 63664754, "saldo_total": 82031880, "pct_ejec_rem": 61.3, "pct_ejec_bys": 0.0, "pct_ejec_total": 61.3, "anomalia": false, "estado": "superavit"}, {"rbd": "1123", "nombre": "ESCUELA GABRIELA MISTRAL", "marco_anual_proy": 394028109, "gasto_rem_ytd": 211133787, "gasto_rem_anual_proy": 361943637, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 275819676, "meta_bys_30": 118208433, "saldo_rem": -86123961, "saldo_bys": 118208433, "saldo_total": 32084472, "pct_ejec_rem": 91.9, "pct_ejec_bys": 0.0, "pct_ejec_total": 91.9, "anomalia": false, "estado": "riesgo"}, {"rbd": "1125", "nombre": "ESCUELA DIEGO PORTALES", "marco_anual_proy": 104816547, "gasto_rem_ytd": 63018834, "gasto_rem_anual_proy": 108032289, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 73371583, "meta_bys_30": 31444964, "saldo_rem": -34660706, "saldo_bys": 31444964, "saldo_total": -3215742, "pct_ejec_rem": 103.1, "pct_ejec_bys": 0.0, "pct_ejec_total": 103.1, "anomalia": false, "estado": "deficit"}, {"rbd": "1128", "nombre": "ESCUELA COMUNIDADES DE VALLE HERMOSO", "marco_anual_proy": 217566609, "gasto_rem_ytd": 59149842, "gasto_rem_anual_proy": 101399727, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 152296626, "meta_bys_30": 65269983, "saldo_rem": 50896899, "saldo_bys": 65269983, "saldo_total": 116166882, "pct_ejec_rem": 46.6, "pct_ejec_bys": 0.0, "pct_ejec_total": 46.6, "anomalia": false, "estado": "superavit"}, {"rbd": "1129", "nombre": "ESCUELA ANGEL MENAY", "marco_anual_proy": 13154286, "gasto_rem_ytd": 88804, "gasto_rem_anual_proy": 152234, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 9208000, "meta_bys_30": 3946286, "saldo_rem": 9055766, "saldo_bys": 3946286, "saldo_total": 13002052, "pct_ejec_rem": 1.2, "pct_ejec_bys": 0.0, "pct_ejec_total": 1.2, "anomalia": false, "estado": "superavit"}, {"rbd": "1130", "nombre": "ESC. BASICA LOS HORNOS DE HUAQUEN", "marco_anual_proy": 23345142, "gasto_rem_ytd": 4914027, "gasto_rem_anual_proy": 8424047, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 16341599, "meta_bys_30": 7003543, "saldo_rem": 7917552, "saldo_bys": 7003543, "saldo_total": 14921095, "pct_ejec_rem": 36.1, "pct_ejec_bys": 0.0, "pct_ejec_total": 36.1, "anomalia": false, "estado": "superavit"}, {"rbd": "1131", "nombre": "ESC. BASICA CASAS VIEJAS DE LONGOTOMA", "marco_anual_proy": 25972071, "gasto_rem_ytd": 1225978, "gasto_rem_anual_proy": 2101678, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 18180450, "meta_bys_30": 7791621, "saldo_rem": 16078772, "saldo_bys": 7791621, "saldo_total": 23870393, "pct_ejec_rem": 8.1, "pct_ejec_bys": 0.0, "pct_ejec_total": 8.1, "anomalia": false, "estado": "superavit"}, {"rbd": "1132", "nombre": "ESCUELA BASICA POZA VERDE", "marco_anual_proy": 119382231, "gasto_rem_ytd": 42648373, "gasto_rem_anual_proy": 73111498, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 83567562, "meta_bys_30": 35814669, "saldo_rem": 10456064, "saldo_bys": 35814669, "saldo_total": 46270733, "pct_ejec_rem": 61.2, "pct_ejec_bys": 0.0, "pct_ejec_total": 61.2, "anomalia": false, "estado": "superavit"}, {"rbd": "1133", "nombre": "ESC.BASICA LAS CASAS DE HUAQUEN", "marco_anual_proy": 56299875, "gasto_rem_ytd": 0, "gasto_rem_anual_proy": 0, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 39409912, "meta_bys_30": 16889962, "saldo_rem": 39409912, "saldo_bys": 16889962, "saldo_total": 56299875, "pct_ejec_rem": 0.0, "pct_ejec_bys": 0.0, "pct_ejec_total": 0.0, "anomalia": false, "estado": "superavit"}, {"rbd": "1134", "nombre": "CARMEN SANCHEZ ARAYA", "marco_anual_proy": 13242879, "gasto_rem_ytd": 1255469, "gasto_rem_anual_proy": 2152234, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 9270015, "meta_bys_30": 3972864, "saldo_rem": 7117781, "saldo_bys": 3972864, "saldo_total": 11090645, "pct_ejec_rem": 16.3, "pct_ejec_bys": 0.0, "pct_ejec_total": 16.3, "anomalia": false, "estado": "superavit"}, {"rbd": "1135", "nombre": "ESCUELA BASICA LOS MOLLES", "marco_anual_proy": 36892992, "gasto_rem_ytd": 0, "gasto_rem_anual_proy": 0, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 25825094, "meta_bys_30": 11067898, "saldo_rem": 25825094, "saldo_bys": 11067898, "saldo_total": 36892992, "pct_ejec_rem": 0.0, "pct_ejec_bys": 0.0, "pct_ejec_total": 0.0, "anomalia": false, "estado": "superavit"}, {"rbd": "1136", "nombre": "ESCUELA BASICA PUYANCON", "marco_anual_proy": 52685169, "gasto_rem_ytd": 16441350, "gasto_rem_anual_proy": 28185170, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 36879618, "meta_bys_30": 15805551, "saldo_rem": 8694448, "saldo_bys": 15805551, "saldo_total": 24499999, "pct_ejec_rem": 53.5, "pct_ejec_bys": 0.0, "pct_ejec_total": 53.5, "anomalia": false, "estado": "superavit"}, {"rbd": "1137", "nombre": "ESCUELA BASICA HORTENCIA POWELL S.", "marco_anual_proy": 15156849, "gasto_rem_ytd": 0, "gasto_rem_anual_proy": 0, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 10609794, "meta_bys_30": 4547055, "saldo_rem": 10609794, "saldo_bys": 4547055, "saldo_total": 15156849, "pct_ejec_rem": 0.0, "pct_ejec_bys": 0.0, "pct_ejec_total": 0.0, "anomalia": false, "estado": "superavit"}, {"rbd": "1139", "nombre": "ESCUELA MINISTRO GOMEZ MILLAS", "marco_anual_proy": 25154754, "gasto_rem_ytd": 7309329, "gasto_rem_anual_proy": 12530279, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 17608328, "meta_bys_30": 7546426, "saldo_rem": 5078049, "saldo_bys": 7546426, "saldo_total": 12624475, "pct_ejec_rem": 49.8, "pct_ejec_bys": 0.0, "pct_ejec_total": 49.8, "anomalia": false, "estado": "superavit"}, {"rbd": "1140", "nombre": "ESCUELA BASICA CARLOS ARIZTIA RUIZ", "marco_anual_proy": 31981968, "gasto_rem_ytd": 0, "gasto_rem_anual_proy": 0, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 22387378, "meta_bys_30": 9594590, "saldo_rem": 22387378, "saldo_bys": 9594590, "saldo_total": 31981968, "pct_ejec_rem": 0.0, "pct_ejec_bys": 0.0, "pct_ejec_total": 0.0, "anomalia": false, "estado": "superavit"}, {"rbd": "1142", "nombre": "ESCUELA LA CANELA", "marco_anual_proy": 45674784, "gasto_rem_ytd": 11231690, "gasto_rem_anual_proy": 19254325, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 31972349, "meta_bys_30": 13702435, "saldo_rem": 12718024, "saldo_bys": 13702435, "saldo_total": 26420459, "pct_ejec_rem": 42.2, "pct_ejec_bys": 0.0, "pct_ejec_total": 42.2, "anomalia": false, "estado": "superavit"}, {"rbd": "1143", "nombre": "ESCUELA BASICA QUEBRADILLA", "marco_anual_proy": 20092098, "gasto_rem_ytd": 5264804, "gasto_rem_anual_proy": 9025379, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 14064469, "meta_bys_30": 6027629, "saldo_rem": 5039090, "saldo_bys": 6027629, "saldo_total": 11066719, "pct_ejec_rem": 44.9, "pct_ejec_bys": 0.0, "pct_ejec_total": 44.9, "anomalia": false, "estado": "superavit"}, {"rbd": "1144", "nombre": "ESCUELA BASICA PICHICUY", "marco_anual_proy": 28797930, "gasto_rem_ytd": 12958897, "gasto_rem_anual_proy": 22215252, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 20158551, "meta_bys_30": 8639379, "saldo_rem": -2056701, "saldo_bys": 8639379, "saldo_total": 6582678, "pct_ejec_rem": 77.1, "pct_ejec_bys": 0.0, "pct_ejec_total": 77.1, "anomalia": false, "estado": "superavit"}, {"rbd": "1145", "nombre": "ESCUELA ENRIQUE DOLL ROJAS", "marco_anual_proy": 38794485, "gasto_rem_ytd": 30943154, "gasto_rem_anual_proy": 53045409, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 27156140, "meta_bys_30": 11638346, "saldo_rem": -25889270, "saldo_bys": 11638346, "saldo_total": -14250924, "pct_ejec_rem": 136.7, "pct_ejec_bys": 0.0, "pct_ejec_total": 136.7, "anomalia": false, "estado": "deficit"}, {"rbd": "1147", "nombre": "ESCUELA FERNANDO GARCIA OLDINI", "marco_anual_proy": 65926875, "gasto_rem_ytd": 45975426, "gasto_rem_anual_proy": 78815016, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 46148812, "meta_bys_30": 19778062, "saldo_rem": -32666204, "saldo_bys": 19778062, "saldo_total": -12888141, "pct_ejec_rem": 119.5, "pct_ejec_bys": 0.0, "pct_ejec_total": 119.5, "anomalia": false, "estado": "deficit"}, {"rbd": "1148", "nombre": "LICEO JOSE MANUEL BORGONO NUNEZ", "marco_anual_proy": 244341870, "gasto_rem_ytd": 167119000, "gasto_rem_anual_proy": 286489715, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 171039309, "meta_bys_30": 73302561, "saldo_rem": -115450406, "saldo_bys": 73302561, "saldo_total": -42147845, "pct_ejec_rem": 117.2, "pct_ejec_bys": 0.0, "pct_ejec_total": 117.2, "anomalia": false, "estado": "deficit"}, {"rbd": "1149", "nombre": "LICEO CORDILLERA", "marco_anual_proy": 91364085, "gasto_rem_ytd": 65934178, "gasto_rem_anual_proy": 113030018, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 63954859, "meta_bys_30": 27409226, "saldo_rem": -49075159, "saldo_bys": 27409226, "saldo_total": -21665933, "pct_ejec_rem": 123.7, "pct_ejec_bys": 0.0, "pct_ejec_total": 123.7, "anomalia": false, "estado": "deficit"}, {"rbd": "1150", "nombre": "ESCUELA BASICA NEFTALI REYES B.", "marco_anual_proy": 5465478, "gasto_rem_ytd": 2156107, "gasto_rem_anual_proy": 3696182, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 3825835, "meta_bys_30": 1639643, "saldo_rem": 129653, "saldo_bys": 1639643, "saldo_total": 1769296, "pct_ejec_rem": 67.6, "pct_ejec_bys": 0.0, "pct_ejec_total": 67.6, "anomalia": false, "estado": "superavit"}, {"rbd": "1151", "nombre": "ESCUELA BASICA VILLA SANTA ANA", "marco_anual_proy": 5659560, "gasto_rem_ytd": 3394488, "gasto_rem_anual_proy": 5819123, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 3961692, "meta_bys_30": 1697868, "saldo_rem": -1857431, "saldo_bys": 1697868, "saldo_total": -159563, "pct_ejec_rem": 102.8, "pct_ejec_bys": 0.0, "pct_ejec_total": 102.8, "anomalia": false, "estado": "deficit"}, {"rbd": "1152", "nombre": "ESCUELA EDUARDO FREI MONTALVA", "marco_anual_proy": 64225842, "gasto_rem_ytd": 47825199, "gasto_rem_anual_proy": 81986054, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 44958089, "meta_bys_30": 19267753, "saldo_rem": -37027965, "saldo_bys": 19267753, "saldo_total": -17760212, "pct_ejec_rem": 127.7, "pct_ejec_bys": 0.0, "pct_ejec_total": 127.7, "anomalia": false, "estado": "deficit"}, {"rbd": "1153", "nombre": "ESCUELA BASICA EL CRUCERO", "marco_anual_proy": 2217225, "gasto_rem_ytd": 4198632, "gasto_rem_anual_proy": 7197657, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 1552058, "meta_bys_30": 665168, "saldo_rem": -5645600, "saldo_bys": 665168, "saldo_total": -4980432, "pct_ejec_rem": 324.6, "pct_ejec_bys": 0.0, "pct_ejec_total": 324.6, "anomalia": false, "estado": "deficit"}, {"rbd": "1156", "nombre": "ESCUELA BASICA G-24", "marco_anual_proy": 32441541, "gasto_rem_ytd": 0, "gasto_rem_anual_proy": 0, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 22709079, "meta_bys_30": 9732462, "saldo_rem": 22709079, "saldo_bys": 9732462, "saldo_total": 32441541, "pct_ejec_rem": 0.0, "pct_ejec_bys": 0.0, "pct_ejec_total": 0.0, "anomalia": false, "estado": "superavit"}, {"rbd": "1157", "nombre": "ESCUELA BASICA LOS ALAMOS EL SOBRANTE", "marco_anual_proy": 27211641, "gasto_rem_ytd": 0, "gasto_rem_anual_proy": 0, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 19048149, "meta_bys_30": 8163492, "saldo_rem": 19048149, "saldo_bys": 8163492, "saldo_total": 27211641, "pct_ejec_rem": 0.0, "pct_ejec_bys": 0.0, "pct_ejec_total": 0.0, "anomalia": false, "estado": "superavit"}, {"rbd": "1158", "nombre": "ESCUELA BASICA BENANCIO PEREZ", "marco_anual_proy": 4329315, "gasto_rem_ytd": 0, "gasto_rem_anual_proy": 0, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 3030520, "meta_bys_30": 1298794, "saldo_rem": 3030520, "saldo_bys": 1298794, "saldo_total": 4329315, "pct_ejec_rem": 0.0, "pct_ejec_bys": 0.0, "pct_ejec_total": 0.0, "anomalia": false, "estado": "superavit"}, {"rbd": "1160", "nombre": "ESCUELA HOGAR FRONTERIZA DE CHALACO", "marco_anual_proy": 9598803, "gasto_rem_ytd": 6896859, "gasto_rem_anual_proy": 11823189, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 6719162, "meta_bys_30": 2879641, "saldo_rem": -5104027, "saldo_bys": 2879641, "saldo_total": -2224386, "pct_ejec_rem": 123.2, "pct_ejec_bys": 0.0, "pct_ejec_total": 123.2, "anomalia": false, "estado": "deficit"}, {"rbd": "1161", "nombre": "ESCUELA BASICA PEDEGUA", "marco_anual_proy": 117441813, "gasto_rem_ytd": 65069793, "gasto_rem_anual_proy": 111548218, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 82209269, "meta_bys_30": 35232544, "saldo_rem": -29338949, "saldo_bys": 35232544, "saldo_total": 5893595, "pct_ejec_rem": 95.0, "pct_ejec_bys": 0.0, "pct_ejec_total": 95.0, "anomalia": false, "estado": "riesgo"}, {"rbd": "1167", "nombre": "LICEO Y ESCUELA MUNICIPAL", "marco_anual_proy": 263010747, "gasto_rem_ytd": 126102032, "gasto_rem_anual_proy": 216174912, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 184107523, "meta_bys_30": 78903224, "saldo_rem": -32067389, "saldo_bys": 78903224, "saldo_total": 46835835, "pct_ejec_rem": 82.2, "pct_ejec_bys": 0.0, "pct_ejec_total": 82.2, "anomalia": false, "estado": "superavit"}, {"rbd": "1168", "nombre": "ESCUELA HANS WENKE MENGERS", "marco_anual_proy": 225940344, "gasto_rem_ytd": 168576701, "gasto_rem_anual_proy": 288988631, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 158158241, "meta_bys_30": 67782103, "saldo_rem": -130830390, "saldo_bys": 67782103, "saldo_total": -63048287, "pct_ejec_rem": 127.9, "pct_ejec_bys": 0.0, "pct_ejec_total": 127.9, "anomalia": false, "estado": "deficit"}, {"rbd": "1170", "nombre": "ESCUELA BASICA VALLE DE ARTIFICIO", "marco_anual_proy": 103718850, "gasto_rem_ytd": 61866791, "gasto_rem_anual_proy": 106057356, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 72603195, "meta_bys_30": 31115655, "saldo_rem": -33454161, "saldo_bys": 31115655, "saldo_total": -2338506, "pct_ejec_rem": 102.3, "pct_ejec_bys": 0.0, "pct_ejec_total": 102.3, "anomalia": false, "estado": "deficit"}, {"rbd": "1171", "nombre": "ESCUELA BASICA LA FRONTERA DE ALICAHUE", "marco_anual_proy": 12236412, "gasto_rem_ytd": 0, "gasto_rem_anual_proy": 0, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 8565488, "meta_bys_30": 3670924, "saldo_rem": 8565488, "saldo_bys": 3670924, "saldo_total": 12236412, "pct_ejec_rem": 0.0, "pct_ejec_bys": 0.0, "pct_ejec_total": 0.0, "anomalia": false, "estado": "superavit"}, {"rbd": "1173", "nombre": "ESCUELA ESTER SILVA SOMARRIVA BARTOLILLO", "marco_anual_proy": 96988563, "gasto_rem_ytd": 38295537, "gasto_rem_anual_proy": 65649492, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 67891994, "meta_bys_30": 29096569, "saldo_rem": 2242502, "saldo_bys": 29096569, "saldo_total": 31339071, "pct_ejec_rem": 67.7, "pct_ejec_bys": 0.0, "pct_ejec_total": 67.7, "anomalia": false, "estado": "superavit"}, {"rbd": "1174", "nombre": "ESCUELA BASICA SAN LORENZO", "marco_anual_proy": 66121950, "gasto_rem_ytd": 41219138, "gasto_rem_anual_proy": 70661378, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 46285365, "meta_bys_30": 19836585, "saldo_rem": -24376013, "saldo_bys": 19836585, "saldo_total": -4539428, "pct_ejec_rem": 106.9, "pct_ejec_bys": 0.0, "pct_ejec_total": 106.9, "anomalia": false, "estado": "deficit"}, {"rbd": "1176", "nombre": "ESCUELA PABLO NERUDA", "marco_anual_proy": 27015630, "gasto_rem_ytd": 25256264, "gasto_rem_anual_proy": 43296454, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 18910941, "meta_bys_30": 8104689, "saldo_rem": -24385513, "saldo_bys": 8104689, "saldo_total": -16280824, "pct_ejec_rem": 160.3, "pct_ejec_bys": 0.0, "pct_ejec_total": 160.3, "anomalia": false, "estado": "deficit"}, {"rbd": "1178", "nombre": "ESCUELA BASICA LA VINA", "marco_anual_proy": 113782905, "gasto_rem_ytd": 54683674, "gasto_rem_anual_proy": 93743439, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 79648034, "meta_bys_30": 34134872, "saldo_rem": -14095406, "saldo_bys": 34134872, "saldo_total": 20039466, "pct_ejec_rem": 82.4, "pct_ejec_bys": 0.0, "pct_ejec_total": 82.4, "anomalia": false, "estado": "superavit"}, {"rbd": "1180", "nombre": "ESCUELA BASICA G-45", "marco_anual_proy": 158356164, "gasto_rem_ytd": 0, "gasto_rem_anual_proy": 0, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 110849315, "meta_bys_30": 47506849, "saldo_rem": 110849315, "saldo_bys": 47506849, "saldo_total": 158356164, "pct_ejec_rem": 0.0, "pct_ejec_bys": 0.0, "pct_ejec_total": 0.0, "anomalia": false, "estado": "superavit"}, {"rbd": "1181", "nombre": "ESCUELA BASICA LOS ANGELES", "marco_anual_proy": 8112729, "gasto_rem_ytd": 1941030, "gasto_rem_anual_proy": 3327480, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 5678910, "meta_bys_30": 2433819, "saldo_rem": 2351430, "saldo_bys": 2433819, "saldo_total": 4785249, "pct_ejec_rem": 41.0, "pct_ejec_bys": 0.0, "pct_ejec_total": 41.0, "anomalia": false, "estado": "superavit"}, {"rbd": "1182", "nombre": "ESCUELA BASICA G-47", "marco_anual_proy": 6524547, "gasto_rem_ytd": 0, "gasto_rem_anual_proy": 0, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 4567183, "meta_bys_30": 1957364, "saldo_rem": 4567183, "saldo_bys": 1957364, "saldo_total": 6524547, "pct_ejec_rem": 0.0, "pct_ejec_bys": 0.0, "pct_ejec_total": 0.0, "anomalia": false, "estado": "superavit"}, {"rbd": "1191", "nombre": "ESCUELA PAPUDO", "marco_anual_proy": 205102704, "gasto_rem_ytd": 51823168, "gasto_rem_anual_proy": 88839718, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 143571893, "meta_bys_30": 61530811, "saldo_rem": 54732175, "saldo_bys": 61530811, "saldo_total": 116262986, "pct_ejec_rem": 43.3, "pct_ejec_bys": 0.0, "pct_ejec_total": 43.3, "anomalia": false, "estado": "superavit"}, {"rbd": "1192", "nombre": "ESCUELA RURAL PULLALLY", "marco_anual_proy": 232070370, "gasto_rem_ytd": 22607560, "gasto_rem_anual_proy": 38755815, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 162449259, "meta_bys_30": 69621111, "saldo_rem": 123693444, "saldo_bys": 69621111, "saldo_total": 193314555, "pct_ejec_rem": 16.7, "pct_ejec_bys": 0.0, "pct_ejec_total": 16.7, "anomalia": false, "estado": "superavit"}, {"rbd": "11199", "nombre": "COLEGIO LUIS CRUZ MARTINEZ", "marco_anual_proy": 398901426, "gasto_rem_ytd": 126212294, "gasto_rem_anual_proy": 216363934, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 279230998, "meta_bys_30": 119670428, "saldo_rem": 62867064, "saldo_bys": 119670428, "saldo_total": 182537492, "pct_ejec_rem": 54.2, "pct_ejec_bys": 0.0, "pct_ejec_total": 54.2, "anomalia": false, "estado": "superavit"}, {"rbd": "11206", "nombre": "ESCUELA MUNICIPAL LAS PUERTAS", "marco_anual_proy": 7372701, "gasto_rem_ytd": 0, "gasto_rem_anual_proy": 0, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 5160891, "meta_bys_30": 2211810, "saldo_rem": 5160891, "saldo_bys": 2211810, "saldo_total": 7372701, "pct_ejec_rem": 0.0, "pct_ejec_bys": 0.0, "pct_ejec_total": 0.0, "anomalia": false, "estado": "superavit"}, {"rbd": "12299", "nombre": "ESCUELA BASICA ANEXO PICHILEMU", "marco_anual_proy": 7292493, "gasto_rem_ytd": 268838, "gasto_rem_anual_proy": 460863, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 5104745, "meta_bys_30": 2187748, "saldo_rem": 4643882, "saldo_bys": 2187748, "saldo_total": 6831630, "pct_ejec_rem": 6.3, "pct_ejec_bys": 0.0, "pct_ejec_total": 6.3, "anomalia": false, "estado": "superavit"}, {"rbd": "12336", "nombre": "LICEO BICENTENARIO TECNICO PROFESIONAL DE MINERIA", "marco_anual_proy": 252228210, "gasto_rem_ytd": 127752393, "gasto_rem_anual_proy": 219004103, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 176559747, "meta_bys_30": 75668463, "saldo_rem": -42444356, "saldo_bys": 75668463, "saldo_total": 33224107, "pct_ejec_rem": 86.8, "pct_ejec_bys": 0.0, "pct_ejec_total": 86.8, "anomalia": false, "estado": "superavit"}, {"rbd": "14479", "nombre": "ESCUELA BASICA MUNICIPAL ARAUCARIA", "marco_anual_proy": 239756457, "gasto_rem_ytd": 167482869, "gasto_rem_anual_proy": 287113489, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 167829520, "meta_bys_30": 71926937, "saldo_rem": -119283969, "saldo_bys": 71926937, "saldo_total": -47357032, "pct_ejec_rem": 119.8, "pct_ejec_bys": 0.0, "pct_ejec_total": 119.8, "anomalia": false, "estado": "deficit"}, {"rbd": "40099", "nombre": "LICEO TECNICO PROFESIONAL PAPUDO", "marco_anual_proy": 102243084, "gasto_rem_ytd": 24938072, "gasto_rem_anual_proy": 42750982, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 71570159, "meta_bys_30": 30672925, "saldo_rem": 28819177, "saldo_bys": 30672925, "saldo_total": 59492102, "pct_ejec_rem": 41.8, "pct_ejec_bys": 0.0, "pct_ejec_total": 41.8, "anomalia": false, "estado": "superavit"}, {"rbd": "40242", "nombre": "COLEGIO BICENTENARIO", "marco_anual_proy": 145323090, "gasto_rem_ytd": 85771435, "gasto_rem_anual_proy": 147036745, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 101726163, "meta_bys_30": 43596927, "saldo_rem": -45310582, "saldo_bys": 43596927, "saldo_total": -1713655, "pct_ejec_rem": 101.2, "pct_ejec_bys": 0.0, "pct_ejec_total": 101.2, "anomalia": false, "estado": "deficit"}, {"rbd": "1120", "nombre": "CENTRO DE EDUCACION DE ADULTOS LA LIGUA", "marco_anual_proy": 0, "gasto_rem_ytd": 0, "gasto_rem_anual_proy": 0, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 0, "meta_bys_30": 0, "saldo_rem": 0, "saldo_bys": 0, "saldo_total": 0, "pct_ejec_rem": 0, "pct_ejec_bys": 0, "pct_ejec_total": 0, "anomalia": false, "estado": "superavit", "sin_marco_sep": true}, {"rbd": "11196", "nombre": "CTRO.REC.ATENC.DIVERS.CRAD PAUL PERCY HARRIS", "marco_anual_proy": 0, "gasto_rem_ytd": 0, "gasto_rem_anual_proy": 0, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 0, "meta_bys_30": 0, "saldo_rem": 0, "saldo_bys": 0, "saldo_total": 0, "pct_ejec_rem": 0, "pct_ejec_bys": 0, "pct_ejec_total": 0, "anomalia": false, "estado": "superavit", "sin_marco_sep": true}, {"rbd": "1126", "nombre": "ESCUELA ESPECIAL SOL NACIENTE", "marco_anual_proy": 0, "gasto_rem_ytd": 0, "gasto_rem_anual_proy": 0, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "meta_rem_70": 0, "meta_bys_30": 0, "saldo_rem": 0, "saldo_bys": 0, "saldo_total": 0, "pct_ejec_rem": 0, "pct_ejec_bys": 0, "pct_ejec_total": 0, "anomalia": false, "estado": "superavit", "sin_marco_sep": true}], "totales": {"marco_anual_proy": 5087817897, "gasto_rem_anual_proy": 3708967894, "gasto_subt22": 0, "gasto_subt29": 0, "gasto_bys": 0, "saldo_total": 1378850003, "n_deficit": 15, "n_riesgo": 2, "n_superavit": 35, "n_anomalias": 0}, "fuente_marco": {"tipo": "Estado_RBD_2026.xlsx (columna TOTAL SEP, monto anual directo); reemplazado por la hoja INGRESO de la carga manual si el RBD tiene override", "incluye_carrera_docente": false}, "fuente_carga_manual": {"archivo": "carga_manual/CARGA_MANUAL_SEP.xlsx", "fecha_carga": "2026-08-19 16:51", "n_rbd_ingreso_override": 52, "n_rbd_rem_override": 52}};
 
@@ -2881,91 +2870,10 @@ const MAPA_COLUMNAS_FONDOS_FIJOS = [
   ['MARZO', 7, 13], ['ABRIL', 15, 21], ['MAYO', 23, 29], ['JUNIO', 31, 37], ['JULIO', 39, 45],
   ['AGOSTO', 47, 53], ['SEPTIEMBRE', 55, 61], ['OCTUBRE', 63, null], ['NOVIEMBRE', 69, null], ['DICIEMBRE', 75, null],
 ];
-const IMPORT_FONDOS_FIJOS_PLAZO_MS = 20000; // sin conexión el SDK no confirma el write hasta reconectar: no se deja la pantalla esperando
 // id de la fila (columna A del libro): un entero positivo, como texto; lo demás (vacío, texto, decimal, negativo) no es una entidad.
 function idFilaFondoFijo(celda) {
   const n = typeof celda === 'number' ? celda : (typeof celda === 'string' && /^\s*\d+\s*$/.test(celda) ? Number(celda) : NaN);
   return Number.isSafeInteger(n) && n > 0 ? String(n) : null;
-}
-async function importarControlFondosFijos(file) {
-  if (!currentUser) { alert('Inicia sesión antes de importar.'); return; }
-  if (typeof XLSX === 'undefined') { alert('No se pudo cargar la librería de Excel. Intenta de nuevo con conexión a internet.'); return; }
-  if (!confirm('Se cargarán cupos, saldos iniciales, rendido, observado y folios desde “FONDOS FIJOS P02”. No se modificarán los ingresos, gastos ni consolidado. Los campos Registrado en General, Compensado SIGFE y Reposición se conservarán si ya existen y, si no, quedarán pendientes. ¿Continuar?')) return;
-  try {
-    const wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
-    const nombreHoja = wb.SheetNames.find(n => String(n).trim().toUpperCase() === 'FONDOS FIJOS P02');
-    if (!nombreHoja) { alert('No se encontró la hoja “FONDOS FIJOS P02”. No se importó nada.'); return; }
-    const rows = rowsFromSheet(wb.Sheets[nombreHoja]);
-    const universo = new Map(filasFondosFijos().map(r => [r.rbd, r]));
-    const cambios = [], rechazadas = [];
-    let omitidos = 0, recortados = 0;
-    // 1.ª pasada: se lee y VALIDA todo el archivo sin tocar nada. Una fila con un monto no numérico, infinito, negativo o enorme se rechaza completa (no se carga a medias).
-    for (let i = 2; i < rows.length; i++) {
-      const row = rows[i] || [];
-      // rowsFromSheet usa defval:0; una fila separadora vacía llega como 0 y no es una entidad omitida.
-      if (row[0] === undefined || row[0] === null || String(row[0]).trim() === '' || Number(row[0]) === 0) continue;
-      const rbd = idFilaFondoFijo(row[0]);
-      if (rbd === null || !universo.has(rbd)) { omitidos++; continue; }
-      const errores = [];
-      const leer = (celda, etiqueta) => { const v = validarMontoFondoFijo(celda); if (!v.ok) { errores.push(`${etiqueta} ${v.motivo}`); return 0; } return v.valor; };
-      const datos = { cupo: leer(row[6], 'Cupo') , meses: {} };
-      let recortadosFila = 0;
-      MAPA_COLUMNAS_FONDOS_FIJOS.forEach(([mes, inicio, colFolio]) => {
-        const nom = mes.charAt(0) + mes.slice(1).toLowerCase();
-        const m = { saldo_inicial: leer(row[inicio], `${nom}: Saldo inicial`), rendido: leer(row[inicio + 2], `${nom}: Rendido`), observado: leer(row[inicio + 3], `${nom}: Observado`) };
-        // rowsFromSheet rellena las celdas vacías con 0: un folio vacío NO es el folio «0».
-        if (colFolio !== null) { const f = recortarFolioFondoFijo(row[colFolio] === 0 ? '' : row[colFolio]); m.folio = f.texto; if (f.recortado) recortadosFila++; }
-        datos.meses[mes] = m;
-      });
-      if (errores.length) { rechazadas.push(`${rbd}: ${errores.slice(0, 3).join('; ')}${errores.length > 3 ? `; … (${errores.length} datos inválidos)` : ''}`); continue; }
-      recortados += recortadosFila;
-      cambios.push({ rbd, nombre: universo.get(rbd).nombre, datos });
-    }
-    const lineasExtra = () => [
-      omitidos ? `${omitidos} ${omitidos === 1 ? 'fila omitida' : 'filas omitidas'} por no pertenecer al universo RBD/GESPARVU.` : '',
-      rechazadas.length ? `⚠ ${rechazadas.length === 1 ? '1 fila NO se importó' : `${rechazadas.length} filas NO se importaron`} por tener un dato inválido (los montos deben ser números finitos, no negativos y menores que ${fmtCLP(MONTO_ABS_MAX)}):\n${rechazadas.slice(0, 8).map(x => '   · ' + x).join('\n')}${rechazadas.length > 8 ? `\n   … y ${rechazadas.length - 8} más` : ''}` : '',
-      recortados ? `${recortados} ${recortados === 1 ? 'folio fue recortado' : 'folios fueron recortados'} a ${FOLIO_FONDO_FIJO_MAX} caracteres.` : '',
-    ].filter(Boolean);
-    if (!cambios.length) { alert(`No se encontraron RBD o GESPARVU coincidentes para importar. No se importó nada.${lineasExtra().length ? '\n\n' + lineasExtra().join('\n') : ''}`); return; }
-    // 2.ª pasada: se aplica en pantalla TODO de una vez y recién después se guarda entidad por entidad, así la pantalla nunca queda a medias aunque un guardado falle o tarde.
-    cambios.forEach(c => {
-      const ff = ensureFondoFijo(c.rbd);
-      ff.cupo = c.datos.cupo;
-      Object.entries(c.datos.meses).forEach(([mes, m]) => Object.assign(ff.meses[mes], m));
-      recomputeOtraFuente(c.rbd, 'general');
-    });
-    renderFondosFijos(); renderDashFondosFijos();
-    if (fondosFijosRbdAbierto) renderFondosFijosModalContenido();
-    const guardadas = [], fallidas = [], sinConfirmar = [];
-    let esperando = true; // tras el primer plazo vencido (sin conexión) el resto se envía sin esperar: no se espera 20 s por cada entidad
-    for (const c of cambios) {
-      scheduleRbdSave(c.rbd, { nombre: c.nombre, fondos_fijos: c.datos });
-      let resultado = 'fin';
-      if (esperando) {
-        let temporizador;
-        const plazo = new Promise(res => { temporizador = setTimeout(() => res('plazo'), IMPORT_FONDOS_FIJOS_PLAZO_MS); });
-        resultado = await Promise.race([flushRbdSave(c.rbd).then(() => 'fin'), plazo]);
-        clearTimeout(temporizador);
-        if (resultado === 'plazo') esperando = false;
-      } else flushRbdSave(c.rbd);
-      // flushRbdSave nunca lanza: un rechazo permanente queda en escrituraRetenida (indicador rojo + Reintentar) y uno transitorio en pendingWrites (reintento automático).
-      if (escrituraRetenida[c.rbd]) fallidas.push({ rbd: c.rbd, motivo: MOTIVO_ERROR_PERMANENTE[errorRetenido[c.rbd]] || `error ${errorRetenido[c.rbd] || 'desconocido'}` });
-      else if (!esperando || resultado === 'plazo' || pendingWrites[c.rbd]) sinConfirmar.push(c.rbd);
-      else guardadas.push(c.rbd);
-    }
-    renderFondosFijos(); renderDashFondosFijos();
-    if (fondosFijosRbdAbierto) renderFondosFijosModalContenido();
-    const lista = (ids) => ids.slice(0, 12).join(', ') + (ids.length > 12 ? ` … y ${ids.length - 12} más` : '');
-    const partes = [`Importación terminada: ${guardadas.length} de ${cambios.length} entidades guardadas.`];
-    if (fallidas.length) partes.push(`⚠ NO se pudieron guardar ${fallidas.length} ${fallidas.length === 1 ? 'entidad' : 'entidades'}: ${lista(fallidas.map(f => f.rbd))}.\nMotivo: ${[...new Set(fallidas.map(f => f.motivo))].join('; ')}.\nLos datos quedaron cargados en pantalla y el indicador de sincronización muestra “Reintentar”; también puedes volver a importar el mismo archivo (es seguro repetirlo).`);
-    if (sinConfirmar.length) partes.push(`${sinConfirmar.length} ${sinConfirmar.length === 1 ? 'entidad queda' : 'entidades quedan'} pendiente${sinConfirmar.length === 1 ? '' : 's'} de confirmar por el servidor (${lista(sinConfirmar)}): sin conexión estable se reintenta sola y el indicador de sincronización lo informa.`);
-    partes.push(...lineasExtra());
-    partes.push('Quedan pendientes de conciliación los campos Reposición entregada, Registrado en General y Compensado SIGFE, porque la planilla fuente no los identifica por separado.');
-    alert(partes.join('\n\n'));
-  } catch (err) {
-    console.error('Error importando Fondos Fijos', err);
-    alert('No se pudo importar el archivo: ' + err.message);
-  }
 }
 let otrasFuentesSel = FUENTES_OTRAS[0].key;
 let otrasFuentesRbdAbierto = null; // rbd (o "AC") cuyo detalle está abierto en el modal de Otras Fuentes
@@ -3097,14 +3005,6 @@ function celdaDcHTML(c) {
 // Devuelve su índice o -1 si el archivo es antiguo (sin la columna).
 function indiceColumnaDc(encabezado) {
   return (encabezado || []).findIndex(h => /^(n[°º]?\s*dc|nro\.?\s*dc|documento\s*contable)$/i.test(String(h == null ? '' : h).trim().replace(/\s+/g, ' ')));
-}
-
-// Importar: pone `documentoContable` en los campos de la compra solo si el archivo trae la columna Y hay algo que escribir
-// (un N° DC, o limpiar uno que la compra ya tenía): así exportar → reimportar deja intacta una compra que nunca tuvo el campo.
-function aplicarDcImportado(campos, fila, idxDc, previa) {
-  if (idxDc < 0) return;
-  const dc = String(fila[idxDc] || '').trim();
-  if (dc || (previa && previa.documentoContable !== undefined)) campos.documentoContable = dc;
 }
 
 // "Documento Original": vacío salvo en NOTACRE/NOTADEB, donde debe ser número-TIPO (123-FAC) y el tipo
@@ -3617,32 +3517,6 @@ function hashTexto53(str) {
   h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
   return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36).padStart(11, '0');
 }
-// Índice firma → ID de las compras ya cargadas de una entidad (la primera con cada contenido). Las compras guardadas bajo una clave NO usable (la
-// "0" que dejó el bug antiguo) no entran: una fila sin ID nunca se une a esa copia corrupta (si hay otra con el mismo contenido y un ID real, se une a esa).
-function indiceComprasPorFirma(compras) {
-  const idx = new Map();
-  Object.entries(compras || {}).forEach(([id, c]) => {
-    if (!c || typeof c !== 'object' || !idCompraImportadoUsable(id)) return;
-    const f = firmaContenidoCompra(c);
-    if (!idx.has(f)) idx.set(f, id);
-  });
-  return idx;
-}
-// ID con el que se guarda la fila de un Excel: el que trae (si es usable) o, si no, el de la compra idéntica que ya existe, o la clave
-// determinista de su contenido ("imp-<hash>"; si esa clave la ocupa OTRA compra —colisión de hash o una compra editada después de importarla— se
-// prueba "imp-<hash>-2", "-3"… para no pisarla). `compras` = mapa actual de la entidad; `idx` = su índice (se mantiene al día con `registrarCompraEnIndice`).
-function idCompraParaImportar(idRaw, campos, compras, idx) {
-  const usable = idCompraImportadoUsable(idRaw);
-  if (usable) return usable;
-  const firma = firmaContenidoCompra(campos);
-  const existente = idx.get(firma);
-  if (existente !== undefined && compras[existente] && firmaContenidoCompra(compras[existente]) === firma) return existente;
-  const base = PREFIJO_ID_COMPRA_IMPORTADA + hashTexto53(firma);
-  let id = base, n = 1;
-  while (compras[id] && firmaContenidoCompra(compras[id]) !== firma) id = base + '-' + (++n);
-  return id;
-}
-function registrarCompraEnIndice(idx, id, campos) { idx.set(firmaContenidoCompra(campos), id); }
 
 // ============================================================================
 // ===== HONORARIOS (Subt. 21): registro POR BOLETA — modelo, cálculo y avisos (PR-1: SEP) =====
@@ -6569,11 +6443,6 @@ document.getElementById('fondosFijosModalBody').addEventListener('change', (e) =
 // Al salir de una celda lo escrito se guarda de inmediato (como en las demás celdas): sin esperar el debounce de 400 ms.
 document.getElementById('fondosFijosModalBody').addEventListener('focusout', (e) => { if (e.target.classList && e.target.classList.contains('ff-input')) flushRbdSaveNow(e.target.dataset.ffRbd); });
 document.getElementById('importFondosFijosBtn').addEventListener('click', () => document.getElementById('importFondosFijosInput').click());
-document.getElementById('importFondosFijosInput').addEventListener('change', async (e) => {
-  const file = e.target.files[0];
-  if (file) await importarControlFondosFijos(file);
-  e.target.value = '';
-});
 
 // Al abrir, el foco entra al modal (botón de cerrar) para que Tab recorra su contenido en vez de la página que queda detrás (U-05 / U-09); al cerrar vuelve a
 // la fila (o a lo que tuviera el foco) de la que se abrió. Las filas se reconstruyen con cada snapshot: el "alterno" las busca por RBD en la tabla de la fuente.
@@ -7634,6 +7503,7 @@ function exportOtraFuenteExcel(fuenteKey) {
 //     la hoja META; no pasa por scheduleRbdSave (su copia JSON rompería el sentinel de deleteField).
 // Alcance: solo las pestañas de «otras fuentes». La importación de SEP y la de Fondos Fijos siguen con su comportamiento anterior (ver README).
 // ============================================================================
+const CARGA_KEY_SEP = 'sep', CARGA_KEY_FF = 'fondos_fijos'; // además de las 12 fuentes, la carga sirve a la pestaña SEP y a Fondos Fijos (mismo plan, resumen de control, respaldo, cuadratura)
 const CARGA_ELIMINAR = '__ELIMINAR__';          // valor «sin corte propio» de la hoja META: se borra el campo (queda el corte por defecto)
 const CARGA_FILAS_VISIBLES = 15;                // filas de detalle visibles en el resumen (después «…y N más»)
 const CARGA_MAX_BYTES_DOC = 1000000;            // Firestore rechaza documentos de ≥ 1 MiB (1.048.576 bytes): se estima con margen
@@ -7673,7 +7543,9 @@ function hojasCargaOtraFuente(fuenteKey) {
   return h;
 }
 function nombreHojaEnLibro(wb, desc) {
-  return [desc.hoja, ...(desc.alias || [])].find(n => wb.Sheets && wb.Sheets[n]) || null;
+  const exacto = [desc.hoja, ...(desc.alias || [])].find(n => wb.Sheets && wb.Sheets[n]);
+  if (exacto || !desc.tolerante) return exacto || null;
+  return (wb.SheetNames || []).find(n => String(n).trim().toUpperCase() === desc.hoja) || null; // el libro operativo de Fondos Fijos: mayúsculas y espacios no importan
 }
 
 // Filas de una hoja con su número REAL de fila en Excel (las totalmente vacías no cuentan como dato). `enc` = fila de encabezados.
@@ -7723,10 +7595,12 @@ function parsearMensualCarga(filas, enc, desc, ctx, r, rechazar) {
   const visto = new Map();
   filas.forEach(({ n, c }) => {
     const rbd = rbdFilaCarga(c[0], ctx, n, rechazar); if (rbd === null) return;
-    const m = mesesFilaCarga(c, 2, n, rechazar); if (!m) return;
+    const m = mesesFilaCarga(c, desc.colMeses || 2, n, rechazar); if (!m) return;
+    if (desc.ceroEsAusente && !MESES_CARGA.some(k => m.meses[k])) { r.leidas--; r.cerosIgnorados = (r.cerosIgnorados || 0) + 1; return; } // SEP: el Excel exportado trae una fila por RBD aunque esté en $0
     registrarClaveUnica(visto, rbd, n, rechazar);
     r.nuevo.set(rbd, m);
   });
+  if (r.cerosIgnorados) r.notasParser = [`${r.cerosIgnorados} filas con todos los meses en $0 no cuentan como filas (un RBD en $0 equivale a no tenerlo).`];
 }
 function parsearMetaCarga(filas, enc, desc, ctx, r, rechazar) {
   const visto = new Map();
@@ -7742,14 +7616,18 @@ function parsearItemsCarga(filas, enc, desc, ctx, r, rechazar) {
   filas.forEach(({ n, c }) => {
     const rbd = rbdFilaCarga(c[0], ctx, n, rechazar); if (rbd === null) return;
     const concepto = txtCelda(c[2]);
-    if (!concepto) { rechazar(n, 'falta el concepto'); return; }
-    const errConcepto = validarClaveMapa(concepto, 'El concepto');
+    const etq = desc.etiquetaClave || 'concepto';
+    if (!concepto) { rechazar(n, `falta el ${etq}`); return; }
+    const errConcepto = desc.valida ? desc.valida(concepto) : validarClaveMapa(concepto, 'El concepto');
     if (errConcepto) { rechazar(n, errConcepto); return; }
     const m = mesesFilaCarga(c, 3, n, rechazar); if (!m) return;
+    // INGRESO de SEP: el Excel exportado trae SIEMPRE los 3 ítems de cada RBD (casi todos en $0); un ítem en $0 equivale a no tenerlo, así que no cuenta como fila leída.
+    if (desc.ceroEsAusente && !MESES_CARGA.some(k => m.meses[k])) { r.leidas--; r.cerosIgnorados = (r.cerosIgnorados || 0) + 1; return; }
     registrarClaveUnica(visto, rbd + '\u0000' + concepto, n, rechazar);
     if (!r.nuevo.has(rbd)) r.nuevo.set(rbd, {});
-    r.nuevo.get(rbd)[concepto] = { concepto, meses: m.meses, total: m.total };
+    r.nuevo.get(rbd)[concepto] = { [desc.claveCampo || 'concepto']: concepto, meses: m.meses, total: m.total };
   });
+  if (r.cerosIgnorados) r.notasParser = [`${r.cerosIgnorados} filas con todos los meses en $0 no cuentan como filas (un ítem en $0 equivale a no tenerlo).`];
 }
 function parsearHonProyCarga(filas, enc, desc, ctx, r, rechazar) {
   const porConcepto = ctx.honConcepto;
@@ -7776,6 +7654,20 @@ function parsearHonProyCarga(filas, enc, desc, ctx, r, rechazar) {
     registrarClaveUnica(visto, rbd + '\u0000' + clave, n, rechazar);
     if (!r.nuevo.has(rbd)) r.nuevo.set(rbd, {});
     r.nuevo.get(rbd)[clave] = { [campo]: clave, meses: m.meses, total: m.total };
+  });
+}
+// Proyección por cuenta de SEP (BYS_PROYECCION y HON_PROYECCION: RBD | Establecimiento | Codigo | Item | 12 meses | Total): una entrada por cuenta; `desc.valida` revisa la cuenta.
+function parsearProyCuentaCarga(filas, enc, desc, ctx, r, rechazar) {
+  const visto = new Map();
+  filas.forEach(({ n, c }) => {
+    const rbd = rbdFilaCarga(c[0], ctx, n, rechazar); if (rbd === null) return;
+    const claveRaw = c[2];
+    const clave = (typeof claveRaw === 'number') ? String(Math.trunc(claveRaw)) : String(claveRaw || '').trim();
+    const err = desc.valida(clave); if (err) { rechazar(n, err); return; }
+    const m = mesesFilaCarga(c, 4, n, rechazar); if (!m) return;
+    registrarClaveUnica(visto, rbd + '\u0000' + clave, n, rechazar);
+    if (!r.nuevo.has(rbd)) r.nuevo.set(rbd, {});
+    r.nuevo.get(rbd)[clave] = { codigo: clave, meses: m.meses, total: m.total };
   });
 }
 // IDs de las filas de COMPRAS / HONORARIOS (ver el comentario de arriba): el del Excel tal cual; repetido en el archivo → «-dupN»; sin ID → «imp-<hash>» (+ «-2», «-3»… si hay filas idénticas).
@@ -7818,7 +7710,7 @@ function parsearComprasCarga(filas, enc, desc, ctx, r, rechazar) {
     const rbd = rbdFilaCarga(c[1], ctx, n, rechazar); if (rbd === null) return;
     const codigoRaw = c[3];
     const codigo = (typeof codigoRaw === 'number') ? String(Math.trunc(codigoRaw)) : String(codigoRaw || '').trim();
-    if (!porConcepto && !CUENTAS_COMPRAS_BY_CODIGO[codigo]) { rechazar(n, codigo ? `la cuenta "${codigo}" no está en el catálogo de cuentas de compras` : 'falta el código de la cuenta'); return; }
+    if (!porConcepto && !(ctx.catalogoCompras || CUENTAS_COMPRAS_BY_CODIGO)[codigo]) { rechazar(n, codigo ? `la cuenta "${codigo}" no está en el catálogo de cuentas de compras` : 'falta el código de la cuenta'); return; }
     const gasto = montoCeldaCarga(c[11]), docto = montoCeldaCarga(c[12]);
     if (!gasto.ok) { rechazar(n, `el monto gasto no es un número ("${txtCelda(c[11]).slice(0, 30)}")`); return; }
     if (!docto.ok) { rechazar(n, `el monto del documento no es un número ("${txtCelda(c[12]).slice(0, 30)}")`); return; }
@@ -7843,7 +7735,7 @@ function parsearComprasCarga(filas, enc, desc, ctx, r, rechazar) {
     if (errId) { rechazar(n, errId); return; }
     if (idxDc >= 0) { const dc = txtCelda(c[idxDc]); if (dc) campos.documentoContable = dc; }
     items.push({ n, rbd, idExp, campos });
-    if (!porConcepto && nivelCuentaOtraFuente(ctx.fk, rbd, codigo) === 0) r.noHabilitadas++;
+    if (!porConcepto && ctx.f && nivelCuentaOtraFuente(ctx.fk, rbd, codigo) === 0) r.noHabilitadas++;
   });
   asignarIdsCarga(items, r);
 }
@@ -7889,18 +7781,39 @@ function parsearHonorariosCarga(filas, enc, desc, ctx, r, rechazar) {
     if (errId) { rechazar(n, errId); return; }
     if (idxDc >= 0) { const dc = txtCelda(c[idxDc]); if (dc) campos.documentoContable = dc; }
     items.push({ n, rbd, idExp, campos });
-    if (!porConcepto && honNivelCuenta(ctxHonOtraFuente(ctx.fk, rbd), codigo) === 0) r.noHabilitadas++;
+    if (!porConcepto && ctx.f && honNivelCuenta(ctxHonOtraFuente(ctx.fk, rbd), codigo) === 0) r.noHabilitadas++;
   });
   asignarIdsCarga(items, r);
 }
-const PARSERS_CARGA = { mensual: parsearMensualCarga, meta: parsearMetaCarga, items: parsearItemsCarga, honproy: parsearHonProyCarga, compras: parsearComprasCarga, honorarios: parsearHonorariosCarga };
+const PARSERS_CARGA = { mensual: parsearMensualCarga, meta: parsearMetaCarga, items: parsearItemsCarga, honproy: parsearHonProyCarga, proycuenta: parsearProyCuentaCarga, compras: parsearComprasCarga, honorarios: parsearHonorariosCarga, ff: parsearFondosFijosCarga };
 
 function ctxCargaOtraFuente(fuenteKey) {
   const f = FUENTES_OTRAS_BY_KEY[fuenteKey];
-  return { fk: fuenteKey, f, label: f.label, universo: new Set(filasOtrasFuentes(fuenteKey).map(r => r.rbd)), comprasConcepto: comprasPorConcepto(fuenteKey), honConcepto: honPorConcepto(fuenteKey) };
+  const ctx = { fk: fuenteKey, f, label: f.label, universo: new Set(filasOtrasFuentes(fuenteKey).map(r => r.rbd)), comprasConcepto: comprasPorConcepto(fuenteKey), honConcepto: honPorConcepto(fuenteKey) };
+  // Ganchos del dominio (SEP y Fondos Fijos definen los suyos más abajo; la maquinaria de carga es la misma):
+  ctx.hojas = () => hojasCargaOtraFuente(fuenteKey);
+  ctx.leer = (desc, rbd) => rawDesdeMemoria(desc, ofDeMemoria(rbd, fuenteKey), ctx);
+  ctx.rutas = (desc, valor) => [[`otras_fuentes.${fuenteKey}.${desc.campo}`, valor === CARGA_ELIMINAR ? CARGA_ELIMINAR : valorFirestoreCarga(desc, valor)]];
+  ctx.vaciarTodo = true;                       // «Vaciar» borra la fuente entera (otras_fuentes.<fuente>)
+  ctx.rutaVaciar = `otras_fuentes.${fuenteKey}`;
+  ctx.nombreDe = (rbd) => { const reg = filasOtrasFuentes(fuenteKey).find(x => x.rbd === rbd); return reg ? reg.nombre : rbd; };
+  ctx.aplicarMemoria = (plan) => aplicarCambiosEnMemoriaOtraFuente(plan);
+  ctx.descartarPendientes = (rbd) => [pendingWrites[rbd], escrituraRetenida[rbd], ...(enVuelo[rbd] || [])].forEach(p => { if (p && p.otras_fuentes) delete p.otras_fuentes[fuenteKey]; });
+  ctx.libroRespaldo = () => buildOtraFuenteCargaWorkbook(fuenteKey);
+  ctx.extensionRespaldo = 'xlsx';
+  ctx.repintar = () => {};
+  ctx.textoAlcance = 'No se toca ninguna otra fuente ni SEP.';
+  ctx.textoVaciar = `(ingresos, remuneraciones, compras, honorarios, conceptos y cortes de todas sus entidades). No toca SEP ni las otras fuentes.`;
+  ctx.ayudaTabla = 'En las hojas mensuales «filas» son las entidades con algún monto y «total» la suma de «Total Año»; en META, las entidades con un corte Real/Proyectado propio; en COMPRAS y HONORARIOS, las filas y la suma de MontoGasto. Filas leídas = filas que se cargan + rechazadas.';
+  ctx.titulos = { excel: 'Revisar carga', deshacer: 'Deshacer última carga', vaciar: 'Vaciar fuente' };
+  return ctx;
 }
+// Dominio de la carga: 'sep' (importador de SEP), 'fondos_fijos' (Control de Fondos Fijos) o el key de una de las 12 fuentes.
+function ctxCarga(key) { return key === CARGA_KEY_SEP ? ctxCargaSep() : key === CARGA_KEY_FF ? ctxCargaFF() : ctxCargaOtraFuente(key); }
+function hojasCarga(key) { return ctxCarga(key).hojas(); }
 function parsearHojaCarga(ws, desc, ctx) {
-  const { enc, filas } = leerFilasHojaCarga(ws);
+  const { enc, filas: todas } = leerFilasHojaCarga(ws);
+  const filas = desc.saltarFilas ? todas.slice(desc.saltarFilas) : todas; // Fondos Fijos: la segunda fila de encabezado no es un dato
   const r = { leidas: filas.length, rechazos: [], nuevo: new Map(), omitida: '', idsRepetidos: [], noHabilitadas: 0 };
   PARSERS_CARGA[desc.tipo](filas, enc, desc, ctx, r, (fila, motivo) => r.rechazos.push({ fila, motivo }));
   r.rechazos.sort((a, b) => a.fila - b.fila);
@@ -7949,8 +7862,9 @@ function normalizaCarga(desc, v, ctx) {
       });
       return o;
     }
-    case 'items': { const o = {}; Object.entries(v || {}).forEach(([k, it]) => { o[k] = { concepto: it.concepto, meses: mesesDe(it) }; }); return o; }
-    case 'honproy': { const o = {}; Object.entries(v || {}).forEach(([k, it]) => { o[k] = { meses: mesesDe(it) }; }); return o; }
+    case 'items': { const o = {}, kc = desc.claveCampo || 'concepto'; Object.entries(v || {}).forEach(([k, it]) => { const m = mesesDe(it); if (desc.ceroEsAusente && !m.some(x => x)) return; o[k] = { [kc]: it[kc], meses: m }; }); return o; } // ceroEsAusente (INGRESO de SEP): un ítem en $0 es lo mismo que no tenerlo
+    case 'honproy': case 'proycuenta': { const o = {}; Object.entries(v || {}).forEach(([k, it]) => { o[k] = { meses: mesesDe(it) }; }); return o; }
+    case 'ff': return canonFondoFijo(v);
   }
   return v;
 }
@@ -7980,8 +7894,16 @@ function estadisticaCarga(desc, porRbd, ctx) {
     });
     e.nDc = [...e.dcs.keys()].filter(k => k !== '').length;
     e.total = Math.round(e.total * 100) / 100;
-  } else { // items / honproy
-    rbds.forEach(rbd => { const o = porRbd[rbd] || {}; const k = Object.keys(o).length; if (k) e.entidades++; Object.values(o).forEach(it => { e.filas++; e.total += MESES_CARGA.reduce((s, m) => s + (Number(it.meses && it.meses[m]) || 0), 0); }); });
+  } else if (desc.tipo === 'ff') {
+    rbds.forEach(rbd => { const v = porRbd[rbd]; if (ffEsVacio(v)) return; const c = canonFondoFijo(v); e.filas++; e.entidades++; e.total += c.cupo + FF_MESES.reduce((s, m) => s + FF_CAMPOS_MES.reduce((t, k) => t + c.meses[m][k], 0), 0); });
+    e.total = Math.round(e.total * 100) / 100;
+  } else { // items / honproy / proycuenta
+    rbds.forEach(rbd => {
+      const o = porRbd[rbd] || {};
+      const vals = Object.values(o).filter(it => !(desc.ceroEsAusente && !MESES_CARGA.some(m => Number(it.meses && it.meses[m]))));
+      if (vals.length) e.entidades++;
+      vals.forEach(it => { e.filas++; e.total += MESES_CARGA.reduce((s, m) => s + (Number(it.meses && it.meses[m]) || 0), 0); });
+    });
     e.total = Math.round(e.total);
   }
   return e;
@@ -7989,7 +7911,7 @@ function estadisticaCarga(desc, porRbd, ctx) {
 // Estado actual de TODAS las entidades de la fuente para una hoja: { entidad: valor } leído de la memoria.
 function rawsActualesCarga(desc, ctx) {
   const o = {};
-  ctx.universo.forEach(rbd => { o[rbd] = rawDesdeMemoria(desc, ofDeMemoria(rbd, ctx.fk), ctx); });
+  ctx.universo.forEach(rbd => { o[rbd] = ctx.leer(desc, rbd); });
   return o;
 }
 function rawsDeArchivoCarga(h) { const o = {}; h.nuevo.forEach((v, rbd) => { o[rbd] = v; }); return o; }
@@ -7997,8 +7919,8 @@ const mismaEstadistica = (a, b) => a.filas === b.filas && (a.total === null || M
 
 // ---- El plan de carga: qué trae el archivo, qué hay hoy y qué cambiaría. Se arma SIN tocar la memoria viva.
 function construirPlanCarga(fuenteKey, wb, archivo) {
-  const ctx = ctxCargaOtraFuente(fuenteKey);
-  const descs = hojasCargaOtraFuente(fuenteKey);
+  const ctx = ctxCarga(fuenteKey);
+  const descs = ctx.hojas();
   const usadas = new Set();
   const hojas = descs.map(desc => {
     const nombre = nombreHojaEnLibro(wb, desc);
@@ -8024,11 +7946,15 @@ function completarPlanCarga(plan) {
     h.estActual = estadisticaCarga(h.desc, actuales, ctx);
     h.notas = [];
     if (!h.presente) return;
+    (h.notasParser || []).forEach(t => h.notas.push(t));
     if (h.omitida) { plan.advertencias.push(`La hoja ${h.nombre} NO se carga: ${h.omitida}. Lo que hay en el panel para esa hoja se conserva.`); return; }
     if (plan.modo === 'excel') {
       const faltan = ctx.universo.size - h.nuevo.size;
       if (h.desc.tipo === 'mensual' || h.desc.tipo === 'meta') {
         if (faltan > 0) h.notas.push(`${faltan} de ${ctx.universo.size} entidades de ${ctx.label} no aparecen en esta hoja: quedarán ${h.desc.tipo === 'meta' ? 'con el corte por defecto' : 'en $0'}.`);
+      } else if (h.desc.tipo === 'ff') {
+        const conDatos = Object.keys(actuales).filter(rbd => !ffEsVacio(actuales[rbd]) && !h.nuevo.has(rbd)).length;
+        if (conDatos) h.notas.push(`${conDatos} ${conDatos === 1 ? 'entidad tiene' : 'entidades tienen'} datos de Fondos Fijos en el panel y ninguna fila en la hoja: quedarán en blanco (cupo, saldo inicial, rendido, observado y folio).`);
       } else {
         const conFilas = Object.keys(actuales).filter(rbd => Object.keys(actuales[rbd] || {}).length && !h.nuevo.has(rbd)).length;
         if (conFilas) h.notas.push(`${conFilas} ${conFilas === 1 ? 'entidad tiene' : 'entidades tienen'} filas en el panel y ninguna en el archivo: se eliminarán todas sus filas de esta hoja.`);
@@ -8047,15 +7973,16 @@ function completarPlanCarga(plan) {
 function calcularCambiosCarga(plan) {
   const ctx = plan.ctx, cambios = {};
   ctx.universo.forEach(rbd => {
-    const of = ofDeMemoria(rbd, ctx.fk);
     plan.hojas.forEach(h => {
       if (!h.presente || h.omitida) return;
       const nuevo = h.nuevo.has(rbd) ? h.nuevo.get(rbd) : vacioCarga(h.desc);
-      if (!igualCarga(h.desc, rawDesdeMemoria(h.desc, of, ctx), nuevo, ctx)) (cambios[rbd] = cambios[rbd] || {})[h.desc.campo] = nuevo;
+      if (!igualCarga(h.desc, ctx.leer(h.desc, rbd), nuevo, ctx)) (cambios[rbd] = cambios[rbd] || {})[h.desc.campo] = nuevo;
     });
   });
   return cambios;
 }
+// Lo que hay en un documento (objeto plano) en una ruta con puntos («otras_fuentes.general.compras», «rem.meses»); undefined si no existe.
+function leerRutaCarga(raw, ruta) { let v = raw; for (const seg of ruta.split('.')) { if (!v || typeof v !== 'object' || Array.isArray(v)) return undefined; v = v[seg]; } return v; }
 const bytesCarga = (v) => new TextEncoder().encode(JSON.stringify(v === undefined ? null : v)).length;
 // Estimación del tamaño que tendría el documento de cada entidad tras la carga (Firestore rechaza ≥ 1 MiB): se bloquea ANTES de escribir.
 function erroresTamanoCarga(plan) {
@@ -8066,10 +7993,9 @@ function erroresTamanoCarga(plan) {
     const d = docs[rbd];
     if (!d) return;
     let raw; try { raw = objetoPlano(d.data()); } catch (e) { return; }
-    const actual = objetoPlano(objetoPlano(raw.otras_fuentes)[plan.fuenteKey]);
     let bytes = bytesCarga(raw);
-    Object.entries(campos).forEach(([campo, valor]) => { bytes += bytesCarga(valor === CARGA_ELIMINAR ? null : valorFirestoreCarga(plan.hojas.find(h => h.desc.campo === campo).desc, valor)) - bytesCarga(actual[campo] === undefined ? null : actual[campo]); });
-    if (plan.modo === 'vaciar') bytes = bytesCarga(raw) - bytesCarga(actual);
+    Object.entries(campos).forEach(([campo, valor]) => { plan.ctx.rutas(plan.hojas.find(h => h.desc.campo === campo).desc, valor).forEach(([ruta, v]) => { bytes += bytesCarga(v === CARGA_ELIMINAR ? null : v) - bytesCarga(leerRutaCarga(raw, ruta)); }); });
+    if (plan.modo === 'vaciar' && plan.ctx.vaciarTodo) bytes = bytesCarga(raw) - bytesCarga(leerRutaCarga(raw, plan.ctx.rutaVaciar));
     if (bytes > CARGA_MAX_BYTES_DOC) errores.push(`La entidad ${rbd} quedaría con un documento de ≈ ${Math.round(bytes / 1024)} KB: supera el límite de Firestore (1 MiB). Divide la carga o elimina filas.`);
   });
   return errores;
@@ -8082,15 +8008,16 @@ function valorFirestoreCarga(desc, v) {
 
 // ---- Respaldo (copia en memoria del estado anterior, en la misma forma que se guarda; el Excel reimportable se descarga aparte)
 function esVacioCarga(desc, v) {
+  if (desc.tipo === 'ff') return ffEsVacio(v);
   if (desc.tipo === 'meta') return v === CARGA_ELIMINAR;
   if (desc.tipo === 'mensual') return !MESES_CARGA.some(m => Number(v && v.meses && v.meses[m]));
   return !Object.keys(v || {}).length;
 }
 function capturarRespaldoCarga(plan) {
   const ctx = plan.ctx, estado = {};
-  hojasCargaOtraFuente(plan.fuenteKey).filter(d => !d.cedeA).forEach(desc => {
+  ctx.hojas().filter(d => !d.cedeA).forEach(desc => {
     const o = {};
-    ctx.universo.forEach(rbd => { const v = rawDesdeMemoria(desc, ofDeMemoria(rbd, plan.fuenteKey), ctx); if (!esVacioCarga(desc, v)) o[rbd] = JSON.parse(JSON.stringify(v)); });
+    ctx.universo.forEach(rbd => { const v = ctx.leer(desc, rbd); if (!esVacioCarga(desc, v)) o[rbd] = JSON.parse(JSON.stringify(v)); });
     estado[desc.campo] = o;
   });
   return { fecha: new Date(), motivo: plan.modo === 'vaciar' ? 'vaciar la fuente' : 'cargar ' + (plan.archivo || 'un Excel'), archivo: plan.archivo || '', estado };
@@ -8098,12 +8025,12 @@ function capturarRespaldoCarga(plan) {
 function descargarRespaldoExcelCarga(fuenteKey) {
   if (typeof XLSX === 'undefined') throw new Error('no se pudo cargar la librería de Excel');
   const nombre = `respaldo_${fuenteKey}_${new Date().toISOString().replace(/[-:]/g, '').slice(0, 15)}.xlsx`;
-  XLSX.writeFile(buildOtraFuenteCargaWorkbook(fuenteKey), nombre);
+  XLSX.writeFile(ctxCarga(fuenteKey).libroRespaldo(), nombre);
   return nombre;
 }
 function construirPlanDesdeValores(fuenteKey, modo, archivo, valoresPorCampo) {
-  const ctx = ctxCargaOtraFuente(fuenteKey);
-  const hojas = hojasCargaOtraFuente(fuenteKey).filter(d => !d.cedeA).map(desc => {
+  const ctx = ctxCarga(fuenteKey);
+  const hojas = ctx.hojas().filter(d => !d.cedeA).map(desc => {
     const nuevo = new Map();
     Object.entries(valoresPorCampo[desc.campo] || {}).forEach(([rbd, v]) => { if (ctx.universo.has(rbd)) nuevo.set(rbd, v); });
     const h = { desc, nombre: desc.hoja, presente: true, omitida: '', notas: [], nuevo, rechazos: [], idsRepetidos: [], noHabilitadas: 0 };
@@ -8119,14 +8046,15 @@ function planDeshacerCarga(fuenteKey) { const r = respaldoCargaOF[fuenteKey]; re
 function planVaciarCarga(fuenteKey) { return construirPlanDesdeValores(fuenteKey, 'vaciar', '', {}); }
 
 // ---- Aplicar a la memoria (lo mismo que reconstruiría aplicarSnapshot desde Firestore) y escribir a Firestore.
-function aplicarCambiosEnMemoriaCarga(plan) {
+function aplicarCambiosEnMemoriaCarga(plan) { plan.ctx.aplicarMemoria(plan); }
+function aplicarCambiosEnMemoriaOtraFuente(plan) {
   const fk = plan.fuenteKey, ctx = plan.ctx;
   const descPorCampo = {};
   hojasCargaOtraFuente(fk).forEach(d => { descPorCampo[d.campo] = d; });
   const mesesNum12 = (x) => { const m = {}; MESES_CARGA.forEach(k => { m[k] = Number(x && x.meses && x.meses[k]) || 0; }); return m; };
   const suma = (m) => MESES_CARGA.reduce((s, k) => s + m[k], 0);
   Object.entries(plan.cambios).forEach(([rbd, campos]) => {
-    if (plan.modo === 'vaciar') {
+    if (plan.modo === 'vaciar') { // (solo las otras fuentes borran la fuente entera; SEP y Fondos Fijos vacían las hojas que gestionan: ver ctxCargaSep / ctxCargaFF)
       if (CARGA_MANUAL.otras_fuentes_por_rbd && CARGA_MANUAL.otras_fuentes_por_rbd[rbd]) delete CARGA_MANUAL.otras_fuentes_por_rbd[rbd][fk];
       ensureOtraFuente(rbd, fk); recomputeOtraFuente(rbd, fk);
       return;
@@ -8151,24 +8079,21 @@ function aplicarCambiosEnMemoriaCarga(plan) {
   });
 }
 // Lo que aún no confirmó el servidor (ediciones tecleadas sin enviar, rechazadas o en vuelo) NO debe resucitar lo que se reemplaza.
-function descartarSuperposicionFuenteCarga(rbd, fk) {
-  [pendingWrites[rbd], escrituraRetenida[rbd], ...(enVuelo[rbd] || [])].forEach(p => { if (p && p.otras_fuentes) delete p.otras_fuentes[fk]; });
-}
+// Escribe `valor` en la ruta con puntos de un objeto (crea los niveles intermedios).
+function ponerRutaCarga(obj, ruta, valor) { const segs = ruta.split('.'); let cur = obj; for (let i = 0; i < segs.length - 1; i++) { if (!cur[segs[i]] || typeof cur[segs[i]] !== 'object') cur[segs[i]] = {}; cur = cur[segs[i]]; } cur[segs[segs.length - 1]] = valor; }
 function enviarCambiosCarga(plan) {
   const fk = plan.fuenteKey;
   const existentes = new Set(ultimoSnapshotAplicado && ultimoSnapshotAplicado.docs ? ultimoSnapshotAplicado.docs.map(d => d.id) : []);
   const ops = Object.entries(plan.cambios).map(([rbd, campos]) => {
     const mergeFields = ['lastModifiedBy', 'lastModifiedAt'];
     const data = { lastModifiedBy: currentUser.email, lastModifiedAt: serverTimestamp() };
-    if (!existentes.has(rbd)) { const reg = filasOtrasFuentes(fk).find(x => x.rbd === rbd); data.nombre = reg ? reg.nombre : rbd; mergeFields.push('nombre'); }
-    if (plan.modo === 'vaciar') {
-      data.otras_fuentes = { [fk]: deleteField() }; mergeFields.push('otras_fuentes.' + fk);
+    if (!existentes.has(rbd)) { data.nombre = plan.ctx.nombreDe(rbd); mergeFields.push('nombre'); }
+    if (plan.modo === 'vaciar' && plan.ctx.vaciarTodo) {
+      ponerRutaCarga(data, plan.ctx.rutaVaciar, deleteField()); mergeFields.push(plan.ctx.rutaVaciar);
     } else {
-      data.otras_fuentes = { [fk]: {} };
       Object.entries(campos).forEach(([campo, valor]) => {
         const desc = plan.hojas.find(h => h.desc.campo === campo).desc;
-        data.otras_fuentes[fk][campo] = valor === CARGA_ELIMINAR ? deleteField() : valorFirestoreCarga(desc, valor);
-        mergeFields.push(`otras_fuentes.${fk}.${campo}`);
+        plan.ctx.rutas(desc, valor).forEach(([ruta, v]) => { ponerRutaCarga(data, ruta, v === CARGA_ELIMINAR ? deleteField() : v); mergeFields.push(ruta); });
       });
     }
     return { rbd, data, mergeFields };
@@ -8212,13 +8137,13 @@ async function aplicarPlanCarga(plan) {
     const previo = capturarRespaldoCarga(plan);
     let respaldoArchivo = '', errRespaldo = '';
     if (plan.modo !== 'deshacer') { try { respaldoArchivo = descargarRespaldoExcelCarga(fk); } catch (err) { errRespaldo = err.message; } }
-    Object.keys(plan.cambios).forEach(rbd => { if (pendingWrites[rbd] || pendingTimers[rbd]) flushRbdSave(rbd); descartarSuperposicionFuenteCarga(rbd, fk); }); // lo ya tecleado sale ANTES que el reemplazo
+    Object.keys(plan.cambios).forEach(rbd => { if (pendingWrites[rbd] || pendingTimers[rbd]) flushRbdSave(rbd); plan.ctx.descartarPendientes(rbd, plan); }); // lo ya tecleado sale ANTES que el reemplazo
     let promesas;
     try { promesas = enviarCambiosCarga(plan); }
     catch (err) { mostrarResultadoCarga({ plan, error: 'No se pudo preparar el guardado: ' + err.message }); return; }
     aplicarCambiosEnMemoriaCarga(plan);
     if (plan.modo === 'deshacer') delete respaldoCargaOF[fk]; else respaldoCargaOF[fk] = previo;
-    repintarTrasCargaOF();
+    repintarTrasCargaOF(); plan.ctx.repintar();
     if (typeof window.__cargaTestHook === 'function') window.__cargaTestHook('memoria', fk, CARGA_MANUAL); // gancho solo para las pruebas (inyectar un desajuste y ver que la cuadratura lo detecta)
     let filas = verificarCarga(plan);
     mostrarResultadoCarga({ plan, filas, guardando: true, respaldoArchivo, errRespaldo });
@@ -8276,7 +8201,7 @@ function tablaHojasCargaHTML(plan) {
     return `<tr><th scope="row">${nombre}</th><td class="num">${h.estActual.filas}</td><td class="num">${escHtml(pesosCarga(h.estActual.total))}</td><td class="num">${h.leidas}</td><td class="num${h.rechazadas ? ' carga-rojo' : ''}">${h.rechazadas}</td><td class="num">${h.estNuevo.filas}</td><td class="num">${escHtml(pesosCarga(h.estNuevo.total))}</td><td class="num">${escHtml(difCarga(h.estNuevo.total, h.estActual.total))}</td></tr>`;
   }).join('');
   return `<div class="table-scroll"><table class="data-table carga-tabla"><thead><tr><th scope="col">Hoja</th><th scope="col" class="num">Panel hoy: filas</th><th scope="col" class="num">Panel hoy: total</th><th scope="col" class="num">Archivo: filas leídas</th><th scope="col" class="num">Archivo: rechazadas</th><th scope="col" class="num">Archivo: filas que se cargan</th><th scope="col" class="num">Archivo: total</th><th scope="col" class="num">Diferencia</th></tr></thead><tbody>${filas}</tbody></table></div>
-    <p class="carga-ayuda">En las hojas mensuales «filas» son las entidades con algún monto y «total» la suma de «Total Año»; en META, las entidades con un corte Real/Proyectado propio; en COMPRAS y HONORARIOS, las filas y la suma de MontoGasto. Filas leídas = filas que se cargan + rechazadas.</p>`;
+    <p class="carga-ayuda">${escHtml(plan.ctx.ayudaTabla)}</p>`;
 }
 function detalleComprasCargaHTML(plan) {
   const h = plan.hojas.find(x => x.desc.tipo === 'compras' && x.presente && !x.omitida);
@@ -8298,9 +8223,9 @@ function detalleComprasCargaHTML(plan) {
 function controlCargaHTML(plan) {
   const label = escHtml(plan.ctx.label);
   const partes = [];
-  if (plan.modo === 'excel') partes.push(`<p>Al confirmar, los datos de <strong>${label}</strong> se <strong>reemplazan por completo</strong> con lo que trae el archivo, hoja por hoja: lo que ya no está en el archivo desaparece del panel y una fila modificada queda solo con su valor nuevo. Las hojas que el archivo no trae se conservan. No se toca ninguna otra fuente ni SEP. Antes de reemplazar se descarga un respaldo del estado actual.</p>`);
+  if (plan.modo === 'excel') partes.push(`<p>Al confirmar, los datos de <strong>${label}</strong> se <strong>reemplazan por completo</strong> con lo que trae el archivo, hoja por hoja: lo que ya no está en el archivo desaparece del panel y una fila modificada queda solo con su valor nuevo. Las hojas que el archivo no trae se conservan. ${escHtml(plan.ctx.textoAlcance)} Antes de reemplazar se descarga un respaldo del estado actual.</p>`);
   else if (plan.modo === 'deshacer') { const r = respaldoCargaOF[plan.fuenteKey]; partes.push(`<p>Se volverá al estado que tenía <strong>${label}</strong> antes de ${escHtml(r ? r.motivo : 'la última carga')} (${escHtml(r ? r.fecha.toLocaleString('es-CL') : '')}). Esto reemplaza por completo, hoja por hoja, lo que hay hoy.</p>`); }
-  else partes.push(`<p><strong>Esto deja ${label} completamente vacía</strong> (ingresos, remuneraciones, compras, honorarios, conceptos y cortes de todas sus entidades). No toca SEP ni las otras fuentes. Antes se descarga un respaldo y queda disponible «↩ Deshacer última carga» mientras no recargues la página.</p>`);
+  else partes.push(`<p><strong>Esto deja ${label} completamente vacía</strong> ${escHtml(plan.ctx.textoVaciar)} Antes se descarga un respaldo y queda disponible «↩ Deshacer última carga» mientras no recargues la página.</p>`);
   if (plan.errores.length) partes.push(`<div class="carga-nota err" role="alert">${plan.errores.map(escHtml).join('<br>')}</div>`);
   plan.advertencias.forEach(t => partes.push(`<div class="carga-nota warn">⚠ ${escHtml(t)}</div>`));
   partes.push(`<div class="carga-nota ${plan.nCambios ? 'info' : 'ok'}">${plan.nCambios ? `Se modificarían los datos de <strong>${plan.nCambios}</strong> ${plan.nCambios === 1 ? 'entidad' : 'entidades'}.` : 'El archivo es idéntico a lo que ya hay en el panel: no se cambiaría nada.'}</div>`);
@@ -8317,7 +8242,7 @@ function controlCargaHTML(plan) {
 }
 function mostrarControlCarga(plan) {
   cargaPlanActivo = plan;
-  const titulos = { excel: 'Revisar carga', deshacer: 'Deshacer última carga', vaciar: 'Vaciar fuente' };
+  const titulos = plan.ctx.titulos;
   abrirModalCarga(`${titulos[plan.modo]} · ${plan.ctx.label}`, plan.modo === 'excel' ? `Archivo: ${plan.archivo}` : '');
   cargaBodyEl.innerHTML = controlCargaHTML(plan);
   const hayHoja = plan.hojas.some(h => h.presente && !h.omitida) || plan.modo !== 'excel';
@@ -8379,14 +8304,267 @@ cargaModalEl.addEventListener('input', (e) => {
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !cargaModalEl.classList.contains('hidden') && !cargaEnCurso) { e.stopPropagation(); cerrarModalCarga(); } }, true);
 document.getElementById('cargaErrorBanner').addEventListener('click', (e) => { if (e.target.closest('#cargaBannerCerrar')) document.getElementById('cargaErrorBanner').classList.add('hidden'); });
 
+// «↩ Deshacer última carga» y «🗑 Vaciar …» junto al botón de importar de cada pestaña (las 12 fuentes, SEP y Fondos Fijos). `ancla` = el <input type=file> de la pestaña.
+function agregarBotonesDeshacerVaciar(key, ancla, textoVaciar, tituloVaciar) {
+  const undoBtn = document.createElement('button');
+  undoBtn.type = 'button'; undoBtn.id = 'undoCargaOFBtn-' + key; undoBtn.className = 'hidden';
+  undoBtn.style.cssText = 'background:#374151; border-color:#374151;';
+  undoBtn.textContent = '↩ Deshacer última carga';
+  undoBtn.title = 'Vuelve al estado que tenía esta pestaña antes de la última carga o vaciado. Solo está disponible mientras no recargues la página; el Excel de respaldo que se descargó sirve siempre.';
+  undoBtn.addEventListener('click', () => { const plan = planDeshacerCarga(key); if (plan) mostrarControlCarga(plan); });
+  const vaciarBtn = document.createElement('button');
+  vaciarBtn.type = 'button'; vaciarBtn.id = 'vaciarOFBtn-' + key; vaciarBtn.className = 'hidden';
+  vaciarBtn.style.cssText = 'background:var(--status-critical); border-color:var(--status-critical);';
+  vaciarBtn.textContent = textoVaciar || '🗑 Vaciar fuente';
+  vaciarBtn.title = tituloVaciar || 'Solo administración: deja esta fuente completamente vacía (con respaldo y doble confirmación). Sirve para limpiar datos mezclados antes de subir el Excel correcto.';
+  vaciarBtn.addEventListener('click', () => {
+    if (!esAdminActual()) { mostrarAvisoCarga(ctxCarga(key).titulos.vaciar, 'Esta herramienta está restringida a quienes administran el panel.'); return; }
+    mostrarControlCarga(planVaciarCarga(key));
+  });
+  ancla.insertAdjacentElement('afterend', undoBtn);
+  undoBtn.insertAdjacentElement('afterend', vaciarBtn);
+}
 // Botones por pestaña: «↩ Deshacer última carga» (solo mientras exista el respaldo en memoria) y «🗑 Vaciar fuente» (solo administración).
 function actualizarBotonesCargaOF() {
-  FUENTES_OTRAS.forEach(f => {
-    const u = document.getElementById('undoCargaOFBtn-' + f.key), v = document.getElementById('vaciarOFBtn-' + f.key);
-    if (u) u.classList.toggle('hidden', !respaldoCargaOF[f.key]);
+  FUENTES_OTRAS.map(f => f.key).concat([CARGA_KEY_SEP, CARGA_KEY_FF]).forEach(key => {
+    const u = document.getElementById('undoCargaOFBtn-' + key), v = document.getElementById('vaciarOFBtn-' + key);
+    if (u) u.classList.toggle('hidden', !respaldoCargaOF[key]);
     if (v) v.classList.toggle('hidden', !esAdminActual());
   });
 }
+
+
+// ============================================================================
+// ===== LA MISMA CARGA «REEMPLAZO TOTAL» PARA SEP (⬆ Importar Excel de la pestaña principal) Y PARA FONDOS FIJOS (⬆ Importar Control Fondos Fijos) =====
+// Causa raíz (idéntica a la de las otras fuentes): el importador de SEP escribía fila por fila con merge:true (una fila ausente se conservaba; una fila sin ID con el contenido
+// cambiado recibía otra clave `imp-<hash>` y quedaba duplicada; `indiceComprasPorFirma` fusionaba las idénticas; `aplicarDcImportado` heredaba el N° DC anterior) y descartaba
+// filas en silencio. El importador de Fondos Fijos hacía merge por campo y también dejaba intacto lo que el libro ya no trae. Ahora usan la MISMA maquinaria de arriba (plan,
+// resumen de control, writeBatch + mergeFields, respaldo + Deshacer, cuadratura, Vaciar): solo cambian el mapa «hoja → campos» y cómo se lee / aplica cada dominio.
+//
+// SEP — qué gestiona cada hoja (SOLO esos campos del documento del RBD se reemplazan; el resto del documento no se toca):
+//   INGRESO         → ingreso_items.<ítem> de los 3 ítems fijos (Ingreso SEP Preferente / Prioritario / Carrera Docente); un ítem en $0 queda sin el campo. (Un ítem con otro nombre
+//                     que ya exista en un documento no sale en el Excel y NO se borra; una fila del archivo con otro ítem se rechaza con aviso.)
+//   REMUNERACIONES  → rem.meses y rem.total  (NO rem.real_hasta_mes: ninguna hoja lo trae)
+//   COMPRAS         → compras (mapa completo)
+//   BYS_PROYECCION  → bys_proyeccion.items (y se borran los restos antiguos bys_proyeccion.meses / .total)
+//   HONORARIOS      → honorarios (mapa completo)
+//   HON_PROYECCION  → hon_proyeccion.items
+// Fuera de todo reemplazo (ninguna hoja los trae): ingreso_real_hasta_mes y rem.real_hasta_mes (cortes Real/Proy por RBD), el mes de cierre global (`_meta.mes_cierre`, solo
+// administración), fondos_fijos, otras_fuentes, nombre y lastModified*. SUBT22 / SUBT29 son derivadas de COMPRAS: no se importan (se avisa que se ignoran).
+// Fondos Fijos — la hoja «FONDOS FIJOS P02» (del libro operativo; la app no la exporta) gestiona: fondos_fijos.cupo y, por mes, saldo_inicial, rendido y observado (y folio en
+// marzo–septiembre, los únicos meses con columna de folio). NO gestiona registrado_general, compensado_sigfe ni reposicion (se registran a mano; como hoy, se conservan).
+// ============================================================================
+function ctxCargaSep() {
+  const ctx = { fk: CARGA_KEY_SEP, f: null, label: 'SEP', universo: new Set(DATA.registros.map(r => r.rbd)), comprasConcepto: false, honConcepto: false, catalogoCompras: CUENTAS_SEP_BY_CODIGO };
+  const memoria = {
+    ingreso_items: (rbd) => { const o = {}; ((CARGA_MANUAL.ingreso_items_por_rbd || {})[rbd] || { items: [] }).items.forEach(it => { if (ITEMS_INGRESO.includes(it.item)) o[it.item] = { item: it.item, meses: { ...it.meses }, total: it.total }; }); return o; },
+    rem: (rbd) => { const r = (CARGA_MANUAL.rem_por_rbd || {})[rbd]; return r ? { meses: { ...r.meses }, total: r.total || 0 } : vacioCarga({ tipo: 'mensual' }); },
+    compras: (rbd) => (CARGA_MANUAL.compras_por_rbd || {})[rbd] || {},
+    bys_proyeccion: (rbd) => { const o = {}; (((CARGA_MANUAL.bys_proyeccion_por_rbd || {})[rbd] || { items: [] }).items).forEach(it => { o[it.codigo] = it; }); return o; },
+    honorarios: (rbd) => (CARGA_MANUAL.honorarios_por_rbd || {})[rbd] || {},
+    hon_proyeccion: (rbd) => { const o = {}; (((CARGA_MANUAL.hon_proyeccion_por_rbd || {})[rbd] || { items: [] }).items).forEach(it => { o[it.codigo] = it; }); return o; },
+  };
+  const mesesNum12 = (x) => { const m = {}; MESES_CARGA.forEach(k => { m[k] = Number(x && x.meses && x.meses[k]) || 0; }); return m; };
+  const suma = (m) => MESES_CARGA.reduce((s, k) => s + m[k], 0);
+  const mapaItems = (valor) => { const o = {}; Object.entries(valor || {}).forEach(([k, it]) => { const m = mesesNum12(it); o[k] = { meses: m, total: Math.round(suma(m)) }; }); return o; };
+  ctx.hojas = () => [
+    { hoja: 'INGRESO', campo: 'ingreso_items', tipo: 'items', claveCampo: 'item', etiquetaClave: 'ítem de ingreso', ceroEsAusente: true,
+      valida: (k) => ITEMS_INGRESO.includes(k) ? null : `el ítem "${k}" no es uno de los ítems de ingreso de SEP (${ITEMS_INGRESO.join(', ')})` },
+    { hoja: 'REMUNERACIONES', campo: 'rem', tipo: 'mensual', colMeses: 3, ceroEsAusente: true },
+    { hoja: 'COMPRAS', campo: 'compras', tipo: 'compras' },
+    { hoja: 'BYS_PROYECCION', campo: 'bys_proyeccion', tipo: 'proycuenta', valida: (k) => (CUENTAS_SEP_BY_CODIGO[k] || k === '_LEGACY_') ? null : (k ? `la cuenta "${k}" no está en el catálogo de cuentas de Bienes y Servicios de SEP` : 'falta el código de la cuenta') },
+    { hoja: 'HONORARIOS', campo: 'honorarios', tipo: 'honorarios' },
+    { hoja: 'HON_PROYECCION', campo: 'hon_proyeccion', tipo: 'proycuenta', valida: (k) => HON_CUENTAS_BY_CODIGO[k] ? null : `la cuenta "${k}" no acepta honorarios (no está en el catálogo de honorarios del Plan de Cuentas 2026)` },
+  ];
+  ctx.leer = (desc, rbd) => memoria[desc.campo](rbd);
+  ctx.rutas = (desc, valor) => {
+    switch (desc.campo) {
+      case 'ingreso_items': return ITEMS_INGRESO.map(nombre => {
+        const it = (valor || {})[nombre], m = it ? mesesNum12(it) : null;
+        return [`ingreso_items.${nombre}`, (m && MESES_CARGA.some(k => m[k])) ? { item: nombre, meses: m, total: Math.round(suma(m)) } : CARGA_ELIMINAR];
+      });
+      case 'rem': { const m = mesesNum12(valor); return [['rem.meses', m], ['rem.total', Math.round(suma(m))]]; }
+      case 'bys_proyeccion': return [['bys_proyeccion.items', mapaItems(valor)], ['bys_proyeccion.meses', CARGA_ELIMINAR], ['bys_proyeccion.total', CARGA_ELIMINAR]];
+      case 'hon_proyeccion': return [['hon_proyeccion.items', mapaItems(valor)]];
+      default: return [[desc.campo, valor]]; // compras, honorarios: el mapa completo por ID
+    }
+  };
+  ctx.vaciarTodo = false; // «Vaciar» deja en blanco las hojas que gestiona (no toca cortes, mes de cierre, Fondos Fijos ni otras fuentes)
+  ctx.nombreDe = (rbd) => { const r = DATA.registros.find(x => x.rbd === rbd); return r ? r.nombre : rbd; };
+  ctx.aplicarMemoria = (plan) => {
+    Object.entries(plan.cambios).forEach(([rbd, campos]) => {
+      Object.entries(campos).forEach(([campo, valor]) => {
+        switch (campo) {
+          case 'ingreso_items': {
+            const ing = ensureIngresoAgregado(rbd);
+            ITEMS_INGRESO.forEach(nombre => {
+              const it = (valor || {})[nombre], m = it ? mesesNum12(it) : null;
+              if (m && MESES_CARGA.some(k => m[k])) { const x = ensureIngresoItem(ing, nombre); x.meses = m; x.total = Math.round(suma(m)); }
+              else ing.items = ing.items.filter(x => x.item !== nombre);
+            });
+            break;
+          }
+          case 'rem': { const r = ensureSimple(rbd, 'rem_por_rbd'); const m = mesesNum12(valor); r.meses = m; r.total = Math.round(suma(m)); break; }
+          case 'compras': { const o = {}; Object.entries(valor).forEach(([id, c]) => { o[id] = sanitizaCompra(c); }); if (!CARGA_MANUAL.compras_por_rbd) CARGA_MANUAL.compras_por_rbd = {}; CARGA_MANUAL.compras_por_rbd[rbd] = o; recomputeItemsDesdeCompras(rbd); break; }
+          case 'honorarios': { const o = {}; Object.entries(valor).forEach(([id, h]) => { o[id] = sanitizaHonorario(h, false); }); if (!CARGA_MANUAL.honorarios_por_rbd) CARGA_MANUAL.honorarios_por_rbd = {}; CARGA_MANUAL.honorarios_por_rbd[rbd] = o; recomputeHonDesdeBoletas(rbd); break; }
+          case 'bys_proyeccion': { const bp = ensureBysProyeccion(rbd); bp.items = Object.entries(valor).map(([codigo, it]) => { const m = mesesNum12(it); return { codigo, meses: m, total: Math.round(suma(m)) }; }); recomputeBysProyeccionAgregado(bp); break; }
+          case 'hon_proyeccion': { const hp = ensureHonProyeccion(rbd); hp.items = Object.entries(valor).map(([codigo, it]) => { const m = mesesNum12(it); return { codigo, meses: m, total: Math.round(suma(m)) }; }); recomputeBysProyeccionAgregado(hp); break; }
+        }
+      });
+      const reg = DATA.registros.find(x => x.rbd === rbd);
+      if (reg) recomputeRegistro(reg);
+    });
+  };
+  // Lo tecleado y aún no confirmado en los campos que se reemplazan no debe resucitar (rem.real_hasta_mes, el corte de ingresos y lo demás se dejan).
+  ctx.descartarPendientes = (rbd, plan) => {
+    const campos = Object.keys((plan && plan.cambios && plan.cambios[rbd]) || {});
+    [pendingWrites[rbd], escrituraRetenida[rbd], ...(enVuelo[rbd] || [])].forEach(p => {
+      if (!p) return;
+      campos.forEach(c => { if (c === 'rem') { if (p.rem) { delete p.rem.meses; delete p.rem.total; } } else delete p[c]; });
+    });
+  };
+  ctx.libroRespaldo = () => buildCargaWorkbook(null);
+  ctx.repintar = () => { if (modalRbdAbierto) renderModalContenido(); };
+  ctx.textoAlcance = 'No se toca el mes de cierre, los cortes Real/Proyectado de cada RBD, Fondos Fijos ni las otras fuentes. El N° DC sale solo de la columna «N° DC» del archivo.';
+  ctx.textoVaciar = '(ingresos, remuneraciones, compras, proyección de B&S, honorarios y proyección de honorarios de todos los RBD). No toca el mes de cierre, los cortes Real/Proyectado, Fondos Fijos ni las otras fuentes.';
+  ctx.ayudaTabla = 'En INGRESO «filas» son los ítems con algún monto y «total» la suma de «Total Año»; en REMUNERACIONES, los RBD con algún monto; en COMPRAS y HONORARIOS, las filas y la suma de MontoGasto; en BYS_PROYECCION y HON_PROYECCION, las cuentas por RBD. Filas leídas = filas que se cargan + rechazadas. SUBT22 y SUBT29 se calculan desde COMPRAS y no se importan.';
+  ctx.titulos = { excel: 'Revisar carga', deshacer: 'Deshacer última carga', vaciar: 'Vaciar SEP' };
+  return ctx;
+}
+
+// ---- Fondos Fijos
+// Columnas de la hoja «FONDOS FIJOS P02» (A = id): G = cupo; por mes [inicio, +2 rendido, +3 observado] y, en marzo–septiembre, una columna de folio.
+const FF_CAMPOS_MES = ['saldo_inicial', 'rendido', 'observado'];
+const FF_MESES = MAPA_COLUMNAS_FONDOS_FIJOS.map(x => x[0]); // marzo–diciembre: enero y febrero NO existen en la hoja (no se leen ni se tocan)
+const FF_FOLIO_MESES = new Set(MAPA_COLUMNAS_FONDOS_FIJOS.filter(x => x[2] !== null).map(x => x[0]));
+const FF_HOJA = 'FONDOS FIJOS P02';
+function parsearFondosFijosCarga(filas, enc, desc, ctx, r, rechazar) {
+  const visto = new Map();
+  let sinId = 0, recortados = 0;
+  const datos = [];
+  filas.forEach(({ n, c }) => { // una fila sin id en la columna A (separador, total) no es una entidad: no cuenta como leída y se informa aparte
+    if (c[0] === undefined || c[0] === null || String(c[0]).trim() === '' || Number(c[0]) === 0) { sinId++; return; }
+    datos.push({ n, c });
+  });
+  r.leidas = datos.length; r.ignoradasSinId = sinId;
+  datos.forEach(({ n, c }) => {
+    const rbd = idFilaFondoFijo(c[0]);
+    if (rbd === null) { rechazar(n, `el id "${String(c[0]).trim().slice(0, 30)}" no es un RBD ni un GESPARVU (debe ser un entero positivo)`); return; }
+    if (!ctx.universo.has(rbd)) { rechazar(n, `la entidad "${rbd}" no es un RBD ni un GESPARVU de Fondos Fijos`); return; }
+    const errores = [];
+    const leer = (celda, etiqueta) => { const v = validarMontoFondoFijo(celda); if (!v.ok) { errores.push(`${etiqueta} ${v.motivo}`); return 0; } return v.valor; };
+    const valor = { cupo: leer(c[6], 'Cupo'), meses: {} };
+    let rec = 0;
+    MAPA_COLUMNAS_FONDOS_FIJOS.forEach(([mes, inicio, colFolio]) => {
+      const nom = mes.charAt(0) + mes.slice(1).toLowerCase();
+      const m = { saldo_inicial: leer(c[inicio], `${nom}: Saldo inicial`), rendido: leer(c[inicio + 2], `${nom}: Rendido`), observado: leer(c[inicio + 3], `${nom}: Observado`) };
+      if (colFolio !== null) { const f = recortarFolioFondoFijo(c[colFolio] === 0 ? '' : c[colFolio]); m.folio = f.texto; if (f.recortado) rec++; } // la celda vacía llega como 0: no es el folio «0»
+      valor.meses[mes] = m;
+    });
+    if (errores.length) { rechazar(n, `${errores.slice(0, 3).join('; ')}${errores.length > 3 ? `; … (${errores.length} datos inválidos)` : ''} (los montos deben ser números finitos, no negativos y menores que ${fmtCLP(MONTO_ABS_MAX)})`); return; }
+    recortados += rec;
+    registrarClaveUnica(visto, rbd, n, rechazar);
+    r.nuevo.set(rbd, valor);
+  });
+  r.notasParser = [];
+  if (sinId) r.notasParser.push(`${sinId} ${sinId === 1 ? 'fila sin id' : 'filas sin id'} en la columna A (separadores o totales): se ignoran.`);
+  if (recortados) r.notasParser.push(`${recortados} ${recortados === 1 ? 'folio se recortó' : 'folios se recortaron'} a ${FOLIO_FONDO_FIJO_MAX} caracteres.`);
+}
+// Forma canónica (solo lo que la hoja gestiona) de lo de una entidad en Fondos Fijos, igual para lo leído de la memoria y lo del archivo.
+function canonFondoFijo(v) {
+  const m = (x) => montoFondoFijoLeido(x);
+  const o = { cupo: m(v && v.cupo), meses: {} };
+  FF_MESES.forEach(mes => {
+    const x = (v && v.meses && v.meses[mes]) || {};
+    const e = {}; FF_CAMPOS_MES.forEach(k => { e[k] = m(x[k]); });
+    if (FF_FOLIO_MESES.has(mes)) e.folio = recortarFolioFondoFijo(x.folio).texto;
+    o.meses[mes] = e;
+  });
+  return o;
+}
+function ffEsVacio(v) { const c = canonFondoFijo(v); return !c.cupo && Object.values(c.meses).every(e => FF_CAMPOS_MES.every(k => !e[k]) && !e.folio); }
+function ctxCargaFF() {
+  const filas = filasFondosFijos();
+  const ctx = { fk: CARGA_KEY_FF, f: null, label: 'Fondos Fijos', universo: new Set(filas.map(r => r.rbd)), comprasConcepto: false, honConcepto: false };
+  ctx.hojas = () => [{ hoja: FF_HOJA, campo: 'fondos_fijos', tipo: 'ff', tolerante: true, saltarFilas: 1 }];
+  ctx.leer = (desc, rbd) => ((CARGA_MANUAL.fondos_fijos_por_rbd || {})[rbd]) || {};
+  ctx.rutas = (desc, valor) => {
+    const c = canonFondoFijo(valor), r = [['fondos_fijos.cupo', c.cupo]];
+    FF_MESES.forEach(mes => Object.entries(c.meses[mes]).forEach(([k, v]) => r.push([`fondos_fijos.meses.${mes}.${k}`, v])));
+    return r;
+  };
+  ctx.vaciarTodo = false; // «Vaciar» pone en blanco lo que gestiona la hoja (cupo, saldo inicial, rendido, observado, folio); Registrado en General / Compensado SIGFE / Reposición se conservan
+  ctx.nombreDe = (rbd) => { const r = filas.find(x => x.rbd === rbd); return r ? r.nombre : rbd; };
+  ctx.aplicarMemoria = (plan) => {
+    Object.entries(plan.cambios).forEach(([rbd, campos]) => {
+      const c = canonFondoFijo(campos.fondos_fijos);
+      const ff = ensureFondoFijo(rbd);
+      ff.cupo = c.cupo;
+      FF_MESES.forEach(mes => Object.assign(ff.meses[mes], c.meses[mes]));
+      recomputeOtraFuente(rbd, 'general');
+    });
+  };
+  ctx.descartarPendientes = (rbd) => [pendingWrites[rbd], escrituraRetenida[rbd], ...(enVuelo[rbd] || [])].forEach(p => {
+    const ff = p && p.fondos_fijos; if (!ff) return;
+    delete ff.cupo;
+    Object.keys(ff.meses || {}).forEach(mes => { const x = ff.meses[mes]; if (x && typeof x === 'object') { FF_CAMPOS_MES.forEach(k => delete x[k]); delete x.folio; } });
+  });
+  ctx.libroRespaldo = () => {
+    // Mismo formato que el libro que se importa (hoja «FONDOS FIJOS P02», cupo en G y las columnas de MAPA_COLUMNAS_FONDOS_FIJOS): el respaldo se puede volver a importar con el mismo botón.
+    const vacia = () => new Array(76).fill('');
+    const enc1 = vacia(); enc1[0] = 'Respaldo de Fondos Fijos (mismo formato de FONDOS FIJOS P02)';
+    const enc2 = vacia(); enc2[0] = 'RBD'; enc2[1] = 'Establecimiento'; enc2[6] = 'Cupo';
+    MAPA_COLUMNAS_FONDOS_FIJOS.forEach(([mes, ini, colFolio]) => { const t = mes.charAt(0) + mes.slice(1).toLowerCase(); enc2[ini] = t + ': Saldo inicial'; enc2[ini + 2] = t + ': Rendido'; enc2[ini + 3] = t + ': Observado'; if (colFolio !== null) enc2[colFolio] = t + ': Folio'; });
+    const aoa = [enc1, enc2];
+    filas.slice().sort((a, b) => Number(a.rbd) - Number(b.rbd)).forEach(r => {
+      const ff = (CARGA_MANUAL.fondos_fijos_por_rbd || {})[r.rbd]; if (!ff || ffEsVacio(ff)) return;
+      const c = canonFondoFijo(ff), f = vacia();
+      f[0] = Number(r.rbd); f[1] = neutralizaFormula(r.nombre); f[6] = c.cupo;
+      MAPA_COLUMNAS_FONDOS_FIJOS.forEach(([mes, ini, colFolio]) => { const e = c.meses[mes]; f[ini] = e.saldo_inicial; f[ini + 2] = e.rendido; f[ini + 3] = e.observado; if (colFolio !== null) f[colFolio] = neutralizaFormula(e.folio); });
+      aoa.push(f);
+    });
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), FF_HOJA);
+    return wb;
+  };
+  ctx.repintar = () => { renderFondosFijos(); renderDashFondosFijos(); if (fondosFijosRbdAbierto) renderFondosFijosModalContenido(); };
+  ctx.textoAlcance = 'No se toca Registrado en General, Compensado SIGFE ni Reposición entregada (se registran a mano), ni ingresos, gastos o el consolidado.';
+  ctx.textoVaciar = '(cupo, saldo inicial, rendido, observado y folio de todos los RBD y GESPARVU). Registrado en General, Compensado SIGFE y Reposición entregada se conservan; no toca ingresos, gastos ni el consolidado.';
+  ctx.ayudaTabla = 'En «FONDOS FIJOS P02» «filas» son las entidades (RBD y GESPARVU) con algún dato y «total» la suma de cupo, saldo inicial, rendido y observado. Filas leídas = filas que se cargan + rechazadas. Una entidad que no aparece en la hoja queda en blanco en lo que la hoja gestiona.';
+  ctx.titulos = { excel: 'Revisar carga', deshacer: 'Deshacer última carga', vaciar: 'Vaciar Fondos Fijos' };
+  return ctx;
+}
+
+// ---- Entradas: elegir el archivo en la pestaña SEP / Fondos Fijos → plan + resumen de control (nada se escribe hasta «Reemplazar»).
+function iniciarCarga(key, wb, archivo) {
+  const plan = construirPlanCarga(key, wb, archivo);
+  if (!plan.hojas.some(h => h.presente)) {
+    mostrarAvisoCarga('Revisar carga · ' + plan.ctx.label, key === CARGA_KEY_FF ? `No se encontró la hoja “${FF_HOJA}”. No se importó nada.` : `El archivo no tiene ninguna hoja con los nombres esperados para ${plan.ctx.label} (${plan.hojas.map(h => h.desc.hoja).join(', ')}). No se importó nada.`);
+    return;
+  }
+  mostrarControlCarga(plan);
+}
+function conectarCargaArchivo(key, input, ayudaFormato) {
+  input.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (typeof XLSX === 'undefined') { alert('No se pudo cargar la librería de Excel (sin conexión a internet). Intenta de nuevo más tarde.'); e.target.value = ''; return; }
+    if (!currentUser) { alert('Inicia sesión antes de importar.'); e.target.value = ''; return; }
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try { iniciarCarga(key, XLSX.read(evt.target.result, { type: 'array' }), file.name); }
+      catch (err) { mostrarAvisoCarga('Revisar carga · ' + ctxCarga(key).label, 'No se pudo leer el archivo. ' + ayudaFormato + ' Detalle: ' + err.message); }
+      e.target.value = '';
+    };
+    reader.readAsArrayBuffer(file);
+  });
+}
+conectarCargaArchivo(CARGA_KEY_SEP, document.getElementById('importExcelInput'), 'Verifica que sea un Excel con el mismo formato de CARGA_MANUAL_SEP.xlsx (hoja COMPRAS con columnas ID | RBD | Establecimiento | Codigo | ...).');
+conectarCargaArchivo(CARGA_KEY_FF, document.getElementById('importFondosFijosInput'), 'Verifica que sea el libro operativo con la hoja “' + FF_HOJA + '”.');
+document.getElementById('importExcelBtn').title = 'Reemplaza por completo, hoja por hoja, lo que trae el Excel (antes muestra un resumen de control y pide confirmación; descarga un respaldo y deja «↩ Deshacer última carga»)';
+document.getElementById('importFondosFijosBtn').title = 'Reemplaza por completo lo que gestiona la hoja “' + FF_HOJA + '” (antes muestra un resumen de control y pide confirmación)';
+agregarBotonesDeshacerVaciar(CARGA_KEY_SEP, document.getElementById('importExcelInput'), '🗑 Vaciar SEP', 'Solo administración: deja en blanco ingresos, remuneraciones, compras, proyección de B&S y honorarios de todos los RBD (con respaldo y doble confirmación). No toca cortes, mes de cierre, Fondos Fijos ni otras fuentes.');
+agregarBotonesDeshacerVaciar(CARGA_KEY_FF, document.getElementById('importFondosFijosInput'), '🗑 Vaciar Fondos Fijos', 'Solo administración: pone en blanco lo que importa la hoja (cupo, saldo inicial, rendido, observado, folio) con respaldo y doble confirmación. Conserva Registrado en General, Compensado SIGFE y Reposición.');
 
 
 // PDF: el mismo mecanismo que exportPdfBtn (window.print() + .hidden ya oculta las otras 7
@@ -8600,24 +8778,7 @@ FUENTES_OTRAS.forEach(f => {
   if (importBtn && importInput) {
     importBtn.addEventListener('click', () => importInput.click());
     importBtn.title = 'Reemplaza por completo los datos de esta fuente con los del Excel (antes muestra un resumen de control y pide confirmación)';
-    // «↩ Deshacer última carga» (solo mientras haya respaldo en memoria) y «🗑 Vaciar fuente» (solo administración): se agregan junto a «Importar Excel».
-    const undoBtn = document.createElement('button');
-    undoBtn.type = 'button'; undoBtn.id = 'undoCargaOFBtn-' + key; undoBtn.className = 'hidden';
-    undoBtn.style.cssText = 'background:#374151; border-color:#374151;';
-    undoBtn.textContent = '↩ Deshacer última carga';
-    undoBtn.title = 'Vuelve al estado que tenía esta fuente antes de la última carga o vaciado. Solo está disponible mientras no recargues la página; el Excel de respaldo que se descargó sirve siempre.';
-    undoBtn.addEventListener('click', () => { const plan = planDeshacerCarga(key); if (plan) mostrarControlCarga(plan); });
-    const vaciarBtn = document.createElement('button');
-    vaciarBtn.type = 'button'; vaciarBtn.id = 'vaciarOFBtn-' + key; vaciarBtn.className = 'hidden';
-    vaciarBtn.style.cssText = 'background:var(--status-critical); border-color:var(--status-critical);';
-    vaciarBtn.textContent = '🗑 Vaciar fuente';
-    vaciarBtn.title = 'Solo administración: deja esta fuente completamente vacía (con respaldo y doble confirmación). Sirve para limpiar datos mezclados antes de subir el Excel correcto.';
-    vaciarBtn.addEventListener('click', () => {
-      if (!esAdminActual()) { mostrarAvisoCarga('Vaciar fuente', 'Esta herramienta está restringida a quienes administran el panel.'); return; }
-      mostrarControlCarga(planVaciarCarga(key));
-    });
-    importInput.insertAdjacentElement('afterend', undoBtn);
-    undoBtn.insertAdjacentElement('afterend', vaciarBtn);
+    agregarBotonesDeshacerVaciar(key, importInput); // «↩ Deshacer última carga» (solo con respaldo en memoria) y «🗑 Vaciar fuente» (solo administración), junto a «Importar Excel»
     importInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -10965,94 +11126,8 @@ document.getElementById('downloadExcelBtn').addEventListener('click', () => {
   XLSX.writeFile(wb, `CARGA_MANUAL_SEP_${new Date().toISOString().slice(0,10)}.xlsx`);
 });
 
-function rowsFromSheet(ws) {
-  // Quita el apóstrofo que antepone la exportación a los textos libres que empiezan con = + - @
-  // (ver neutralizaFormula): así exportar y reimportar no altera los datos.
-  return XLSX.utils.sheet_to_json(ws, { header: 1, defval: 0, blankrows: false }).map(fila => fila.map(quitaApostrofoFormula));
-}
-
-function importSimpleSheet(ws, bucket) {
-  if (!CARGA_MANUAL[bucket]) CARGA_MANUAL[bucket] = {};
-  const saveKey = 'rem';
-  const rows = rowsFromSheet(ws);
-  let n = 0;
-  for (let i = 1; i < rows.length; i++) {
-    const row = rows[i];
-    if (row[0] === undefined || row[0] === null || String(row[0]).trim() === '') continue;
-    const rbd = String(Math.trunc(Number(row[0])));
-    const nombre = row[1] || rbd;
-    const meses = {};
-    let total = 0;
-    MESES_CARGA.forEach((m, mi) => { const v = Number(row[3 + mi]) || 0; meses[m] = v; total += v; });
-    // Conserva real_hasta_mes ya cargado (columna que no viene en esta hoja) — reimportar
-    // Remuneraciones no debe resetear el corte "reales hasta" que ya se haya elegido por RBD.
-    const existente = CARGA_MANUAL[bucket][rbd];
-    CARGA_MANUAL[bucket][rbd] = { rbd, nombre, meses, total: Math.round(total), ...(existente && existente.real_hasta_mes ? { real_hasta_mes: existente.real_hasta_mes } : {}) };
-    scheduleRbdSave(rbd, { nombre, [saveKey]: { meses, total: Math.round(total) } });
-    n++;
-  }
-  return n;
-}
-
-function importIngresoItemsSheet(ws) {
-  const rows = rowsFromSheet(ws);
-  let n = 0;
-  for (let i = 1; i < rows.length; i++) {
-    const row = rows[i];
-    if (row[0] === undefined || row[0] === null || String(row[0]).trim() === '') continue;
-    const rbd = String(Math.trunc(Number(row[0])));
-    const nombre = row[1] || rbd;
-    const item = row[2] || '';
-    const errItem = validarClaveMapa(String(item), 'El nombre del ítem de ingreso');
-    if (errItem) { rechazarFilaImportacion('INGRESO', i + 1, errItem); continue; }
-    const meses = {};
-    let total = 0;
-    MESES_CARGA.forEach((m, mi) => { const v = Number(row[3 + mi]) || 0; meses[m] = v; total += v; });
-    const ing = ensureIngresoAgregado(rbd);
-    ing.nombre = nombre;
-    const it = ensureIngresoItem(ing, item);
-    it.meses = meses;
-    it.total = Math.round(total);
-    scheduleRbdSave(rbd, { nombre, ingreso_items: { [item]: { item, meses, total: it.total } } });
-    n++;
-  }
-  return n;
-}
-
-// BYS_PROYECCION: mismo formato Codigo+Item que SUBT22/29 (ver sheetBysProyeccionAOA). Una fila
-// con un código de cuenta que no exista en CUENTAS_SEP_BY_CODIGO se ignora (igual que
-// importComprasSheet) — no hay forma segura de adivinar a qué ítem correspondía.
-function importBysProyeccionSheet(ws) {
-  const rows = rowsFromSheet(ws);
-  const porRbd = new Set();
-  let n = 0;
-  for (let i = 1; i < rows.length; i++) {
-    const row = rows[i];
-    if (row[0] === undefined || row[0] === null || String(row[0]).trim() === '') continue;
-    const rbd = String(Math.trunc(Number(row[0])));
-    const nombre = row[1] || rbd;
-    const codigoRaw = row[2];
-    const codigo = (typeof codigoRaw === 'number') ? String(Math.trunc(codigoRaw)) : String(codigoRaw || '').trim();
-    if (!CUENTAS_SEP_BY_CODIGO[codigo]) continue;
-    const meses = {};
-    let total = 0;
-    MESES_CARGA.forEach((m, mi) => { const v = Number(row[4 + mi]) || 0; meses[m] = v; total += v; });
-    const bp = ensureBysProyeccion(rbd);
-    bp.nombre = nombre;
-    const it = ensureBysProyeccionItem(bp, codigo);
-    it.meses = meses;
-    it.total = Math.round(total);
-    recomputeBysProyeccionAgregado(bp);
-    scheduleRbdSave(rbd, { nombre, bys_proyeccion: { items: { [codigo]: { meses, total: it.total } } } });
-    porRbd.add(rbd);
-    n++;
-  }
-  if (modalRbdAbierto && porRbd.has(modalRbdAbierto)) renderModalContenido();
-  return n;
-}
-
-// --- HONORARIOS: hoja de respaldo — una fila por boleta, con su ID (mismas columnas del Libro de Honorarios de SUPEREDUC A–L + N° DC). La columna ID permite reimportar el
-// mismo Excel sin duplicar: fila con ID existente = actualiza esa boleta; ID vacío = boleta nueva (clave determinista, ver idCompraParaImportar). El tipo va como CÓDIGO (BOLHE). ---
+// --- HONORARIOS: hoja de respaldo — una fila por boleta, con su ID (mismas columnas del Libro de Honorarios de SUPEREDUC A–L + N° DC). La columna ID se respeta al importar (carga = reemplazo total:
+// ver «LA MISMA CARGA»); sin ID la boleta recibe una clave determinista imp-<hash>. El tipo va como CÓDIGO (BOLHE). ---
 function sheetHonorariosAOA(onlyRbd) {
   const headers = ['ID', 'RBD', 'Establecimiento', 'Codigo', 'TipoDocumento', 'NroDocumento', 'FechaDocumento', 'FechaPago', 'Descripcion', 'RutProveedor', 'NombreProveedor', 'MontoGasto', 'MontoDocumento', 'N° DC'];
   const rows = [headers];
@@ -11077,99 +11152,8 @@ function sheetHonProyeccionAOA(onlyRbd) {
   });
   return rows;
 }
-// Importar la hoja HONORARIOS. Cada fila que no se puede importar se informa con su motivo (rechazarFilaImportacion) y no se pierde en silencio. Una boleta ya cargada
-// que no viene en el archivo no se toca. El N° DC solo se escribe si el archivo trae la columna (un Excel antiguo sin ella no borra el que ya tenía la boleta).
-function importHonorariosSheet(ws) {
-  const rows = rowsFromSheet(ws);
-  const idxDc = indiceColumnaDc(rows[0]);
-  const indicesPorRbd = {};
-  const porRbd = {};
-  let n = 0;
-  for (let i = 1; i < rows.length; i++) {
-    const row = rows[i];
-    if (row[1] === undefined || row[1] === null || String(row[1]).trim() === '') continue;
-    const fila = i + 1;
-    const rbd = String(Math.trunc(Number(row[1])));
-    if (!DATA.registros.some(r => r.rbd === rbd)) { rechazarFilaImportacion('HONORARIOS', fila, `el RBD "${String(row[1]).trim()}" no existe en el panel`); continue; }
-    const codigoRaw = row[3];
-    const codigo = (typeof codigoRaw === 'number') ? String(Math.trunc(codigoRaw)) : String(codigoRaw || '').trim();
-    if (!HON_CUENTAS_BY_CODIGO[codigo]) { rechazarFilaImportacion('HONORARIOS', fila, `la cuenta "${codigo}" no acepta honorarios (no está en el catálogo de honorarios del Plan de Cuentas 2026)`); continue; }
-    const tipoRaw = String(row[4] || '').trim();
-    const tipo = honCodigoTipo(tipoRaw);
-    if (!tipo) { rechazarFilaImportacion('HONORARIOS', fila, `el tipo de documento "${tipoRaw}" no es de honorarios (BOLH, BHE, BOLHE, BPST, BPSTE)`); continue; }
-    if (!honTipoPermitido(codigo, tipo)) { rechazarFilaImportacion('HONORARIOS', fila, `la cuenta ${codigo} no acepta el tipo ${tipo}`); continue; }
-    const campos = {
-      codigo,
-      tipoDocumento: tipo,
-      nroDocumento: String(row[5] || '').trim(),
-      fechaDocumento: excelDateToISO(row[6]),
-      fechaPago: excelDateToISO(row[7]),
-      descripcion: String(row[8] || '').trim(),
-      rutProveedor: String(row[9] || '').trim(),
-      nombreProveedor: String(row[10] || '').trim(),
-      montoGasto: Number(row[11]) || 0,
-      montoDocumento: Number(row[12]) || 0,
-    };
-    if (!campos.fechaDocumento) { rechazarFilaImportacion('HONORARIOS', fila, 'falta la fecha del documento'); continue; }
-    if (!(campos.montoGasto > 0)) { rechazarFilaImportacion('HONORARIOS', fila, 'el monto gasto debe ser mayor que 0 (las boletas son gasto positivo)'); continue; }
-    if (!(campos.montoDocumento > 0)) campos.montoDocumento = campos.montoGasto;
-    const idExplicito = idCompraImportadoUsable(row[0]);
-    const errId = idExplicito ? validarClaveMapa(idExplicito, 'El ID de la boleta') : null;
-    if (errId) { rechazarFilaImportacion('HONORARIOS', fila, errId); continue; }
-    if (!CARGA_MANUAL.honorarios_por_rbd) CARGA_MANUAL.honorarios_por_rbd = {};
-    if (!CARGA_MANUAL.honorarios_por_rbd[rbd]) CARGA_MANUAL.honorarios_por_rbd[rbd] = {};
-    const boletasRbd = CARGA_MANUAL.honorarios_por_rbd[rbd];
-    const indice = indicesPorRbd[rbd] || (indicesPorRbd[rbd] = indiceComprasPorFirma(boletasRbd));
-    const id = idCompraParaImportar(row[0], campos, boletasRbd, indice);
-    const previa = boletasRbd[id];
-    aplicarDcImportado(campos, row, idxDc, previa);
-    boletasRbd[id] = (idxDc < 0 && previa && previa.documentoContable) ? { ...campos, documentoContable: previa.documentoContable } : campos;
-    registrarCompraEnIndice(indice, id, campos);
-    if (!porRbd[rbd]) porRbd[rbd] = {};
-    porRbd[rbd][id] = campos;
-    n++;
-  }
-  Object.keys(porRbd).forEach(rbd => {
-    recomputeHonDesdeBoletas(rbd);
-    const r = DATA.registros.find(x => x.rbd === rbd);
-    if (r) recomputeRegistro(r);
-    scheduleRbdSave(rbd, { nombre: r ? r.nombre : rbd, honorarios: porRbd[rbd] });
-  });
-  if (modalRbdAbierto && porRbd[modalRbdAbierto]) renderModalContenido();
-  return n;
-}
-// Importar la hoja HON_PROYECCION (mismo formato que BYS_PROYECCION). Una cuenta fuera del catálogo de honorarios se informa y se omite.
-function importHonProyeccionSheet(ws) {
-  const rows = rowsFromSheet(ws);
-  const porRbd = new Set();
-  let n = 0;
-  for (let i = 1; i < rows.length; i++) {
-    const row = rows[i];
-    if (row[0] === undefined || row[0] === null || String(row[0]).trim() === '') continue;
-    const fila = i + 1;
-    const rbd = String(Math.trunc(Number(row[0])));
-    if (!DATA.registros.some(r => r.rbd === rbd)) { rechazarFilaImportacion('HON_PROYECCION', fila, `el RBD "${String(row[0]).trim()}" no existe en el panel`); continue; }
-    const codigoRaw = row[2];
-    const codigo = (typeof codigoRaw === 'number') ? String(Math.trunc(codigoRaw)) : String(codigoRaw || '').trim();
-    if (!HON_CUENTAS_BY_CODIGO[codigo]) { rechazarFilaImportacion('HON_PROYECCION', fila, `la cuenta "${codigo}" no acepta honorarios (no está en el catálogo de honorarios del Plan de Cuentas 2026)`); continue; }
-    const meses = {};
-    let total = 0;
-    MESES_CARGA.forEach((m, mi) => { const v = Number(row[4 + mi]) || 0; meses[m] = v; total += v; });
-    const hp = ensureHonProyeccion(rbd);
-    const it = ensureBysProyeccionItem(hp, codigo);
-    it.meses = meses;
-    it.total = Math.round(total);
-    recomputeBysProyeccionAgregado(hp);
-    scheduleRbdSave(rbd, { nombre: hp.nombre, hon_proyeccion: { items: { [codigo]: { meses, total: it.total } } } });
-    porRbd.add(rbd);
-    n++;
-  }
-  if (modalRbdAbierto && porRbd.has(modalRbdAbierto)) renderModalContenido();
-  return n;
-}
-
 // Excel guarda fechas como número de serie (días desde 1899-12-30) cuando la celda tiene
-// formato de fecha, y como texto en cualquier otro caso — rowsFromSheet no usa cellDates, así
+// formato de fecha, y como texto en cualquier otro caso — la lectura de hojas no usa cellDates, así
 // que hay que convertir ambos casos a 'YYYY-MM-DD' a mano.
 function excelDateToISO(val) {
   if (val === undefined || val === null || val === '' || val === 0) return '';
@@ -11188,109 +11172,9 @@ function excelDateToISO(val) {
 // Carga masiva de compras (hoja COMPRAS): una fila por compra, mismos campos que el formulario
 // "Registro de compras". La columna ID hace el reimport seguro — fila con ID ya existente
 // actualiza esa compra en vez de duplicarla; fila con ID vacío crea una compra nueva.
-function importComprasSheet(ws) {
-  const rows = rowsFromSheet(ws);
-  const idxDc = indiceColumnaDc(rows[0]); // N° DC: -1 en un Excel antiguo (sin la columna) → no se toca el N° DC que ya tenga la compra
-  const porRbd = {};
-  const indicesPorRbd = {}; // RBD → índice firma→ID de sus compras (ver idCompraParaImportar)
-  let n = 0;
-  for (let i = 1; i < rows.length; i++) {
-    const row = rows[i];
-    if (row[1] === undefined || row[1] === null || String(row[1]).trim() === '') continue;
-    const rbd = String(Math.trunc(Number(row[1])));
-    const codigoRaw = row[3];
-    const codigo = (typeof codigoRaw === 'number') ? String(Math.trunc(codigoRaw)) : String(codigoRaw || '').trim();
-    if (!CUENTAS_SEP_BY_CODIGO[codigo]) continue;
-    const campos = {
-      codigo,
-      tipoDocumento: String(row[4] || '').trim(),
-      nroDocumento: String(row[5] || '').trim(),
-      fechaDocumento: excelDateToISO(row[6]),
-      fechaPago: excelDateToISO(row[7]),
-      descripcion: String(row[8] || '').trim(),
-      rutProveedor: String(row[9] || '').trim(),
-      nombreProveedor: String(row[10] || '').trim(),
-      montoGasto: Number(row[11]) || 0,
-      montoDocumento: Number(row[12]) || 0,
-      documentoOriginal: String(row[13] || '').trim(),
-    };
-    if (!campos.fechaDocumento || !campos.montoGasto) continue;
-    // L-03: nota de crédito siempre en negativo, nota de débito en positivo, el resto como viene en el archivo.
-    campos.montoGasto = montoGastoCompra(campos);
-    campos.montoDocumento = montoDocumentoCompra(campos);
-    const idExplicito = idCompraImportadoUsable(row[0]); // '' si la celda ID está vacía / es 0 / "0"…
-    const errId = idExplicito ? validarClaveMapa(idExplicito, 'El ID de la compra') : null; // la clave generada ("imp-…") siempre es válida
-    if (errId) { rechazarFilaImportacion('COMPRAS', i + 1, errId); continue; }
-    if (!CARGA_MANUAL.compras_por_rbd) CARGA_MANUAL.compras_por_rbd = {};
-    if (!CARGA_MANUAL.compras_por_rbd[rbd]) CARGA_MANUAL.compras_por_rbd[rbd] = {};
-    // L-14: rowsFromSheet lee con defval:0, así que una celda ID vacía llega como el número 0 (y un Excel exportado puede traer el texto "0"):
-    // un ID no usable cuenta como SIN ID y la compra recibe una clave determinista según su contenido (ver idCompraParaImportar). Antes se
-    // inventaba un ID nuevo en cada importación (reimportar duplicaba todo) o todas las filas "0" de un RBD colapsaban en una sola compra.
-    const comprasRbd = CARGA_MANUAL.compras_por_rbd[rbd];
-    const indice = indicesPorRbd[rbd] || (indicesPorRbd[rbd] = indiceComprasPorFirma(comprasRbd));
-    const id = idCompraParaImportar(row[0], campos, comprasRbd, indice);
-    const previa = comprasRbd[id];
-    aplicarDcImportado(campos, row, idxDc, previa);
-    // Sin columna N° DC en el archivo, lo que ya tiene la compra se conserva (en Firestore el merge no lo toca; aquí tampoco se pierde).
-    comprasRbd[id] = (idxDc < 0 && previa && previa.documentoContable) ? { ...campos, documentoContable: previa.documentoContable } : campos;
-    registrarCompraEnIndice(indice, id, campos);
-    if (!porRbd[rbd]) porRbd[rbd] = {};
-    porRbd[rbd][id] = campos;
-    n++;
-  }
-  Object.keys(porRbd).forEach(rbd => {
-    recomputeItemsDesdeCompras(rbd);
-    const r = DATA.registros.find(x => x.rbd === rbd);
-    if (r) recomputeRegistro(r);
-    const ag = ensureAgregado(rbd);
-    scheduleRbdSave(rbd, { nombre: ag.nombre, compras: porRbd[rbd] });
-  });
-  if (modalRbdAbierto && porRbd[modalRbdAbierto]) renderModalContenido();
-  return n;
-}
 
-function importWorkbook(wb) {
-  let resumen = [];
-  importRechazos.length = 0;
-  if (wb.Sheets['INGRESO']) resumen.push('INGRESO: ' + importIngresoItemsSheet(wb.Sheets['INGRESO']) + ' filas');
-  if (wb.Sheets['REMUNERACIONES']) resumen.push('REMUNERACIONES: ' + importSimpleSheet(wb.Sheets['REMUNERACIONES'], 'rem_por_rbd') + ' filas');
-  if (wb.Sheets['COMPRAS']) resumen.push('COMPRAS: ' + importComprasSheet(wb.Sheets['COMPRAS']) + ' filas');
-  if (wb.Sheets['BYS_PROYECCION']) resumen.push('BYS_PROYECCION: ' + importBysProyeccionSheet(wb.Sheets['BYS_PROYECCION']) + ' filas');
-  // Honorarios (hojas nuevas): un archivo antiguo que no las trae simplemente no las toca (no borra nada).
-  if (wb.Sheets['HONORARIOS']) resumen.push('HONORARIOS: ' + importHonorariosSheet(wb.Sheets['HONORARIOS']) + ' filas');
-  if (wb.Sheets['HON_PROYECCION']) resumen.push('HON_PROYECCION: ' + importHonProyeccionSheet(wb.Sheets['HON_PROYECCION']) + ' filas');
-  // Subt.22/29 ya no se importan como hojas de montos mensuales — ahora se cargan como
-  // compras (hoja COMPRAS, o el "Registro de compras" dentro del detalle de cada RBD), con su
-  // propio código de cuenta y fecha de documento, así que una hoja "SUBT22"/"SUBT29" de un
-  // Excel viejo ya no aplica aquí.
-  DATA.registros.forEach(recomputeRegistro);
-  renderKpis();
-  renderTable();
-  return resumen.concat(resumenRechazosImportacion());
-}
 
-document.getElementById('importExcelBtn').addEventListener('click', () => document.getElementById('importExcelInput').click());
-document.getElementById('importExcelInput').addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  if (typeof XLSX === 'undefined') { alert('No se pudo cargar la librería de Excel (sin conexión a internet). Intenta de nuevo más tarde.'); e.target.value = ''; return; }
-  const reader = new FileReader();
-  reader.onload = (evt) => {
-    try {
-      const wb = XLSX.read(evt.target.result, { type: 'array' });
-      const resumen = importWorkbook(wb);
-      if (resumen.length === 0) {
-        alert('El archivo no tiene ninguna hoja con los nombres esperados (INGRESO, REMUNERACIONES, COMPRAS, HONORARIOS). No se importó nada.');
-      } else {
-        alert('Carga importada correctamente:\n' + resumen.join('\n') + '\n\nEl panel ya se actualizó con estos montos.');
-      }
-    } catch (err) {
-      alert('No se pudo leer el archivo. Verifica que sea un Excel con el mismo formato de CARGA_MANUAL_SEP.xlsx (hoja COMPRAS con columnas ID | RBD | Establecimiento | Codigo | ...). Detalle: ' + err.message);
-    }
-    e.target.value = '';
-  };
-  reader.readAsArrayBuffer(file);
-});
+document.getElementById('importExcelBtn').addEventListener('click', () => document.getElementById('importExcelInput').click()); // el archivo se lee y se revisa en conectarCargaArchivo (carga = reemplazo total)
 
 // --- Exportar PDF (general): usa el diálogo de impresión del navegador (Guardar como PDF),
 // respetando la búsqueda/filtro — SIEMPRE a nivel resumen, nunca incluye el detalle desplegado

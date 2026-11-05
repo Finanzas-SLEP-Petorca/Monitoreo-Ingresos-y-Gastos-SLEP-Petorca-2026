@@ -2,9 +2,9 @@
 //   F1) Guardado con merge por campo: editar una celda del modal = UN setDoc con merge:true confirmado que toca SOLO `fondos_fijos.meses.<MES>.<campo>` (o `fondos_fijos.cupo`); el servidor conserva lo demás
 //       (folio, otros meses, otros documentos); otra persona (cliente del SDK real) escribe OTRO mes del mismo RBD y ambos conviven; sobrevive a recargar (IndexedDB real) y recargar no escribe.
 //       Un valor inválido (negativo) no se envía; el folio se recorta a 40; lo registrado en General sube el B&S de General en el panel.
-//   F2) Importación en lote («FONDOS FIJOS P02», 3 entidades): un setDoc confirmado por entidad, el servidor recibe cupo / saldo inicial / rendido / observado / folio y CONSERVA Registrado en General, Compensado SIGFE
-//       y Reposición; reimportar es idempotente; una fila con un monto negativo se rechaza y NO se escribe; con un rechazo permanente del servidor (reglas que niegan la escritura de una entidad) el resumen dice cuántas
-//       se guardaron y cuáles no, los datos quedan en pantalla y el indicador queda rojo con «Reintentar».
+//   F2) Importación en lote («FONDOS FIJOS P02») = REEMPLAZO TOTAL: resumen de control + batch.set con mergeFields solo sobre fondos_fijos.*; el servidor recibe cupo / saldo inicial / rendido / observado / folio, CONSERVA Registrado en General,
+//       Compensado SIGFE y Reposición, deja en blanco lo gestionado de las entidades que el libro no trae; una fila con monto negativo se rechaza con motivo; reimportar es idempotente (sin escrituras); con un rechazo permanente del servidor el
+//       batch es atómico (no se guarda nada) y la pantalla vuelve a lo guardado. (El spec 18 cubre SEP y más Fondos Fijos.)
 //   F3) Lectura de `fondos_fijos` DAÑADO que el servidor sí guarda (texto, negativos, folio que no es texto o de 200 caracteres, AC con Fondos Fijos): el panel queda verde, no escribe nada y ningún documento cambia.
 // Esperado: PASS en la PR; FALLA en @13653a5 (sin validación, sin recorte de folio, importador sin resumen de fallos).
 import { boot, prepararServidor, cargarFixture, estado, clickTab, cerrarModal } from '../lib/harness.mjs';
@@ -33,6 +33,20 @@ function fila(id, cupo, meses) {
 async function libro(page, filas) {
   const bytes = await page.evaluate((f) => { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(f), 'FONDOS FIJOS P02'); return Array.from(new Uint8Array(XLSX.write(wb, { bookType: 'xlsx', type: 'array' }))); }, filas);
   return Buffer.from(bytes);
+}
+// Carga reemplazo total: sube el libro, lee el resumen de control, confirma y lee el resultado.
+async function subirFF(h, buffer) {
+  const { page } = h;
+  await page.setInputFiles('#importFondosFijosInput', { name: 'control.xlsx', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', buffer });
+  await page.waitForFunction(() => !!document.getElementById('cargaOkBtn') || !!document.getElementById('cargaCerrarBtn'), null, { timeout: 90000 });
+  const control = await page.evaluate(() => document.getElementById('cargaControlBody').innerText.replace(/\s+/g, ' '));
+  if (!await page.$('#cargaOkBtn')) { await page.click('#cargaCerrarBtn'); return { control }; }
+  await page.click('#cargaOkBtn');
+  await page.waitForFunction(() => !!document.getElementById('cargaCerrarBtn') && !document.getElementById('cargaOkBtn') && !/Guardando para el resto/.test(document.getElementById('cargaControlBody').innerText), null, { timeout: 120000 });
+  const resultado = await page.evaluate(() => document.getElementById('cargaControlBody').innerText.replace(/\s+/g, ' '));
+  await page.click('#cargaCerrarBtn');
+  await h.esperarEscriturasListas().catch(() => {});
+  return { control, resultado };
 }
 async function importar(h, buffer) {
   const antes = h.dialogs.length;
@@ -110,7 +124,7 @@ await correrSpec('15_fondos_fijos', async (t) => {
     await h.close();
   }
 
-  // ============================================================ F2) importación en lote
+  // ============================================================ F2) importación en lote (reemplazo total: resumen de control + UN batch con mergeFields; el spec 18 cubre el resto)
   {
     await prepararServidor(emu, fx);
     const h = await boot({ prepararServidor: false });
@@ -124,21 +138,23 @@ await correrSpec('15_fondos_fijos', async (t) => {
         fila('1131', 5, { MARZO: { saldo: 1, rendido: -50, obs: 0 } })];
       const antes = await emu.instantanea();
       await h.clearLog();
-      const msg = await importar(h, await libro(page, filas));
-      t.ok(/3 de 3 entidades guardadas/.test(msg) && /1 fila NO se importó/.test(msg) && /· 1131: .*Rendido no puede ser negativo/.test(msg) && /1 folio fue recortado/.test(msg), 'F2) resumen: 3 de 3 guardadas, 1 fila rechazada (1131, negativa) y 1 folio recortado', msg);
-      const wr = (await h.writes()).filter(w => w.payload && w.payload.fondos_fijos);
-      t.ok(wr.length === 3 && wr.every(w => w.op === 'setDoc' && w.options.merge === true && w.status === 'acked'), 'F2) UN setDoc confirmado con merge:true por cada entidad válida (3)', wr.map(w => [w.path, w.status]));
-      t.eq((await writesDe(h, '1131')).length, 0, 'F2) la fila rechazada (1131) no escribe nada');
+      const r = await subirFF(h, await libro(page, filas));
+      t.ok(/Filas que NO se cargarán \(1\)/.test(r.control) && /fila \d+: Marzo: Rendido no puede ser negativo/.test(r.control) && /1 folio se recortó/.test(r.control), 'F2) resumen de control: 1 fila rechazada (1131, negativa) y 1 folio recortado', r.control.slice(-500));
+      t.ok(/aplicado y verificado/.test(r.resultado), 'F2) la carga se aplica y cuadra', r.resultado && r.resultado.slice(0, 200));
+      const wr = (await h.writes()).filter(w => w.op === 'batch.set');
+      t.ok(wr.length > 0 && wr.every(w => Array.isArray(w.options.mergeFields) && w.options.mergeFields.every(f => /^(lastModifiedBy|lastModifiedAt|nombre|fondos_fijos\.)/.test(f)) && w.status === 'acked'), 'F2) batch.set con mergeFields solo sobre fondos_fijos.*, todos confirmados', wr.slice(0, 2).map(w => [w.path, w.status]));
       const s1121 = (await emu.leer('1121')).data.fondos_fijos;
       t.eq([s1121.cupo, s1121.meses.MARZO.rendido, s1121.meses.MARZO.folio, s1121.meses.OCTUBRE.rendido], [600000, 160000, 'FF-IMP-3', 6], 'F2) servidor: cupo, rendido, folio (marzo) y octubre importados');
       t.eq([s1121.meses.MARZO.registrado_general, s1121.meses.MARZO.compensado_sigfe, s1121.meses.MARZO.reposicion, s1121.meses.JUNIO.registrado_general], [120000, 60000, 100000, 80000], 'F2) servidor: Registrado en General, Compensado SIGFE y Reposición se CONSERVAN');
       t.eq((await emu.leer('1130')).data.fondos_fijos.meses.ABRIL.folio, 'A'.repeat(40), 'F2) servidor: el folio de 50 caracteres quedó en 40');
-      t.eq(canon((await emu.leer('1131')).data), canon(antes['1131'].data), 'F2) servidor: 1131 igual que antes');
-      t.eq(canon((await emu.leer('1125')).data), canon(antes['1125'].data), 'F2) servidor: una entidad que no estaba en el archivo (1125) no se tocó');
+      t.eq((((await emu.leer('1131')).data.fondos_fijos) || {}).cupo || 0, 0, 'F2) servidor: 1131 (fila rechazada) queda como una entidad ausente: en blanco');
+      t.eq((await emu.leer('1125')).data.fondos_fijos.cupo, 0, 'F2) servidor: una entidad que no estaba en el archivo (1125) queda en blanco (reemplazo total)');
+      t.eq((await emu.leer('1125')).data.fondos_fijos.meses.OCTUBRE.registrado_general, antes['1125'].data.fondos_fijos.meses.OCTUBRE.registrado_general, 'F2) ... conservando lo manual');
       // idempotente
       const snap = canon(Object.fromEntries(Object.entries(await emu.instantanea()).map(([k, v]) => [k, (({ lastModifiedAt, lastModifiedBy, ...r }) => r)(v.data)])));
       await h.clearLog();
-      await importar(h, await libro(page, filas));
+      const r2 = await subirFF(h, await libro(page, filas));
+      t.ok(/idéntico a lo que ya hay/.test(r2.control) && (await h.writes()).length === 0, 'F2) reimportar el mismo archivo: «idéntico» y sin escrituras');
       const snap2 = canon(Object.fromEntries(Object.entries(await emu.instantanea()).map(([k, v]) => [k, (({ lastModifiedAt, lastModifiedBy, ...r }) => r)(v.data)])));
       t.eq(snap2, snap, 'F2) reimportar el mismo archivo deja TODOS los documentos idénticos (idempotente)');
       t.ok((await estado(page)).color === 'green', 'F2) indicador verde');
@@ -146,26 +162,23 @@ await correrSpec('15_fondos_fijos', async (t) => {
     });
     await h.close();
 
-    // rechazo permanente del servidor para UNA entidad (reglas que niegan la escritura de 1132)
+    // rechazo permanente del servidor para UNA entidad (reglas que niegan la escritura de 1132): el batch es ATÓMICO, no se guarda NADA
     await prepararServidor(emu, fx);
     const h2 = await boot({ prepararServidor: false });
-    h2.expectErrors(/Error guardando RBD 1132/, /permission-denied|PERMISSION_DENIED|Missing or insufficient permissions/i);
+    h2.expectErrors(/Error guardando la carga/, /permission-denied|PERMISSION_DENIED|Missing or insufficient permissions/i);
     await t.escenario('F2b', async () => {
       await clickTab(h2.page, 'of-fondos_fijos');
       await emu.reglas(REGLAS_SIN_ESCRITURA_EN('1132'));
+      const antes = await emu.instantanea();
       await h2.clearLog();
-      const msg = await importar(h2, await libro(h2.page, [['CONTROL'], ['RBD'], fila('1132', 1, { MARZO: { saldo: 1, rendido: 2, obs: 0 } }), fila('1133', 2, { MARZO: { saldo: 3, rendido: 4, obs: 0 } }), fila('1134', 3, { MARZO: { saldo: 5, rendido: 6, obs: 0 } })]));
-      t.ok(/2 de 3 entidades guardadas/.test(msg) && /NO se pudieron guardar 1 entidad: 1132\./.test(msg) && /Reintentar/.test(msg), 'F2b) con un rechazo permanente de 1132: «2 de 3 entidades guardadas», dice cuál no y cómo reintentar', msg);
-      const e = await estado(h2.page);
-      t.ok(e.color === 'red' && /sin guardar/.test(e.txt) && e.retry, 'F2b) el indicador queda en rojo con «Reintentar»', e);
+      const r = await subirFF(h2, await libro(h2.page, [['CONTROL'], ['RBD'], fila('1132', 1, { MARZO: { saldo: 1, rendido: 2, obs: 0 } }), fila('1133', 2, { MARZO: { saldo: 3, rendido: 4, obs: 0 } }), fila('1134', 3, { MARZO: { saldo: 5, rendido: 6, obs: 0 } })]));
+      t.ok(/NO guardó la carga/.test(r.resultado), 'F2b) con un rechazo permanente de 1132: «El servidor NO guardó la carga»', r.resultado && r.resultado.slice(0, 300));
+      const despues = await emu.instantanea();
+      t.eq(Object.keys(despues).filter(id => despues[id].updateTime !== antes[id].updateTime), [], 'F2b) el batch es atómico: el servidor no cambió en NINGUNA entidad (nada queda a medias)');
       const fil = await h2.page.evaluate(() => Object.fromEntries(Array.from(document.querySelectorAll('#fondosFijosTbody tr')).filter(tr => ['1132', '1133', '1134'].includes(tr.children[0].textContent.trim())).map(tr => [tr.children[0].textContent.trim(), tr.children[2].textContent.replace(/\D/g, '')])));
-      t.eq(fil, { 1132: '1', 1133: '2', 1134: '3' }, 'F2b) la pantalla muestra lo importado en las 3 entidades (no queda a medias)');
-      t.eq([(await emu.leer('1133')).data.fondos_fijos.cupo, (await emu.leer('1134')).data.fondos_fijos.cupo, ((await emu.leer('1132')).data.fondos_fijos || {}).cupo], [2, 3, undefined], 'F2b) servidor: 1133 y 1134 sí; 1132 no');
+      t.eq(fil, { 1132: '0', 1133: '0', 1134: '0' }, 'F2b) la pantalla volvió a mostrar lo guardado (no lo importado)');
       await emu.reglas(REGLAS_ABIERTAS);
-      await h2.page.click('#sync-retry');
-      await esperar(async () => ((await emu.leer('1132')).data.fondos_fijos || {}).cupo === 1, 20000);
-      t.eq((await emu.leer('1132')).data.fondos_fijos.cupo, 1, 'F2b) con las reglas restablecidas «Reintentar» lo guarda sin volver a importar');
-      await t.sinErrores(h2, 'F2b) sin errores inesperados (el rechazo de 1132 era el esperado)');
+      await t.sinErrores(h2, 'F2b) sin errores inesperados (el rechazo era el esperado)');
     });
     await h2.close();
   }
