@@ -32,9 +32,9 @@ await correrSpec('carga_reemplazo_ff', async (t) => {
   // El fixture `fondos_fijos` trae Fondos Fijos con datos manuales (registrado_general, compensado_sigfe, reposicion) en 8 documentos.
   const h = await boot({ autoCarga: false, fixture: 'fondos_fijos' });
   const nombres = Object.fromEntries(Object.entries(await h.store()).map(([p, d]) => [p.split('/')[1], d.nombre]));
-  const conFF = Object.entries(await h.store()).filter(([p, d]) => d.fondos_fijos).map(([p]) => p.split('/')[1]);
+  const conFF = Object.entries(await h.store()).filter(([p, d]) => d.fondos_fijos).map(([p]) => p.split('/')[1]).filter(id => /^\d+$/.test(id)); // AC trae fondos_fijos en el fixture pero NO es entidad de Fondos Fijos
   await clickTab(h.page, 'of-fondos_fijos');
-  const A = conFF[0], B = conFF[1];
+  const A = conFF[1], B = conFF[2]; // (conFF[0] es 1121, que algunos escenarios usan aparte)
 
   await escenario(t, 'carga completa', async () => {
     const antes = await docs(h);
@@ -160,9 +160,11 @@ await correrSpec('carga_reemplazo_ff', async (t) => {
     await h4.page.fill('#cargaConfirmaNombre', 'fondos fijos');
     await h4.page.click('#cargaOkBtn'); await h4.page.waitForSelector('#cargaCerrarBtn'); await h4.page.click('#cargaCerrarBtn'); await h4.flushWrites(); await h4.waitIdle();
     const st = await docs(h4);
-    const noVacios = Object.keys(st).filter(p => { const f = st[p].fondos_fijos; if (!f) return false; if (f.cupo) return true; return Object.values(f.meses || {}).some(m => m.saldo_inicial || m.rendido || m.observado || m.folio); });
+    const MESES_FOLIO = ['MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE']; // los únicos meses con columna de folio en la hoja (el folio de otros meses no se gestiona)
+    const noVacios = Object.keys(st).filter(p => p !== 'sep_carga_rbd/AC' && p !== 'sep_carga_rbd/_meta').filter(p => { const f = st[p].fondos_fijos; if (!f) return false; if (f.cupo) return true; return Object.entries(f.meses || {}).some(([mes, m]) => m.saldo_inicial || m.rendido || m.observado || (MESES_FOLIO.includes(mes) && m.folio)); });
     t.eq(noVacios, [], 'Vaciar: cupo, saldo inicial, rendido, observado y folio en blanco en todas las entidades');
     t.ok(Object.values(st).some(d => d.fondos_fijos && Object.values(d.fondos_fijos.meses || {}).some(m => m.registrado_general)), 'lo manual (Registrado en General) se conserva');
+    t.eq(st['sep_carga_rbd/AC'].fondos_fijos, previo['sep_carga_rbd/AC'].fondos_fijos, 'AC (no es entidad de Fondos Fijos) no se toca');
     t.eq(sinFF(st), sinFF(previo), 'SEP y otras fuentes intactos');
     await h4.close();
     const h5 = await boot({ autoCarga: false, fixture: 'fondos_fijos', user: 'authorized-nonadmin' });

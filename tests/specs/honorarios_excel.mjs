@@ -99,7 +99,13 @@ await correrSpec('honorarios_excel', async (t) => {
   t.eq(i1.libro.hojas.HON_PROYECCION.slice(1).map(r => r[0]), [1121, 1121], 'y solo su proyección');
   const mi = await importarLibro(h, '#importExcelInput', i1.buffer, i1.filename);
   t.ok(/^Carga importada correctamente/.test(mi[0] || ''), 'el Excel individual se puede reimportar', mi);
-  t.eq(primeraDiferencia(storeAntes, honDelStore(await h.store())), null, 'y no cambia nada');
+  // Reemplazo total: el Excel de UNA entidad trae las hojas solo con esa entidad, así que al reimportarlo las demás quedan SIN boletas ni proyección (el resumen de control lo avisa);
+  // la entidad exportada queda igual. Después se restablece con el libro completo.
+  const stInd = honDelStore(await h.store());
+  t.eq(primeraDiferencia(storeAntes['sep_carga_rbd/1121'], stInd['sep_carga_rbd/1121']), null, 'la entidad exportada (1121) queda igual');
+  t.eq(Object.keys(stInd).filter(p => p !== 'sep_carga_rbd/1121' && (Object.keys(stInd[p].honorarios).length || Object.keys(stInd[p].hon_proyeccion).length)), [], 'y las demás quedan sin boletas ni proyección en esas hojas (reemplazo total)');
+  await importarLibro(h, '#importExcelInput', x1.buffer, x1.filename);
+  t.eq(primeraDiferencia(storeAntes, honDelStore(await h.store())), null, 'el libro completo restablece todo');
 
   // ================================================================ 3. importación: filas nuevas, actualización, rechazos
   const nueva = (extra = {}) => { const b = boleta({ nroDocumento: '901', fechaDocumento: '2026-08-10', fechaPago: '2026-08-15', montoGasto: 123456, montoDocumento: 123456, descripcion: 'Boleta importada', ...extra }); return [extra.id !== undefined ? extra.id : '', extra.rbd !== undefined ? extra.rbd : 1122, 'X', b.codigo, b.tipoDocumento, b.nroDocumento, b.fechaDocumento, b.fechaPago, b.descripcion, b.rutProveedor, b.nombreProveedor, b.montoGasto, b.montoDocumento, extra.dc !== undefined ? extra.dc : '']; };
@@ -113,20 +119,22 @@ await correrSpec('honorarios_excel', async (t) => {
   await importarLibro(h, '#importExcelInput', libroNuevas);
   const claves2 = Object.keys((await h.store())['sep_carga_rbd/1122'].honorarios).filter(k => /^imp-/.test(k)).sort();
   t.eq(claves2, claves1, 'reimportar el mismo archivo da las mismas claves: no duplica');
-  t.eq(Object.keys((await h.store())['sep_carga_rbd/1122'].honorarios).length, 2 + 3, 'el RBD 1122 queda con sus 2 boletas originales + las 3 nuevas');
+  t.eq(Object.keys((await h.store())['sep_carga_rbd/1122'].honorarios).length, 3, 'el RBD 1122 queda SOLO con las 3 boletas del archivo (reemplazo total: sus 2 originales ya no están)');
   const dc9 = Object.values((await h.store())['sep_carga_rbd/1122'].honorarios).find(b => b.nroDocumento === '903');
   t.eq([dc9.documentoContable, dc9.tipoDocumento, dc9.montoGasto], ['DC_9', 'BOLHE', 30000], 'el N° DC y el tipo (código) se guardan');
-  t.eq((await h.store())['sep_carga_rbd/1122'].honorarios.h1122_1.montoGasto, 500000, 'las boletas que no vienen en el archivo (h1122_1) no se tocan');
-  // fila con ID existente: actualiza solo esa
+  t.eq((await h.store())['sep_carga_rbd/1122'].honorarios.h1122_1, undefined, 'las boletas que no vienen en el archivo (h1122_1) DESAPARECEN');
+  // se restablece el libro completo; fila con ID existente modificada: queda UNA sola, las demás intactas
+  await importarLibro(h, '#importExcelInput', x1.buffer, x1.filename);
   await h.clearWrites();
   const upd = nueva({ id: 'h1122_1', nroDocumento: '7', fechaDocumento: '2026-03-09', montoGasto: 510000, montoDocumento: 510000, descripcion: 'Taller de teatro' });
   upd[3] = '410803'; upd[4] = 'BOLHE';
-  const m2 = await importarLibro(h, '#importExcelInput', await libroXlsx(page, { HONORARIOS: [ENC_HON, upd] }));
-  t.ok(/HONORARIOS: 1 filas/.test(m2[0] || ''), 'una fila con ID existente se importa', m2);
-  const w = (await h.writes()).filter(x => x.path === 'sep_carga_rbd/1122');
-  t.eq(w.map(x => Object.keys(x.payload.honorarios || {})), [['h1122_1']], 'el write toca solo esa boleta');
+  const m2 = await importarLibro(h, '#importExcelInput', await libroXlsx(page, { HONORARIOS: [ENC_HON, ...x1.libro.hojas.HONORARIOS.slice(1).filter(r => r[0] !== 'h1122_1'), upd] }));
+  t.ok(new RegExp(`HONORARIOS: ${nBoletas} filas`).test(m2[0] || ''), 'el libro completo con una fila modificada se importa', m2);
+  const w = (await h.writes()).filter(x => x.path.startsWith('sep_carga_rbd/'));
+  t.eq(w.map(x => x.path), ['sep_carga_rbd/1122'], 'solo se escribe el documento que cambió (1122), con mergeFields');
+  t.eq(w[0].options.mergeFields.filter(f => f === 'honorarios').length, 1, 'reemplazando el campo honorarios completo');
   t.eq((await h.store())['sep_carga_rbd/1122'].honorarios.h1122_1.montoGasto, 510000, 'con el monto nuevo');
-  t.eq(Object.keys((await h.store())['sep_carga_rbd/1122'].honorarios).length, 5, 'sin crear una boleta nueva');
+  t.eq(Object.keys((await h.store())['sep_carga_rbd/1122'].honorarios).length, 2, 'sin crear una boleta nueva (1122 sigue con sus 2)');
 
   // rechazos
   await h.clearWrites();
@@ -145,7 +153,7 @@ await correrSpec('honorarios_excel', async (t) => {
   const msg = m3[0] || '';
   t.ok(/HONORARIOS: 1 filas/.test(msg), 'de 8 filas entra solo la buena', msg);
   t.ok(/7 filas NO se importaron por tener un dato inválido/.test(msg), 'se informa que 7 filas NO se importaron', msg);
-  [['fila 2', 'el RBD "9999" no existe en el panel'], ['fila 3', 'la cuenta "999999" no acepta honorarios'], ['fila 4', 'el tipo de documento "FAC" no es de honorarios'], ['fila 5', 'la cuenta 410904 no acepta el tipo BHE'],
+  [['fila 2', 'la entidad "9999" no es parte de SEP'], ['fila 3', 'la cuenta "999999" no acepta honorarios'], ['fila 4', 'el tipo de documento "FAC" no es de honorarios'], ['fila 5', 'la cuenta 410904 no acepta el tipo BHE'],
     ['fila 6', 'falta la fecha del documento'], ['fila 7', 'el monto gasto debe ser mayor que 0'], ['fila 8', 'ID de la boleta']].forEach(([fila, motivo]) => t.ok(new RegExp(`HONORARIOS, ${fila}: [^\\n]*${motivo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`).test(msg), `rechazo ${fila}: ${motivo}`, msg));
   const despues = JSON.stringify(honDelStore(await h.store()));
   t.ok(antesRech !== despues && Object.values((await h.store())['sep_carga_rbd/1122'].honorarios).filter(b => /^(r\d|ok1)$/.test(b.nroDocumento)).map(b => b.nroDocumento).join() === 'ok1', 'en el servidor solo quedó la boleta buena (ninguna de las rechazadas)');
@@ -155,7 +163,7 @@ await correrSpec('honorarios_excel', async (t) => {
   const m4 = await importarLibro(h, '#importExcelInput', await libroXlsx(page, { HON_PROYECCION: [ENC_PROY, filaProy(1125, '410304', 777000), filaProy(1125, '411801', 1), filaProy(9999, '410304', 2), filaProy(1125, '123456', 3)] }));
   const msg4 = m4[0] || '';
   t.ok(/HON_PROYECCION: 2 filas/.test(msg4) && /2 filas NO se importaron/.test(msg4), 'proyección: de 4 filas entran 2 y 2 se rechazan', msg4);
-  t.ok(/HON_PROYECCION, fila 4: el RBD "9999" no existe en el panel/.test(msg4) && /HON_PROYECCION, fila 5: la cuenta "123456" no acepta honorarios/.test(msg4), 'proyección: se informa cada fila rechazada con su motivo', msg4);
+  t.ok(/HON_PROYECCION, fila 4: la entidad "9999" no es parte de SEP/.test(msg4) && /HON_PROYECCION, fila 5: la cuenta "123456" no acepta honorarios/.test(msg4), 'proyección: se informa cada fila rechazada con su motivo', msg4);
   t.eq(Object.keys((await h.store())['sep_carga_rbd/1125'].hon_proyeccion.items).sort(), ['410304', '411801'], 'en el servidor quedaron las 2 cuentas buenas del RBD 1125');
   t.eq((await h.store())['sep_carga_rbd/1125'].hon_proyeccion.items['410304'].total, 777000, 'con su total');
 
@@ -186,7 +194,7 @@ await correrSpec('honorarios_excel', async (t) => {
     t.ok(/3 filas NO se importaron por tener un dato inválido/.test(txt), 'reimportar ese respaldo informa que 3 filas NO se importaron', txt);
     t.ok(/la cuenta "999999" no acepta honorarios/.test(txt) && /el tipo de documento "FAC" no es de honorarios/.test(txt) && /la cuenta 410904 no acepta el tipo BHE/.test(txt), 'cada una con su motivo (cuenta fuera del catálogo, tipo que no es de honorarios, tipo que la cuenta no acepta)', txt);
     const despues = (await h2.store())['sep_carga_rbd/1121'].honorarios;
-    t.eq(['h1121_cuenta_x', 'h1121_tipo_fac', 'h1121_tipo_np'].map(id => JSON.stringify(despues[id]) === JSON.stringify(cargarFixture('honorarios').docs['1121'].honorarios[id])), [true, true, true], 'las 3 rechazadas siguen intactas en el servidor (importar nunca borra)');
+    t.eq(['h1121_cuenta_x', 'h1121_tipo_fac', 'h1121_tipo_np'].map(id => despues[id]), [undefined, undefined, undefined], 'las 3 rechazadas DESAPARECEN del servidor (reemplazo total: el panel solo guarda lo que el archivo puede cargar; el resumen las avisó con su motivo)');
     t.eq(despues.h1121_invalida.fechaDocumento, '2026-03-10', 'la fecha «10/03/2026» (dd/mm/aaaa, como la escribe Excel) se repara a 2026-03-10 al importar (igual que en las compras)');
     t.eq(JSON.parse(antes).h1121_invalida.fechaDocumento, '10/03/2026', 'sanity: antes estaba sin reparar');
     t.noErrores(h2);

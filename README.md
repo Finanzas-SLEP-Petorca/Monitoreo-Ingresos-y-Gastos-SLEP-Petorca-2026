@@ -265,13 +265,13 @@ positivo ya no suma gasto: lo resta. La regla se aplica en todo el flujo con las
 - **Formulario** (SEP y las 4 fuentes con compras, al agregar, editar y duplicar): se guarda ya normalizado. Con el tipo
   "Nota de crédito" / "Nota de débito" el formulario muestra una ayuda ("Las notas de crédito se registran con monto negativo;
   se ajusta automáticamente").
-- **Importar Excel** (hoja COMPRAS de SEP y de las fuentes): igual, fila por fila.
+- **Importar Excel** (hoja COMPRAS de SEP y de las fuentes): igual (reemplazo total: ver «Cargar un Excel … = REEMPLAZO TOTAL»).
 - **Cálculos y vistas**: `itemsFromCompras` (y por lo tanto el ítem/mes de cada RBD, Real/Proyectado, KPI, Visualizador, Reporte
   personalizado, Panel principal y % Ejecución) suma `montoGastoCompra(c)`; las tablas de compras, el CSV de SUPEREDUC y los
   Excel/PDF por fila muestran el valor normalizado. La comprobación "monto gasto mayor que el documento" del aviso previo al
   CSV sigue comparando en **valor absoluto**.
 
-**Importar sin duplicar: ID vacío o "0".** En la hoja COMPRAS, una fila con un **ID real** actualiza esa compra. Un ID **vacío**
+**Importar sin duplicar: ID vacío o "0".** *(Esta sección describe el modelo de IDs; la importación ya no «actualiza» ni «fusiona»: cada carga reemplaza por completo lo que trae el archivo, ver «REEMPLAZO TOTAL».)* En la hoja COMPRAS, una fila con un **ID real** conserva ese ID. Un ID **vacío**
 (la celda vacía llega como el número `0`), `0`, `"0"`, `"00"` (cualquier cantidad de ceros), `"undefined"`, `"null"`, `"NaN"`, `"#N/A"`, `"#REF!"`,
 `"#VALUE!"`, uno o más guiones (`-`) o solo espacios **cuenta como sin ID**: antes cada importación inventaba un ID nuevo (reimportar el mismo archivo duplicaba todas las compras) o, con el texto
 `"0"`, todas las filas de un RBD colapsaban en una sola compra con la clave `"0"`. Ahora la compra recibe una **clave determinista
@@ -430,9 +430,9 @@ El mismo bloque «Honorarios (Subt. 21)» de SEP (fila mensual de boletas siempr
 
 ### Cargar un Excel en una fuente = REEMPLAZO TOTAL (el panel es un espejo exacto del Excel)
 
-**Alcance:** las pestañas de las 12 fuentes de financiamiento (Subv. General, PIE, Mantenimiento, Pro-Retención, JUNJI, FAEP, Subt. 31, Recuperación LLMM,
-Asignación Familiar, FIGA y los dos Aportes Fiscales). **La importación de SEP y la de Fondos Fijos NO cambian** (siguen fila por fila, con ID = actualiza, como se
-describe arriba): pendiente de decidir si también pasan a reemplazo total.
+**Alcance:** las 12 fuentes de financiamiento (Subv. General, PIE, Mantenimiento, Pro-Retención, JUNJI, FAEP, Subt. 31, Recuperación LLMM, Asignación Familiar, FIGA y los dos Aportes
+Fiscales), **el importador de SEP** («⬆ Importar Excel» de la pestaña principal) **y el de Fondos Fijos** («⬆ Importar Control Fondos Fijos»). Los tres usan la **misma maquinaria** (plan,
+resumen de control, `writeBatch` con `mergeFields`, respaldo + «Deshacer», cuadratura, «Vaciar»); solo cambia el mapa «hoja → campos» (secciones siguientes).
 
 **Qué hace «⬆ Importar Excel» ahora.** Cada carga de una fuente **reemplaza por completo, hoja por hoja, lo que el archivo trae**; el Excel es la única verdad:
 
@@ -474,6 +474,41 @@ versión mezclada queda reemplazada por completo, no hace falta borrar nada ante
 que **reemplaza el campo completo** (a diferencia de `merge:true`, que fusiona mapas y nunca borra una clave), y `deleteField()` para `real_hasta_mes`. Una carga que dejaría el documento de
 una entidad por sobre 1 MiB se bloquea antes de escribir. Las cifras en pantalla se actualizan al instante (Panel principal, Visualizador, % Ejecución, Reportes, modal abierto).
 El resumen y los datos nuevos se calculan aparte, sin tocar los datos vivos hasta confirmar.
+
+#### SEP: qué gestiona cada hoja del Excel («⬇ Excel» ⇄ «⬆ Importar Excel»)
+
+Antes el importador de SEP escribía fila por fila con `merge:true`: una fila que ya no venía se **conservaba**, una fila sin ID con el contenido cambiado quedaba **duplicada** (clave `imp-<hash>`
+distinta), `indiceComprasPorFirma` **fusionaba** las idénticas, el N° DC anterior se **heredaba** y varias filas se descartaban en silencio. Ahora cada hoja que el archivo trae reemplaza por
+completo, **en los 55 RBD** (un RBD que no aparece en una hoja queda vacío en ella), exactamente estos campos del documento del RBD (`sep_carga_rbd/<rbd>`) y nada más:
+
+| Hoja | Campos que reemplaza | Notas |
+|---|---|---|
+| `INGRESO` | `ingreso_items.<ítem>` de los 3 ítems fijos (Ingreso SEP Preferente / Prioritario / Carrera Docente) | un ítem en $0 queda sin el campo (equivale a no tenerlo y no cuenta como fila leída); una fila con otro nombre de ítem se **rechaza** con aviso (antes creaba un ítem invisible en la pantalla pero sumado al ingreso) |
+| `REMUNERACIONES` | `rem.meses` y `rem.total` | **no** toca `rem.real_hasta_mes` (el corte Real/Proy de Remuneraciones; ninguna hoja lo trae) |
+| `COMPRAS` | `compras` (mapa completo, una entrada por fila) | IDs como en las fuentes; N° DC solo de la columna del archivo |
+| `BYS_PROYECCION` | `bys_proyeccion.items` (y borra los restos antiguos `bys_proyeccion.meses/total`) | acepta el ítem `_LEGACY_` que exporta un documento anterior a la proyección por ítem |
+| `HONORARIOS` | `honorarios` (mapa completo) | |
+| `HON_PROYECCION` | `hon_proyeccion.items` | |
+
+**Quedan fuera de todo reemplazo** (ninguna hoja los trae): `ingreso_real_hasta_mes` y `rem.real_hasta_mes` (cortes Real/Proy por RBD), el **mes de cierre global** (`_meta.mes_cierre`, solo
+administración: una importación jamás lo cambia), `fondos_fijos`, `otras_fuentes`, `nombre` y la auditoría. `SUBT22` / `SUBT29` son derivadas de COMPRAS y no se importan (el resumen avisa que se ignoran).
+La hoja `META` no existe en SEP. Una hoja que el archivo no trae **se conserva** (un Excel antiguo sin `HONORARIOS` no borra boletas ni altera la parte de personal del 70/30). Exportar con
+«⬇ Excel» y reimportar sin tocar nada es idempotente (el resumen dice «idéntico» y no se escribe nada; probado en todos los fixtures).
+Limitación conocida: el Excel redondea los montos a pesos enteros; un monto con decimales guardado a mano se redondea al reimportar (se ve como un cambio en el resumen).
+
+#### Fondos Fijos: qué gestiona la hoja «FONDOS FIJOS P02»
+
+Fondos Fijos **no tiene Excel propio de exportación**: se carga desde la hoja **«FONDOS FIJOS P02»** del libro operativo (no se exporta desde la app; esa exportación sigue pendiente). La hoja
+reemplaza, en **todos los RBD y GESPARVU** (68 entidades; una que no aparece queda en blanco en esto), solo: `fondos_fijos.cupo` y, por mes, `saldo_inicial`, `rendido`, `observado` y —de marzo a
+septiembre, los únicos meses con columna de folio— `folio`. **No** toca `registrado_general`, `compensado_sigfe` ni `reposicion` (se registran a mano; antes también se conservaban).
+Cada fila rechazada (monto negativo, texto, infinito, ≥ `MONTO_ABS_MAX`, id que no es RBD/GESPARVU —AC incluida—, id repetido: manda la última) sale en el resumen con hoja, fila y motivo; las filas
+sin id (totales, separadores) no son entidades: se ignoran con aviso. Antes las filas fuera del universo se «omitían» contándolas y la confirmación era un `confirm()`; ahora es el mismo cuadro de
+resumen que las demás cargas. El respaldo que se descarga antes de reemplazar (`respaldo_fondos_fijos_<fecha>.xlsx`) usa **el mismo formato de la hoja** (se puede volver a importar con el mismo botón);
+no es un botón de exportación.
+
+**Botones nuevos.** En SEP y en Fondos Fijos, junto al botón de importar: **↩ Deshacer última carga** (solo mientras exista el respaldo en memoria de la sesión) y **🗑 Vaciar SEP / 🗑 Vaciar Fondos Fijos**
+(solo administración, con respaldo y escribiendo el nombre). «Vaciar SEP» deja en blanco las seis hojas de arriba en los 55 RBD; «Vaciar Fondos Fijos», lo que gestiona la hoja (no lo manual).
+**Cómo limpiar datos ya mezclados en SEP o Fondos Fijos:** volver a subir el Excel correcto (se reemplaza todo lo que trae); si no hay un Excel confiable, «Vaciar» y luego subir el correcto.
 
 ### Real vs. proyectado
 
@@ -792,11 +827,7 @@ se escribe en **«Registrado en General»**.
   registrado es además **fila de General** (`filasOtrasFuentes`); los demás jardines no. La misma cifra sale en la pestaña General (tarjetas, fila, modal —bloque de solo lectura «Fondos Fijos rendidos — B&S General»— y PDF de la fila), el Panel principal, % Ejecución,
   el Visualizador (grupo «Bienes y Servicios — Fondos Fijos rendidos», también en el CSV y el Excel) y el Reporte personalizado (concepto «Fondos Fijos rendidos (control operativo)» y dentro de «B&S total»). No aparece en el Excel de General ni en su CSV SUPEREDUC (el libro
   de compras no cambia).
-- **Importador** («⬆ Importar Control Fondos Fijos», hoja **«FONDOS FIJOS P02»**; `importarControlFondosFijos`): lee cupo (columna G), y de marzo a diciembre saldo inicial, rendido, observado y —de marzo a septiembre— folio (`MAPA_COLUMNAS_FONDOS_FIJOS`); **nunca** infiere Reposición, Registrado en General
-  ni Compensado SIGFE (se conservan). Valida todo el archivo antes de tocar nada: las filas vacías se saltan; las de un id que no es RBD / GESPARVU (AC, inexistente, decimal, negativo, texto) se **omiten y se cuentan**; una fila con un monto no numérico, infinito,
-  negativo o ≥ `MONTO_ABS_MAX` se **rechaza completa** con el motivo; un folio vacío queda vacío (no «0») y uno de más de 40 caracteres se recorta con aviso. Luego aplica en pantalla todo de una vez y guarda entidad por entidad (`flushRbdSave`): el resumen dice «N de M entidades
-  guardadas», **cuáles no y por qué** (rechazo permanente: el cambio queda en pantalla, el indicador de sincronización pasa a rojo con «Reintentar» y también se puede reimportar el mismo archivo), cuáles quedan pendientes de confirmar (error transitorio: reintento automático) y,
-  sin conexión, no deja la pantalla esperando (plazo `IMPORT_FONDOS_FIJOS_PLAZO_MS` = 20 s por la primera entidad; el resto se envía sin esperar y el SDK conserva la cola). Reimportar el mismo archivo es idempotente. El libro es la fuente de marzo a diciembre: una celda vacía deja ese campo en 0.
+- **Importador** («⬆ Importar Control Fondos Fijos», hoja **«FONDOS FIJOS P02»**): **reemplazo total** con el resumen de control, respaldo, «Deshacer» y «Vaciar» de las demás cargas (ver «Fondos Fijos: qué gestiona la hoja»). Lee cupo (columna G) y, de marzo a diciembre, saldo inicial, rendido, observado y —de marzo a septiembre— folio (`MAPA_COLUMNAS_FONDOS_FIJOS`); **nunca** infiere ni toca Reposición, Registrado en General ni Compensado SIGFE. Valida todo el archivo antes de escribir; un folio vacío queda vacío (no «0») y uno de más de 40 caracteres se recorta con aviso. Reimportar el mismo libro no escribe nada. La escritura es un `writeBatch` con `mergeFields` (un solo guardado atómico por lote de ≤ 400 entidades) en vez de un guardado por entidad.
 - **Modal** (accesible como los otros tres: `role="dialog"`, foco al abrir, fondo `inert`, Escape, foco de vuelta, aviso de sincronización roja con «Reintentar» dentro del modal): se reconcilia con cada cambio remoto sin mover la celda en edición, y Tab pasa de una celda a la siguiente.
 - **Pruebas**: `fondos_fijos_modelo`, `fondos_fijos_validacion`, `fondos_fijos_importador`, `fondos_fijos_general` y los `a11y_*` (ver `tests/README.md`).
 

@@ -66,11 +66,20 @@ async function confirmarCapturando(h, buffer, nombre = 'carga.xlsx') {
 
 await correrSpec('carga_reemplazo_sep', async (t) => {
   // ======================= 0. Round-trip: exportar → reimportar es idempotente en todos los fixtures =======================
+  // (Cuatro fixtures traen filas inválidas A PROPÓSITO —cuenta fuera del catálogo, tipo que no es de honorarios…—: la primera ida y vuelta las limpia y LO AVISA como «filas que NO se cargarán»;
+  //  la segunda ya es idempotente. En los demás la primera ya es idéntica.)
+  const conInvalidas = new Set(['honorarios', 'fondos_fijos', 'compras', 'honorarios_fuentes']);
   for (const fx of ['default', 'honorarios', 'fondos_fijos', 'cierre', 'estado', 'compras', 'jardines', 'junji_rem', 'honorarios_fuentes', 'compras_conceptos']) {
     await escenario(t, 'round-trip ' + fx, async () => {
       const h = await boot({ autoCarga: false, fixture: fx });
+      let x = await exportarSep(h);
+      if (conInvalidas.has(fx)) {
+        const r0 = await subirYConfirmar(h, 'sep', x.buffer, { nombre: x.filename });
+        t.ok(/Filas que NO se cargarán \(\d+\)/.test(r0.control.texto) && /Hoja \w+, fila \d+:/.test(r0.control.texto), `[${fx}] las filas inválidas del fixture se AVISAN con hoja, fila y motivo antes de limpiarse`, r0.control.texto.slice(-500));
+        t.ok(/aplicado y verificado/.test(r0.resultado.texto), `[${fx}] la carga que las limpia cuadra`);
+        x = await exportarSep(h);
+      }
       const antes = await docs(h);
-      const x = await exportarSep(h);
       await h.clearWrites();
       const r = await subirYConfirmar(h, 'sep', x.buffer, { nombre: x.filename });
       t.ok(/idéntico a lo que ya hay/.test(r.control.texto), `[${fx}] exportar → reimportar: el resumen dice que el archivo es idéntico al panel`, r.control.texto.slice(0, 700));
@@ -236,7 +245,7 @@ await correrSpec('carga_reemplazo_sep', async (t) => {
       HONORARIOS: [ENC_HON, ['', 1121, 'x', '410803', 'FAC', '1', '2026-01-01', '', 'd', 'r', 'n', 100, 100, '']],
     });
     const r = await subirYConfirmar(h4, 'sep', libro);
-    t.ok(/Filas que NO se cargarán \(9\)/.test(r.control.texto), 'el resumen cuenta las 9 filas rechazadas', r.control.texto.slice(-1500));
+    t.ok(/Filas que NO se cargarán \(8\)/.test(r.control.texto), 'el resumen cuenta las 8 filas rechazadas', r.control.texto.slice(-1500));
     for (const motivo of ['no está en el catálogo de cuentas de compras', 'falta la fecha del documento', 'el monto gasto está vacío o es 0', 'no es parte de SEP', 'el monto gasto no es un número', 'no es uno de los ítems de ingreso de SEP', 'no está en el catálogo de cuentas de Bienes y Servicios de SEP', 'no es de honorarios']) t.ok(r.control.texto.includes(motivo), `motivo visible: ${motivo}`);
     t.ok(/Hoja COMPRAS, fila 3:/.test(r.control.texto) && /Hoja INGRESO, fila 2:/.test(r.control.texto), 'cada rechazo trae hoja y número de fila de Excel');
     t.ok(/COMPRAS 0 \$0 7 5 2 \$1\.501\.000/.test(r.control.texto), 'COMPRAS: leídas (7) = cargadas (2) + rechazadas (5)', (r.control.texto.match(/COMPRAS[^A-Z]{0,80}/) || [''])[0]);
@@ -277,6 +286,7 @@ await correrSpec('carga_reemplazo_sep', async (t) => {
     await clickTab(h6.page, 'SEP');
     t.eq(await h6.page.evaluate(() => !document.getElementById('vaciarOFBtn-sep').classList.contains('hidden')), true, '«Vaciar SEP» se ve para administración');
     const previo = await docs(h6);
+    const previoExport = await exportarSep(h6);
     await h6.page.click('#vaciarOFBtn-sep'); await h6.page.waitForSelector('#cargaConfirmaNombre');
     t.eq(await h6.page.evaluate(() => document.getElementById('cargaOkBtn').disabled), true, 'sin escribir el nombre el botón está deshabilitado');
     await h6.page.fill('#cargaConfirmaNombre', 'sep');
@@ -289,7 +299,10 @@ await correrSpec('carga_reemplazo_sep', async (t) => {
     t.eq(intactos, [], 'Vaciar no tocó cortes, otras fuentes, Fondos Fijos ni el mes de cierre');
     await h6.page.click('#undoCargaOFBtn-sep'); await h6.page.waitForSelector('#cargaOkBtn'); await h6.page.click('#cargaOkBtn');
     await h6.page.waitForSelector('#cargaCerrarBtn'); await h6.page.click('#cargaCerrarBtn'); await h6.flushWrites(); await h6.waitIdle();
-    t.eq(await docs(h6), previo, 'Deshacer el vaciado devuelve TODO exactamente como estaba');
+    t.eq((await exportarSep(h6)).libro.hojas, previoExport.libro.hojas, 'Deshacer el vaciado devuelve TODO lo que el Excel exporta, igual que antes');
+    const pos2 = await docs(h6);
+    const ajeno = Object.keys(previo).filter(p => { const a = clon(previo[p]), b = clon(pos2[p]); ['compras', 'ingreso_items', 'honorarios', 'hon_proyeccion', 'bys_proyeccion', 'rem'].forEach(c => { delete a[c]; delete b[c]; }); return JSON.stringify(a) !== JSON.stringify(b); });
+    t.eq(ajeno, [], 'y lo que no gestiona el importador sigue idéntico');
     await h6.close();
     const h7 = await boot({ autoCarga: false, fixture: 'default', user: 'authorized-nonadmin' });
     await clickTab(h7.page, 'SEP');
@@ -300,6 +313,8 @@ await correrSpec('carga_reemplazo_sep', async (t) => {
   // ======================= 8. Respaldo descargado: reimportable; hon. 70/30 intacto con COMPRAS sola; Excel grande =======================
   await escenario(t, 'respaldo y honorarios', async () => {
     const h8 = await boot({ autoCarga: false, fixture: 'honorarios' });
+    await clickTab(h8.page, 'SEP');
+    await subirYConfirmar(h8, 'sep', (await exportarSep(h8)).buffer); // purga primero las boletas inválidas a propósito del fixture
     await clickTab(h8.page, 'SEP');
     const filaRbd = () => h8.page.evaluate(() => Array.from(document.querySelectorAll('#tableBody tr')).map(tr => tr.innerText.replace(/\s+/g, ' ')).join('|'));
     const tablaAntes = await filaRbd();

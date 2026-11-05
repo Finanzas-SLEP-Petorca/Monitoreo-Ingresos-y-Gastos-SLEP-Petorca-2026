@@ -648,7 +648,7 @@ await correrSpec('n_dc', async (t) => {
     const limpiado = await reescribir(x1, `const idx = aoa[0].indexOf('N° DC'); aoa.forEach(r => { if (r[0] === 'c1121_5') r[idx] = ''; }); return aoa;`);
     await importar(limpiado);
     st = await h.store();
-    t.eq(st[RUTA('1121')].compras.c1121_5.documentoContable, '', 'SEP: una celda N° DC vacía en el Excel limpia el N° DC que tenía la compra');
+    t.eq(st[RUTA('1121')].compras.c1121_5.documentoContable, undefined, 'SEP (reemplazo total): una celda N° DC vacía en el Excel deja la compra SIN N° DC (el campo desaparece)');
     // ---- archivo antiguo (sin la columna): se importa igual y NO borra el N° DC existente
     await importar(x1);   // vuelve DC_501 y los demás
     t.eq((await h.store())[RUTA('1121')].compras.c1121_5.documentoContable, 'DC_501', 'SEP: (se restablece DC_501 con el Excel completo)');
@@ -657,15 +657,16 @@ await correrSpec('n_dc', async (t) => {
     const msgsAnt = await importar(nuevaFila);
     t.ok(/^Carga importada correctamente/.test(msgsAnt[0] || '') && /COMPRAS: \d+ filas/.test(msgsAnt[0] || ''), 'SEP: un Excel antiguo (14 columnas, sin N° DC) se importa sin errores', msgsAnt);
     st = await h.store();
-    t.eq(st[RUTA('1121')].compras.c1121_5.documentoContable, 'DC_501', 'SEP: el Excel antiguo NO borra el N° DC que ya tenía la compra');
-    t.eq(st[RUTA('1121')].compras.c1121_especial.documentoContable, `DC_<9> & 'Z'; "Q"`, 'SEP: ni el de la compra con caracteres especiales');
+    t.eq(st[RUTA('1121')].compras.c1121_5.documentoContable, undefined, 'SEP (reemplazo total): un Excel sin la columna N° DC deja las compras SIN N° DC (el N° DC solo sale de la columna del archivo; ya no se hereda el anterior)');
+    t.eq(st[RUTA('1121')].compras.c1121_especial.documentoContable, undefined, 'SEP (reemplazo total): tampoco hereda el de la compra con caracteres especiales');
     const idAnt = Object.keys(st[RUTA('1121')].compras).find(k => st[RUTA('1121')].compras[k].nroDocumento === 'ANT-1');
     t.ok(idAnt && !('documentoContable' in st[RUTA('1121')].compras[idAnt]) && st[RUTA('1121')].compras[idAnt].documentoOriginal === 'DC_44 (Excel antiguo)', 'SEP: una compra nueva de un Excel antiguo queda sin N° DC y con su Doc. original (se muestra derivada)', st[RUTA('1121')].compras[idAnt]);
     await abrirSep(h);
     const dcAnt = await celdaDc(page, MODAL, idAnt);
     t.ok(dcAnt && dcAnt.derivado && dcAnt.texto === 'DC_44 (Excel antiguo)', 'SEP: y la pantalla la muestra como N° DC derivado', dcAnt);
     await cerrarModales(h);
-    // ---- XLS por fila
+    // ---- XLS por fila (antes se restablece el estado con el Excel completo)
+    await importar(x1);
     const xf = await exportar(() => page.click('#tableBody button.row-action-btn[data-action="excel"][data-rbd="1121"]'));
     t.eq(xf.libro.hojas.COMPRAS[0].slice(-2), ['DocumentoOriginal', 'N° DC'], 'SEP XLS por fila: la hoja COMPRAS trae la columna N° DC');
     t.eq(xf.libro.hojas.COMPRAS.find(r => r[0] === 'c1121_5').slice(-2), ['', 'DC_501'], 'SEP XLS por fila: con el valor de cada compra');

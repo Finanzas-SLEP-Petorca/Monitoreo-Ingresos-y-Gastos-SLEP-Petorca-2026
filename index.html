@@ -7596,9 +7596,11 @@ function parsearMensualCarga(filas, enc, desc, ctx, r, rechazar) {
   filas.forEach(({ n, c }) => {
     const rbd = rbdFilaCarga(c[0], ctx, n, rechazar); if (rbd === null) return;
     const m = mesesFilaCarga(c, desc.colMeses || 2, n, rechazar); if (!m) return;
+    if (desc.ceroEsAusente && !MESES_CARGA.some(k => m.meses[k])) { r.leidas--; r.cerosIgnorados = (r.cerosIgnorados || 0) + 1; return; } // SEP: el Excel exportado trae una fila por RBD aunque esté en $0
     registrarClaveUnica(visto, rbd, n, rechazar);
     r.nuevo.set(rbd, m);
   });
+  if (r.cerosIgnorados) r.notasParser = [`${r.cerosIgnorados} filas con todos los meses en $0 no cuentan como filas (un RBD en $0 equivale a no tenerlo).`];
 }
 function parsearMetaCarga(filas, enc, desc, ctx, r, rechazar) {
   const visto = new Map();
@@ -8368,7 +8370,7 @@ function ctxCargaSep() {
   ctx.hojas = () => [
     { hoja: 'INGRESO', campo: 'ingreso_items', tipo: 'items', claveCampo: 'item', etiquetaClave: 'ítem de ingreso', ceroEsAusente: true,
       valida: (k) => ITEMS_INGRESO.includes(k) ? null : `el ítem "${k}" no es uno de los ítems de ingreso de SEP (${ITEMS_INGRESO.join(', ')})` },
-    { hoja: 'REMUNERACIONES', campo: 'rem', tipo: 'mensual', colMeses: 3 },
+    { hoja: 'REMUNERACIONES', campo: 'rem', tipo: 'mensual', colMeses: 3, ceroEsAusente: true },
     { hoja: 'COMPRAS', campo: 'compras', tipo: 'compras' },
     { hoja: 'BYS_PROYECCION', campo: 'bys_proyeccion', tipo: 'proycuenta', valida: (k) => (CUENTAS_SEP_BY_CODIGO[k] || k === '_LEGACY_') ? null : (k ? `la cuenta "${k}" no está en el catálogo de cuentas de Bienes y Servicios de SEP` : 'falta el código de la cuenta') },
     { hoja: 'HONORARIOS', campo: 'honorarios', tipo: 'honorarios' },
