@@ -3,7 +3,7 @@
   "esquema": 1,
   "baseline_ref": "0f16ace",
   "html_bajo_prueba": "árbol de trabajo (index.html)",
-  "html_sha1": "36128a7860fec92662e053955199bb2ce3b69e3e",
+  "html_sha1": "53f5e21de66c7185602b284199abe53a625739c8",
   "fixture_sha1": "ecc4594e51c6ceb6cd125835198a76ae771228d4",
   "fixture_cierre_sha1": "68795eab98878757f6827fee93b16ce2df3655b8",
   "fixture": {
@@ -1651,6 +1651,7 @@
     "⬇ CSV",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar SEP",
     "🖨 Exportar PDF (general)",
     "⬇ Excel (resumen general)",
     "⬇ Compras SUPEREDUC (CSV)",
@@ -1855,7 +1856,7 @@
     "Datos a revisar | 0",
     "⚠ Gasto SEP sin marco | 1"
    ],
-   "htmlHash": "1cdeb521dc6412"
+   "htmlHash": "17949efb791906"
   },
   "sep.filtro-deficit": {
    "text": [
@@ -1905,6 +1906,7 @@
     "⬇ CSV",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar SEP",
     "🖨 Exportar PDF (general)",
     "⬇ Excel (resumen general)",
     "⬇ Compras SUPEREDUC (CSV)",
@@ -1956,7 +1958,7 @@
     "Datos a revisar | 0",
     "⚠ Gasto SEP sin marco | 1"
    ],
-   "htmlHash": "0ed49c230eda4f"
+   "htmlHash": "164435de604d8a"
   },
   "sep.filtro-riesgo": {
    "text": [
@@ -2006,6 +2008,7 @@
     "⬇ CSV",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar SEP",
     "🖨 Exportar PDF (general)",
     "⬇ Excel (resumen general)",
     "⬇ Compras SUPEREDUC (CSV)",
@@ -2048,7 +2051,7 @@
     "Datos a revisar | 0",
     "⚠ Gasto SEP sin marco | 1"
    ],
-   "htmlHash": "124c8860df9471"
+   "htmlHash": "185bffa1e12516"
   },
   "sep.busqueda-liceo": {
    "text": [
@@ -2098,6 +2101,7 @@
     "⬇ CSV",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar SEP",
     "🖨 Exportar PDF (general)",
     "⬇ Excel (resumen general)",
     "⬇ Compras SUPEREDUC (CSV)",
@@ -2156,7 +2160,7 @@
     "Datos a revisar | 0",
     "⚠ Gasto SEP sin marco | 1"
    ],
-   "htmlHash": "023adcdb42ad27"
+   "htmlHash": "0870a456a0b993"
   },
   "sep.corte-julio": {
    "text": [
@@ -2206,6 +2210,7 @@
     "⬇ CSV",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar SEP",
     "🖨 Exportar PDF (general)",
     "⬇ Excel (resumen general)",
     "⬇ Compras SUPEREDUC (CSV)",
@@ -2410,7 +2415,7 @@
     "Datos a revisar | 0",
     "⚠ Gasto SEP sin marco | 1"
    ],
-   "htmlHash": "0f71b6d1ec32cb"
+   "htmlHash": "00a17c753faf37"
   },
   "sep.orden-rbd": {
    "text": [
@@ -4071,7 +4076,7 @@
     "Gasto Total (Total) | $218.842.285",
     "Saldo (Total) | $345.459.430"
    ],
-   "htmlHash": "1bc05834c3a6d2"
+   "htmlHash": "1fea43a1b3a2a5"
   },
   "of.general.real": {
    "text": [
@@ -4196,7 +4201,7 @@
     "Gasto Total (Total) | $218.842.285",
     "Saldo (Total) | $345.459.430"
    ],
-   "htmlHash": "0a939077730dc3"
+   "htmlHash": "0db5134d311893"
   },
   "of.general.proy": {
    "text": [
@@ -4321,7 +4326,7 @@
     "Gasto Total (Total) | $218.842.285",
     "Saldo (Total) | $345.459.430"
    ],
-   "htmlHash": "0c9fb01f1081fc"
+   "htmlHash": "17a6f0bd4b29f0"
   },
   "of.pie.total": {
    "text": [
@@ -4446,7 +4451,7 @@
     "Gasto Total (Total) | $223.181.425",
     "Saldo (Total) | $359.048.290"
    ],
-   "htmlHash": "08f6aebe4cd9ad"
+   "htmlHash": "171363fab31171"
   },
   "of.mantenimiento.total": {
    "text": [
@@ -4571,7 +4576,7 @@
     "Gasto Total (Total) | $22.056.000",
     "Saldo (Total) | $614.120.575"
    ],
-   "htmlHash": "14db82562f5453"
+   "htmlHash": "0fe4b388741996"
   },
   "of.prorretencion.total": {
    "text": [
@@ -4696,7 +4701,7 @@
     "Gasto Total (Total) | $701.676.720",
     "Saldo (Total) | $1.068.832.415"
    ],
-   "htmlHash": "1186d5b1e4f4d5"
+   "htmlHash": "0e8b050dd5ee31"
   },
   "of.junji.total": {
    "text": [
@@ -4799,7 +4804,7 @@
     "Gasto Total (Total) | $536.832.000",
     "Saldo (Total) | -$50.460.005"
    ],
-   "htmlHash": "057335945b70ca"
+   "htmlHash": "12b425352ed1e7"
   },
   "of.junji.real": {
    "text": [
@@ -4902,7 +4907,7 @@
     "Gasto Total (Total) | $536.832.000",
     "Saldo (Total) | -$50.460.005"
    ],
-   "htmlHash": "05d56f569e3e73"
+   "htmlHash": "01f69af85680cf"
   },
   "of.junji.proy": {
    "text": [
@@ -5005,7 +5010,7 @@
     "Gasto Total (Total) | $536.832.000",
     "Saldo (Total) | -$50.460.005"
    ],
-   "htmlHash": "1f8eb58081998b"
+   "htmlHash": "0fc46b98860d5d"
   },
   "of.faep.total": {
    "text": [
@@ -5142,7 +5147,7 @@
     "Gasto Total (Total) | $291.677.145",
     "Saldo (Total) | $75.644.565"
    ],
-   "htmlHash": "1ff272ba41cf0f"
+   "htmlHash": "18efe843891f7d"
   },
   "of.faep.real": {
    "text": [
@@ -5279,7 +5284,7 @@
     "Gasto Total (Total) | $291.677.145",
     "Saldo (Total) | $75.644.565"
    ],
-   "htmlHash": "1c24a6954ea5ad"
+   "htmlHash": "01ad6fc86c57d9"
   },
   "of.faep.proy": {
    "text": [
@@ -5416,7 +5421,7 @@
     "Gasto Total (Total) | $291.677.145",
     "Saldo (Total) | $75.644.565"
    ],
-   "htmlHash": "0f4574034ecab9"
+   "htmlHash": "044bceaa9bbba5"
   },
   "of.figa.total": {
    "text": [
@@ -5553,7 +5558,7 @@
     "Gasto Total (Total) | $303.939.435",
     "Saldo (Total) | $82.832.565"
    ],
-   "htmlHash": "0b35cca7923439"
+   "htmlHash": "15468152c7694b"
   },
   "of.aporte_educ.total": {
    "text": [
@@ -5677,7 +5682,7 @@
     "Gasto Total (Total) | $294.324.000",
     "Saldo (Total) | $67.560.000"
    ],
-   "htmlHash": "1c1a821d084853"
+   "htmlHash": "10015ee095f175"
   },
   "of.aporte_junji.total": {
    "text": [
@@ -5758,7 +5763,7 @@
     "Gasto Total (Total) | $49.392.000",
     "Saldo (Total) | $6.142.290"
    ],
-   "htmlHash": "0c71747597483d"
+   "htmlHash": "141fc0fe87f1b7"
   },
   "modal.of.general.1121": {
    "text": [
@@ -12818,6 +12823,7 @@
     "⬇ CSV",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar SEP",
     "🖨 Exportar PDF (general)",
     "⬇ Excel (resumen general)",
     "⬇ Compras SUPEREDUC (CSV)",
@@ -13022,7 +13028,7 @@
     "Datos a revisar | 0",
     "⚠ Gasto SEP sin marco | 1"
    ],
-   "htmlHash": "134f1a7555e69b"
+   "htmlHash": "0525e3ab5910ec"
   },
   "cierre.modal.sep.1121": {
    "text": [
@@ -15712,6 +15718,7 @@
     "⬇ CSV",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar SEP",
     "🖨 Exportar PDF (general)",
     "⬇ Excel (resumen general)",
     "⬇ Compras SUPEREDUC (CSV)",
@@ -15916,7 +15923,7 @@
     "Datos a revisar | 2",
     "⚠ Gasto SEP sin marco | 1"
    ],
-   "htmlHash": "08292d9cc18dd0"
+   "htmlHash": "1d575a47f6d309"
   },
   "compras.modal.sep.1121": {
    "text": [
@@ -16754,7 +16761,7 @@
     "Gasto Total (Total) | $218.477.285",
     "Saldo (Total) | $345.824.430"
    ],
-   "htmlHash": "05a8b7befe20ae"
+   "htmlHash": "1bc2671ce8b18d"
   },
   "compras.modal.of.general.1121": {
    "text": [
@@ -19190,6 +19197,7 @@
     "⬇ CSV",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar SEP",
     "🖨 Exportar PDF (general)",
     "⬇ Excel (resumen general)",
     "⬇ Compras SUPEREDUC (CSV)",
@@ -19394,7 +19402,7 @@
     "Datos a revisar | 0",
     "⚠ Gasto SEP sin marco | 1"
    ],
-   "htmlHash": "084fca28923f66"
+   "htmlHash": "1f2d8ca9b8e223"
   },
   "estado.sep.filtro-deficit": {
    "text": [
@@ -19444,6 +19452,7 @@
     "⬇ CSV",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar SEP",
     "🖨 Exportar PDF (general)",
     "⬇ Excel (resumen general)",
     "⬇ Compras SUPEREDUC (CSV)",
@@ -19501,7 +19510,7 @@
     "Datos a revisar | 0",
     "⚠ Gasto SEP sin marco | 1"
    ],
-   "htmlHash": "0fb6d5e9b36924"
+   "htmlHash": "12d05cf7a482c8"
   },
   "estado.sep.filtro-riesgo": {
    "text": [
@@ -19551,6 +19560,7 @@
     "⬇ CSV",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar SEP",
     "🖨 Exportar PDF (general)",
     "⬇ Excel (resumen general)",
     "⬇ Compras SUPEREDUC (CSV)",
@@ -19608,7 +19618,7 @@
     "Datos a revisar | 0",
     "⚠ Gasto SEP sin marco | 1"
    ],
-   "htmlHash": "01625acf6e7761"
+   "htmlHash": "05e18ecc6fcc26"
   },
   "estado.sep.filtro-superavit": {
    "text": [
@@ -19658,6 +19668,7 @@
     "⬇ CSV",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar SEP",
     "🖨 Exportar PDF (general)",
     "⬇ Excel (resumen general)",
     "⬇ Compras SUPEREDUC (CSV)",
@@ -19826,7 +19837,7 @@
     "Datos a revisar | 0",
     "⚠ Gasto SEP sin marco | 1"
    ],
-   "htmlHash": "1712a762937fb7"
+   "htmlHash": "09af9972297457"
   },
   "estado.sep.busqueda-113": {
    "text": [
@@ -19876,6 +19887,7 @@
     "⬇ CSV",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar SEP",
     "🖨 Exportar PDF (general)",
     "⬇ Excel (resumen general)",
     "⬇ Compras SUPEREDUC (CSV)",
@@ -19943,7 +19955,7 @@
     "Datos a revisar | 0",
     "⚠ Gasto SEP sin marco | 1"
    ],
-   "htmlHash": "11877224c13311"
+   "htmlHash": "1b22a5bd464edd"
   },
   "estado.modal.sep.1131": {
    "text": [
@@ -20578,7 +20590,7 @@
     "Gasto Total (Total) | $306.776.946",
     "Saldo (Total) | $75.544.764"
    ],
-   "htmlHash": "0f02ce5877a406"
+   "htmlHash": "035f4d180f623f"
   },
   "estado.of.general": {
    "text": [
@@ -20703,7 +20715,7 @@
     "Gasto Total (Total) | $224.842.286",
     "Saldo (Total) | $345.459.429"
    ],
-   "htmlHash": "1a4a5119488987"
+   "htmlHash": "0a59b204b4eae9"
   },
   "estado.of.junji": {
    "text": [
@@ -20804,7 +20816,7 @@
     "Gasto Total (Total) | $332.758.856",
     "Saldo (Total) | -$37.226.291"
    ],
-   "htmlHash": "06965b56ebc96d"
+   "htmlHash": "0d543f2d9b5cb2"
   },
   "estado.of.aporte_junji": {
    "text": [
@@ -20885,7 +20897,7 @@
     "Gasto Total (Total) | $50.292.000",
     "Saldo (Total) | $6.242.290"
    ],
-   "htmlHash": "0de1127e1c9555"
+   "htmlHash": "045c42941dc04c"
   },
   "estado.modal.of.junji.5402002": {
    "text": [
@@ -24343,6 +24355,7 @@
     "⬇ CSV",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar SEP",
     "🖨 Exportar PDF (general)",
     "⬇ Excel (resumen general)",
     "⬇ Compras SUPEREDUC (CSV)",
@@ -24547,7 +24560,7 @@
     "Datos a revisar | 1",
     "⚠ Gasto SEP sin marco | 1"
    ],
-   "htmlHash": "073fe3f7c50a7c"
+   "htmlHash": "10b14fbc170173"
   },
   "honorarios.sep.corte-marzo": {
    "text": [
@@ -24654,6 +24667,7 @@
     "⬇ CSV",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar SEP",
     "🖨 Exportar PDF (general)",
     "⬇ Excel (resumen general)",
     "⬇ Compras SUPEREDUC (CSV)",
@@ -24708,7 +24722,7 @@
     "Datos a revisar | 1",
     "⚠ Gasto SEP sin marco | 1"
    ],
-   "htmlHash": "01fbdb0dbff7b7"
+   "htmlHash": "1585d0c93c3b4c"
   },
   "honorarios.modal.sep.1121": {
    "text": [
@@ -27785,7 +27799,7 @@
     "Gasto Total (Total) | $302.197.145",
     "Saldo (Total) | $78.084.565"
    ],
-   "htmlHash": "17f9a3eb197e6b"
+   "htmlHash": "051a872320e18e"
   },
   "jardines.of.faep.real": {
    "text": [
@@ -27922,7 +27936,7 @@
     "Gasto Total (Total) | $302.197.145",
     "Saldo (Total) | $78.084.565"
    ],
-   "htmlHash": "0fafb3ac2b4413"
+   "htmlHash": "1ca7ba25d32516"
   },
   "jardines.of.faep.proy": {
    "text": [
@@ -28059,7 +28073,7 @@
     "Gasto Total (Total) | $302.197.145",
     "Saldo (Total) | $78.084.565"
    ],
-   "htmlHash": "080ca1f94c71fd"
+   "htmlHash": "0cf906dda7492a"
   },
   "jardines.of.figa.total": {
    "text": [
@@ -28196,7 +28210,7 @@
     "Gasto Total (Total) | $305.449.435",
     "Saldo (Total) | $84.792.565"
    ],
-   "htmlHash": "09d66cc2aaf0ea"
+   "htmlHash": "0b5ca60f388c2d"
   },
   "jardines.of.junji.total": {
    "text": [
@@ -28297,7 +28311,7 @@
     "Gasto Total (Total) | $455.451.430",
     "Saldo (Total) | -$5.863.430"
    ],
-   "htmlHash": "033d750e896a3d"
+   "htmlHash": "131fd1f54ca3b6"
   },
   "jardines.of.junji.real": {
    "text": [
@@ -28398,7 +28412,7 @@
     "Gasto Total (Total) | $455.451.430",
     "Saldo (Total) | -$5.863.430"
    ],
-   "htmlHash": "0e9e52c59e98ad"
+   "htmlHash": "0227ecb52fdc74"
   },
   "jardines.of.junji.proy": {
    "text": [
@@ -28499,7 +28513,7 @@
     "Gasto Total (Total) | $455.451.430",
     "Saldo (Total) | -$5.863.430"
    ],
-   "htmlHash": "19f6ea1343b0a0"
+   "htmlHash": "12fa33084b1d84"
   },
   "jardines.modal.of.faep.5402002": {
    "text": [
@@ -33080,7 +33094,7 @@
     "Gasto Total (Total) | $457.971.430",
     "Saldo (Total) | -$8.383.430"
    ],
-   "htmlHash": "1b5da2b54c9785"
+   "htmlHash": "11b4dfe4eafa7d"
   },
   "compras_conceptos.of.faep.total": {
    "text": [
@@ -33223,7 +33237,7 @@
     "Gasto Total (Total) | $303.612.145",
     "Saldo (Total) | $76.669.565"
    ],
-   "htmlHash": "19379e76ff7df8"
+   "htmlHash": "05a49ff5680742"
   },
   "compras_conceptos.of.faep.real": {
    "text": [
@@ -33366,7 +33380,7 @@
     "Gasto Total (Total) | $303.612.145",
     "Saldo (Total) | $76.669.565"
    ],
-   "htmlHash": "05572350f24c52"
+   "htmlHash": "1bae1b4624cd9a"
   },
   "compras_conceptos.of.faep.proy": {
    "text": [
@@ -33503,7 +33517,7 @@
     "Gasto Total (Total) | $303.612.145",
     "Saldo (Total) | $76.669.565"
    ],
-   "htmlHash": "0b0d36d764c518"
+   "htmlHash": "1bc1589b085321"
   },
   "compras_conceptos.of.figa.total": {
    "text": [
@@ -33644,7 +33658,7 @@
     "Gasto Total (Total) | $305.794.435",
     "Saldo (Total) | $84.447.565"
    ],
-   "htmlHash": "08590a1737b72f"
+   "htmlHash": "069c8bc0f645e2"
   },
   "compras_conceptos.of.aporte_educ.total": {
    "text": [
@@ -33772,7 +33786,7 @@
     "Gasto Total (Total) | $294.639.000",
     "Saldo (Total) | $67.245.000"
    ],
-   "htmlHash": "09437bca3695cf"
+   "htmlHash": "05a48a8b0ab206"
   },
   "compras_conceptos.of.aporte_junji.total": {
    "text": [
@@ -33855,7 +33869,7 @@
     "Gasto Total (Total) | $49.702.000",
     "Saldo (Total) | $5.832.290"
    ],
-   "htmlHash": "0fb5060414d183"
+   "htmlHash": "0b1e54d5be3a93"
   },
   "compras_conceptos.modal.of.faep.1121": {
    "text": [
@@ -38459,7 +38473,7 @@
     "Gasto Total (Total) | $222.537.285",
     "Saldo (Total) | $342.464.430"
    ],
-   "htmlHash": "1177989d99b649"
+   "htmlHash": "07031ef8e2b40d"
   },
   "honorarios_fuentes.of.general.real": {
    "text": [
@@ -38584,7 +38598,7 @@
     "Gasto Total (Total) | $222.537.285",
     "Saldo (Total) | $342.464.430"
    ],
-   "htmlHash": "012d8299047eeb"
+   "htmlHash": "1a440023e5b504"
   },
   "honorarios_fuentes.of.general.proy": {
    "text": [
@@ -38709,7 +38723,7 @@
     "Gasto Total (Total) | $222.537.285",
     "Saldo (Total) | $342.464.430"
    ],
-   "htmlHash": "0d0a2998bb668c"
+   "htmlHash": "0eb150ab47a0ff"
   },
   "honorarios_fuentes.of.pie.total": {
    "text": [
@@ -38834,7 +38848,7 @@
     "Gasto Total (Total) | $224.586.425",
     "Saldo (Total) | $357.943.290"
    ],
-   "htmlHash": "12a38807023515"
+   "htmlHash": "1086078dbb862b"
   },
   "honorarios_fuentes.of.mantenimiento.total": {
    "text": [
@@ -38959,7 +38973,7 @@
     "Gasto Total (Total) | $24.006.000",
     "Saldo (Total) | $612.170.575"
    ],
-   "htmlHash": "04e98eb45c7ccc"
+   "htmlHash": "1b847564fc4868"
   },
   "honorarios_fuentes.of.prorretencion.total": {
    "text": [
@@ -39084,7 +39098,7 @@
     "Gasto Total (Total) | $702.066.720",
     "Saldo (Total) | $1.068.442.415"
    ],
-   "htmlHash": "12a2aac595ebdf"
+   "htmlHash": "08836d13e98838"
   },
   "honorarios_fuentes.of.junji.total": {
    "text": [
@@ -39189,7 +39203,7 @@
     "Gasto Total (Total) | $430.239.715",
     "Saldo (Total) | -$17.943.145"
    ],
-   "htmlHash": "0bbb4f96183662"
+   "htmlHash": "0a92f69378002a"
   },
   "honorarios_fuentes.of.junji.real": {
    "text": [
@@ -39294,7 +39308,7 @@
     "Gasto Total (Total) | $430.239.715",
     "Saldo (Total) | -$17.943.145"
    ],
-   "htmlHash": "08cbfc38bd0154"
+   "htmlHash": "119063cc535faa"
   },
   "honorarios_fuentes.of.junji.proy": {
    "text": [
@@ -39395,7 +39409,7 @@
     "Gasto Total (Total) | $430.239.715",
     "Saldo (Total) | -$17.943.145"
    ],
-   "htmlHash": "17965c5ae2f0bb"
+   "htmlHash": "0e0d94ed3506ac"
   },
   "honorarios_fuentes.of.faep.total": {
    "text": [
@@ -39538,7 +39552,7 @@
     "Gasto Total (Total) | $305.522.145",
     "Saldo (Total) | $74.759.565"
    ],
-   "htmlHash": "04072f6e9ba45a"
+   "htmlHash": "1221698436ad45"
   },
   "honorarios_fuentes.of.figa.total": {
    "text": [
@@ -39679,7 +39693,7 @@
     "Gasto Total (Total) | $306.259.435",
     "Saldo (Total) | $83.982.565"
    ],
-   "htmlHash": "069a3b775ad650"
+   "htmlHash": "130a1e567d619b"
   },
   "honorarios_fuentes.of.aporte_educ.total": {
    "text": [
@@ -39807,7 +39821,7 @@
     "Gasto Total (Total) | $295.154.000",
     "Saldo (Total) | $66.730.000"
    ],
-   "htmlHash": "0101d687fca909"
+   "htmlHash": "03c3534aff45d9"
   },
   "honorarios_fuentes.of.aporte_junji.total": {
    "text": [
@@ -39890,7 +39904,7 @@
     "Gasto Total (Total) | $50.077.000",
     "Saldo (Total) | $5.457.290"
    ],
-   "htmlHash": "1c75316506ed1e"
+   "htmlHash": "1c19f6bdcfc29b"
   },
   "honorarios_fuentes.modal.of.general.1121": {
    "text": [
@@ -47588,7 +47602,7 @@
     "Gasto Total (Total) | $225.818.570",
     "Saldo (Total) | $9.338.570"
    ],
-   "htmlHash": "1ff9be2a20bd15"
+   "htmlHash": "121bc679f042bb"
   },
   "junji_rem.of.junji.real": {
    "text": [
@@ -47685,7 +47699,7 @@
     "Gasto Total (Total) | $225.818.570",
     "Saldo (Total) | $9.338.570"
    ],
-   "htmlHash": "1ea7a870adbb3b"
+   "htmlHash": "09ec14124cb205"
   },
   "junji_rem.of.junji.proy": {
    "text": [
@@ -47782,7 +47796,7 @@
     "Gasto Total (Total) | $225.818.570",
     "Saldo (Total) | $9.338.570"
    ],
-   "htmlHash": "155c5866ec4034"
+   "htmlHash": "1c052fdc6e6b5a"
   },
   "junji_rem.modal.of.junji.5402002": {
    "text": [
@@ -51352,8 +51366,8 @@
     "tab-panel"
    ],
    "printWrap": [],
-   "visibleLineas": 250,
-   "visibleSha1": "5c25735c2ed4385ae8c25d8b9b42bfc9b8c80fdc"
+   "visibleLineas": 251,
+   "visibleSha1": "767935f1836f453ebd32c415dff908729fc7cee2"
   },
   "exp.sep.csv-resumen-filtrado-liceo": {
    "filename": "monitor_sep_rbd_2026-08-19.csv",
@@ -51943,8 +51957,8 @@
     "410906 · COMBUSTIBLE Y PEAJES Factura exenta electrónica 6450 2026-01-03 2026-01-21 Gasto de prueba 1121-3 76.123.456-7 Librería Central Ltda. $1.935.000 $2.302.650 DC_344 DC_344",
     "Ingreso SEP se divide en 3 filas — Preferente y Prioritario traen enero a julio reales (Liquidación Web Subvenciones Mineduc, por RBD) y agosto a diciembre parten como proyección editable (promedio de esos 7 meses); el selector \"Ingresos reales hasta\" (arriba de la tabla de ingresos) marca hasta qué mes el ingreso se considera Real — por defecto, el mes de cierre de la pestaña SEP — y de ahí en adelante es proyección; Carrera Docente parte en $0 y la completas tú mes a mes. Carrera Docente es de uso exclusivo en remuneraciones, así que se suma completa a la meta de remuneraciones (no al 30% de B&S). Remuneraciones parte en $0 en todos los meses — cárgala tú mes a mes, y el selector \"reales hasta\" de esa fila marca desde qué mes son solo una proyección tuya (no afecta ningún cálculo, es solo para que se vea claro). El total de \"Preferente\"+\"Prioritario\" alimenta \"Ingreso SEP anual\". Bienes y Servicios (Gasto B&S) = compras reales (Subt.22+Subt.29, siempre reales, se cargan como \"Registro de compras\" más abajo) + \"Bienes y Servicios (Proyección)\": puedes agregar cualquier cantidad de ítems (elegidos de la misma lista de cuentas que las compras) con su propia proyección mensual, siempre proyectada, que se SUMA al total de compras de cada mes (no lo reemplaza) — sirve para estimar gasto de meses que todavía no tienen compras documentadas, ya clasificado por ítem."
    ],
-   "visibleLineas": 250,
-   "visibleSha1": "5c25735c2ed4385ae8c25d8b9b42bfc9b8c80fdc"
+   "visibleLineas": 251,
+   "visibleSha1": "767935f1836f453ebd32c415dff908729fc7cee2"
   },
   "exp.of.general.csv-compras": {
    "filename": "compras_general_2026-08-19.csv",
@@ -55897,8 +55911,8 @@
     "410906 · COMBUSTIBLE Y PEAJES Factura exenta electrónica 6450 2026-01-03 2026-01-21 Gasto de prueba 1121-3 76.123.456-7 Librería Central Ltda. $1.935.000 $2.302.650 DC_344 DC_344",
     "Ingreso SEP se divide en 3 filas — Preferente y Prioritario traen enero a julio reales (Liquidación Web Subvenciones Mineduc, por RBD) y agosto a diciembre parten como proyección editable (promedio de esos 7 meses); el selector \"Ingresos reales hasta\" (arriba de la tabla de ingresos) marca hasta qué mes el ingreso se considera Real — por defecto, el mes de cierre de la pestaña SEP — y de ahí en adelante es proyección; Carrera Docente parte en $0 y la completas tú mes a mes. Carrera Docente es de uso exclusivo en remuneraciones, así que se suma completa a la meta de remuneraciones (no al 30% de B&S). Remuneraciones parte en $0 en todos los meses — cárgala tú mes a mes, y el selector \"reales hasta\" de esa fila marca desde qué mes son solo una proyección tuya (no afecta ningún cálculo, es solo para que se vea claro). El total de \"Preferente\"+\"Prioritario\" alimenta \"Ingreso SEP anual\". Bienes y Servicios (Gasto B&S) = compras reales (Subt.22+Subt.29, siempre reales, se cargan como \"Registro de compras\" más abajo) + \"Bienes y Servicios (Proyección)\": puedes agregar cualquier cantidad de ítems (elegidos de la misma lista de cuentas que las compras) con su propia proyección mensual, siempre proyectada, que se SUMA al total de compras de cada mes (no lo reemplaza) — sirve para estimar gasto de meses que todavía no tienen compras documentadas, ya clasificado por ítem."
    ],
-   "visibleLineas": 260,
-   "visibleSha1": "1d96e949c87da23928e5c854b38188929394ca87"
+   "visibleLineas": 261,
+   "visibleSha1": "8df8fb3a0fdd7fb1017f0411daa1462c342f55ab"
   },
   "cierre.print.sep.fila.1128": {
    "kind": "impresion",
@@ -56152,8 +56166,8 @@
     "410906 · COMBUSTIBLE Y PEAJES Documento extranjero 3747 2026-07-17 2026-07-24 Gasto de prueba 1128-1 96.555.444-3 Servicios Integrales Petorca $601.000 $715.190 DOC-1128-1",
     "Ingreso SEP se divide en 3 filas — Preferente y Prioritario traen enero a julio reales (Liquidación Web Subvenciones Mineduc, por RBD) y agosto a diciembre parten como proyección editable (promedio de esos 7 meses); el selector \"Ingresos reales hasta\" (arriba de la tabla de ingresos) marca hasta qué mes el ingreso se considera Real — por defecto, el mes de cierre de la pestaña SEP — y de ahí en adelante es proyección; Carrera Docente parte en $0 y la completas tú mes a mes. Carrera Docente es de uso exclusivo en remuneraciones, así que se suma completa a la meta de remuneraciones (no al 30% de B&S). Remuneraciones parte en $0 en todos los meses — cárgala tú mes a mes, y el selector \"reales hasta\" de esa fila marca desde qué mes son solo una proyección tuya (no afecta ningún cálculo, es solo para que se vea claro). El total de \"Preferente\"+\"Prioritario\" alimenta \"Ingreso SEP anual\". Bienes y Servicios (Gasto B&S) = compras reales (Subt.22+Subt.29, siempre reales, se cargan como \"Registro de compras\" más abajo) + \"Bienes y Servicios (Proyección)\": puedes agregar cualquier cantidad de ítems (elegidos de la misma lista de cuentas que las compras) con su propia proyección mensual, siempre proyectada, que se SUMA al total de compras de cada mes (no lo reemplaza) — sirve para estimar gasto de meses que todavía no tienen compras documentadas, ya clasificado por ítem."
    ],
-   "visibleLineas": 260,
-   "visibleSha1": "1d96e949c87da23928e5c854b38188929394ca87"
+   "visibleLineas": 261,
+   "visibleSha1": "8df8fb3a0fdd7fb1017f0411daa1462c342f55ab"
   },
   "cierre.exp.vz.sep.csv": {
    "filename": "visualizador_fuente_2026-08-19.csv",
@@ -57070,8 +57084,8 @@
     "410605 · MATERIAL Y RECURSOS DIDACTICOS Factura 5005 10/03/2026 2026-03-20 Fecha con formato no reconocido 76.123.456-7 Librería Central Ltda. $45.000 $53.550",
     "Ingreso SEP se divide en 3 filas — Preferente y Prioritario traen enero a julio reales (Liquidación Web Subvenciones Mineduc, por RBD) y agosto a diciembre parten como proyección editable (promedio de esos 7 meses); el selector \"Ingresos reales hasta\" (arriba de la tabla de ingresos) marca hasta qué mes el ingreso se considera Real — por defecto, el mes de cierre de la pestaña SEP — y de ahí en adelante es proyección; Carrera Docente parte en $0 y la completas tú mes a mes. Carrera Docente es de uso exclusivo en remuneraciones, así que se suma completa a la meta de remuneraciones (no al 30% de B&S). Remuneraciones parte en $0 en todos los meses — cárgala tú mes a mes, y el selector \"reales hasta\" de esa fila marca desde qué mes son solo una proyección tuya (no afecta ningún cálculo, es solo para que se vea claro). El total de \"Preferente\"+\"Prioritario\" alimenta \"Ingreso SEP anual\". Bienes y Servicios (Gasto B&S) = compras reales (Subt.22+Subt.29, siempre reales, se cargan como \"Registro de compras\" más abajo) + \"Bienes y Servicios (Proyección)\": puedes agregar cualquier cantidad de ítems (elegidos de la misma lista de cuentas que las compras) con su propia proyección mensual, siempre proyectada, que se SUMA al total de compras de cada mes (no lo reemplaza) — sirve para estimar gasto de meses que todavía no tienen compras documentadas, ya clasificado por ítem."
    ],
-   "visibleLineas": 250,
-   "visibleSha1": "f81f9a43cdd33fc0e83d42dd79d2fa2281fa0976"
+   "visibleLineas": 251,
+   "visibleSha1": "65f8e7c9eee65c8a0fa8e5d35e82de51bd145c22"
   },
   "compras.exp.of.general.csv-compras": {
    "filename": "compras_general_2026-08-19.csv",
@@ -57867,8 +57881,8 @@
     "tab-panel"
    ],
    "printWrap": [],
-   "visibleLineas": 250,
-   "visibleSha1": "1f3a6f8b18f85c5e9f77a29fc15b7fde8d3e09a7"
+   "visibleLineas": 251,
+   "visibleSha1": "73259ceaabd01c66a7cf664d7ca7acc28ac261cc"
   },
   "estado.print.sep.fila.1131": {
    "kind": "impresion",
@@ -58120,8 +58134,8 @@
     "Sin compras registradas todavía.",
     "Ingreso SEP se divide en 3 filas — Preferente y Prioritario traen enero a julio reales (Liquidación Web Subvenciones Mineduc, por RBD) y agosto a diciembre parten como proyección editable (promedio de esos 7 meses); el selector \"Ingresos reales hasta\" (arriba de la tabla de ingresos) marca hasta qué mes el ingreso se considera Real — por defecto, el mes de cierre de la pestaña SEP — y de ahí en adelante es proyección; Carrera Docente parte en $0 y la completas tú mes a mes. Carrera Docente es de uso exclusivo en remuneraciones, así que se suma completa a la meta de remuneraciones (no al 30% de B&S). Remuneraciones parte en $0 en todos los meses — cárgala tú mes a mes, y el selector \"reales hasta\" de esa fila marca desde qué mes son solo una proyección tuya (no afecta ningún cálculo, es solo para que se vea claro). El total de \"Preferente\"+\"Prioritario\" alimenta \"Ingreso SEP anual\". Bienes y Servicios (Gasto B&S) = compras reales (Subt.22+Subt.29, siempre reales, se cargan como \"Registro de compras\" más abajo) + \"Bienes y Servicios (Proyección)\": puedes agregar cualquier cantidad de ítems (elegidos de la misma lista de cuentas que las compras) con su propia proyección mensual, siempre proyectada, que se SUMA al total de compras de cada mes (no lo reemplaza) — sirve para estimar gasto de meses que todavía no tienen compras documentadas, ya clasificado por ítem."
    ],
-   "visibleLineas": 250,
-   "visibleSha1": "1f3a6f8b18f85c5e9f77a29fc15b7fde8d3e09a7"
+   "visibleLineas": 251,
+   "visibleSha1": "73259ceaabd01c66a7cf664d7ca7acc28ac261cc"
   },
   "estado.exp.of.junji.fila.5402002.csv": {
    "filename": "detalle_junji_5402002_2026-08-19.csv",
@@ -59547,8 +59561,8 @@
     "410906 · COMBUSTIBLE Y PEAJES Factura exenta electrónica 6450 2026-01-03 2026-01-21 Gasto de prueba 1121-3 76.123.456-7 Librería Central Ltda. $1.935.000 $2.302.650 DC_344 DC_344",
     "Ingreso SEP se divide en 3 filas — Preferente y Prioritario traen enero a julio reales (Liquidación Web Subvenciones Mineduc, por RBD) y agosto a diciembre parten como proyección editable (promedio de esos 7 meses); el selector \"Ingresos reales hasta\" (arriba de la tabla de ingresos) marca hasta qué mes el ingreso se considera Real — por defecto, el mes de cierre de la pestaña SEP — y de ahí en adelante es proyección; Carrera Docente parte en $0 y la completas tú mes a mes. Carrera Docente es de uso exclusivo en remuneraciones, así que se suma completa a la meta de remuneraciones (no al 30% de B&S). Remuneraciones parte en $0 en todos los meses — cárgala tú mes a mes, y el selector \"reales hasta\" de esa fila marca desde qué mes son solo una proyección tuya (no afecta ningún cálculo, es solo para que se vea claro). El total de \"Preferente\"+\"Prioritario\" alimenta \"Ingreso SEP anual\". Bienes y Servicios (Gasto B&S) = compras reales (Subt.22+Subt.29, siempre reales, se cargan como \"Registro de compras\" más abajo) + \"Bienes y Servicios (Proyección)\": puedes agregar cualquier cantidad de ítems (elegidos de la misma lista de cuentas que las compras) con su propia proyección mensual, siempre proyectada, que se SUMA al total de compras de cada mes (no lo reemplaza) — sirve para estimar gasto de meses que todavía no tienen compras documentadas, ya clasificado por ítem."
    ],
-   "visibleLineas": 250,
-   "visibleSha1": "414e98f74f7a70fe9bffb6afbe7bf786e3910fc6"
+   "visibleLineas": 251,
+   "visibleSha1": "732aba1b4bfffb894098be0d7cfdea7d9ceaff54"
   },
   "honorarios.print.sep.fila.1123": {
    "kind": "impresion",
@@ -59806,8 +59820,8 @@
     "411701 · MANTENCION Y REPARACION DE BIENES MUEBLES Nota de crédito 6944 2026-02-07 2026-03-02 Gasto de prueba 1123-2 78.901.234-5 Ferretería El Roble -$424.500 -$424.500 DOC-1123-2",
     "Ingreso SEP se divide en 3 filas — Preferente y Prioritario traen enero a julio reales (Liquidación Web Subvenciones Mineduc, por RBD) y agosto a diciembre parten como proyección editable (promedio de esos 7 meses); el selector \"Ingresos reales hasta\" (arriba de la tabla de ingresos) marca hasta qué mes el ingreso se considera Real — por defecto, el mes de cierre de la pestaña SEP — y de ahí en adelante es proyección; Carrera Docente parte en $0 y la completas tú mes a mes. Carrera Docente es de uso exclusivo en remuneraciones, así que se suma completa a la meta de remuneraciones (no al 30% de B&S). Remuneraciones parte en $0 en todos los meses — cárgala tú mes a mes, y el selector \"reales hasta\" de esa fila marca desde qué mes son solo una proyección tuya (no afecta ningún cálculo, es solo para que se vea claro). El total de \"Preferente\"+\"Prioritario\" alimenta \"Ingreso SEP anual\". Bienes y Servicios (Gasto B&S) = compras reales (Subt.22+Subt.29, siempre reales, se cargan como \"Registro de compras\" más abajo) + \"Bienes y Servicios (Proyección)\": puedes agregar cualquier cantidad de ítems (elegidos de la misma lista de cuentas que las compras) con su propia proyección mensual, siempre proyectada, que se SUMA al total de compras de cada mes (no lo reemplaza) — sirve para estimar gasto de meses que todavía no tienen compras documentadas, ya clasificado por ítem."
    ],
-   "visibleLineas": 250,
-   "visibleSha1": "414e98f74f7a70fe9bffb6afbe7bf786e3910fc6"
+   "visibleLineas": 251,
+   "visibleSha1": "732aba1b4bfffb894098be0d7cfdea7d9ceaff54"
   },
   "honorarios.print.sep.general": {
    "kind": "impresion",
@@ -59819,8 +59833,8 @@
     "tab-panel"
    ],
    "printWrap": [],
-   "visibleLineas": 250,
-   "visibleSha1": "414e98f74f7a70fe9bffb6afbe7bf786e3910fc6"
+   "visibleLineas": 251,
+   "visibleSha1": "732aba1b4bfffb894098be0d7cfdea7d9ceaff54"
   },
   "honorarios.print.dashboard": {
    "kind": "impresion",

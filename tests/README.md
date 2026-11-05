@@ -537,7 +537,7 @@ El mock de arriba es rápido y determinista, pero lo escribimos nosotros: no dem
 `setup.sh`; las dependencias, unos 280 MB, se instalan fuera del repositorio en `E2E_HOME`, por defecto `/home/user/.e2e-real`).
 
 ```bash
-bash tests/e2e-real/setup.sh && node tests/e2e-real/run.mjs        # los 16 specs contra el árbol (el 16 es JUNJI con el gasto de Remuneraciones en 4 líneas: merge por línea, documento antiguo, cliente viejo y líneas dañadas; el 15 es Fondos Fijos —merge por campo, importación en lote y lectura dañada—; el 11 es Honorarios por boleta; el 12, jardines en FAEP/FIGA y BDL de JUNJI; el 13, registro de compras por concepto; el 14, Honorarios por boleta en las fuentes), ≈ 9 min
+bash tests/e2e-real/setup.sh && node tests/e2e-real/run.mjs        # los specs (el 18 es la carga reemplazo total de SEP y Fondos Fijos) contra el árbol (el 16 es JUNJI con el gasto de Remuneraciones en 4 líneas: merge por línea, documento antiguo, cliente viejo y líneas dañadas; el 15 es Fondos Fijos —merge por campo, importación en lote y lectura dañada—; el 11 es Honorarios por boleta; el 12, jardines en FAEP/FIGA y BDL de JUNJI; el 13, registro de compras por concepto; el 14, Honorarios por boleta en las fuentes), ≈ 9 min
 node tests/e2e-real/run.mjs --matriz                                # además contra @069f9dd y @baseline, ≈ 15 min
 ```
 
