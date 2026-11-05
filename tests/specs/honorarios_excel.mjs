@@ -103,7 +103,7 @@ await correrSpec('honorarios_excel', async (t) => {
   // la entidad exportada queda igual. Después se restablece con el libro completo.
   const stInd = honDelStore(await h.store());
   t.eq(primeraDiferencia(storeAntes['sep_carga_rbd/1121'], stInd['sep_carga_rbd/1121']), null, 'la entidad exportada (1121) queda igual');
-  t.eq(Object.keys(stInd).filter(p => p !== 'sep_carga_rbd/1121' && (Object.keys(stInd[p].honorarios).length || Object.keys(stInd[p].hon_proyeccion).length)), [], 'y las demás quedan sin boletas ni proyección en esas hojas (reemplazo total)');
+  t.eq(Object.keys(stInd).filter(p => p !== 'sep_carga_rbd/1121' && (Object.keys(stInd[p].honorarios || {}).length || Object.keys(stInd[p].hon_proyeccion || {}).length)), [], 'y las demás quedan sin boletas ni proyección en esas hojas (reemplazo total)');
   await importarLibro(h, '#importExcelInput', x1.buffer, x1.filename);
   t.eq(primeraDiferencia(storeAntes, honDelStore(await h.store())), null, 'el libro completo restablece todo');
 
