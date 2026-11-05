@@ -102,6 +102,66 @@ const SCRIPT_CAPTURA_IMPRESION = `(() => {
   };
 })();`;
 
+
+// Carga por fuente = REEMPLAZO TOTAL: el flujo nuevo muestra un resumen de control (modal) y pide confirmar. Los specs anteriores a ese cambio importan Excel y esperan el
+// `alert` de resumen de antes; este «adaptador de arnés» hace lo que haría la persona (pulsa «Reemplazar», espera el resultado y lo cierra) y emite ese mismo alert con el
+// formato antiguo («Carga importada correctamente:\nHOJA: N filas … ⚠ N filas NO se importaron…»), de modo que esos specs siguen verificando los DATOS importados sin
+// repetir el flujo del modal. Los specs de la carga nueva (carga_reemplazo_*) arrancan con `autoCarga:false` y manejan el modal ellos mismos.
+const SCRIPT_AUTOCARGA = `(() => {
+  if (window.__AUTOCARGA === false) return;
+  const norm = (s) => (s || '').replace(/\\s+/g, ' ').trim();
+  let guardado = null, confirmado = false;
+  function resumenControl() {
+    const lineas = [], rechazos = [];
+    const tabla = document.querySelector('#cargaControlBody table.carga-tabla');
+    const notas = Array.from(document.querySelectorAll('#cargaControlBody ul.carga-lista li')).map(li => norm(li.textContent));
+    if (tabla) tabla.querySelectorAll('tbody tr').forEach(tr => {
+      const hoja = norm(tr.querySelector('th').textContent), tds = Array.from(tr.querySelectorAll('td'));
+      if (tr.classList.contains('carga-omitida')) {
+        const m = /NO se carga: (.*?)\\. Se conserva/.exec(norm(tds[0].textContent));
+        lineas.push(hoja + ': 0 filas'); rechazos.push(hoja + ', fila 1: ' + (m ? m[1] : '')); return;
+      }
+      if (tds.length < 7) return;
+      const leidas = Number(tds[2].textContent), rech = Number(tds[3].textContent);
+      const nota = notas.find(n => n.startsWith(hoja + ': ⚠'));
+      lineas.push(hoja + ': ' + (leidas - rech) + ' filas' + (nota ? ' (' + nota.slice(hoja.length + 2) + ')' : ''));
+    });
+    const h4 = Array.from(document.querySelectorAll('#cargaControlBody h4')).find(h => /NO se cargarán/.test(h.textContent));
+    let total = 0;
+    if (h4) {
+      total = Number(/\\((\\d+)\\)/.exec(h4.textContent)[1]);
+      Array.from(h4.nextElementSibling.querySelectorAll('li')).forEach(li => rechazos.push(norm(li.textContent).replace(/^Hoja /, '')));
+    } else total = rechazos.length;
+    return { lineas, rechazos, total };
+  }
+  function mensaje(g) {
+    let m = 'Carga importada correctamente:\\n' + g.lineas.join('\\n');
+    if (g.total) {
+      m += '\\n⚠ ' + (g.total === 1 ? '1 fila NO se importó' : g.total + ' filas NO se importaron') + ' por tener un dato inválido:\\n' + g.rechazos.slice(0, 8).map(l => '   · ' + l).join('\\n');
+      if (g.total > 8) m += '\\n… y ' + (g.total - 8) + ' más';
+    }
+    return m + '\\n\\nLa pestaña ya se actualizó con estos montos.';
+  }
+  function revisar() {
+    const modal = document.getElementById('cargaControlModal');
+    if (!modal || modal.classList.contains('hidden')) { guardado = null; confirmado = false; return; }
+    const ok = document.getElementById('cargaOkBtn'), cerrar = document.getElementById('cargaCerrarBtn'), cancelar = document.getElementById('cargaCancelarBtn');
+    if (ok && !confirmado) {
+      if (ok.disabled) { const t = norm(document.getElementById('cargaControlBody').innerText); setTimeout(() => { cancelar.click(); window.alert(t); }, 0); confirmado = true; return; }
+      guardado = resumenControl(); confirmado = true; setTimeout(() => ok.click(), 0); return;
+    }
+    if (cerrar && !ok) {
+      const cuerpo = document.getElementById('cargaControlBody');
+      if (/Guardando para el resto del equipo/.test(cuerpo.innerText)) return;
+      const texto = norm(cuerpo.innerText);
+      const msg = (guardado && !cuerpo.querySelector('.carga-nota.err')) ? mensaje(guardado) : texto;
+      guardado = null; confirmado = false;
+      setTimeout(() => { cerrar.click(); window.alert(msg); }, 0);
+    }
+  }
+  document.addEventListener('DOMContentLoaded', () => { new MutationObserver(revisar).observe(document.getElementById('cargaControlModal'), { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] }); });
+})();`;
+
 /**
  * @param {object} o
  * @param {string|object|null} [o.fixture='default']  nombre de fixture en tests/fixtures, un mapa {id: doc}, o null (colección vacía)
@@ -116,6 +176,7 @@ const SCRIPT_CAPTURA_IMPRESION = `(() => {
  * @param {object} [o.viewport]
  * @param {Array<string|Function>} [o.initScripts]    scripts extra que se inyectan antes de cargar la página
  * @param {Array<RegExp|string>} [o.allowErrors]      errores esperados (no cuentan como fallo)
+ * @param {boolean} [o.autoCarga=true]                 adaptador de la carga por fuente (confirma el resumen y emite el alert antiguo); false = el spec maneja el modal
  * @param {(d:object)=>any} [o.onDialog]               manejador de alert/confirm/prompt (por defecto acepta y registra)
  */
 export async function boot(o = {}) {
@@ -145,6 +206,8 @@ export async function boot(o = {}) {
   if (freezeTime) await context.addInitScript(scriptCongelarTiempo(FECHA_CONGELADA));
   await context.addInitScript({ path: path.join(MOCKFB_DIR, 'core.js') });
   await context.addInitScript(SCRIPT_CAPTURA_IMPRESION);
+  if (o.autoCarga === false) await context.addInitScript('window.__AUTOCARGA = false;');
+  await context.addInitScript(SCRIPT_AUTOCARGA);
 
   const errors = [];
   const dialogs = [];

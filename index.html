@@ -8036,7 +8036,7 @@ function completarPlanCarga(plan) {
       if (h.aceptadas === 0 && h.estActual.filas > 0) h.notas.push('El archivo trae esta hoja SIN filas válidas: se eliminarán todas las filas que hay hoy en el panel.');
     }
     if (h.idsRepetidos && h.idsRepetidos.length) h.notas.push(`${h.idsRepetidos.length} ${h.idsRepetidos.length === 1 ? 'fila traía un ID repetido' : 'filas traían un ID repetido'} dentro del archivo: se conservan todas, con un ID nuevo (ej. ${h.idsRepetidos[0].original} → ${h.idsRepetidos[0].nuevo}).`);
-    if (h.noHabilitadas) h.notas.push(`⚠ ${h.noHabilitadas} con cuenta no habilitada para ${ctx.label} en el Plan de Cuentas 2026: se cargan igual y quedan marcadas en el registro.`);
+    if (h.noHabilitadas) h.notas.push(`⚠ ${h.noHabilitadas} con cuenta no habilitada para ${ctx.label} en el Plan de Cuentas 2026: quedan marcadas en el registro.`);
   });
   plan.cambios = calcularCambiosCarga(plan);
   plan.nCambios = Object.keys(plan.cambios).length;

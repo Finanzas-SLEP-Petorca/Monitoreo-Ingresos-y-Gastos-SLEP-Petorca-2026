@@ -21,7 +21,7 @@ const nHon = async (h, f, rbd) => Object.keys(((await docFuente(h, rbd, f)) || {
 
 await correrSpec('carga_reemplazo_hojas', async (t) => {
   // ======================= FAEP (por concepto) =======================
-  const h = await boot({ fixture: 'honorarios_fuentes' });
+  const h = await boot({ autoCarga: false, fixture: 'honorarios_fuentes' });
   await escenario(t, 'faep', async () => {
     const x = await exportar(h, 'faep');
     t.ok(cuerpo(x, 'HONORARIOS').filter(r => r[1] !== '').length >= 4, 'partida: FAEP trae boletas en varias entidades');
@@ -112,7 +112,7 @@ await correrSpec('carga_reemplazo_hojas', async (t) => {
   // ======================= Idempotencia en las 12 fuentes =======================
   await escenario(t, 'idempotencia 12 fuentes', async () => {
     for (const fx of ['default', 'compras_conceptos', 'junji_rem', 'jardines']) {
-      const hh = await boot({ fixture: fx });
+      const hh = await boot({ autoCarga: false, fixture: fx });
       for (const f of FUENTES) {
         const x = await exportar(hh, f);
         const r = await subirYConfirmar(hh, f, x.buffer, { nombre: x.filename, confirmar: false });

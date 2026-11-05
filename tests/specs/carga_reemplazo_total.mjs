@@ -48,7 +48,7 @@ await correrSpec('carga_reemplazo_total', async (t) => {
   void sinGeneral;
 
   // ======================= 1. Carga completa: filas y totales exactos =======================
-  const h = await boot({ fixture: docsBase });
+  const h = await boot({ autoCarga: false, fixture: docsBase });
   await escenario(t, 'carga completa', async () => {
     const cs = [
       FILA('', '1121', compra({ nroDocumento: '100', montoGasto: 100000, montoDocumento: 119000 })),
@@ -157,7 +157,7 @@ await correrSpec('carga_reemplazo_total', async (t) => {
 
   // ======================= 5. Otra fuente y SEP intactos =======================
   await escenario(t, 'otras fuentes intactas', async () => {
-    const h2 = await boot({ fixture: 'default' });
+    const h2 = await boot({ autoCarga: false, fixture: 'default' });
     const antes = sinAuditoria(JSON.parse(JSON.stringify(await h2.store())));
     const libro = await libroXlsx(h2.page, {
       INGRESO: [ENC_MENSUAL, mensual(docsBase, '1121', 123456)],
@@ -181,7 +181,7 @@ await correrSpec('carga_reemplazo_total', async (t) => {
 
   // ======================= 6. DC_247: 53 antiguas + 66 nuevas = 66, no 119 =======================
   await escenario(t, 'DC_247', async () => {
-    const h3 = await boot({ fixture: docsBase });
+    const h3 = await boot({ autoCarga: false, fixture: docsBase });
     await h3.clickTab('of-general');
     const viejas = Array.from({ length: 53 }, (_, i) => FILA('', '1121', compra({ nroDocumento: 'V' + i, montoGasto: 1000 + i, montoDocumento: 1000 + i, documentoContable: 'DC_247' })));
     await subirYConfirmar(h3, 'general', await libroXlsx(h3.page, { COMPRAS: [ENC_COMPRAS_FUENTE, ...viejas] }));
@@ -210,7 +210,7 @@ await correrSpec('carga_reemplazo_total', async (t) => {
 
   // ======================= 7. Rechazos visibles; montos como texto; cuadre de filas =======================
   await escenario(t, 'rechazos', async () => {
-    const h4 = await boot({ fixture: docsBase });
+    const h4 = await boot({ autoCarga: false, fixture: docsBase });
     await h4.clickTab('of-general');
     const libro = await libroXlsx(h4.page, { COMPRAS: [ENC_COMPRAS_FUENTE,
       FILA('', '1121', compra({ nroDocumento: '1', montoGasto: 1000 })),
@@ -257,7 +257,7 @@ await correrSpec('carga_reemplazo_total', async (t) => {
 
   // ======================= 9. Cuadratura: un desajuste forzado se detecta (banner rojo persistente) =======================
   await escenario(t, 'cuadratura', async () => {
-    const h5 = await boot({ fixture: docsBase });
+    const h5 = await boot({ autoCarga: false, fixture: docsBase });
     await h5.clickTab('of-general');
     await h5.page.evaluate(() => { window.__cargaTestHook = (fase, fk, cm) => { if (fase === 'memoria' || fase === 'guardado') { const c = cm.otras_fuentes_por_rbd['1121'][fk].compras; delete c[Object.keys(c)[0]]; } }; });
     const libro = await libroXlsx(h5.page, { COMPRAS: [ENC_COMPRAS_FUENTE, FILA('', '1121', compra({ nroDocumento: '1', montoGasto: 10 })), FILA('', '1121', compra({ nroDocumento: '2', montoGasto: 20 }))] });
@@ -276,7 +276,7 @@ await correrSpec('carga_reemplazo_total', async (t) => {
 
   // ======================= 10. Vaciar fuente: solo admin, escribiendo el nombre, con respaldo =======================
   await escenario(t, 'vaciar fuente', async () => {
-    const h6 = await boot({ fixture: 'default' });
+    const h6 = await boot({ autoCarga: false, fixture: 'default' });
     await h6.clickTab('of-faep');
     t.eq(await h6.page.evaluate(() => !document.getElementById('vaciarOFBtn-faep').classList.contains('hidden')), true, 'el botón «Vaciar fuente» se ve para administración');
     const otras = sinAuditoria(JSON.parse(JSON.stringify(await h6.store())));
@@ -304,7 +304,7 @@ await correrSpec('carga_reemplazo_total', async (t) => {
     t.ok(!!(await docFuente(h6, '1121', 'faep')), 'Deshacer devuelve los datos de FAEP');
     await h6.close();
     // no admin
-    const h7 = await boot({ fixture: 'default', user: 'authorized-nonadmin' });
+    const h7 = await boot({ autoCarga: false, fixture: 'default', user: 'authorized-nonadmin' });
     await h7.clickTab('of-faep');
     t.eq(await h7.page.evaluate(() => document.getElementById('vaciarOFBtn-faep').classList.contains('hidden')), true, 'una persona sin permisos de administración NO ve «Vaciar fuente»');
     await h7.close();
@@ -312,7 +312,7 @@ await correrSpec('carga_reemplazo_total', async (t) => {
 
   // ======================= 11. Excel grande: ≥ 3.000 filas de COMPRAS =======================
   await escenario(t, 'excel grande', async () => {
-    const h8 = await boot({ fixture: docsBase });
+    const h8 = await boot({ autoCarga: false, fixture: docsBase });
     await h8.clickTab('of-general');
     const N = 3200;
     const filas = Array.from({ length: N }, (_, i) => FILA('', RBDS[i % 4], compra({ nroDocumento: String(10000 + i), montoGasto: 1000 + (i % 97) * 13, montoDocumento: 1200 + (i % 97) * 13, fechaDocumento: `2026-${String(1 + (i % 12)).padStart(2, '0')}-${String(1 + (i % 27)).padStart(2, '0')}`, documentoContable: 'DC_' + (i % 40) })));

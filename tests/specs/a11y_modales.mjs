@@ -6,7 +6,7 @@
 // al elemento que lo abrió (o a su equivalente si ese se repintó o quedó oculto). Y el reconciliador del modal (morphContenedor, PR #57) no pierde el foco, el
 // cursor ni lo tecleado, ni borra los atributos de rol/aria, ante snapshots remotos.
 //
-// Inventario (grep de `modal-overlay`, `role=`, `position:fixed`, `confirm(`): exactamente 4 diálogos propios (#rbdModal, #otrasFuentesModal, #fondosFijosModal, #helpModal); el panel
+// Inventario (grep de `modal-overlay`, `role=`, `position:fixed`, `confirm(`): exactamente 5 diálogos propios (#rbdModal, #otrasFuentesModal, #fondosFijosModal, #helpModal y, desde la carga por fuente con reemplazo total, #cargaControlModal: resumen de control / resultado, con su propio spec en carga_reemplazo_total); el panel
 // "Atención" del Panel principal es una LISTA (no un modal): abre el detalle de la entidad en el modal de SEP o de la fuente, y eso también se verifica aquí.
 import { boot } from '../lib/boot.mjs';
 import { axDe } from '../lib/a11y.mjs';
@@ -108,8 +108,8 @@ await correrSpec('a11y_modales', async (t) => {
       t.ok(r.rol === 'dialog' && r.modal === 'true' && r.lb === m.titulo && r.tituloExiste, `E0) ${m.nombre}: role="dialog" aria-modal="true" aria-labelledby="${m.titulo}" (el título existe)`, r);
       t.ok(!r.dentroDeWrap, `E0) ${m.nombre}: el diálogo está FUERA de .wrap (para poder inertizar el fondo sin inertizarlo a él)`, r);
     }
-    t.eq(await page.evaluate(() => document.querySelectorAll('.modal-overlay').length), 4, 'E0) inventario: exactamente 4 diálogos modales propios (.modal-overlay)');
-    t.eq(await page.evaluate(() => document.querySelectorAll('[role="dialog"], [role="alertdialog"], dialog').length), 4, 'E0) y ningún otro role="dialog" / <dialog> en la página');
+    t.eq(await page.evaluate(() => document.querySelectorAll('.modal-overlay').length), 5, 'E0) inventario: exactamente 5 diálogos modales propios (.modal-overlay; el 5.º es el resumen de control de la carga por fuente)');
+    t.eq(await page.evaluate(() => document.querySelectorAll('[role="dialog"], [role="alertdialog"], dialog').length), 5, 'E0) y ningún otro role="dialog" / <dialog> en la página');
     t.eq(await page.evaluate(() => document.querySelector('#app .wrap').hasAttribute('inert')), false, 'E0) con todos cerrados la página NO está inert');
   });
 
