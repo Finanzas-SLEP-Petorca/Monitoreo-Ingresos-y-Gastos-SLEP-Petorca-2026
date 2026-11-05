@@ -508,7 +508,7 @@ Cambios en helpers/specs existentes (cada uno porque, ante el aviso, el botón a
 - `tests/lib/carga.mjs`: nuevo `marcarCasillaMasiva(page)` y `subirYConfirmar` la marca por defecto (`casilla:false` para no marcarla); devuelve `masivo` (si había casilla).
 - `carga_reemplazo_sep`: `confirmarCapturando` llama a `marcarCasillaMasiva` (su Excel de 1 entidad sobre un SEP con datos en muchas entidades dispara el aviso; es el único spec existente que fallaba).
 - e2e-real 15, 17 y 18: sus helpers de subida/confirmación marcan la casilla si aparece (sin aviso no hacen nada).
-- Golden: el modal solo existe tras subir un archivo y el golden no sube ninguno; se verifica abajo con la corrida del golden.
+- Golden: sin cambios (el modal solo existe tras subir un archivo y el golden no sube ninguno); corrida completa PASS sin regenerar.
 
 ### Bugs conocidos: `known-bug` vs `enforced`
 
