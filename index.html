@@ -788,6 +788,9 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .carga-tabla tr.carga-fila-err td, .carga-tabla tr.carga-fila-err th { background:var(--tone-red-bg); color:var(--status-critical); font-weight:700; }
   .carga-ayuda { margin:6px 0; font-size:12px; color:var(--text-secondary); }
   .carga-lista { margin:6px 0; padding-left:20px; font-size:12.5px; line-height:1.5; } .carga-mas { font-size:12.5px; color:var(--text-secondary); margin:2px 0 6px 20px; }
+  .carga-masivo p { margin:0 0 6px; } .carga-masivo .carga-lista { margin:4px 0 0; font-weight:400; }
+  .carga-confirma-masivo { flex:1 1 100%; display:flex; align-items:flex-start; gap:8px; font-size:13px; font-weight:600; color:var(--status-critical); cursor:pointer; }
+  .carga-confirma-masivo input { width:18px; height:18px; margin-top:1px; flex-shrink:0; }
   .carga-confirma { display:block; margin:14px 0 6px; font-size:13px; } .carga-input { width:100%; max-width:420px; padding:7px 10px; border:1px solid var(--baseline); border-radius:6px; font-size:14px; }
   .carga-banner { position:fixed; top:0; left:0; right:0; z-index:90; display:flex; gap:14px; align-items:center; justify-content:space-between; padding:10px 18px; background:var(--status-critical); color:#fff; font-size:14px; font-weight:600; box-shadow:0 2px 10px rgba(0,0,0,.35); }
   .carga-banner.hidden { display:none !important; }
@@ -7507,6 +7510,10 @@ const CARGA_KEY_SEP = 'sep', CARGA_KEY_FF = 'fondos_fijos'; // además de las 12
 const CARGA_ELIMINAR = '__ELIMINAR__';          // valor «sin corte propio» de la hoja META: se borra el campo (queda el corte por defecto)
 const CARGA_FILAS_VISIBLES = 15;                // filas de detalle visibles en el resumen (después «…y N más»)
 const CARGA_MAX_BYTES_DOC = 1000000;            // Firestore rechaza documentos de ≥ 1 MiB (1.048.576 bytes): se estima con margen
+// Confirmación extra por «vaciado masivo» (p. ej. subir por error el «⬇ XLS» de UNA sola entidad, que deja vacías a las demás): se pide cuando, en alguna hoja (o sumando
+// las entidades distintas de todas), quedarían vacías —y hoy TIENEN datos— ≥ UMBRAL_VACIADO_MASIVO entidades, o ≥ 50 % del universo de la fuente si este tiene ≥ 10 entidades.
+const UMBRAL_VACIADO_MASIVO = 50, UMBRAL_VACIADO_RELATIVO = 0.5, UNIVERSO_MIN_RELATIVO = 10;
+const esVaciadoMasivo = (k, universo) => k > 0 && (k >= UMBRAL_VACIADO_MASIVO || (universo >= UNIVERSO_MIN_RELATIVO && k >= UMBRAL_VACIADO_RELATIVO * universo));
 const CARGA_LOTE_MAX = 400;                     // documentos por batch (Firestore admite 500 operaciones)
 const respaldoCargaOF = {};                     // fuenteKey → { fecha, motivo, archivo, estado } (solo en memoria: se pierde al recargar; por eso también se descarga el Excel)
 let cargaPlanActivo = null;                     // el plan que muestra el modal de control (null si no hay uno abierto)
@@ -7966,8 +7973,28 @@ function completarPlanCarga(plan) {
   });
   plan.cambios = calcularCambiosCarga(plan);
   plan.nCambios = Object.keys(plan.cambios).length;
+  plan.masivo = calcularVaciadoMasivo(plan);
   plan.errores = erroresTamanoCarga(plan);
   return plan;
+}
+// Vaciado masivo: entidades que HOY tienen datos en una hoja y que, tras la carga, quedarían sin ninguno. No cuenta las que ya estaban vacías ni la hoja META (solo vuelve al corte por defecto,
+// no se pierde ningún monto). No aplica a «Vaciar» (tiene su propia confirmación escribiendo el nombre). `n` = entidades que SÍ traen datos en las hojas afectadas. Devuelve null si no hay que pedir la confirmación extra.
+function calcularVaciadoMasivo(plan) {
+  if (plan.modo === 'vaciar') return null;
+  const ctx = plan.ctx, m = ctx.universo.size, hojas = [], afectadas = new Set(), conDatos = new Set();
+  plan.hojas.forEach(h => {
+    if (!h.presente || h.omitida || h.desc.tipo === 'meta') return;
+    const perdidas = {}, traen = new Set(); let k = 0;
+    ctx.universo.forEach(rbd => {
+      const nuevo = h.nuevo.has(rbd) ? h.nuevo.get(rbd) : vacioCarga(h.desc);
+      if (estadisticaCarga(h.desc, { [rbd]: nuevo }, ctx).filas > 0) { traen.add(rbd); return; }
+      const actual = ctx.leer(h.desc, rbd);
+      if (estadisticaCarga(h.desc, { [rbd]: actual }, ctx).filas > 0) { perdidas[rbd] = actual; k++; afectadas.add(rbd); }
+    });
+    if (k) { traen.forEach(rbd => conDatos.add(rbd)); const e = estadisticaCarga(h.desc, perdidas, ctx); hojas.push({ nombre: h.nombre || h.desc.hoja, k, filas: e.filas, total: e.total }); }
+  });
+  if (!(hojas.some(x => esVaciadoMasivo(x.k, m)) || esVaciadoMasivo(afectadas.size, m))) return null;
+  return { k: afectadas.size, m, n: conDatos.size, hojas };
 }
 // { entidad: { campo: valor|CARGA_ELIMINAR } } — SOLO lo que realmente cambia respecto de la memoria.
 function calcularCambiosCarga(plan) {
@@ -8186,6 +8213,7 @@ function cerrarModalCarga() {
   if (cargaModalEl.classList.contains('hidden')) return;
   cargaModalEl.classList.add('hidden');
   cargaBodyEl.innerHTML = ''; cargaFooterEl.innerHTML = '';
+  cargaModalEl.querySelector('.modal-panel').removeAttribute('aria-describedby');
   cargaPlanActivo = null;
   a11yModalCerrado(cargaModalEl);
 }
@@ -8220,12 +8248,19 @@ function detalleComprasCargaHTML(plan) {
     <h5 class="carga-h5">Diferencia por N° DC (solo los que cambian: ${dcs.length})</h5>
     ${dcs.length ? `<div class="table-scroll"><table class="data-table carga-tabla"><thead><tr><th scope="col">N° DC</th><th scope="col" class="num">Filas hoy</th><th scope="col" class="num">Filas archivo</th><th scope="col" class="num">Suma hoy</th><th scope="col" class="num">Suma archivo</th><th scope="col" class="num">Diferencia</th></tr></thead><tbody>${dcs.slice(0, CARGA_FILAS_VISIBLES).map(fila).join('')}</tbody></table></div>${dcs.length > CARGA_FILAS_VISIBLES ? `<div class="carga-mas">…y ${dcs.length - CARGA_FILAS_VISIBLES} más</div>` : ''}` : '<p class="carga-ayuda">Ningún N° DC cambia de filas ni de monto.</p>'}`;
 }
+function avisoVaciadoMasivoHTML(plan) {
+  const v = plan.masivo, ent = (n) => `${n} ${n === 1 ? 'entidad' : 'entidades'}`;
+  const origen = plan.modo === 'deshacer' ? 'El estado que se restaura' : 'Este archivo';
+  const lista = v.hojas.map(x => `<li><strong>${escHtml(x.nombre)}:</strong> ${ent(x.k)} hoy con datos (${x.filas} ${x.filas === 1 ? 'fila' : 'filas'}${x.total === null ? '' : ', ' + escHtml(pesosCarga(x.total))}) quedarán en $0 / sin datos${x.total === null ? '' : '; se perderían ' + escHtml(pesosCarga(x.total))}.</li>`).join('');
+  return `<div class="carga-nota err carga-masivo" id="cargaAvisoMasivo" role="alert"><p><strong>⚠ ${origen} trae solo ${v.n} de ${v.m} entidades.</strong> Si confirmas, ${ent(v.k)} quedarán en $0 / sin datos en: ${v.hojas.map(x => escHtml(x.nombre)).join(', ')}. <strong>¿Subiste el Excel de una sola entidad por error?</strong></p><ul class="carga-lista">${lista}</ul></div>`;
+}
 function controlCargaHTML(plan) {
   const label = escHtml(plan.ctx.label);
   const partes = [];
   if (plan.modo === 'excel') partes.push(`<p>Al confirmar, los datos de <strong>${label}</strong> se <strong>reemplazan por completo</strong> con lo que trae el archivo, hoja por hoja: lo que ya no está en el archivo desaparece del panel y una fila modificada queda solo con su valor nuevo. Las hojas que el archivo no trae se conservan. ${escHtml(plan.ctx.textoAlcance)} Antes de reemplazar se descarga un respaldo del estado actual.</p>`);
   else if (plan.modo === 'deshacer') { const r = respaldoCargaOF[plan.fuenteKey]; partes.push(`<p>Se volverá al estado que tenía <strong>${label}</strong> antes de ${escHtml(r ? r.motivo : 'la última carga')} (${escHtml(r ? r.fecha.toLocaleString('es-CL') : '')}). Esto reemplaza por completo, hoja por hoja, lo que hay hoy.</p>`); }
   else partes.push(`<p><strong>Esto deja ${label} completamente vacía</strong> ${escHtml(plan.ctx.textoVaciar)} Antes se descarga un respaldo y queda disponible «↩ Deshacer última carga» mientras no recargues la página.</p>`);
+  if (plan.masivo) partes.push(avisoVaciadoMasivoHTML(plan));
   if (plan.errores.length) partes.push(`<div class="carga-nota err" role="alert">${plan.errores.map(escHtml).join('<br>')}</div>`);
   plan.advertencias.forEach(t => partes.push(`<div class="carga-nota warn">⚠ ${escHtml(t)}</div>`));
   partes.push(`<div class="carga-nota ${plan.nCambios ? 'info' : 'ok'}">${plan.nCambios ? `Se modificarían los datos de <strong>${plan.nCambios}</strong> ${plan.nCambios === 1 ? 'entidad' : 'entidades'}.` : 'El archivo es idéntico a lo que ya hay en el panel: no se cambiaría nada.'}</div>`);
@@ -8247,7 +8282,10 @@ function mostrarControlCarga(plan) {
   cargaBodyEl.innerHTML = controlCargaHTML(plan);
   const hayHoja = plan.hojas.some(h => h.presente && !h.omitida) || plan.modo !== 'excel';
   const etiqueta = { excel: `Reemplazar los datos de ${plan.ctx.label}`, deshacer: 'Volver al estado anterior', vaciar: `Vaciar ${plan.ctx.label}` }[plan.modo];
-  cargaFooterEl.innerHTML = `<button type="button" id="cargaOkBtn" class="carga-btn-ok"${(!hayHoja || plan.errores.length || plan.modo === 'vaciar') ? ' disabled' : ''}>${escHtml(etiqueta)}</button><button type="button" id="cargaCancelarBtn" class="carga-btn-cancel">Cancelar</button>`;
+  const panel = cargaModalEl.querySelector('.modal-panel');
+  if (plan.masivo) panel.setAttribute('aria-describedby', 'cargaAvisoMasivo'); else panel.removeAttribute('aria-describedby');
+  const casilla = plan.masivo ? `<label class="carga-confirma-masivo" for="cargaConfirmaMasivo"><input type="checkbox" id="cargaConfirmaMasivo"> Entiendo que ${plan.masivo.k} ${plan.masivo.k === 1 ? 'entidad quedará vacía' : 'entidades quedarán vacías'} y que ${plan.modo === 'deshacer' ? 'ese estado' : 'este archivo'} no trae sus datos</label>` : '';
+  cargaFooterEl.innerHTML = `${casilla}<button type="button" id="cargaOkBtn" class="carga-btn-ok"${(!hayHoja || plan.errores.length || plan.modo === 'vaciar' || plan.masivo) ? ' disabled' : ''}>${escHtml(etiqueta)}</button><button type="button" id="cargaCancelarBtn" class="carga-btn-cancel">Cancelar</button>`;
   (document.getElementById('cargaConfirmaNombre') || document.getElementById('cargaCancelarBtn')).focus({ preventScroll: true });
 }
 function mostrarAvisoCarga(titulo, mensaje) {
@@ -8293,7 +8331,16 @@ function iniciarCargaOtraFuente(fuenteKey, wb, archivo) {
 cargaModalEl.addEventListener('click', (e) => {
   if (e.target === cargaModalEl) { if (!cargaEnCurso) cerrarModalCarga(); return; }
   if (e.target.closest('#cargaControlCloseBtn') || e.target.closest('#cargaCancelarBtn') || e.target.closest('#cargaCerrarBtn')) { if (!cargaEnCurso) cerrarModalCarga(); return; }
-  if (e.target.closest('#cargaOkBtn') && cargaPlanActivo && !cargaEnCurso) aplicarPlanCarga(cargaPlanActivo);
+  if (e.target.closest('#cargaOkBtn') && cargaPlanActivo && !cargaEnCurso) {
+    const cb = document.getElementById('cargaConfirmaMasivo');
+    if (cargaPlanActivo.masivo && !(cb && cb.checked)) return; // vaciado masivo: sin la casilla marcada no se escribe nada
+    aplicarPlanCarga(cargaPlanActivo);
+  }
+});
+cargaModalEl.addEventListener('change', (e) => {
+  if (e.target.id !== 'cargaConfirmaMasivo' || !cargaPlanActivo) return;
+  const btn = document.getElementById('cargaOkBtn');
+  if (btn) btn.disabled = !(e.target.checked && !cargaPlanActivo.errores.length);
 });
 cargaModalEl.addEventListener('input', (e) => {
   if (e.target.id !== 'cargaConfirmaNombre' || !cargaPlanActivo) return;

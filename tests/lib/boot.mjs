@@ -147,8 +147,10 @@ const SCRIPT_AUTOCARGA = `(() => {
     if (!modal || modal.classList.contains('hidden')) { guardado = null; confirmado = false; return; }
     const ok = document.getElementById('cargaOkBtn'), cerrar = document.getElementById('cargaCerrarBtn'), cancelar = document.getElementById('cargaCancelarBtn');
     if (ok && !confirmado) {
-      if (ok.disabled) { const t = norm(document.getElementById('cargaControlBody').innerText); setTimeout(() => { cancelar.click(); window.alert(t); }, 0); confirmado = true; return; }
-      guardado = resumenControl(); confirmado = true; setTimeout(() => ok.click(), 0); return;
+      if (ok.disabled && !document.getElementById('cargaConfirmaMasivo')) { const t = norm(document.getElementById('cargaControlBody').innerText); setTimeout(() => { cancelar.click(); window.alert(t); }, 0); confirmado = true; return; }
+      guardado = resumenControl(); confirmado = true;
+      // Aviso de vaciado masivo: la persona marca la casilla «Entiendo que K entidades quedarán vacías…» antes de poder reemplazar.
+      setTimeout(() => { const cb = document.getElementById('cargaConfirmaMasivo'); if (cb && !cb.checked) cb.click(); ok.click(); }, 0); return;
     }
     if (cerrar && !ok) {
       const cuerpo = document.getElementById('cargaControlBody');

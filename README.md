@@ -455,6 +455,14 @@ filas rechazadas, las entidades que quedarían en cero y las hojas del archivo q
 **diferencia por N° DC** (solo los que cambian; con tope visible y «…y N más»). Botones **Reemplazar** (confirma) y **Cancelar** / `Esc` (no cambia nada ni escribe a Firestore).
 Si el archivo es idéntico a lo que ya hay, lo dice y confirmar no escribe nada (cargar dos veces el mismo Excel no cambia nada).
 
+**Confirmación extra si el archivo dejaría vacías muchas entidades.** Si el archivo dejaría vacías (en $0 / sin datos) a muchas entidades que hoy tienen datos —el error típico es subir el «⬇ XLS» de **una sola** entidad—,
+el resumen muestra un aviso rojo («Este archivo trae solo N de M entidades. Si confirmas, K entidades quedarán en $0 / sin datos en: …. ¿Subiste el Excel de una sola entidad por error?») con, por hoja, cuántas
+entidades se afectan y cuántos pesos se perderían, y **«Reemplazar» queda deshabilitado hasta marcar la casilla** «Entiendo que K entidades quedarán vacías y que este archivo no trae sus datos» (el foco inicial va a
+«Cancelar»; `Esc` sigue cancelando). **Regla** (constantes `UMBRAL_VACIADO_MASIVO = 50`, 50 % y universo mínimo 10, en `index.html`): se pide cuando, en alguna hoja —o sumando las entidades distintas de todas las hojas—,
+quedarían vacías **≥ 50 entidades o ≥ 50 % del universo de la fuente** (este segundo criterio solo si el universo tiene ≥ 10 entidades: SEP 55 → 28, General 56 → 28, Aporte JUNJI 13 → 7, Fondos Fijos 68 → 34).
+Solo cuentan las entidades que hoy **sí** tienen datos en esa hoja (las que ya estaban vacías no) y no se considera la hoja `META` (solo vuelve al corte por defecto; no se pierde ningún monto). Rige igual en las 12 fuentes, SEP,
+Fondos Fijos y «↩ Deshacer última carga»; «🗑 Vaciar» no lo usa (ya pide escribir el nombre). Sin aviso, el flujo es el de siempre.
+
 **Cuadratura posterior.** Tras escribir se vuelve a leer lo que quedó en el panel y se compara con el archivo (filas y suma por hoja). Si algo no cuadra aparece un **mensaje
 rojo persistente** (cuadro y banner superior que solo se cierra con «Entendido») indicando hoja, esperado y obtenido. Si el servidor rechaza la escritura (sin permisos, sin
 red) se avisa igual y el panel vuelve a mostrar lo que hay guardado.

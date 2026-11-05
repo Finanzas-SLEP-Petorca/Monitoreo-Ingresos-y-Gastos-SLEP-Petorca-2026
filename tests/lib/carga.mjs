@@ -28,7 +28,14 @@ async function esperarModal(page, cond, desc, timeout = 60000) {
   try { await page.waitForFunction(cond, null, { timeout }); }
   catch (e) { throw new Error('No apareció ' + desc + ': ' + JSON.stringify(await leerModalCarga(page)).slice(0, 600)); }
 }
-export async function subirYConfirmar(h, fuente, buffer, { nombre = 'carga.xlsx', confirmar = true, cerrar = true } = {}) {
+// Aviso de vaciado masivo: si el resumen pide la casilla «Entiendo que K entidades quedarán vacías…», la marca (sin aviso no hace nada). Devuelve si había casilla.
+export async function marcarCasillaMasiva(page) {
+  if (!await page.$('#cargaConfirmaMasivo')) return false;
+  await page.check('#cargaConfirmaMasivo');
+  return true;
+}
+// `casilla:false` = no marca la casilla (para probar que el botón queda deshabilitado); por defecto la marca, como haría la persona que sí quiere reemplazar.
+export async function subirYConfirmar(h, fuente, buffer, { nombre = 'carga.xlsx', confirmar = true, cerrar = true, casilla = true } = {}) {
   const { page } = h;
   await page.setInputFiles(inputFuente(fuente), { name: nombre, mimeType: MIME, buffer });
   await esperarModal(page, () => !document.getElementById('cargaControlModal').classList.contains('hidden') && (document.getElementById('cargaOkBtn') || document.getElementById('cargaCerrarBtn')), 'el resumen de control');
@@ -36,6 +43,7 @@ export async function subirYConfirmar(h, fuente, buffer, { nombre = 'carga.xlsx'
   const out = { control, resultado: null };
   if (!confirmar) { if (cerrar && await page.$('#cargaCancelarBtn')) await page.click('#cargaCancelarBtn'); else if (cerrar && await page.$('#cargaCerrarBtn')) await page.click('#cargaCerrarBtn'); await h.waitIdle(); return out; }
   if (!await page.$('#cargaOkBtn')) { out.resultado = control; if (cerrar) await page.click('#cargaCerrarBtn'); await h.waitIdle(); return out; }
+  out.masivo = casilla ? await marcarCasillaMasiva(page) : !!await page.$('#cargaConfirmaMasivo');
   await page.click('#cargaOkBtn');
   await esperarModal(page, () => !!document.getElementById('cargaCerrarBtn') && !document.getElementById('cargaOkBtn'), 'el resultado de la carga');
   await page.waitForTimeout(150);

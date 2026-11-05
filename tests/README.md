@@ -352,6 +352,7 @@ Cada uno termina con `process.exit(1)` si falla y con una línea final `RESULT: 
 | `junji_rem_excel` | JUNJI · hojas `REM_*` e `ING_CARRERA_DOCENTE_PARVULARIA`, ida y vuelta, compatibilidad con el Excel anterior (`REMUNERACIONES` → Operación) |
 | `carga_reemplazo_total` | Carga por fuente = REEMPLAZO TOTAL (General): resumen de control antes de escribir, filas y sumas exactas (NC negativas), mismo Excel dos veces sin escrituras, fila modificada = una fila, eliminadas desaparecen, entidad ausente vacía, hoja ausente se conserva, filas idénticas y ID repetido, otras fuentes y SEP intactos, DC_247 (53 + 66 = 66), rechazos con motivo (leídas = cargadas + rechazadas), Cancelar/Esc, accesibilidad del modal, cuadratura con desajuste inyectado (banner rojo), Deshacer, Vaciar fuente (solo admin, escribiendo el nombre), Excel de 3.200 compras |
 | `carga_reemplazo_hojas` | Semántica por tipo de hoja en fuentes por concepto (FAEP), JUNJI (REM_*, REMUNERACIONES antigua, META espejo) y Recuperación LLMM; hoja con encabezado de otra fuente se omite entera; exportar → subir en las 12 fuentes × 4 fixtures no cambia nada |
+| `carga_confirmacion_masiva` | Confirmación extra si la carga dejaría vacías ≥ 50 entidades o ≥ 50 % del universo (≥ 10): aviso rojo (`role=alert`), «Reemplazar» deshabilitado hasta marcar la casilla, foco en «Cancelar», Cancelar/`Esc` sin escribir, sin aviso con archivo completo, límites 27/28 de 55 y 6/7 de 13, entidades ya vacías no cuentan, «Deshacer», SEP / Fondos Fijos / General / Aporte JUNJI, «Vaciar» sin este aviso. |
 | `mock_semantica` | prueba el propio mock (merge profundo, deleteField, timestamps, batch, offline, errores…) sin el panel |
 | `fondos_fijos_modelo` | PR K, fixture `fondos_fijos`: lectura de `fondos_fijos` SIN escribir (68 entidades —55 RBD + 13 GESPARVU, sin AC—, tarjetas, Estado de cada una y modal contra un cálculo independiente: aceptado, pendientes, saldo de caja), lectura TOLERANTE de un documento con valores no numéricos, nulos, negativos, ≥ `MONTO_ABS_MAX`, folio que no es texto o de 60 caracteres / emojis (estado verde, 0 writes), AC ignorado, guardado con merge por mes y campo (un write de solo `fondos_fijos.meses.<MES>.<campo>`, el servidor conserva lo demás, persiste tras recargar), lo registrado en General mueve la fila, el modal y el Panel principal y el jardín entra y sale de General, y cambios remotos con el modal abierto |
 | `fondos_fijos_validacion` | PR K, endurecimiento: montos solo finitos, no negativos y bajo el tope (negativo, 1e13, «1e999» → no se guarda, mensaje claro y la celda vuelve; vacío = 0; 9.999.999.999.999 sí), folio de 40 caracteres (41 se recorta con aviso; emojis cuentan como 1; espacios de los bordes), `data-ff-*` manipulados (campo, mes o entidad inválidos, `__proto__`, AC, id inexistente) no escriben ni crean documentos, error de guardado permanente (rojo con «Reintentar» también dentro del modal) y XSS (folio con marcado literal; copia del HTML con un GESPARVU de id con marcado: `data-ff-rbd` / `data-ff-abrir` escapados) |
@@ -493,6 +494,21 @@ la segunda ya es idempotente (así lo prueba `carga_reemplazo_sep`).
   guardado entidad por entidad («N de M guardadas», «Reintentar», plazo de 20 s sin conexión): ahora es un batch con resumen y cuadratura (un servidor que rechaza se prueba en la sección 5 y en 18).
 - `roundtrip_excel`: igual que en las fuentes, el Excel de una entidad vacía las demás en las hojas que trae; se verifica la entidad exportada.
 - Golden: solo aparecen los botones «↩ Deshacer última carga» (oculto) y «🗑 Vaciar SEP» / «🗑 Vaciar Fondos Fijos» (solo admin) y el texto de ayuda del botón de importar; ninguna cifra cambia.
+
+### Confirmación extra por vaciado masivo: qué cambió en los specs y por qué
+
+Spec nuevo `carga_confirmacion_masiva` (usa `tests/lib/carga.mjs`) y un escenario `S6` en `tests/e2e-real/specs/18_carga_sep_ff.mjs` (SDK real: Excel de una entidad con compras en 50 RBD → aviso, `Esc` sin escrituras, con la casilla se borran
+de verdad las compras de las otras 49). Cubre: aviso rojo con `role="alert"` y `aria-describedby` en el diálogo, «Reemplazar» deshabilitado hasta marcar la casilla (con `label`), foco inicial en «Cancelar», Cancelar/`Esc` sin escrituras,
+archivo completo sin aviso, límites (27/28 de 55 en SEP, 6/7 de 13 en Aporte JUNJI; la regla pura se extrae del `index.html` bajo prueba: 49/50 de 200, universo < 10, universo = 10), entidades ya vacías que no cuentan, «Deshacer» que
+restaura un estado con 54 entidades vacías, y los tres flujos (SEP, Fondos Fijos y otras fuentes: General y Aporte JUNJI). Con los universos reales (≤ 69 entidades) el criterio relativo (50 %) siempre dispara antes que el absoluto (≥ 50),
+por eso este último solo se prueba con la función pura.
+
+Cambios en helpers/specs existentes (cada uno porque, ante el aviso, el botón arranca deshabilitado y confirmar sin la casilla fallaría):
+- `tests/lib/boot.mjs` (`autoCarga`): si el resumen trae la casilla `#cargaConfirmaMasivo` la marca antes de pulsar «Reemplazar» (antes cancelaba y emitía el resumen como alert cuando el botón estaba deshabilitado; ahora solo lo hace si NO hay casilla, p. ej. errores de tamaño).
+- `tests/lib/carga.mjs`: nuevo `marcarCasillaMasiva(page)` y `subirYConfirmar` la marca por defecto (`casilla:false` para no marcarla); devuelve `masivo` (si había casilla).
+- `carga_reemplazo_sep`: `confirmarCapturando` llama a `marcarCasillaMasiva` (su Excel de 1 entidad sobre un SEP con datos en muchas entidades dispara el aviso; es el único spec existente que fallaba).
+- e2e-real 15, 17 y 18: sus helpers de subida/confirmación marcan la casilla si aparece (sin aviso no hacen nada).
+- Golden: el modal solo existe tras subir un archivo y el golden no sube ninguno; se verifica abajo con la corrida del golden.
 
 ### Bugs conocidos: `known-bug` vs `enforced`
 

@@ -41,6 +41,7 @@ async function subirFF(h, buffer) {
   await page.waitForFunction(() => !!document.getElementById('cargaOkBtn') || !!document.getElementById('cargaCerrarBtn'), null, { timeout: 90000 });
   const control = await page.evaluate(() => document.getElementById('cargaControlBody').innerText.replace(/\s+/g, ' '));
   if (!await page.$('#cargaOkBtn')) { await page.click('#cargaCerrarBtn'); return { control }; }
+  if (await page.$('#cargaConfirmaMasivo')) await page.check('#cargaConfirmaMasivo'); // vaciado masivo: casilla
   await page.click('#cargaOkBtn');
   await page.waitForFunction(() => !!document.getElementById('cargaCerrarBtn') && !document.getElementById('cargaOkBtn') && !/Guardando para el resto/.test(document.getElementById('cargaControlBody').innerText), null, { timeout: 120000 });
   const resultado = await page.evaluate(() => document.getElementById('cargaControlBody').innerText.replace(/\s+/g, ' '));
