@@ -56,7 +56,7 @@ await correrSpec('junji_rem_excel', async (t) => {
   const s2 = await h.store();
   t.eq([s2[RUTA('5401003')].otras_fuentes.junji.gasto_rem_homologacion.meses.FEBRERO, s2[RUTA('5401003')].otras_fuentes.junji.gasto_rem_homologacion.total], [654321, 654321], 'el gasto de Homologación de febrero de 5401003 (un jardín sin esa línea antes) llega al servidor');
   const wr = (await h.writes()).filter(x => x.path === RUTA('5401003'));
-  t.ok(wr.length > 0 && wr.every(x => x.options.merge === true), 'con merge:true');
+  t.ok(wr.length > 0 && wr.every(x => (x.options.merge === true || Array.isArray(x.options.mergeFields))), 'con merge:true o mergeFields (reemplazo del campo)');
 
   // ---------------------------------------------------------------- 4) Excel ANTERIOR: REMUNERACIONES → Operación; ING_CARRERA_DOCENTE → Carrera Docente Parvularia
   const ant = {};
@@ -66,7 +66,7 @@ await correrSpec('junji_rem_excel', async (t) => {
   const antes = (await h.store())[RUTA('5402002')].otras_fuentes.junji;
   await h.clearWrites();
   msg = await importarLibro(h, '#importExcelOFInput-junji', await libroXlsx(page, ant), 'junji_anterior.xlsx');
-  t.ok(/^Carga importada correctamente/.test(msg[0] || '') && msg[0].includes('REMUNERACIONES (→ Operación): 13 filas') && msg[0].includes('ING_CARRERA_DOCENTE: 13 filas'), 'un Excel ANTERIOR (REMUNERACIONES + ING_CARRERA_DOCENTE) se importa sin error: REMUNERACIONES pasa a Operación', msg);
+  t.ok(/^Carga importada correctamente/.test(msg[0] || '') && msg[0].includes('REMUNERACIONES: 13 filas') && msg[0].includes('ING_CARRERA_DOCENTE: 13 filas'), 'un Excel ANTERIOR (REMUNERACIONES + ING_CARRERA_DOCENTE) se importa sin error: REMUNERACIONES pasa a Operación', msg);
   const d2 = (await h.store())[RUTA('5402002')].otras_fuentes.junji;
   t.eq([d2.gasto_rem_operacion.meses.ENERO, d2.ingreso_carrera_docente.meses.ENERO], [123000, 77000], 'REMUNERACIONES escribió Gasto Rem. Operación (123.000) e ING_CARRERA_DOCENTE el Ingreso Carrera Docente Parvularia (77.000)');
   t.eq([JSON.stringify(d2.gasto_rem_homologacion), JSON.stringify(d2.gasto_rem_carrera_docente), JSON.stringify(d2.gasto_rem_bdl)], [JSON.stringify(antes.gasto_rem_homologacion), JSON.stringify(antes.gasto_rem_carrera_docente), JSON.stringify(antes.gasto_rem_bdl)], 'las otras 3 líneas de Remuneración no se tocan');

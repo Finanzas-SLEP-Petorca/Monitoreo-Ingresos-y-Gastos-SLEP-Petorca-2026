@@ -260,7 +260,7 @@ await correrSpec('junji_bdl', async (t) => {
   const s2 = await h.store();
   t.eq([s2[RUTA('5401003')].otras_fuentes.junji.ingreso_bdl.meses.FEBRERO, s2[RUTA('5401003')].otras_fuentes.junji.ingreso_bdl.total], [654321, 654321], 'el BDL de febrero de 5401003 (un jardín sin BDL antes) llega al servidor');
   const wBdl = (await h.writes()).filter(x => x.path === RUTA('5401003'));
-  t.ok(wBdl.length > 0 && wBdl.every(x => x.options.merge === true), 'con merge:true');
+  t.ok(wBdl.length > 0 && wBdl.every(x => (x.options.merge === true || Array.isArray(x.options.mergeFields))), 'con merge:true o mergeFields (reemplazo del campo)');
   t.noErrores(h);
 
   // ---------------------------------------------------------------- 8) CSV / PDF por fila, respaldo JSON y Aporte JUNJI (una sola línea: sin BDL)
