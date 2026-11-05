@@ -159,7 +159,7 @@ const SCRIPT_AUTOCARGA = `(() => {
       setTimeout(() => { cerrar.click(); window.alert(msg); }, 0);
     }
   }
-  document.addEventListener('DOMContentLoaded', () => { new MutationObserver(revisar).observe(document.getElementById('cargaControlModal'), { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] }); });
+  document.addEventListener('DOMContentLoaded', () => { const m = document.getElementById('cargaControlModal'); if (m) new MutationObserver(revisar).observe(m, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] }); });
 })();`;
 
 /**

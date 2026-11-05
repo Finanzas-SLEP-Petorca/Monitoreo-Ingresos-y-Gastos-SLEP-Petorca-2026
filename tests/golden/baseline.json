@@ -3,7 +3,7 @@
   "esquema": 1,
   "baseline_ref": "0f16ace",
   "html_bajo_prueba": "árbol de trabajo (index.html)",
-  "html_sha1": "33664ef45f9ef9b2656059c22ffef4a8470884fe",
+  "html_sha1": "36128a7860fec92662e053955199bb2ce3b69e3e",
   "fixture_sha1": "ecc4594e51c6ceb6cd125835198a76ae771228d4",
   "fixture_cierre_sha1": "68795eab98878757f6827fee93b16ce2df3655b8",
   "fixture": {
@@ -3979,6 +3979,7 @@
     "⬇ Compras SUPEREDUC (CSV)",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -4070,7 +4071,7 @@
     "Gasto Total (Total) | $218.842.285",
     "Saldo (Total) | $345.459.430"
    ],
-   "htmlHash": "0bd54f1a609d69"
+   "htmlHash": "1bc05834c3a6d2"
   },
   "of.general.real": {
    "text": [
@@ -4103,6 +4104,7 @@
     "⬇ Compras SUPEREDUC (CSV)",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -4194,7 +4196,7 @@
     "Gasto Total (Total) | $218.842.285",
     "Saldo (Total) | $345.459.430"
    ],
-   "htmlHash": "07fd06cdbf4b0f"
+   "htmlHash": "0a939077730dc3"
   },
   "of.general.proy": {
    "text": [
@@ -4227,6 +4229,7 @@
     "⬇ Compras SUPEREDUC (CSV)",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -4318,7 +4321,7 @@
     "Gasto Total (Total) | $218.842.285",
     "Saldo (Total) | $345.459.430"
    ],
-   "htmlHash": "19f350c85ae8a4"
+   "htmlHash": "0c9fb01f1081fc"
   },
   "of.pie.total": {
    "text": [
@@ -4351,6 +4354,7 @@
     "⬇ Compras SUPEREDUC (CSV)",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -4442,7 +4446,7 @@
     "Gasto Total (Total) | $223.181.425",
     "Saldo (Total) | $359.048.290"
    ],
-   "htmlHash": "153cd39d01a008"
+   "htmlHash": "08f6aebe4cd9ad"
   },
   "of.mantenimiento.total": {
    "text": [
@@ -4475,6 +4479,7 @@
     "⬇ Compras SUPEREDUC (CSV)",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -4566,7 +4571,7 @@
     "Gasto Total (Total) | $22.056.000",
     "Saldo (Total) | $614.120.575"
    ],
-   "htmlHash": "1415ba918fcc93"
+   "htmlHash": "14db82562f5453"
   },
   "of.prorretencion.total": {
    "text": [
@@ -4599,6 +4604,7 @@
     "⬇ Compras SUPEREDUC (CSV)",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -4690,7 +4696,7 @@
     "Gasto Total (Total) | $701.676.720",
     "Saldo (Total) | $1.068.832.415"
    ],
-   "htmlHash": "1096007acd032b"
+   "htmlHash": "1186d5b1e4f4d5"
   },
   "of.junji.total": {
    "text": [
@@ -4722,6 +4728,7 @@
     "Ingreso − Gasto · 11 de 13 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -4792,7 +4799,7 @@
     "Gasto Total (Total) | $536.832.000",
     "Saldo (Total) | -$50.460.005"
    ],
-   "htmlHash": "124ec72b7a798a"
+   "htmlHash": "057335945b70ca"
   },
   "of.junji.real": {
    "text": [
@@ -4824,6 +4831,7 @@
     "Ingreso − Gasto · 11 de 13 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -4894,7 +4902,7 @@
     "Gasto Total (Total) | $536.832.000",
     "Saldo (Total) | -$50.460.005"
    ],
-   "htmlHash": "18fa816c6ec3b6"
+   "htmlHash": "05d56f569e3e73"
   },
   "of.junji.proy": {
    "text": [
@@ -4926,6 +4934,7 @@
     "Ingreso − Gasto · 11 de 13 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -4996,7 +5005,7 @@
     "Gasto Total (Total) | $536.832.000",
     "Saldo (Total) | -$50.460.005"
    ],
-   "htmlHash": "134c6fa9b8f7d5"
+   "htmlHash": "1f8eb58081998b"
   },
   "of.faep.total": {
    "text": [
@@ -5028,6 +5037,7 @@
     "Ingreso − Gasto · 0 de 69 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -5132,7 +5142,7 @@
     "Gasto Total (Total) | $291.677.145",
     "Saldo (Total) | $75.644.565"
    ],
-   "htmlHash": "13c330bdcf4b98"
+   "htmlHash": "1ff272ba41cf0f"
   },
   "of.faep.real": {
    "text": [
@@ -5164,6 +5174,7 @@
     "Ingreso − Gasto · 0 de 69 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -5268,7 +5279,7 @@
     "Gasto Total (Total) | $291.677.145",
     "Saldo (Total) | $75.644.565"
    ],
-   "htmlHash": "1b74f60c52bcaf"
+   "htmlHash": "1c24a6954ea5ad"
   },
   "of.faep.proy": {
    "text": [
@@ -5300,6 +5311,7 @@
     "Ingreso − Gasto · 0 de 69 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -5404,7 +5416,7 @@
     "Gasto Total (Total) | $291.677.145",
     "Saldo (Total) | $75.644.565"
    ],
-   "htmlHash": "02e18b191b761e"
+   "htmlHash": "0f4574034ecab9"
   },
   "of.figa.total": {
    "text": [
@@ -5436,6 +5448,7 @@
     "Ingreso − Gasto · 0 de 69 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -5540,7 +5553,7 @@
     "Gasto Total (Total) | $303.939.435",
     "Saldo (Total) | $82.832.565"
    ],
-   "htmlHash": "02d1490bc00141"
+   "htmlHash": "0b35cca7923439"
   },
   "of.aporte_educ.total": {
    "text": [
@@ -5572,6 +5585,7 @@
     "Ingreso − Gasto · 0 de 56 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -5663,7 +5677,7 @@
     "Gasto Total (Total) | $294.324.000",
     "Saldo (Total) | $67.560.000"
    ],
-   "htmlHash": "04d8939d77368b"
+   "htmlHash": "1c1a821d084853"
   },
   "of.aporte_junji.total": {
    "text": [
@@ -5695,6 +5709,7 @@
     "Ingreso − Gasto · 0 de 13 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -5743,7 +5758,7 @@
     "Gasto Total (Total) | $49.392.000",
     "Saldo (Total) | $6.142.290"
    ],
-   "htmlHash": "0dd1080f0aed19"
+   "htmlHash": "0c71747597483d"
   },
   "modal.of.general.1121": {
    "text": [
@@ -16647,6 +16662,7 @@
     "⬇ Compras SUPEREDUC (CSV)",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -16738,7 +16754,7 @@
     "Gasto Total (Total) | $218.477.285",
     "Saldo (Total) | $345.824.430"
    ],
-   "htmlHash": "0eb42f44e66d41"
+   "htmlHash": "05a8b7befe20ae"
   },
   "compras.modal.of.general.1121": {
    "text": [
@@ -20457,6 +20473,7 @@
     "Ingreso − Gasto · 2 de 69 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -20561,7 +20578,7 @@
     "Gasto Total (Total) | $306.776.946",
     "Saldo (Total) | $75.544.764"
    ],
-   "htmlHash": "0565139fa4d655"
+   "htmlHash": "0f02ce5877a406"
   },
   "estado.of.general": {
    "text": [
@@ -20594,6 +20611,7 @@
     "⬇ Compras SUPEREDUC (CSV)",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -20685,7 +20703,7 @@
     "Gasto Total (Total) | $224.842.286",
     "Saldo (Total) | $345.459.429"
    ],
-   "htmlHash": "079896c8f41145"
+   "htmlHash": "1a4a5119488987"
   },
   "estado.of.junji": {
    "text": [
@@ -20717,6 +20735,7 @@
     "Ingreso − Gasto · 11 de 13 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -20785,7 +20804,7 @@
     "Gasto Total (Total) | $332.758.856",
     "Saldo (Total) | -$37.226.291"
    ],
-   "htmlHash": "143203bd2d8eeb"
+   "htmlHash": "06965b56ebc96d"
   },
   "estado.of.aporte_junji": {
    "text": [
@@ -20817,6 +20836,7 @@
     "Ingreso − Gasto · 0 de 13 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -20865,7 +20885,7 @@
     "Gasto Total (Total) | $50.292.000",
     "Saldo (Total) | $6.242.290"
    ],
-   "htmlHash": "0fc7986fda3e2b"
+   "htmlHash": "0de1127e1c9555"
   },
   "estado.modal.of.junji.5402002": {
    "text": [
@@ -27660,6 +27680,7 @@
     "Ingreso − Gasto · 1 de 69 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -27764,7 +27785,7 @@
     "Gasto Total (Total) | $302.197.145",
     "Saldo (Total) | $78.084.565"
    ],
-   "htmlHash": "1b072ca770bb80"
+   "htmlHash": "17f9a3eb197e6b"
   },
   "jardines.of.faep.real": {
    "text": [
@@ -27796,6 +27817,7 @@
     "Ingreso − Gasto · 1 de 69 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -27900,7 +27922,7 @@
     "Gasto Total (Total) | $302.197.145",
     "Saldo (Total) | $78.084.565"
    ],
-   "htmlHash": "08ef4f0e36b8d3"
+   "htmlHash": "0fafb3ac2b4413"
   },
   "jardines.of.faep.proy": {
    "text": [
@@ -27932,6 +27954,7 @@
     "Ingreso − Gasto · 1 de 69 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -28036,7 +28059,7 @@
     "Gasto Total (Total) | $302.197.145",
     "Saldo (Total) | $78.084.565"
    ],
-   "htmlHash": "1ce9823e6a9db4"
+   "htmlHash": "080ca1f94c71fd"
   },
   "jardines.of.figa.total": {
    "text": [
@@ -28068,6 +28091,7 @@
     "Ingreso − Gasto · 1 de 69 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -28172,7 +28196,7 @@
     "Gasto Total (Total) | $305.449.435",
     "Saldo (Total) | $84.792.565"
    ],
-   "htmlHash": "05ec31e01c9bff"
+   "htmlHash": "09d66cc2aaf0ea"
   },
   "jardines.of.junji.total": {
    "text": [
@@ -28204,6 +28228,7 @@
     "Ingreso − Gasto · 10 de 13 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -28272,7 +28297,7 @@
     "Gasto Total (Total) | $455.451.430",
     "Saldo (Total) | -$5.863.430"
    ],
-   "htmlHash": "099c0cfc626612"
+   "htmlHash": "033d750e896a3d"
   },
   "jardines.of.junji.real": {
    "text": [
@@ -28304,6 +28329,7 @@
     "Ingreso − Gasto · 10 de 13 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -28372,7 +28398,7 @@
     "Gasto Total (Total) | $455.451.430",
     "Saldo (Total) | -$5.863.430"
    ],
-   "htmlHash": "0ed459275cb0a7"
+   "htmlHash": "0e9e52c59e98ad"
   },
   "jardines.of.junji.proy": {
    "text": [
@@ -28404,6 +28430,7 @@
     "Ingreso − Gasto · 10 de 13 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -28472,7 +28499,7 @@
     "Gasto Total (Total) | $455.451.430",
     "Saldo (Total) | -$5.863.430"
    ],
-   "htmlHash": "18a76185d250d7"
+   "htmlHash": "19f6ea1343b0a0"
   },
   "jardines.modal.of.faep.5402002": {
    "text": [
@@ -32978,6 +33005,7 @@
     "Ingreso − Gasto · 11 de 13 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -33052,7 +33080,7 @@
     "Gasto Total (Total) | $457.971.430",
     "Saldo (Total) | -$8.383.430"
    ],
-   "htmlHash": "181769d791f0ee"
+   "htmlHash": "1b5da2b54c9785"
   },
   "compras_conceptos.of.faep.total": {
    "text": [
@@ -33084,6 +33112,7 @@
     "Ingreso − Gasto · 1 de 69 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -33194,7 +33223,7 @@
     "Gasto Total (Total) | $303.612.145",
     "Saldo (Total) | $76.669.565"
    ],
-   "htmlHash": "13a796b87efcac"
+   "htmlHash": "19379e76ff7df8"
   },
   "compras_conceptos.of.faep.real": {
    "text": [
@@ -33226,6 +33255,7 @@
     "Ingreso − Gasto · 1 de 69 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -33336,7 +33366,7 @@
     "Gasto Total (Total) | $303.612.145",
     "Saldo (Total) | $76.669.565"
    ],
-   "htmlHash": "135b15ad444c9d"
+   "htmlHash": "05572350f24c52"
   },
   "compras_conceptos.of.faep.proy": {
    "text": [
@@ -33368,6 +33398,7 @@
     "Ingreso − Gasto · 1 de 69 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -33472,7 +33503,7 @@
     "Gasto Total (Total) | $303.612.145",
     "Saldo (Total) | $76.669.565"
    ],
-   "htmlHash": "0e978e12fc4f83"
+   "htmlHash": "0b0d36d764c518"
   },
   "compras_conceptos.of.figa.total": {
    "text": [
@@ -33504,6 +33535,7 @@
     "Ingreso − Gasto · 1 de 69 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -33612,7 +33644,7 @@
     "Gasto Total (Total) | $305.794.435",
     "Saldo (Total) | $84.447.565"
    ],
-   "htmlHash": "0cc06f29eb700a"
+   "htmlHash": "08590a1737b72f"
   },
   "compras_conceptos.of.aporte_educ.total": {
    "text": [
@@ -33644,6 +33676,7 @@
     "Ingreso − Gasto · 0 de 56 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -33739,7 +33772,7 @@
     "Gasto Total (Total) | $294.639.000",
     "Saldo (Total) | $67.245.000"
    ],
-   "htmlHash": "171f2128d10eba"
+   "htmlHash": "09437bca3695cf"
   },
   "compras_conceptos.of.aporte_junji.total": {
    "text": [
@@ -33771,6 +33804,7 @@
     "Ingreso − Gasto · 0 de 13 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -33821,7 +33855,7 @@
     "Gasto Total (Total) | $49.702.000",
     "Saldo (Total) | $5.832.290"
    ],
-   "htmlHash": "0ed25056e4b0bf"
+   "htmlHash": "0fb5060414d183"
   },
   "compras_conceptos.modal.of.faep.1121": {
    "text": [
@@ -38333,6 +38367,7 @@
     "⬇ Compras SUPEREDUC (CSV)",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -38424,7 +38459,7 @@
     "Gasto Total (Total) | $222.537.285",
     "Saldo (Total) | $342.464.430"
    ],
-   "htmlHash": "031c02bbeff669"
+   "htmlHash": "1177989d99b649"
   },
   "honorarios_fuentes.of.general.real": {
    "text": [
@@ -38457,6 +38492,7 @@
     "⬇ Compras SUPEREDUC (CSV)",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -38548,7 +38584,7 @@
     "Gasto Total (Total) | $222.537.285",
     "Saldo (Total) | $342.464.430"
    ],
-   "htmlHash": "1e6b6ef16e941a"
+   "htmlHash": "012d8299047eeb"
   },
   "honorarios_fuentes.of.general.proy": {
    "text": [
@@ -38581,6 +38617,7 @@
     "⬇ Compras SUPEREDUC (CSV)",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -38672,7 +38709,7 @@
     "Gasto Total (Total) | $222.537.285",
     "Saldo (Total) | $342.464.430"
    ],
-   "htmlHash": "1bee4510aa3532"
+   "htmlHash": "0d0a2998bb668c"
   },
   "honorarios_fuentes.of.pie.total": {
    "text": [
@@ -38705,6 +38742,7 @@
     "⬇ Compras SUPEREDUC (CSV)",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -38796,7 +38834,7 @@
     "Gasto Total (Total) | $224.586.425",
     "Saldo (Total) | $357.943.290"
    ],
-   "htmlHash": "0347546897218a"
+   "htmlHash": "12a38807023515"
   },
   "honorarios_fuentes.of.mantenimiento.total": {
    "text": [
@@ -38829,6 +38867,7 @@
     "⬇ Compras SUPEREDUC (CSV)",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -38920,7 +38959,7 @@
     "Gasto Total (Total) | $24.006.000",
     "Saldo (Total) | $612.170.575"
    ],
-   "htmlHash": "1d4fd660708d56"
+   "htmlHash": "04e98eb45c7ccc"
   },
   "honorarios_fuentes.of.prorretencion.total": {
    "text": [
@@ -38953,6 +38992,7 @@
     "⬇ Compras SUPEREDUC (CSV)",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -39044,7 +39084,7 @@
     "Gasto Total (Total) | $702.066.720",
     "Saldo (Total) | $1.068.442.415"
    ],
-   "htmlHash": "1480b268625e68"
+   "htmlHash": "12a2aac595ebdf"
   },
   "honorarios_fuentes.of.junji.total": {
    "text": [
@@ -39076,6 +39116,7 @@
     "Ingreso − Gasto · 11 de 13 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -39148,7 +39189,7 @@
     "Gasto Total (Total) | $430.239.715",
     "Saldo (Total) | -$17.943.145"
    ],
-   "htmlHash": "014ce1477ad976"
+   "htmlHash": "0bbb4f96183662"
   },
   "honorarios_fuentes.of.junji.real": {
    "text": [
@@ -39180,6 +39221,7 @@
     "Ingreso − Gasto · 11 de 13 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -39252,7 +39294,7 @@
     "Gasto Total (Total) | $430.239.715",
     "Saldo (Total) | -$17.943.145"
    ],
-   "htmlHash": "0a984d6178cbec"
+   "htmlHash": "08cbfc38bd0154"
   },
   "honorarios_fuentes.of.junji.proy": {
    "text": [
@@ -39284,6 +39326,7 @@
     "Ingreso − Gasto · 11 de 13 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -39352,7 +39395,7 @@
     "Gasto Total (Total) | $430.239.715",
     "Saldo (Total) | -$17.943.145"
    ],
-   "htmlHash": "036f16d2529b6c"
+   "htmlHash": "17965c5ae2f0bb"
   },
   "honorarios_fuentes.of.faep.total": {
    "text": [
@@ -39384,6 +39427,7 @@
     "Ingreso − Gasto · 1 de 69 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -39494,7 +39538,7 @@
     "Gasto Total (Total) | $305.522.145",
     "Saldo (Total) | $74.759.565"
    ],
-   "htmlHash": "169d4d8686854f"
+   "htmlHash": "04072f6e9ba45a"
   },
   "honorarios_fuentes.of.figa.total": {
    "text": [
@@ -39526,6 +39570,7 @@
     "Ingreso − Gasto · 1 de 69 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -39634,7 +39679,7 @@
     "Gasto Total (Total) | $306.259.435",
     "Saldo (Total) | $83.982.565"
    ],
-   "htmlHash": "1f63b452216c8c"
+   "htmlHash": "069a3b775ad650"
   },
   "honorarios_fuentes.of.aporte_educ.total": {
    "text": [
@@ -39666,6 +39711,7 @@
     "Ingreso − Gasto · 0 de 56 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -39761,7 +39807,7 @@
     "Gasto Total (Total) | $295.154.000",
     "Saldo (Total) | $66.730.000"
    ],
-   "htmlHash": "111a7b95ff7210"
+   "htmlHash": "0101d687fca909"
   },
   "honorarios_fuentes.of.aporte_junji.total": {
    "text": [
@@ -39793,6 +39839,7 @@
     "Ingreso − Gasto · 0 de 13 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -39843,7 +39890,7 @@
     "Gasto Total (Total) | $50.077.000",
     "Saldo (Total) | $5.457.290"
    ],
-   "htmlHash": "12e7705c2815ad"
+   "htmlHash": "1c75316506ed1e"
   },
   "honorarios_fuentes.modal.of.general.1121": {
    "text": [
@@ -47476,6 +47523,7 @@
     "Ingreso − Gasto · 8 de 13 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -47540,7 +47588,7 @@
     "Gasto Total (Total) | $225.818.570",
     "Saldo (Total) | $9.338.570"
    ],
-   "htmlHash": "046c73f976004a"
+   "htmlHash": "1ff9be2a20bd15"
   },
   "junji_rem.of.junji.real": {
    "text": [
@@ -47572,6 +47620,7 @@
     "Ingreso − Gasto · 8 de 13 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -47636,7 +47685,7 @@
     "Gasto Total (Total) | $225.818.570",
     "Saldo (Total) | $9.338.570"
    ],
-   "htmlHash": "17b6fc4e623c8f"
+   "htmlHash": "1ea7a870adbb3b"
   },
   "junji_rem.of.junji.proy": {
    "text": [
@@ -47668,6 +47717,7 @@
     "Ingreso − Gasto · 8 de 13 entidades en déficit",
     "⬇ Excel",
     "⬆ Importar Excel",
+    "🗑 Vaciar fuente",
     "🖨 Exportar PDF",
     "⬇ Descargar carga (JSON)",
     "Vista de la tabla:",
@@ -47732,7 +47782,7 @@
     "Gasto Total (Total) | $225.818.570",
     "Saldo (Total) | $9.338.570"
    ],
-   "htmlHash": "1f79caa83b5fe7"
+   "htmlHash": "155c5866ec4034"
   },
   "junji_rem.modal.of.junji.5402002": {
    "text": [
@@ -53195,8 +53245,8 @@
     "tab-of-general"
    ],
    "printWrap": [],
-   "visibleLineas": 107,
-   "visibleSha1": "5b8abc8ff96e1c8ed2ea6a2a59871e7dfdcf3776"
+   "visibleLineas": 108,
+   "visibleSha1": "d398caf8cb07e99ce89eb24ebed01f01ea042881"
   },
   "exp.of.general.fila.1121.xls": {
    "filename": "general_1121_2026-08-19.xlsx",
@@ -53570,8 +53620,8 @@
     "Código cuenta Tipo doc. N° doc. Fecha doc. Fecha pago Descripción RUT prov. Nombre prov. Monto gasto Monto doc. N° DC Doc. original",
     "410503 · ACTIVIDADES PARA EL FORTALECIMIENTO DE LOS OBJETIVOS DE MEJORAMIENTO DE LA CALIDAD EDUCATIVA Factura 7351 2026-03-08 2026-03-14 Gasto de prueba general-1121-1 76.123.456-7 Librería Central Ltda. $1.226.000 $1.458.940 DC_77 DC_77"
    ],
-   "visibleLineas": 107,
-   "visibleSha1": "5b8abc8ff96e1c8ed2ea6a2a59871e7dfdcf3776"
+   "visibleLineas": 108,
+   "visibleSha1": "d398caf8cb07e99ce89eb24ebed01f01ea042881"
   },
   "print.of.general.fila.AC": {
    "kind": "impresion",
@@ -53838,8 +53888,8 @@
     "410503 · ACTIVIDADES PARA EL FORTALECIMIENTO DE LOS OBJETIVOS DE MEJORAMIENTO DE LA CALIDAD EDUCATIVA Documento extranjero 7171 2026-06-23 2026-07-03 Gasto de prueba general-AC-4 12.345.678-5 Juan Pérez Soto $2.179.000 $2.593.010 DOC-general-AC-4",
     "⚠ 410501 · ASISTENCIA TECNICO PEDAGOGICA EDUCATIVA (REGISTRO ATE) Factura 6092 2026-07-07 2026-07-12 Cuenta no habilitada para la subvención 78.901.234-5 Ferretería El Roble -$341.000 -$341.000 DOC-general-AC-noh"
    ],
-   "visibleLineas": 107,
-   "visibleSha1": "5b8abc8ff96e1c8ed2ea6a2a59871e7dfdcf3776"
+   "visibleLineas": 108,
+   "visibleSha1": "d398caf8cb07e99ce89eb24ebed01f01ea042881"
   },
   "exp.of.general.fila.1125.csv-sin-compras": {
    "kind": "sin-descarga",
@@ -55201,8 +55251,8 @@
     "Concepto Tipo doc. N° doc. Fecha doc. Fecha pago Descripción RUT prov. Nombre prov. Monto gasto Monto doc. N° DC Doc. original",
     "Sin compras registradas."
    ],
-   "visibleLineas": 85,
-   "visibleSha1": "8e1f901b1fd2c9dac6006e1de6161a89da55e6dc"
+   "visibleLineas": 86,
+   "visibleSha1": "c0458cbf6330d7271b9a52685efa9483747463d0"
   },
   "exp.of.faep.fila.1121.csv-detalle": {
    "filename": "detalle_faep_1121_2026-08-19.csv",
@@ -55464,8 +55514,8 @@
     "Concepto Tipo doc. N° doc. Fecha doc. Fecha pago Descripción RUT prov. Nombre prov. Monto gasto Monto doc. N° DC Doc. original",
     "Sin compras registradas."
    ],
-   "visibleLineas": 119,
-   "visibleSha1": "d266ad42dfdd3aa4c94d681f2a6439cfd85576ff"
+   "visibleLineas": 120,
+   "visibleSha1": "a54db8cd3367cf3059e54c0d6404bf225ab7c650"
   },
   "exp.of.aporte_junji.fila.5402002.csv-detalle": {
    "filename": "detalle_aporte_junji_5402002_2026-08-19.csv",
@@ -57645,8 +57695,8 @@
     "410601 · IMPLEMENTOS DE LABORATORIO Nota de crédito 6001 2026-04-08 2026-04-12 NC cargada en positivo (General) 76.123.456-7 Librería Central Ltda. -$70.000 -$83.300 1001-FACEL",
     "410601 · IMPLEMENTOS DE LABORATORIO Factura 6003 abril 2026 2026-04-30 Fecha con formato no reconocido (General) 76.123.456-7 Librería Central Ltda. $33.000 $39.270"
    ],
-   "visibleLineas": 107,
-   "visibleSha1": "3e88763f88e025ac36aaa8273ea745348dae92ea"
+   "visibleLineas": 108,
+   "visibleSha1": "7e0f1749ebff20b01a3ede7a250a41ad71d56bd9"
   },
   "compras.exp.of.pie.csv-compras": {
    "filename": "compras_pie_2026-08-19.csv",
@@ -58538,8 +58588,8 @@
     "Concepto Tipo doc. N° doc. Fecha doc. Fecha pago Descripción RUT prov. Nombre prov. Monto gasto Monto doc. N° DC Doc. original",
     "Sin compras registradas."
    ],
-   "visibleLineas": 83,
-   "visibleSha1": "047e5e718f1839d7c486645adbc09a3659cf9cd2"
+   "visibleLineas": 84,
+   "visibleSha1": "e96a0ff31e0864a1335044b3a14fa8d8a30660b2"
   },
   "estado.exp.of.faep.fila.1131.csv": {
    "filename": "detalle_faep_1131_2026-08-19.csv",
@@ -60369,8 +60419,8 @@
     "tab-of-faep"
    ],
    "printWrap": [],
-   "visibleLineas": 119,
-   "visibleSha1": "36b81f001c94a0bb1d673fd1b87dd370de36fb1b"
+   "visibleLineas": 120,
+   "visibleSha1": "4b7115d5b5a8155f1edfa920af5ce1d96605706b"
   },
   "jardines.exp.of.faep.fila.5402002.xls": {
    "filename": "faep_5402002_2026-08-19.xlsx",
@@ -60708,8 +60758,8 @@
     "Concepto Tipo doc. N° doc. Fecha doc. Fecha pago Descripción RUT prov. Nombre prov. Monto gasto Monto doc. N° DC Doc. original",
     "Sin compras registradas."
    ],
-   "visibleLineas": 119,
-   "visibleSha1": "36b81f001c94a0bb1d673fd1b87dd370de36fb1b"
+   "visibleLineas": 120,
+   "visibleSha1": "4b7115d5b5a8155f1edfa920af5ce1d96605706b"
   },
   "jardines.exp.of.faep.fila.AC.csv-detalle": {
    "filename": "detalle_faep_AC_2026-08-19.csv",
@@ -61365,8 +61415,8 @@
     "Concepto Tipo doc. N° doc. Fecha doc. Fecha pago Descripción RUT prov. Nombre prov. Monto gasto Monto doc. N° DC Doc. original",
     "Sin compras registradas."
    ],
-   "visibleLineas": 83,
-   "visibleSha1": "8d5798660d432b20ee39a3e7bfc367f03d98168a"
+   "visibleLineas": 84,
+   "visibleSha1": "257790b99247f6f56ffe2be91bee491633bc93b6"
   },
   "jardines.print.dashboard": {
    "kind": "impresion",
@@ -62619,8 +62669,8 @@
     "Boleta 78 2026-06-01 2026-06-08 Compra sin concepto 76123456-7 Proveedor Ejemplo SpA $40.000 $40.000",
     "Alimentación Factura electrónica 1002 2026-09-15 2026-09-30 Colaciones de septiembre (después del corte) 76123456-7 Proveedor Ejemplo SpA $300.000 $357.000"
    ],
-   "visibleLineas": 125,
-   "visibleSha1": "0febfdf8240dd01ccc75c523d2798c32f0be331d"
+   "visibleLineas": 126,
+   "visibleSha1": "25ffa9f402a0cfbf399de89d1b16025ff01badb2"
   },
   "compras_conceptos.exp.of.junji.fila.5403002.csv-detalle": {
    "filename": "detalle_junji_5403002_2026-08-19.csv",
@@ -63053,8 +63103,8 @@
     "Concepto Tipo doc. N° doc. Fecha doc. Fecha pago Descripción RUT prov. Nombre prov. Monto gasto Monto doc. N° DC Doc. original",
     "Alimentación Factura electrónica 610 2026-01-15 2026-01-30 Alimentación enero (empuja el saldo de Operación) 76123456-7 Proveedor Ejemplo SpA $1.600.000 $1.600.000"
    ],
-   "visibleLineas": 89,
-   "visibleSha1": "c77ca619d85d74a97b23ff2ca9f526b551443bc6"
+   "visibleLineas": 90,
+   "visibleSha1": "7d02d616cd8673ea31ff8e64533337a02e55f272"
   },
   "compras_conceptos.print.dashboard": {
    "kind": "impresion",
@@ -64322,8 +64372,8 @@
     "Origen Ene Feb Mar Abr May Jun Jul Ago Sep Oct Nov Dic Total",
     "Rendición Fondo Fijo — — $120.000 — — $80.000 — — — — — — $200.000"
    ],
-   "visibleLineas": 107,
-   "visibleSha1": "6c9d4771842aaf5889e2da0042e54196801610f8"
+   "visibleLineas": 108,
+   "visibleSha1": "ba2cf9f6abc8cbbf613cccc63943787a70b26189"
   },
   "honorarios_fuentes.exp.of.junji.fila.5402002.xls": {
    "filename": "junji_5402002_2026-08-19.xlsx",
@@ -64928,8 +64978,8 @@
     "Servicios básicos Boleta de honorarios manual 622 2026-04-06 2026-04-13 Compra antigua con tipo de honorarios 76123456-7 Proveedor Ejemplo SpA $33.000 $33.000",
     "Servicios básicos Boleta 621 2026-10-10 2026-10-17 Servicios básicos (después del corte) 76123456-7 Proveedor Ejemplo SpA $120.000 $120.000"
    ],
-   "visibleLineas": 87,
-   "visibleSha1": "4dbd537a7e909f5ec27bb2e7b417086c810ab8bd"
+   "visibleLineas": 88,
+   "visibleSha1": "3823365be058adc83abcca4463e24e2f48f7de30"
   },
   "honorarios_fuentes.print.of.junji.fila.5401005": {
    "kind": "impresion",
@@ -65326,8 +65376,8 @@
     "Concepto Tipo doc. N° doc. Fecha doc. Fecha pago Descripción RUT prov. Nombre prov. Monto gasto Monto doc. N° DC Doc. original",
     "Sin compras registradas."
    ],
-   "visibleLineas": 87,
-   "visibleSha1": "4dbd537a7e909f5ec27bb2e7b417086c810ab8bd"
+   "visibleLineas": 88,
+   "visibleSha1": "3823365be058adc83abcca4463e24e2f48f7de30"
   },
   "honorarios_fuentes.print.of.junji.general": {
    "kind": "impresion",
@@ -65339,8 +65389,8 @@
     "tab-of-junji"
    ],
    "printWrap": [],
-   "visibleLineas": 87,
-   "visibleSha1": "4dbd537a7e909f5ec27bb2e7b417086c810ab8bd"
+   "visibleLineas": 88,
+   "visibleSha1": "3823365be058adc83abcca4463e24e2f48f7de30"
   },
   "honorarios_fuentes.print.of.faep.fila.1121": {
    "kind": "impresion",
@@ -65590,8 +65640,8 @@
     "Boleta 78 2026-06-01 2026-06-08 Compra sin concepto 76123456-7 Proveedor Ejemplo SpA $40.000 $40.000",
     "Alimentación Factura electrónica 1002 2026-09-15 2026-09-30 Colaciones de septiembre (después del corte) 76123456-7 Proveedor Ejemplo SpA $300.000 $357.000"
    ],
-   "visibleLineas": 125,
-   "visibleSha1": "dd69a7a43d25dfb0640e6e90963f50b499edf8c6"
+   "visibleLineas": 126,
+   "visibleSha1": "589fe0ca06116ff590bd6357293423b962bbfbdb"
   },
   "honorarios_fuentes.print.dashboard": {
    "kind": "impresion",
@@ -66502,8 +66552,8 @@
     "Concepto Tipo doc. N° doc. Fecha doc. Fecha pago Descripción RUT prov. Nombre prov. Monto gasto Monto doc. N° DC Doc. original",
     "Sin compras registradas."
    ],
-   "visibleLineas": 79,
-   "visibleSha1": "25668704a1c10ff9f3fff01daa05d35d7a5d5b1c"
+   "visibleLineas": 80,
+   "visibleSha1": "9330423fee2cc4176033eb504e74e1c92edc6ea8"
   }
  }
 }
