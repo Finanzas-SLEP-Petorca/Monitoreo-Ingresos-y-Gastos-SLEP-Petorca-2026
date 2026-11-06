@@ -4445,11 +4445,24 @@ function applyKpiSectionState(key) {
 }
 function applyAllKpiSectionStates() {
   Object.keys(KPI_ROW_IDS).forEach(applyKpiSectionState);
+  igualarAlturaKpiSep();
 }
+// Las 3 filas de KPI de SEP (Real / Proyectado / Total) comparten la altura de su tarjeta más alta: el texto de cada tarjeta
+// ocupa distinto número de líneas según el ancho de la ventana, así que la altura mínima no puede ser un número fijo en CSS.
+function igualarAlturaKpiSep() {
+  const tarjetas = Object.values(KPI_ROW_IDS).map(id => document.getElementById(id))
+    .filter(r => r && !r.classList.contains('kpi-row-collapsed')).flatMap(r => [...r.querySelectorAll(':scope > .kpi-card')]);
+  tarjetas.forEach(c => { c.style.minHeight = ''; });
+  const alto = Math.max(0, ...tarjetas.map(c => c.getBoundingClientRect().height));
+  if (alto > 0) tarjetas.forEach(c => { c.style.minHeight = Math.ceil(alto) + 'px'; });
+}
+let kpiAlturaTimer = null;
+window.addEventListener('resize', () => { clearTimeout(kpiAlturaTimer); kpiAlturaTimer = setTimeout(igualarAlturaKpiSep, 120); });
 function toggleKpiSection(key) {
   const collapsedAhora = isKpiSectionCollapsed(key);
   try { localStorage.setItem('kpiSeccionColapsada_' + key, collapsedAhora ? '0' : '1'); } catch (err) { /* sin persistencia, igual cambia por esta carga de página */ }
   applyKpiSectionState(key);
+  igualarAlturaKpiSep();
 }
 window.toggleKpiSection = toggleKpiSection;
 
