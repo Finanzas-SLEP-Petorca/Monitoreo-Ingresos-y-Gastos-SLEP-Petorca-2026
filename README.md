@@ -611,6 +611,8 @@ solo la vista que interesa y liberar espacio para la tabla "Estado por RBD" de a
 este navegador (no se comparte con el resto del equipo). El PDF individual de cada RBD (botón 🖨 de
 cada fila) incluye este mismo desglose Real / Proyectado / Total.
 
+Las tablas de cada fuente (y la de Fondos Fijos) se ordenan haciendo clic en el título de la columna: el primer clic ordena de mayor a menor (Z→A en texto), el segundo invierte y el tercero vuelve a mayor a menor; «Acciones» no se ordena. El RBD se ordena como número (los códigos no numéricos, como «AC», quedan siempre al final), «Real hasta» por número de mes, «Estado» por severidad (Déficit primero) y los empates por RBD ascendente. El orden se recuerda por pestaña mientras la página está abierta, se conserva al llegar cambios y no altera totales ni exportaciones.
+
 ### Pestaña "Reportes"
 
 Es la última pestaña de la barra y tiene dos vistas, que se eligen con los chips de arriba:

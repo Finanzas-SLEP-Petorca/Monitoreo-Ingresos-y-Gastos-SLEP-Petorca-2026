@@ -25,9 +25,9 @@ await correrSpec('teclado_fuentes', async (t) => {
     t.ok(filas.length > 0 && filas.every((r) => r.tabindex === '0'), `${f}: las ${filas.length} filas son focusables (tabindex="0")`);
     t.ok(filas.every((r) => /^Ver detalle de .+/.test(r.label || '')), `${f}: cada fila tiene nombre accesible "Ver detalle de …"`);
 
-    await page.focus(`#ofCorteAplicarBtn-${f}`); // último control antes de la tabla
+    await page.focus(`#ofCorteAplicarBtn-${f}`); // último control antes de la tabla; después vienen los títulos ordenables (botones del encabezado) y recién la primera fila
     let llego = false;
-    for (let i = 0; i < 6 && !llego; i++) { await page.keyboard.press('Tab'); llego = (await activo(page)).esFila; }
+    for (let i = 0; i < 16 && !llego; i++) { await page.keyboard.press('Tab'); llego = (await activo(page)).esFila; }
     const a1 = await activo(page);
     t.ok(llego && a1.rbd === filas[0].rbd, `${f}: Tab desde los controles llega a la primera fila (${filas[0].rbd})`, a1);
     t.ok(await page.evaluate(() => { const a = document.activeElement; return a.matches(':focus-visible') && getComputedStyle(a).outlineStyle !== 'none' && parseFloat(getComputedStyle(a).outlineWidth) > 0; }), `${f}: la fila enfocada con teclado muestra un anillo de foco visible`);

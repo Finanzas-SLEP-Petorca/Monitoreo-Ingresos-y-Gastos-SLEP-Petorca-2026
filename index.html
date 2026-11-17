@@ -163,6 +163,13 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   table.data-table { width:100%; border-collapse:collapse; font-size:12.5px; }
   table.data-table thead { position:sticky; top:0; z-index:2; }
   table.data-table th { text-align:left; padding:6px 6px; border-bottom:1px solid var(--baseline); color:var(--text-secondary); font-weight:600; background:var(--surface-1); cursor:pointer; white-space:nowrap; }
+  /* Encabezados ordenables (tablas de las fuentes y Fondos Fijos): el título es un <button>; la flecha del orden activo sale por CSS (no es texto) */
+  table.data-table th .th-orden { background:none; border:0; padding:0; margin:0; font:inherit; color:inherit; cursor:pointer; text-align:inherit; white-space:inherit; line-height:inherit; border-radius:3px; }
+  table.data-table th .th-orden:hover { color:var(--text-primary); text-decoration:underline; }
+  table.data-table th[aria-sort="descending"], table.data-table th[aria-sort="ascending"] { color:var(--text-primary); }
+  table.data-table th[aria-sort="descending"] .th-orden::after { content:" \25BC"; font-size:.8em; }
+  table.data-table th[aria-sort="ascending"] .th-orden::after { content:" \25B2"; font-size:.8em; }
+  .tab-content[id^="tab-of-"] table.data-table th.col-acciones { cursor:default; }
   table.data-table th.th-group { text-align:center; font-size:11px; border-bottom:1px solid var(--gridline); cursor:default; }
   table.data-table th.th-group-alt, table.data-table th.pct-ing-total { background:#eef3f9; }
   table.data-table td { padding:5px 6px; border-bottom:1px solid var(--gridline); font-variant-numeric: tabular-nums; }
@@ -2646,6 +2653,64 @@ function filasDeUniverso(universo) {
   if (universo === 'rbd_gesparvu') return [...DATA.registros, ...GESPARVU_REGISTROS];
   return universo === 'rbd_ac_gesparvu' ? [...rbdAc, ...GESPARVU_REGISTROS] : rbdAc;
 }
+// ---- Tablas ordenables (las de cada fuente y la de Fondos Fijos) ----
+// Una sola lógica para todas: cada tabla guarda su columna y sentido (dir −1 = decreciente, +1 = creciente) en ORDEN_TABLAS mientras dura la sesión, y cada repintado
+// de sus filas pasa por ordenarFilasTabla; sin clic no hay orden elegido y quedan las filas en su orden de siempre. Se ordenan los valores numéricos ya calculados
+// (no el texto «$1.234»). Primer clic en una columna = decreciente, otro clic invierte. Empates: por RBD ascendente (y, si no, el orden original), para que no «salten».
+const ORDEN_TABLAS = {};
+const ORDEN_COLLATOR = new Intl.Collator('es', { sensitivity: 'base' });
+function compararCeldaOrden(tipo, a, b, dir) {
+  if (tipo === 'rbd') { // RBD numérico; los códigos no numéricos (AC) quedan SIEMPRE al final, en cualquier sentido, ordenados entre sí por texto
+    const na = /^\d+$/.test(a), nb = /^\d+$/.test(b);
+    if (na !== nb) return na ? -1 : 1;
+    return (na ? Number(a) - Number(b) : ORDEN_COLLATOR.compare(a, b)) * dir;
+  }
+  if (tipo === 'texto') return ORDEN_COLLATOR.compare(a, b) * dir;
+  return (a - b) * dir; // 'numero' (montos con signo, mes 1–12, severidad del estado)
+}
+window.compararCeldaOrden = compararCeldaOrden; // expuesta para las pruebas (el script es un módulo)
+// filas: [{ rbd, v: { <clave de columna>: valor }, html }]; columnas: [{ key, tipo } | null] en el orden de las celdas (null = no ordenable).
+function ordenarFilasTabla(idTabla, filas, columnas) {
+  const o = ORDEN_TABLAS[idTabla];
+  const col = o && columnas.find(c => c && c.key === o.key);
+  if (!col) return filas;
+  return filas.map((f, i) => [f, i]).sort((x, y) =>
+    compararCeldaOrden(col.tipo, x[0].v[col.key], y[0].v[col.key], o.dir) || compararCeldaOrden('rbd', x[0].rbd, y[0].rbd, 1) || x[1] - y[1]).map(x => x[0]);
+}
+function pintarOrdenTabla(idTabla) {
+  const o = ORDEN_TABLAS[idTabla];
+  document.querySelectorAll(`#${idTabla} thead th[data-orden-key]`).forEach(th => {
+    th.setAttribute('aria-sort', o && o.key === th.dataset.ordenKey ? (o.dir < 0 ? 'descending' : 'ascending') : 'none');
+  });
+}
+// Convierte cada título ordenable en un <button> (tabulable, Enter/Espacio) y el <th> lleva aria-sort. alCambiar repinta las filas de esa tabla.
+function montarOrdenTabla(idTabla, columnas, alCambiar) {
+  const tabla = document.getElementById(idTabla);
+  if (!tabla) return;
+  tabla.querySelectorAll('thead th').forEach((th, i) => {
+    const col = columnas[i];
+    if (!col) return;
+    const texto = th.textContent.trim(), ayuda = th.getAttribute('title');
+    th.removeAttribute('title');
+    th.dataset.ordenKey = col.key;
+    th.setAttribute('aria-sort', 'none');
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'th-orden';
+    b.textContent = texto;
+    b.title = `${ayuda ? ayuda + ' — ' : ''}Ordenar por ${texto}: un clic de mayor a menor, otro clic invierte el orden`;
+    th.textContent = '';
+    th.appendChild(b);
+  });
+  tabla.querySelector('thead').addEventListener('click', (e) => {
+    const b = e.target.closest('button.th-orden');
+    if (!b) return;
+    const key = b.closest('th').dataset.ordenKey, o = ORDEN_TABLAS[idTabla];
+    ORDEN_TABLAS[idTabla] = o && o.key === key ? { key, dir: -o.dir } : { key, dir: -1 };
+    pintarOrdenTabla(idTabla);
+    alCambiar();
+  });
+}
 function filasOtrasFuentes(fuenteKey) {
   const fuente = FUENTES_OTRAS_BY_KEY[fuenteKey];
   const filas = filasDeUniverso(fuente.universo);
@@ -2727,11 +2792,12 @@ function resumenFondoFijo(rbd) {
   return total;
 }
 function estadoFondoFijo(t) {
-  if (!t.cupo && !t.rendido && !t.aceptado) return { label: 'Sin datos', cls: 'nd' };
-  if (t.observado > 0) return { label: 'Con observaciones', cls: 'mal' };
-  if (t.pendienteGeneral > 0) return { label: 'Pendiente General', cls: 'mal' };
-  if (t.pendienteSigfe > 0) return { label: 'Pendiente SIGFE', cls: 'mal' };
-  return { label: 'Conciliado', cls: 'ok' };
+  // sev: severidad para ordenar la columna Estado (mayor = peor): Con observaciones > Pendiente General > Pendiente SIGFE > Conciliado > Sin datos.
+  if (!t.cupo && !t.rendido && !t.aceptado) return { label: 'Sin datos', cls: 'nd', sev: 0 };
+  if (t.observado > 0) return { label: 'Con observaciones', cls: 'mal', sev: 4 };
+  if (t.pendienteGeneral > 0) return { label: 'Pendiente General', cls: 'mal', sev: 3 };
+  if (t.pendienteSigfe > 0) return { label: 'Pendiente SIGFE', cls: 'mal', sev: 2 };
+  return { label: 'Conciliado', cls: 'ok', sev: 1 };
 }
 function tagFondoFijo(t) { const e = estadoFondoFijo(t); return `<span class="c-estado ${e.cls}">${e.label}</span>`; }
 function totalFondosFijos() {
@@ -2740,6 +2806,8 @@ function totalFondosFijos() {
   return t;
 }
 function kpiFondoFijo(label, value, detail, tone) { return `<div class="kpi-card tone-${tone}"><div class="label">${label}</div><div class="value">${fmtCLP(value)}</div><div class="delta">${detail}</div></div>`; }
+const COLUMNAS_FONDOS_FIJOS = [{ key: 'rbd', tipo: 'rbd' }, { key: 'nombre', tipo: 'texto' }, { key: 'cupo', tipo: 'numero' }, { key: 'aceptado', tipo: 'numero' }, { key: 'registrado', tipo: 'numero' },
+  { key: 'pendiente_general', tipo: 'numero' }, { key: 'compensado', tipo: 'numero' }, { key: 'pendiente_sigfe', tipo: 'numero' }, { key: 'estado', tipo: 'numero' }, null];
 function renderFondosFijos() {
   const tbody = document.getElementById('fondosFijosTbody');
   if (!tbody) return;
@@ -2754,10 +2822,12 @@ function renderFondosFijos() {
   // La tabla se repinta con cada snapshot: si el foco del teclado estaba en un «Ver / editar», vuelve al de la misma entidad (igual que las tablas de las fuentes).
   const activo = document.activeElement;
   const rbdActivo = activo && tbody.contains(activo) && activo.matches('[data-ff-abrir]') ? activo.getAttribute('data-ff-abrir') : null;
-  tbody.innerHTML = filasFondosFijos().map(r => {
+  const filas = filasFondosFijos().map(r => {
     const t = resumenFondoFijo(r.rbd);
-    return `<tr class="otras-fuentes-row" data-ff-rbd="${escHtml(r.rbd)}"><td>${escHtml(r.rbd)}</td><td><span class="nombre-txt" title="${escHtml(r.nombre)}">${escHtml(r.nombre)}</span></td><td class="num">${fmtCLP(t.cupo)}</td><td class="num">${fmtCLP(t.aceptado)}</td><td class="num">${fmtCLP(t.registrado)}</td><td class="num" style="color:${t.pendienteGeneral ? 'var(--status-critical)' : 'inherit'}">${fmtCLP(t.pendienteGeneral)}</td><td class="num">${fmtCLP(t.compensado)}</td><td class="num" style="color:${t.pendienteSigfe ? 'var(--status-critical)' : 'inherit'}">${fmtCLP(t.pendienteSigfe)}</td><td>${tagFondoFijo(t)}</td><td class="col-acciones"><button type="button" class="row-action-btn" data-ff-abrir="${escHtml(r.rbd)}" aria-label="${escHtml('Ver / editar Fondos Fijos de ' + otrasFuentesTituloEntidad(r))}">Ver / editar</button></td></tr>`;
-  }).join('');
+    const html = `<tr class="otras-fuentes-row" data-ff-rbd="${escHtml(r.rbd)}"><td>${escHtml(r.rbd)}</td><td><span class="nombre-txt" title="${escHtml(r.nombre)}">${escHtml(r.nombre)}</span></td><td class="num">${fmtCLP(t.cupo)}</td><td class="num">${fmtCLP(t.aceptado)}</td><td class="num">${fmtCLP(t.registrado)}</td><td class="num" style="color:${t.pendienteGeneral ? 'var(--status-critical)' : 'inherit'}">${fmtCLP(t.pendienteGeneral)}</td><td class="num">${fmtCLP(t.compensado)}</td><td class="num" style="color:${t.pendienteSigfe ? 'var(--status-critical)' : 'inherit'}">${fmtCLP(t.pendienteSigfe)}</td><td>${tagFondoFijo(t)}</td><td class="col-acciones"><button type="button" class="row-action-btn" data-ff-abrir="${escHtml(r.rbd)}" aria-label="${escHtml('Ver / editar Fondos Fijos de ' + otrasFuentesTituloEntidad(r))}">Ver / editar</button></td></tr>`;
+    return { rbd: r.rbd, html, v: { rbd: r.rbd, nombre: r.nombre, cupo: t.cupo, aceptado: t.aceptado, registrado: t.registrado, pendiente_general: t.pendienteGeneral, compensado: t.compensado, pendiente_sigfe: t.pendienteSigfe, estado: estadoFondoFijo(t).sev } };
+  });
+  tbody.innerHTML = ordenarFilasTabla('fondosFijosTable', filas, COLUMNAS_FONDOS_FIJOS).map(f => f.html).join('');
   if (rbdActivo !== null) { const b = Array.from(tbody.querySelectorAll('[data-ff-abrir]')).find(x => x.getAttribute('data-ff-abrir') === rbdActivo); if (b) b.focus({ preventScroll: true }); }
 }
 function renderDashFondosFijos() {
@@ -6343,17 +6413,24 @@ function bysSplitCeldaHTML(b) {
 
 // Cada fuente tiene su propia pestaña y su propia tabla (sin selector intermedio) — solo se
 // pinta la tabla de la fuente pedida, no las 9 de una vez, para no recalcular lo que no se ve.
+// Columnas de la tabla de cada fuente, en el orden de sus celdas (según la forma de gasto de la fuente); Acciones no se ordena.
+const ESTADO_SEVERIDAD = { deficit: 2, riesgo: 1, superavit: 0 }; // decreciente = Déficit primero
+function columnasOtraFuente(f) {
+  const gasto = f.sinGasto ? [] : f.soloRem ? ['rem', 'hon', 'gasto'] : ['rem', 'hon', 'bys', 'gasto'];
+  return [{ key: 'rbd', tipo: 'rbd' }, { key: 'nombre', tipo: 'texto' }, { key: 'real_hasta', tipo: 'numero' }, { key: 'ingreso', tipo: 'numero' },
+    ...gasto.map(key => ({ key, tipo: 'numero' })), { key: 'saldo', tipo: 'numero' }, { key: 'estado', tipo: 'numero' }, null];
+}
 function renderOtrasFuentesTable(fuenteKey) {
   const key = fuenteKey || otrasFuentesSel;
   const fuente = FUENTES_OTRAS_BY_KEY[key];
   const tbody = document.getElementById('otrasFuentesTbody-' + key);
   if (!tbody) return;
   const vista = otrasFuentesVista;
-  const filas = filasOtrasFuentes(key).map(r => {
+  const filasPlanas = filasOtrasFuentes(key).map(r => {
     const of = recomputeOtraFuente(r.rbd, key);
     const b = of.rp[vista];
     const corteTxt = MESES_CARGA_ABREV[realHastaMesOtraFuente(of) - 1];
-    return `<tr class="otras-fuentes-row" data-rbd="${escHtml(r.rbd)}" tabindex="0" aria-label="Ver detalle de ${escHtml(r.nombre)}">
+    const html = `<tr class="otras-fuentes-row" data-rbd="${escHtml(r.rbd)}" tabindex="0" aria-label="Ver detalle de ${escHtml(r.nombre)}">
       <td class="rbd-clickable" data-abrir-otra-fuente="${escHtml(r.rbd)}">${escHtml(r.rbd)}</td>
       <td class="rbd-clickable" data-abrir-otra-fuente="${escHtml(r.rbd)}"><span class="nombre-txt" title="${escHtml(r.nombre)}">${escHtml(r.nombre)}</span></td>
       <td class="of-real-hasta">${corteTxt}</td>
@@ -6363,7 +6440,9 @@ function renderOtrasFuentesTable(fuenteKey) {
       <td>${otrasFuentesEstadoTagHTML(of, key)}${otrasFuentesEstadoCausaHTML(of, key)}</td>
       <td class="col-acciones">${otrasFuentesAccionesHTML(key, r.rbd)}</td>
     </tr>`;
-  }).join('');
+    return { rbd: r.rbd, html, v: { rbd: r.rbd, nombre: r.nombre, real_hasta: realHastaMesOtraFuente(of), ingreso: b.ingreso, rem: b.rem, hon: b.hon, bys: b.bys, gasto: b.gasto, saldo: b.saldo, estado: ESTADO_SEVERIDAD[of.estado] || 0 } };
+  });
+  const filas = ordenarFilasTabla('otrasFuentesTable-' + key, filasPlanas, columnasOtraFuente(fuente)).map(f => f.html).join('');
   // El tbody se reconstruye con cada snapshot (cualquier persona que guarde): si el foco del teclado estaba en una fila (o en uno de sus
   // botones), se devuelve a la fila nueva equivalente; si no, la persona perdería el lugar entre el Tab y el Enter (U-05).
   const activo = document.activeElement;
@@ -6449,6 +6528,9 @@ FUENTES_OTRAS.forEach(f => {
     abrirOtrasFuentesModal(fila.getAttribute('data-rbd'));
   });
 });
+
+FUENTES_OTRAS.forEach(f => montarOrdenTabla('otrasFuentesTable-' + f.key, columnasOtraFuente(f), () => renderOtrasFuentesTable(f.key)));
+montarOrdenTabla('fondosFijosTable', COLUMNAS_FONDOS_FIJOS, renderFondosFijos);
 
 document.getElementById('fondosFijosTable').addEventListener('click', (e) => {
   const b = e.target.closest('[data-ff-abrir]');
